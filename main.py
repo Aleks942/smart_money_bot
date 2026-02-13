@@ -23,10 +23,10 @@ def send_telegram(text: str):
 
 
 # =========================
-# COINGLASS BTC OPEN INTEREST
+# COINGLASS FUNDING RATE
 # =========================
-def get_btc_open_interest():
-    url = "https://open-api.coinglass.com/public/v2/futures/openInterest"
+def get_funding():
+    url = "https://open-api.coinglass.com/public/v2/futures/funding_rates"
 
     headers = {
         "coinglassSecret": COINGLASS_API_KEY
@@ -46,25 +46,23 @@ def get_btc_open_interest():
     if "data" not in data:
         raise Exception(f"Unexpected response: {data}")
 
-    # безопасное получение
-    total_oi = data["data"].get("totalOpenInterest")
+    # Берём первую биржу
+    first_exchange = data["data"][0]
+    funding = first_exchange.get("fundingRate")
 
-    if total_oi is None:
-        raise Exception(f"No totalOpenInterest in response: {data}")
-
-    return total_oi
+    return funding
 
 
 # =========================
 # MAIN LOOP
 # =========================
 if __name__ == "__main__":
-    send_telegram("🚀 Smart Money Bot (Coinglass) started")
+    send_telegram("🚀 Smart Money Bot (Coinglass funding) started")
 
     while True:
         try:
-            oi = get_btc_open_interest()
-            message = f"📊 BTC Total Open Interest: {oi}"
+            funding = get_funding()
+            message = f"💰 BTC Funding Rate: {funding}"
             send_telegram(message)
         except Exception as e:
             send_telegram(f"❌ Coinglass error:\n{str(e)}")
