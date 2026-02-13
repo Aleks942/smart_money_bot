@@ -7,61 +7,66 @@ load_dotenv()
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
+COINGLASS_API_KEY = os.getenv("COINGLASS_API_KEY")
 
 
 # =========================
 # TELEGRAM
 # =========================
 def send_telegram(text: str):
-    try:
-        url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-        payload = {
-            "chat_id": CHAT_ID,
-            "text": text
-        }
-        requests.post(url, data=payload, timeout=10)
-    except Exception as e:
-        print("Telegram error:", e)
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    payload = {
+        "chat_id": CHAT_ID,
+        "text": text
+    }
+    requests.post(url, data=payload, timeout=10)
 
 
 # =========================
-# BINANCE FUTURES PRICE
+# COINGLASS BTC OPEN INTEREST
 # =========================
-def get_btc_price():
-    url = "https://fapi.binance.com/fapi/v1/ticker/price"
-    params = {"symbol": "BTCUSDT"}
+def get_btc_open_interest():
+    url = "https://open-api.coinglass.com/public/v2/futures/openInterest"
 
-    r = requests.get(url, params=params, timeout=10)
+    headers = {
+        "coinglassSecret": COINGLASS_API_KEY
+    }
+
+    params = {
+        "symbol": "BTC"
+    }
+
+    r = requests.get(url, headers=headers, params=params, timeout=10)
 
     if r.status_code != 200:
         raise Exception(f"HTTP {r.status_code}: {r.text}")
 
-    try:
-        data = r.json()
-    except Exception:
-        raise Exception(f"Invalid JSON response: {r.text}")
+    data = r.json()
 
-    if not isinstance(data, dict):
-        raise Exception(f"Unexpected response format: {data}")
+    if "data" not in data:
+        raise Exception(f"Unexpected response: {data}")
 
-    if "price" not in data:
-        raise Exception(f"No 'price' field in response: {data}")
+    # безопасное получение
+    total_oi = data["data"].get("totalOpenInterest")
 
-    return data["price"]
+    if total_oi is None:
+        raise Exception(f"No totalOpenInterest in response: {data}")
+
+    return total_oi
 
 
 # =========================
 # MAIN LOOP
 # =========================
 if __name__ == "__main__":
-    send_telegram("🚀 Smart Money Bot started")
+    send_telegram("🚀 Smart Money Bot (Coinglass) started")
 
     while True:
         try:
-            price = get_btc_price()
-            message = f"📊 BTCUSDT price: {price}"
+            oi = get_btc_open_interest()
+            message = f"📊 BTC Total Open Interest: {oi}"
             send_telegram(message)
         except Exception as e:
-            send_telegram(f"❌ Binance error:\n{str(e)}")
+            send_telegram(f"❌ Coinglass error:\n{str(e)}")
 
-        time.sleep(600)  # 10 минут
+        time.sleep(600)
