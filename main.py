@@ -21,28 +21,21 @@ def send_telegram(text: str):
 
 
 # =========================
-# BYBIT (ALTERNATIVE DOMAIN)
+# BINANCE FUTURES PRICE
 # =========================
 def get_btc_price():
-    url = "https://api.bytick.com/v5/market/tickers"
-
+    url = "https://fapi.binance.com/fapi/v1/ticker/price"
     params = {
-        "category": "linear",
         "symbol": "BTCUSDT"
     }
 
-    headers = {
-        "User-Agent": "Mozilla/5.0"
-    }
-
-    r = requests.get(url, params=params, headers=headers, timeout=10)
+    r = requests.get(url, params=params, timeout=10)
 
     if r.status_code != 200:
-        raise Exception(f"Bybit error: {r.status_code} - {r.text}")
+        raise Exception(f"Binance error: {r.status_code} - {r.text}")
 
     data = r.json()
-
-    return data["result"]["list"][0]["lastPrice"]
+    return data["price"]
 
 
 # =========================
@@ -56,3 +49,4 @@ if __name__ == "__main__":
         message = f"❌ Bot error:\n{str(e)}"
 
     send_telegram(message)
+
