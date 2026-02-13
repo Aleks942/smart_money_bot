@@ -1,4 +1,5 @@
 import os
+import time
 import requests
 from dotenv import load_dotenv
 
@@ -16,8 +17,7 @@ def send_telegram(text: str):
         "chat_id": CHAT_ID,
         "text": text
     }
-    r = requests.post(url, data=payload, timeout=10)
-    r.raise_for_status()
+    requests.post(url, data=payload, timeout=10)
 
 
 # =========================
@@ -25,28 +25,24 @@ def send_telegram(text: str):
 # =========================
 def get_btc_price():
     url = "https://fapi.binance.com/fapi/v1/ticker/price"
-    params = {
-        "symbol": "BTCUSDT"
-    }
-
+    params = {"symbol": "BTCUSDT"}
     r = requests.get(url, params=params, timeout=10)
-
-    if r.status_code != 200:
-        raise Exception(f"Binance error: {r.status_code} - {r.text}")
-
     data = r.json()
     return data["price"]
 
 
 # =========================
-# MAIN
+# MAIN LOOP
 # =========================
 if __name__ == "__main__":
-    try:
-        price = get_btc_price()
-        message = f"✅ Smart Money Bot ONLINE\nBTCUSDT price: {price}"
-    except Exception as e:
-        message = f"❌ Bot error:\n{str(e)}"
+    send_telegram("🚀 Smart Money Bot started")
 
-    send_telegram(message)
+    while True:
+        try:
+            price = get_btc_price()
+            message = f"BTCUSDT price: {price}"
+            send_telegram(message)
+        except Exception as e:
+            send_telegram(f"❌ Error: {str(e)}")
 
+        time.sleep(600)  # 10 минут
