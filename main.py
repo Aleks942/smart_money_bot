@@ -16,24 +16,23 @@ def send_telegram(text: str):
         "chat_id": CHAT_ID,
         "text": text
     }
-
     r = requests.post(url, data=payload, timeout=10)
     r.raise_for_status()
 
 
 # =========================
-# BYBIT (PUBLIC ENDPOINT)
+# BYBIT (ALTERNATIVE DOMAIN)
 # =========================
 def get_btc_price():
-    url = "https://api.bybit.com/v5/market/tickers"
-
-    headers = {
-        "User-Agent": "Mozilla/5.0"
-    }
+    url = "https://api.bytick.com/v5/market/tickers"
 
     params = {
         "category": "linear",
         "symbol": "BTCUSDT"
+    }
+
+    headers = {
+        "User-Agent": "Mozilla/5.0"
     }
 
     r = requests.get(url, params=params, headers=headers, timeout=10)
@@ -42,9 +41,6 @@ def get_btc_price():
         raise Exception(f"Bybit error: {r.status_code} - {r.text}")
 
     data = r.json()
-
-    if "result" not in data or "list" not in data["result"]:
-        raise Exception(f"Unexpected response: {data}")
 
     return data["result"]["list"][0]["lastPrice"]
 
