@@ -2,316 +2,234 @@ import os
 import time
 import json
 import requests
-from typing import Any, Dict, List, Optional
 from dotenv import load_dotenv
 
 load_dotenv()
 
-BOT_TOKEN = os.getenv("BOT_TOKEN", "").strip()
-CHAT_ID = os.getenv("CHAT_ID", "").strip()
-COINGLASS_API_KEY = os.getenv("COINGLASS_API_KEY", "").strip()
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
+COINGLASS_API_KEY = os.getenv("COINGLASS_API_KEY")
 
-# =========================
-# SETTINGS
-# =========================
-# Свечи берём с Bybit (Binance на Railway часто отдаёт 451)
-BYBIT_SYMBOL = "BTCUSDT"
-BYBIT_CATEGORY = "linear"   # linear = USDT perp. Для структуры рынка ок.
-
-COINGLASS_SYMBOL = "BTC"
-
-INTERVAL_MINUTES = 5        # 5m
-CANDLES_LIMIT = 30
-
-POLL_SECONDS = 600               # каждые 10 минут
-HEARTBEAT_SECONDS = 6 * 3600     # раз в 6 часов "бот жив"
+POLL_SECONDS = 600
 STATE_FILE = "state.json"
+HEARTBEAT_SECONDS = 6 * 3600
 
 REQUEST_TIMEOUT = 12
 
 
 # =========================
-# UTILS
-# =========================
-def require_env() -> None:
-    missing = []
-    if not BOT_TOKEN:
-        missing.append("BOT_TOKEN")
-    if not CHAT_ID:
-        missing.append("CHAT_ID")
-    # COINGLASS_API_KEY НЕ делаем обязательным — бот умеет жить без Coinglass
-    if missing:
-        raise RuntimeError(f"Missing env vars: {', '.join(missing)}")
-
-
-def safe_float(x: Any) -> Optional[float]:
-    try:
-        if x is None:
-            return None
-        return float(x)
-    except Exception:
-        return None
-
-
-def load_state() -> Dict[str, Any]:
-    if not os.path.exists(STATE_FILE):
-        return {}
-    try:
-        with open(STATE_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
-        return {}
-
-
-def save_state(state: Dict[str, Any]) -> None:
-    try:
-        with open(STATE_FILE, "w", encoding="utf-8") as f:
-            json.dump(state, f, ensure_ascii=False, indent=2)
-    except Exception:
-        pass
-
-
-# =========================
 # TELEGRAM
 # =========================
-def send_telegram(text: str) -> None:
-    if not BOT_TOKEN or not CHAT_ID:
-        return
-
+def send_telegram(text):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     payload = {"chat_id": CHAT_ID, "text": text}
-
     try:
         requests.post(url, data=payload, timeout=REQUEST_TIMEOUT)
-    except Exception:
-        # Telegram не должен ронять бота
+    except:
         pass
 
 
 # =========================
-# COINGLASS FUNDING RATE (FAIL-SAFE)
+# COINGLASS FUNDING (FAIL SAFE)
 # =========================
-def get_funding_btc() -> Optional[float]:
-    """
-    FAIL-SAFE:
-    - Coinglass может отдавать 500 / падать / лагать
-    - Тогда возвращаем None и бот продолжает работать по свечам (compression)
-    """
+def get_funding():
+
     if not COINGLASS_API_KEY:
         return None
 
     url = "https://open-api.coinglass.com/public/v2/futures/funding_rates"
     headers = {"coinglassSecret": COINGLASS_API_KEY}
-    params = {"symbol": COINGLASS_SYMBOL}
+    params = {"symbol": "BTC"}
 
     try:
         r = requests.get(url, headers=headers, params=params, timeout=REQUEST_TIMEOUT)
         if r.status_code != 200:
-            print(f"[WARN] Coinglass HTTP {r.status_code}: {r.text[:200]}")
             return None
 
-        data = r.json()
-        arr = data.get("data")
-        if not isinstance(arr, list) or not arr:
-            return None
+        data = r.json().get("data", [])
 
-        rates: List[float] = []
-        for item in arr:
-            fr = safe_float(item.get("fundingRate"))
-            if fr is not None:
-                rates.append(fr)
+        rates = []
+        for x in data:
+            if x.get("fundingRate") is not None:
+                rates.append(float(x["fundingRate"]))
 
         if not rates:
             return None
 
         return sum(rates) / len(rates)
 
-    except Exception as e:
-        print(f"[WARN] Coinglass failed: {str(e)}")
+    except:
         return None
 
 
 # =========================
-# BYBIT CANDLES (replacement for Binance)
+# COINGLASS OPEN INTEREST
 # =========================
-def get_candles() -> List[List[Any]]:
-    """
-    Bybit v5 Kline:
-    result.list items: [startTime, open, high, low, close, volume, turnover]
-    Обычно приходит в обратном порядке — переворачиваем.
+def get_open_interest():
 
-    Возвращаем формат свечей похожий на Binance:
-    [openTime, open, high, low, close, volume]
-    """
-    url = "https://api.bybit.com/v5/market/kline"
-    params = {
-        "category": BYBIT_CATEGORY,
-        "symbol": BYBIT_SYMBOL,
-        "interval": str(INTERVAL_MINUTES),  # "5"
-        "limit": CANDLES_LIMIT,
-    }
+    if not COINGLASS_API_KEY:
+        return None
+
+    url = "https://open-api.coinglass.com/public/v2/futures/open_interest"
+    headers = {"coinglassSecret": COINGLASS_API_KEY}
+    params = {"symbol": "BTC"}
+
+    try:
+        r = requests.get(url, headers=headers, params=params, timeout=REQUEST_TIMEOUT)
+        if r.status_code != 200:
+            return None
+
+        data = r.json().get("data", [])
+
+        oi_values = []
+        for x in data:
+            if x.get("openInterest") is not None:
+                oi_values.append(float(x["openInterest"]))
+
+        if not oi_values:
+            return None
+
+        return sum(oi_values) / len(oi_values)
+
+    except:
+        return None
+
+
+# =========================
+# COINGECKO CANDLES (NO BLOCKS)
+# =========================
+def get_candles():
+
+    url = "https://api.coingecko.com/api/v3/coins/bitcoin/ohlc"
+    params = {"vs_currency": "usd", "days": "1"}
 
     r = requests.get(url, params=params, timeout=REQUEST_TIMEOUT)
+
     if r.status_code != 200:
-        raise RuntimeError(f"Bybit HTTP {r.status_code}: {r.text}")
+        raise RuntimeError("CoinGecko candles failed")
 
     data = r.json()
-    result = data.get("result")
-    if not isinstance(result, dict):
-        raise RuntimeError(f"Bybit bad response: {data}")
 
-    klines = result.get("list")
-    if not isinstance(klines, list) or len(klines) < 20:
-        raise RuntimeError("Bybit candles: not enough data")
+    candles = []
+    for c in data:
+        candles.append([c[0], c[1], c[2], c[3], c[4], 1])
 
-    klines.reverse()  # делаем от старых к новым
-
-    candles: List[List[Any]] = []
-    for k in klines:
-        # k: [startTime, open, high, low, close, volume, turnover]
-        candles.append([k[0], k[1], k[2], k[3], k[4], k[5]])
-
-    return candles
+    return candles[-30:]
 
 
 # =========================
-# SMART MONEY PATTERN: COMPRESSION (пружина)
+# COMPRESSION DETECTOR
 # =========================
-def compression_ok(candles: List[List[Any]]) -> bool:
-    """
-    Паттерн "пружина":
-    - Волатильность падает (диапазон свечей сжимается)
-    - Объём НЕ падает (значит идёт тихий набор)
-    """
+def compression_ok(candles):
+
     if len(candles) < 20:
         return False
 
     highs = [float(c[2]) for c in candles]
     lows = [float(c[3]) for c in candles]
-    volumes = [float(c[5]) for c in candles]
 
     ranges = [h - l for h, l in zip(highs, lows)]
 
-    # последние 4 свечи vs предыдущие 8
-    last_range = sum(ranges[-4:]) / 4.0
-    prev_range = sum(ranges[-12:-4]) / 8.0
+    last_range = sum(ranges[-4:]) / 4
+    prev_range = sum(ranges[-12:-4]) / 8
 
-    # сжатие: диапазон упал минимум на 30%
-    compression = last_range < prev_range * 0.70
-
-    # объём держится: последние 4 свечи не хуже ~90% предыдущей базы
-    avg_vol_prev = sum(volumes[-20:-4]) / 16.0
-    avg_vol_last = sum(volumes[-4:]) / 4.0
-    vol_ok = avg_vol_last >= avg_vol_prev * 0.90
-
-    return compression and vol_ok
+    return last_range < prev_range * 0.7
 
 
 # =========================
-# SCORE + SIGNAL BUILD
+# STATE
 # =========================
-def build_signal(funding: Optional[float], candles: List[List[Any]]) -> Dict[str, Any]:
-    score = 0
-    reasons: List[str] = []
-
-    # 1) Funding < 0 = толпа чаще в шорте (топливо для squeeze)
-    if funding is not None and funding < 0:
-        score += 1
-        reasons.append("funding<0 (толпа чаще в шорте)")
-
-    # 2) Compression = рынок сжат, объём держится (набор позиции)
-    comp = compression_ok(candles)
-    if comp:
-        score += 1
-        reasons.append("compression (волатильность↓, объём держится)")
-
-    alert = score >= 2
-
-    last_close = float(candles[-1][4])
-
-    return {
-        "funding": funding,
-        "score": score,
-        "alert": alert,
-        "reasons": reasons,
-        "price": last_close,
-        "ts": int(time.time()),
-    }
+def load_state():
+    try:
+        with open(STATE_FILE, "r") as f:
+            return json.load(f)
+    except:
+        return {}
 
 
-def format_message(sig: Dict[str, Any]) -> str:
-    funding = sig["funding"]
-    funding_str = "N/A (Coinglass offline)" if funding is None else f"{funding:.6f}"
-
-    lines = [
-        "🧠 Smart Money Bot — BTC (Bybit candles)",
-        f"💵 Price ({BYBIT_SYMBOL}): {sig['price']:.2f}",
-        f"💰 Funding (avg): {funding_str}",
-        f"📊 Smart Score: {sig['score']}/2",
-    ]
-
-    if sig["reasons"]:
-        lines.append("Причины:")
-        for r in sig["reasons"]:
-            lines.append(f"• {r}")
-
-    if sig["alert"]:
-        lines.append("")
-        lines.append("⚡ PRE-PUMP STRUCTURE DETECTED")
-        lines.append("👉 Идея: рынок сжат + толпа против движения → шанс импульса выше.")
-
-    return "\n".join(lines)
-
-
-def should_send(prev: Dict[str, Any], curr: Dict[str, Any], last_heartbeat_ts: int) -> Dict[str, Any]:
-    """
-    Анти-спам:
-    - отправляем если изменился score или alert
-    - либо пришло время heartbeat
-    """
-    now = curr["ts"]
-    prev_alert = prev.get("alert")
-    prev_score = prev.get("score")
-
-    changed = (prev_alert != curr["alert"]) or (prev_score != curr["score"])
-    heartbeat_due = (now - last_heartbeat_ts) >= HEARTBEAT_SECONDS
-
-    return {"send": changed or heartbeat_due, "heartbeat_due": heartbeat_due}
+def save_state(state):
+    try:
+        with open(STATE_FILE, "w") as f:
+            json.dump(state, f)
+    except:
+        pass
 
 
 # =========================
 # MAIN
 # =========================
 if __name__ == "__main__":
-    require_env()
+
+    send_telegram("🚀 Smart Money PRO Bot started")
 
     state = load_state()
-    last_heartbeat_ts = int(state.get("last_heartbeat_ts", 0))
-    prev_signal = state.get("last_signal", {})
 
-    send_telegram("🚀 Smart Money Bot started (funding + compression)")
+    prev_score = state.get("score")
+    prev_oi = state.get("oi")
+    last_heartbeat = state.get("hb", 0)
 
     while True:
+
         try:
-            funding = get_funding_btc()   # может быть None — это ок
-            candles = get_candles()       # Bybit — обязателен
-            curr_signal = build_signal(funding, candles)
 
-            decision = should_send(prev_signal, curr_signal, last_heartbeat_ts)
+            funding = get_funding()
+            oi = get_open_interest()
+            candles = get_candles()
 
-            if decision["send"]:
-                send_telegram(format_message(curr_signal))
+            score = 0
 
-                if decision["heartbeat_due"]:
-                    last_heartbeat_ts = curr_signal["ts"]
+            # Funding сигнал
+            if funding is not None and funding < 0:
+                score += 1
 
-                prev_signal = curr_signal
-                state["last_signal"] = prev_signal
-                state["last_heartbeat_ts"] = last_heartbeat_ts
+            # Compression сигнал
+            if compression_ok(candles):
+                score += 1
+
+            # Open Interest Spike
+            if prev_oi is not None and oi is not None:
+                if oi > prev_oi * 1.01:
+                    score += 1
+
+            now = int(time.time())
+
+            changed = (score != prev_score)
+            heartbeat = (now - last_heartbeat) > HEARTBEAT_SECONDS
+
+            if changed or heartbeat:
+
+                msg = "🧠 Smart Money PRO\n"
+                msg += f"📊 Score: {score}/3\n"
+
+                if funding is None:
+                    msg += "💰 Funding: N/A\n"
+                else:
+                    msg += f"💰 Funding: {funding}\n"
+
+                if oi is not None:
+                    msg += f"📈 Open Interest: {int(oi)}\n"
+
+                if score >= 2:
+                    msg += "⚡ PRE-PUMP STRUCTURE\n"
+
+                if score == 3:
+                    msg += "🔥 STRONG SMART MONEY SIGNAL\n"
+
+                send_telegram(msg)
+
+                prev_score = score
+                prev_oi = oi
+
+                state["score"] = score
+                state["oi"] = oi
+
+                if heartbeat:
+                    last_heartbeat = now
+                    state["hb"] = now
+
                 save_state(state)
 
         except Exception as e:
-            # Bybit/сеть может падать — сообщим, но не убиваем процесс
             send_telegram(f"❌ Error:\n{str(e)}")
 
         time.sleep(POLL_SECONDS)
