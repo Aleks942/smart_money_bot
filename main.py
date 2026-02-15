@@ -14,14 +14,17 @@ COINGLASS_API_KEY = os.getenv("COINGLASS_API_KEY", "").strip()
 # =========================
 # SETTINGS
 # =========================
-SYMBOL_SPOT = "BTCUSDT"        # Binance spot symbol
-COINGLASS_SYMBOL = "BTC"       # Coinglass symbol
+# Свечи берём с Bybit (Binance на Railway часто отдаёт 451)
+BYBIT_SYMBOL = "BTCUSDT"
+BYBIT_CATEGORY = "linear"   # linear = USDT perp. Для структуры рынка ок.
 
-INTERVAL = "5m"
+COINGLASS_SYMBOL = "BTC"
+
+INTERVAL_MINUTES = 5        # 5m
 CANDLES_LIMIT = 30
 
-POLL_SECONDS = 600              # каждые 10 минут
-HEARTBEAT_SECONDS = 6 * 3600    # раз в 6 часов "бот жив"
+POLL_SECONDS = 600               # каждые 10 минут
+HEARTBEAT_SECONDS = 6 * 3600     # раз в 6 часов "бот жив"
 STATE_FILE = "state.json"
 
 REQUEST_TIMEOUT = 12
@@ -65,7 +68,6 @@ def save_state(state: Dict[str, Any]) -> None:
         with open(STATE_FILE, "w", encoding="utf-8") as f:
             json.dump(state, f, ensure_ascii=False, indent=2)
     except Exception:
-        # если не смогли сохранить — не критично, просто потеряем "память" до рестарта
         pass
 
 
@@ -82,7 +84,7 @@ def send_telegram(text: str) -> None:
     try:
         requests.post(url, data=payload, timeout=REQUEST_TIMEOUT)
     except Exception:
-        # не роняем бота из-за Telegram
+        # Telegram не должен ронять бота
         pass
 
 
@@ -93,7 +95,7 @@ def get_funding_btc() -> Optional[float]:
     """
     FAIL-SAFE:
     - Coinglass может отдавать 500 / падать / лагать
-    - Тогда возвращаем None и бот продолжает работать по Binance compression
+    - Тогда возвращаем None и бот продолжает работать по свечам (compression)
     """
     if not COINGLASS_API_KEY:
         return None
@@ -104,14 +106,12 @@ def get_funding_btc() -> Optional[float]:
 
     try:
         r = requests.get(url, headers=headers, params=params, timeout=REQUEST_TIMEOUT)
-
         if r.status_code != 200:
             print(f"[WARN] Coinglass HTTP {r.status_code}: {r.text[:200]}")
             return None
 
         data = r.json()
         arr = data.get("data")
-
         if not isinstance(arr, list) or not arr:
             return None
 
@@ -132,30 +132,46 @@ def get_funding_btc() -> Optional[float]:
 
 
 # =========================
-# BINANCE CANDLES
+# BYBIT CANDLES (replacement for Binance)
 # =========================
-def get_binance_candles() -> List[List[Any]]:
+def get_candles() -> List[List[Any]]:
     """
-    Binance klines:
-    [
-      [
-        openTime, open, high, low, close, volume,
-        closeTime, quoteAssetVolume, trades, ...
-      ], ...
-    ]
+    Bybit v5 Kline:
+    result.list items: [startTime, open, high, low, close, volume, turnover]
+    Обычно приходит в обратном порядке — переворачиваем.
+
+    Возвращаем формат свечей похожий на Binance:
+    [openTime, open, high, low, close, volume]
     """
-    url = "https://api.binance.com/api/v3/klines"
-    params = {"symbol": SYMBOL_SPOT, "interval": INTERVAL, "limit": CANDLES_LIMIT}
+    url = "https://api.bybit.com/v5/market/kline"
+    params = {
+        "category": BYBIT_CATEGORY,
+        "symbol": BYBIT_SYMBOL,
+        "interval": str(INTERVAL_MINUTES),  # "5"
+        "limit": CANDLES_LIMIT,
+    }
 
     r = requests.get(url, params=params, timeout=REQUEST_TIMEOUT)
     if r.status_code != 200:
-        raise RuntimeError(f"Binance HTTP {r.status_code}: {r.text}")
+        raise RuntimeError(f"Bybit HTTP {r.status_code}: {r.text}")
 
     data = r.json()
-    if not isinstance(data, list) or len(data) < 20:
-        raise RuntimeError("Binance candles: not enough data")
+    result = data.get("result")
+    if not isinstance(result, dict):
+        raise RuntimeError(f"Bybit bad response: {data}")
 
-    return data
+    klines = result.get("list")
+    if not isinstance(klines, list) or len(klines) < 20:
+        raise RuntimeError("Bybit candles: not enough data")
+
+    klines.reverse()  # делаем от старых к новым
+
+    candles: List[List[Any]] = []
+    for k in klines:
+        # k: [startTime, open, high, low, close, volume, turnover]
+        candles.append([k[0], k[1], k[2], k[3], k[4], k[5]])
+
+    return candles
 
 
 # =========================
@@ -173,6 +189,7 @@ def compression_ok(candles: List[List[Any]]) -> bool:
     highs = [float(c[2]) for c in candles]
     lows = [float(c[3]) for c in candles]
     volumes = [float(c[5]) for c in candles]
+
     ranges = [h - l for h, l in zip(highs, lows)]
 
     # последние 4 свечи vs предыдущие 8
@@ -227,8 +244,8 @@ def format_message(sig: Dict[str, Any]) -> str:
     funding_str = "N/A (Coinglass offline)" if funding is None else f"{funding:.6f}"
 
     lines = [
-        "🧠 Smart Money Bot — BTC",
-        f"💵 Price ({SYMBOL_SPOT}): {sig['price']:.2f}",
+        "🧠 Smart Money Bot — BTC (Bybit candles)",
+        f"💵 Price ({BYBIT_SYMBOL}): {sig['price']:.2f}",
         f"💰 Funding (avg): {funding_str}",
         f"📊 Smart Score: {sig['score']}/2",
     ]
@@ -276,8 +293,8 @@ if __name__ == "__main__":
 
     while True:
         try:
-            funding = get_funding_btc()          # может быть None — это ок
-            candles = get_binance_candles()       # обязательно
+            funding = get_funding_btc()   # может быть None — это ок
+            candles = get_candles()       # Bybit — обязателен
             curr_signal = build_signal(funding, candles)
 
             decision = should_send(prev_signal, curr_signal, last_heartbeat_ts)
@@ -294,7 +311,7 @@ if __name__ == "__main__":
                 save_state(state)
 
         except Exception as e:
-            # Binance/сеть может падать — сообщим, но не убиваем процесс
+            # Bybit/сеть может падать — сообщим, но не убиваем процесс
             send_telegram(f"❌ Error:\n{str(e)}")
 
         time.sleep(POLL_SECONDS)
