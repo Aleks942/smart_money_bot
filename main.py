@@ -11,14 +11,17 @@ BOT_TOKEN = os.getenv("BOT_TOKEN", "").strip()
 CHAT_ID = os.getenv("CHAT_ID", "").strip()
 COINGLASS_API_KEY = os.getenv("COINGLASS_API_KEY", "").strip()
 
-# Настройки
-SYMBOL_SPOT = "BTCUSDT"
-COINGLASS_SYMBOL = "BTC"
+# =========================
+# SETTINGS
+# =========================
+SYMBOL_SPOT = "BTCUSDT"        # Binance spot symbol
+COINGLASS_SYMBOL = "BTC"       # Coinglass symbol
+
 INTERVAL = "5m"
 CANDLES_LIMIT = 30
 
-POLL_SECONDS = 600          # каждые 10 минут
-HEARTBEAT_SECONDS = 6 * 3600  # раз в 6 часов "бот жив"
+POLL_SECONDS = 600              # каждые 10 минут
+HEARTBEAT_SECONDS = 6 * 3600    # раз в 6 часов "бот жив"
 STATE_FILE = "state.json"
 
 REQUEST_TIMEOUT = 12
@@ -27,14 +30,13 @@ REQUEST_TIMEOUT = 12
 # =========================
 # UTILS
 # =========================
-def require_env():
+def require_env() -> None:
     missing = []
     if not BOT_TOKEN:
         missing.append("BOT_TOKEN")
     if not CHAT_ID:
         missing.append("CHAT_ID")
-    if not COINGLASS_API_KEY:
-        missing.append("COINGLASS_API_KEY")
+    # COINGLASS_API_KEY НЕ делаем обязательным — бот умеет жить без Coinglass
     if missing:
         raise RuntimeError(f"Missing env vars: {', '.join(missing)}")
 
@@ -71,8 +73,12 @@ def save_state(state: Dict[str, Any]) -> None:
 # TELEGRAM
 # =========================
 def send_telegram(text: str) -> None:
+    if not BOT_TOKEN or not CHAT_ID:
+        return
+
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     payload = {"chat_id": CHAT_ID, "text": text}
+
     try:
         requests.post(url, data=payload, timeout=REQUEST_TIMEOUT)
     except Exception:
@@ -81,37 +87,48 @@ def send_telegram(text: str) -> None:
 
 
 # =========================
-# COINGLASS FUNDING RATE
+# COINGLASS FUNDING RATE (FAIL-SAFE)
 # =========================
 def get_funding_btc() -> Optional[float]:
     """
-    Берём funding rate по BTC с Coinglass.
-    В ответе обычно массив бирж. Берём "первую", но корректнее — усреднять.
-    Здесь делаем: если есть несколько бирж с fundingRate — усредняем.
+    FAIL-SAFE:
+    - Coinglass может отдавать 500 / падать / лагать
+    - Тогда возвращаем None и бот продолжает работать по Binance compression
     """
+    if not COINGLASS_API_KEY:
+        return None
+
     url = "https://open-api.coinglass.com/public/v2/futures/funding_rates"
     headers = {"coinglassSecret": COINGLASS_API_KEY}
     params = {"symbol": COINGLASS_SYMBOL}
 
-    r = requests.get(url, headers=headers, params=params, timeout=REQUEST_TIMEOUT)
-    if r.status_code != 200:
-        raise RuntimeError(f"Coinglass HTTP {r.status_code}: {r.text}")
+    try:
+        r = requests.get(url, headers=headers, params=params, timeout=REQUEST_TIMEOUT)
 
-    data = r.json()
-    arr = data.get("data")
-    if not isinstance(arr, list) or not arr:
-        raise RuntimeError(f"Coinglass unexpected response: {data}")
+        if r.status_code != 200:
+            print(f"[WARN] Coinglass HTTP {r.status_code}: {r.text[:200]}")
+            return None
 
-    rates: List[float] = []
-    for item in arr:
-        fr = safe_float(item.get("fundingRate"))
-        if fr is not None:
-            rates.append(fr)
+        data = r.json()
+        arr = data.get("data")
 
-    if not rates:
+        if not isinstance(arr, list) or not arr:
+            return None
+
+        rates: List[float] = []
+        for item in arr:
+            fr = safe_float(item.get("fundingRate"))
+            if fr is not None:
+                rates.append(fr)
+
+        if not rates:
+            return None
+
+        return sum(rates) / len(rates)
+
+    except Exception as e:
+        print(f"[WARN] Coinglass failed: {str(e)}")
         return None
-
-    return sum(rates) / len(rates)
 
 
 # =========================
@@ -135,8 +152,9 @@ def get_binance_candles() -> List[List[Any]]:
         raise RuntimeError(f"Binance HTTP {r.status_code}: {r.text}")
 
     data = r.json()
-    if not isinstance(data, list) or len(data) < 12:
+    if not isinstance(data, list) or len(data) < 20:
         raise RuntimeError("Binance candles: not enough data")
+
     return data
 
 
@@ -145,9 +163,9 @@ def get_binance_candles() -> List[List[Any]]:
 # =========================
 def compression_ok(candles: List[List[Any]]) -> bool:
     """
-    Идея:
-    - Диапазон свечей сжимается (волатильность падает)
-    - Объём не падает (значит это не "сон", а набор позиции)
+    Паттерн "пружина":
+    - Волатильность падает (диапазон свечей сжимается)
+    - Объём НЕ падает (значит идёт тихий набор)
     """
     if len(candles) < 20:
         return False
@@ -155,17 +173,16 @@ def compression_ok(candles: List[List[Any]]) -> bool:
     highs = [float(c[2]) for c in candles]
     lows = [float(c[3]) for c in candles]
     volumes = [float(c[5]) for c in candles]
-
     ranges = [h - l for h, l in zip(highs, lows)]
 
-    # последние 4 свечи vs предыдущие 8 свечей
+    # последние 4 свечи vs предыдущие 8
     last_range = sum(ranges[-4:]) / 4.0
     prev_range = sum(ranges[-12:-4]) / 8.0
 
-    # "пружина": диапазон упал минимум на 30%
+    # сжатие: диапазон упал минимум на 30%
     compression = last_range < prev_range * 0.70
 
-    # объём держится (не провалился)
+    # объём держится: последние 4 свечи не хуже ~90% предыдущей базы
     avg_vol_prev = sum(volumes[-20:-4]) / 16.0
     avg_vol_last = sum(volumes[-4:]) / 4.0
     vol_ok = avg_vol_last >= avg_vol_prev * 0.90
@@ -174,30 +191,25 @@ def compression_ok(candles: List[List[Any]]) -> bool:
 
 
 # =========================
-# SCORE + STATE
+# SCORE + SIGNAL BUILD
 # =========================
 def build_signal(funding: Optional[float], candles: List[List[Any]]) -> Dict[str, Any]:
-    """
-    Собираем признаки и score.
-    """
     score = 0
-    reasons = []
+    reasons: List[str] = []
 
-    # 1) Толпа шортит (funding ниже 0)
+    # 1) Funding < 0 = толпа чаще в шорте (топливо для squeeze)
     if funding is not None and funding < 0:
         score += 1
         reasons.append("funding<0 (толпа чаще в шорте)")
 
-    # 2) Пружина
+    # 2) Compression = рынок сжат, объём держится (набор позиции)
     comp = compression_ok(candles)
     if comp:
         score += 1
         reasons.append("compression (волатильность↓, объём держится)")
 
-    # Можно расширять дальше: OI, ликвидации, ончейн — но пока держим просто и надёжно.
     alert = score >= 2
 
-    # Цена для контекста
     last_close = float(candles[-1][4])
 
     return {
@@ -212,9 +224,9 @@ def build_signal(funding: Optional[float], candles: List[List[Any]]) -> Dict[str
 
 def format_message(sig: Dict[str, Any]) -> str:
     funding = sig["funding"]
-    funding_str = "None" if funding is None else f"{funding:.6f}"
+    funding_str = "N/A (Coinglass offline)" if funding is None else f"{funding:.6f}"
 
-    base = [
+    lines = [
         "🧠 Smart Money Bot — BTC",
         f"💵 Price ({SYMBOL_SPOT}): {sig['price']:.2f}",
         f"💰 Funding (avg): {funding_str}",
@@ -222,32 +234,29 @@ def format_message(sig: Dict[str, Any]) -> str:
     ]
 
     if sig["reasons"]:
-        base.append("Причины:")
+        lines.append("Причины:")
         for r in sig["reasons"]:
-            base.append(f"• {r}")
+            lines.append(f"• {r}")
 
     if sig["alert"]:
-        base.append("")
-        base.append("⚡ PRE-PUMP STRUCTURE DETECTED")
-        base.append("👉 Идея: рынок сжат + толпа против движения → шанс импульса выше.")
+        lines.append("")
+        lines.append("⚡ PRE-PUMP STRUCTURE DETECTED")
+        lines.append("👉 Идея: рынок сжат + толпа против движения → шанс импульса выше.")
 
-    return "\n".join(base)
+    return "\n".join(lines)
 
 
 def should_send(prev: Dict[str, Any], curr: Dict[str, Any], last_heartbeat_ts: int) -> Dict[str, Any]:
     """
-    Решаем отправлять ли сообщение:
-    - если изменился alert (OFF->ON или ON->OFF)
-    - или изменился score
-    - или пришло время heartbeat
+    Анти-спам:
+    - отправляем если изменился score или alert
+    - либо пришло время heartbeat
     """
     now = curr["ts"]
-
     prev_alert = prev.get("alert")
     prev_score = prev.get("score")
 
     changed = (prev_alert != curr["alert"]) or (prev_score != curr["score"])
-
     heartbeat_due = (now - last_heartbeat_ts) >= HEARTBEAT_SECONDS
 
     return {"send": changed or heartbeat_due, "heartbeat_due": heartbeat_due}
@@ -267,25 +276,25 @@ if __name__ == "__main__":
 
     while True:
         try:
-            funding = get_funding_btc()
-            candles = get_binance_candles()
+            funding = get_funding_btc()          # может быть None — это ок
+            candles = get_binance_candles()       # обязательно
             curr_signal = build_signal(funding, candles)
 
             decision = should_send(prev_signal, curr_signal, last_heartbeat_ts)
+
             if decision["send"]:
                 send_telegram(format_message(curr_signal))
 
-                # если это был heartbeat — обновим метку
                 if decision["heartbeat_due"]:
                     last_heartbeat_ts = curr_signal["ts"]
 
                 prev_signal = curr_signal
-
                 state["last_signal"] = prev_signal
                 state["last_heartbeat_ts"] = last_heartbeat_ts
                 save_state(state)
 
         except Exception as e:
+            # Binance/сеть может падать — сообщим, но не убиваем процесс
             send_telegram(f"❌ Error:\n{str(e)}")
 
         time.sleep(POLL_SECONDS)
