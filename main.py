@@ -36,6 +36,10 @@ PRESSURE_LOOKBACK = 20         # сколько свечей берём в ди�
 PRESSURE_ZONE = 0.15           # 15% верх/низ диапазона = зона давления
 MIN_RANGE_PCT = 0.25           # если диапазон слишком узкий (<0.25% цены), pressure не считаем (шум)
 
+# Breakout confirm
+BREAKOUT_LOOKBACK = 12
+BREAKOUT_CONFIRM_BARS = 2      # 2 свечи подряд держатся выше/ниже диапазона
+
 
 # =========================
 # TELEGRAM
@@ -248,7 +252,7 @@ def fake_dump_ok(candles):
 
     return pierced and recovered and wick_strong
 
-def breakout_ok(candles, lookback=12):
+def breakout_ok(candles, lookback=BREAKOUT_LOOKBACK):
     if len(candles) < lookback + 2:
         return None
 
@@ -259,6 +263,25 @@ def breakout_ok(candles, lookback=12):
     if last_close > max(highs):
         return "UP"
     if last_close < min(lows):
+        return "DOWN"
+    return None
+
+def breakout_confirm_ok(candles, lookback=BREAKOUT_LOOKBACK, confirm_bars=BREAKOUT_CONFIRM_BARS):
+    """
+    Подтверждение breakout: последние N свечей закрылись выше/ниже границ диапазона.
+    Возвращает "UP"/"DOWN"/None
+    """
+    if len(candles) < lookback + confirm_bars + 2:
+        return None
+
+    base = candles[-(lookback + confirm_bars + 1):- (confirm_bars + 1)]
+    hi = max(x[2] for x in base)
+    lo = min(x[3] for x in base)
+
+    last_closes = [c[4] for c in candles[-confirm_bars:]]
+    if all(cl > hi for cl in last_closes):
+        return "UP"
+    if all(cl < lo for cl in last_closes):
         return "DOWN"
     return None
 
@@ -284,12 +307,7 @@ def oi_spike_ok(prev_oi, oi):
         return False
     return oi > prev_oi * OI_SPIKE_MULT
 
-def liquidity_pressure(candles, lookback=PRESSURE_LOOKBACK, zone=PRESSURE_ZONE):
-    """
-    Возвращает ("UP"/"DOWN"/None, meta_dict)
-    meta_dict: range_hi, range_lo, range_pct, pos (0..1)
-    pos = где close внутри диапазона: 0=низ, 1=верх
-    """
+def liquidity_pressure(candles, lookback=20, zone=0.15, min_range_pct=0.25):
     if len(candles) < lookback + 2:
         return None, {}
 
@@ -302,16 +320,13 @@ def liquidity_pressure(candles, lookback=PRESSURE_LOOKBACK, zone=PRESSURE_ZONE):
     if rng <= 0:
         return None, {}
 
-    # диапазон в % от цены — если слишком мал, это шум
     range_pct = (rng / close) * 100.0
-    if range_pct < MIN_RANGE_PCT:
+    if range_pct < min_range_pct:
         return None, {"range_hi": hi, "range_lo": lo, "range_pct": range_pct, "pos": None}
 
     pos = (close - lo) / rng  # 0..1
-    # верхние 15% диапазона = давление вверх
     if pos >= (1.0 - zone):
         return "UP", {"range_hi": hi, "range_lo": lo, "range_pct": range_pct, "pos": pos}
-    # нижние 15% диапазона = давление вниз
     if pos <= zone:
         return "DOWN", {"range_hi": hi, "range_lo": lo, "range_pct": range_pct, "pos": pos}
 
@@ -322,41 +337,89 @@ def liquidity_pressure(candles, lookback=PRESSURE_LOOKBACK, zone=PRESSURE_ZONE):
 # RUSSIAN EXPLANATIONS
 # =========================
 EXPLAIN = {
-    "FUNDING_NEG": "Funding < 0: толпа чаще в шорте. Это топливо для squeeze (резкого выноса вверх).",
-    "OI_SPIKE": "Open Interest растёт: в рынок заходят новые плечевые позиции. Часто это признак активности крупных.",
-    "COMP_5M": "Compression 5m: рынок сжался (волатильность упала). Обычно это ‘пружина’ перед движением.",
-    "COMP_5M+VOL": "Compression 5m + объём держится: это сильнее — похоже на тихий набор позиции, а не ‘сон’.",
-    "COMP_15M": "Compression 15m: сжатие на старшем ТФ — обычно даёт более сильные и чистые импульсы.",
-    "COMP_15M+VOL": "Compression 15m + объём держится: редкая комбинация, рынок реально ‘зажат’ и готов к выстрелу.",
-    "FAKE_DUMP": "Fake Dump: ложный слив/ловушка — пробили низ, всех напугали и быстро выкупили. Часто перед ростом.",
-    "VOL_SPIKE": "Volume Spike: всплеск объёма — подтверждение, что рынок ‘толкают’, а не просто рисуют свечи.",
-    "BREAKOUT_UP": "Breakout UP: закрытие выше диапазона — цена вышла вверх не проколом, а закреплением.",
-    "BREAKOUT_DOWN": "Breakout DOWN: закрытие ниже диапазона — цена закрепилась вниз, а не просто ‘сходила тенью’.",
-    "ATR_EXPANSION": "ATR Expansion: амплитуда движения выросла — импульс действительно начался, меньше шансов на фейк.",
-    "PRESSURE_UP": "Liquidity Pressure UP: цена в верхней зоне диапазона — рынок ‘упёрся’ и готов выстрелить вверх.",
-    "PRESSURE_DOWN": "Liquidity Pressure DOWN: цена в нижней зоне диапазона — рынок ‘упёрся’ и готов пролиться вниз.",
+    "FUNDING_NEG": "Funding < 0: толпа чаще в шорте. Это топливо для squeeze (вынос вверх).",
+    "OI_SPIKE": "Open Interest растёт: заходят новые плечевые позиции, часто признак активности крупных.",
+    "COMP_5M": "Compression 5m: волатильность упала, рынок сжался — ‘пружина’ копит энергию.",
+    "COMP_5M+VOL": "Compression 5m + объём держится: похоже на тихий набор, это сильнее обычного сжатия.",
+    "COMP_15M": "Compression 15m: сжатие на старшем ТФ — обычно даёт более сильные импульсы.",
+    "COMP_15M+VOL": "Compression 15m + объём держится: рынок реально ‘зажат’, вероятность сильного движения выше.",
+    "FAKE_DUMP": "Fake Dump: ложный слив — пробили низ, выбили стопы и быстро выкупили (ловушка).",
+    "VOL_SPIKE": "Volume Spike: всплеск объёма — рынок реально ‘толкают’, подтверждение силы.",
+    "BREAKOUT_UP": "Breakout UP: закрытие выше диапазона — не тень, а закрепление вверх.",
+    "BREAKOUT_DOWN": "Breakout DOWN: закрытие ниже диапазона — закрепление вниз.",
+    "BREAKOUT_CONFIRM_UP": "Confirm UP: 2 свечи подряд удержались выше диапазона — фейков меньше, движение надёжнее.",
+    "BREAKOUT_CONFIRM_DOWN": "Confirm DOWN: 2 свечи подряд удержались ниже диапазона — подтверждение импульса вниз.",
+    "ATR_EXPANSION": "ATR вырос: амплитуда движения увеличилась — импульс реально начался.",
+    "PRESSURE_UP": "Давление вверх: цена в верхней зоне диапазона — ‘упёрлась’ и готова выстрелить вверх.",
+    "PRESSURE_DOWN": "Давление вниз: цена в нижней зоне диапазона — ‘упёрлась’ и готова пролиться вниз.",
 }
 
 def explain_flags_ru(flags):
     lines = []
     for f in flags:
-        text = EXPLAIN.get(f)
-        if text:
-            lines.append(f"• {f}: {text}")
-        else:
-            lines.append(f"• {f}: (нет описания)")
+        txt = EXPLAIN.get(f)
+        lines.append(f"• {f}: {txt if txt else '(нет описания)'}")
     return lines
+
+
+# =========================
+# DIRECTION HINT ENGINE
+# =========================
+def direction_hint(flags):
+    """
+    Возвращает (hint_text, reasons_list)
+    hint_text: "⬆️ вероятнее вверх" / "⬇️ вероятнее вниз" / "⚖️ баланс"
+    """
+    up = 0
+    down = 0
+    reasons = []
+
+    # Сильные направленные флаги
+    if "BREAKOUT_CONFIRM_UP" in flags:
+        up += 3; reasons.append("Confirm breakout UP (+3)")
+    if "BREAKOUT_CONFIRM_DOWN" in flags:
+        down += 3; reasons.append("Confirm breakout DOWN (+3)")
+
+    if "BREAKOUT_UP" in flags:
+        up += 2; reasons.append("Breakout UP (+2)")
+    if "BREAKOUT_DOWN" in flags:
+        down += 2; reasons.append("Breakout DOWN (+2)")
+
+    if "PRESSURE_UP" in flags:
+        up += 1; reasons.append("Pressure UP (+1)")
+    if "PRESSURE_DOWN" in flags:
+        down += 1; reasons.append("Pressure DOWN (+1)")
+
+    # Fake dump чаще даёт уклон вверх (но не всегда)
+    if "FAKE_DUMP" in flags:
+        up += 1; reasons.append("Fake dump чаще перед ростом (+1)")
+
+    # VOL_SPIKE и ATR_EXPANSION — подтверждают импульс в сторону breakout/pressure
+    if "VOL_SPIKE" in flags and ("BREAKOUT_UP" in flags or "BREAKOUT_CONFIRM_UP" in flags or "PRESSURE_UP" in flags):
+        up += 1; reasons.append("Volume подтверждает UP (+1)")
+    if "VOL_SPIKE" in flags and ("BREAKOUT_DOWN" in flags or "BREAKOUT_CONFIRM_DOWN" in flags or "PRESSURE_DOWN" in flags):
+        down += 1; reasons.append("Volume подтверждает DOWN (+1)")
+
+    if "ATR_EXPANSION" in flags and ("BREAKOUT_UP" in flags or "BREAKOUT_CONFIRM_UP" in flags):
+        up += 1; reasons.append("ATR подтверждает UP (+1)")
+    if "ATR_EXPANSION" in flags and ("BREAKOUT_DOWN" in flags or "BREAKOUT_CONFIRM_DOWN" in flags):
+        down += 1; reasons.append("ATR подтверждает DOWN (+1)")
+
+    # Итог
+    if up >= down + 2:
+        return "⬆️ Вероятнее ВВЕРХ", reasons
+    if down >= up + 2:
+        return "⬇️ Вероятнее ВНИЗ", reasons
+    return "⚖️ Баланс / нет явного направления", reasons
 
 
 # =========================
 # SCORING / MESSAGE
 # =========================
 def build_signal(state):
-    # Candles 5m + 15m (multi-timeframe)
     c5, src5 = get_candles_with_fallback(bar="5m", limit=120)
     c15, src15 = get_candles_with_fallback(bar="15m", limit=120)
 
-    # Coinglass
     funding = get_funding_btc()
     oi = get_open_interest_btc()
     prev_oi = state.get("prev_oi")
@@ -391,24 +454,26 @@ def build_signal(state):
         score += 1
         flags.append("FAKE_DUMP")
 
-    # 6) Volume spike (только OKX)
+    # 6) Volume spike
     if volume_spike_ok(c5):
         score += 1
         flags.append("VOL_SPIKE")
 
-    # 7) Breakout (на 5m)
+    # 7) Breakout
     direction = breakout_ok(c5)
     if direction:
         score += 1
         flags.append(f"BREAKOUT_{direction}")
 
-    # 8) ATR expansion (на 5m)
+    # 8) ATR expansion
     if atr_expansion_ok(c5):
         score += 1
         flags.append("ATR_EXPANSION")
 
-    # 9) Liquidity Pressure (на 5m)
-    pres, pres_meta = liquidity_pressure(c5)
+    # 9) Liquidity Pressure
+    pres, pres_meta = liquidity_pressure(
+        c5, lookback=PRESSURE_LOOKBACK, zone=PRESSURE_ZONE, min_range_pct=MIN_RANGE_PCT
+    )
     if pres == "UP":
         score += 1
         flags.append("PRESSURE_UP")
@@ -416,7 +481,18 @@ def build_signal(state):
         score += 1
         flags.append("PRESSURE_DOWN")
 
+    # 10) Breakout confirmation (2-bar)
+    conf = breakout_confirm_ok(c5, lookback=BREAKOUT_LOOKBACK, confirm_bars=BREAKOUT_CONFIRM_BARS)
+    if conf == "UP":
+        score += 1
+        flags.append("BREAKOUT_CONFIRM_UP")
+    elif conf == "DOWN":
+        score += 1
+        flags.append("BREAKOUT_CONFIRM_DOWN")
+
     price = c5[-1][4]
+
+    hint, hint_reasons = direction_hint(flags)
 
     return {
         "price": price,
@@ -426,8 +502,9 @@ def build_signal(state):
         "flags": flags,
         "src_5m": src5,
         "src_15m": src15,
-        "pressure": pres,
         "pressure_meta": pres_meta,
+        "direction_hint": hint,
+        "direction_reasons": hint_reasons,
         "ts": int(time.time()),
     }
 
@@ -437,10 +514,10 @@ def format_message(sig):
     flags = sig["flags"]
 
     lines = []
-    lines.append("🧠 SMART MONEY RADAR — PRO MAX + PRESSURE")
+    lines.append("🧠 SMART MONEY RADAR — PRO MAX + DIRECTION")
     lines.append(f"💵 BTC: {sig['price']:.2f}")
     lines.append(f"🧷 Sources: 5m={sig['src_5m']} | 15m={sig['src_15m']}")
-    lines.append(f"📊 Score: {sig['score']}/9")
+    lines.append(f"📊 Score: {sig['score']}/10")
 
     if funding is None:
         lines.append("💰 Funding(avg): N/A")
@@ -452,7 +529,6 @@ def format_message(sig):
     else:
         lines.append(f"📈 OI(avg): {int(oi)}")
 
-    # Pressure meta
     pm = sig.get("pressure_meta") or {}
     if pm.get("range_hi") is not None and pm.get("range_lo") is not None and pm.get("range_pct") is not None:
         try:
@@ -460,7 +536,16 @@ def format_message(sig):
         except:
             pass
 
+    # Direction hint
+    lines.append("")
+    lines.append(f"🎯 Direction hint: {sig['direction_hint']}")
+    if sig.get("direction_reasons"):
+        lines.append("Причины направления:")
+        for r in sig["direction_reasons"][:6]:
+            lines.append(f"• {r}")
+
     if flags:
+        lines.append("")
         lines.append("Флаги (что увидел бот):")
         lines.extend([f"• {x}" for x in flags])
 
@@ -468,7 +553,7 @@ def format_message(sig):
         lines.append("Расшифровка (по-русски):")
         lines.extend(explain_flags_ru(flags))
 
-    # Уровни (под 9)
+    # Levels
     if sig["score"] >= 7:
         lines.append("")
         lines.append("🔥 EDGE: рынок реально толкают. Движение вероятнее и обычно резче.")
@@ -501,16 +586,15 @@ if __name__ == "__main__":
         raise RuntimeError("Missing env vars: BOT_TOKEN / CHAT_ID")
 
     state = load_state()
-    send_telegram("🚀 SMART MONEY RADAR — PRO MAX + PRESSURE started")
+    send_telegram("🚀 SMART MONEY RADAR — PRO MAX + DIRECTION started")
 
     while True:
         try:
             sig = build_signal(state)
 
-            # решение об отправке
             send_it, hb = should_send(state, sig)
 
-            # обновляем state всегда (чтобы OI сравнивался корректно)
+            # update state always
             state["prev_oi"] = sig["oi"]
             state["prev_score"] = sig["score"]
             state["prev_flags"] = sig["flags"]
