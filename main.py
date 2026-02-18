@@ -1,6 +1,7 @@
 import os
 import time
 import json
+import math
 import requests
 from dotenv import load_dotenv
 
@@ -30,43 +31,59 @@ ALERT_TOP_M = int(os.getenv("ALERT_TOP_M") or "8")
 DETAIL_TOP_K = int(os.getenv("DETAIL_TOP_K") or "1")
 
 # =========================
-# V2 ENV (NEW)
+# V2 ENV
 # =========================
-ALERT_COOLDOWN_SEC = int(os.getenv("ALERT_COOLDOWN_SEC") or "1800")  # 30 min default
-ANTI_PUMP_PCT_5M = float(os.getenv("ANTI_PUMP_PCT_5M") or "6.0")     # abs move on last 5m bar
+ALERT_COOLDOWN_SEC = int(os.getenv("ALERT_COOLDOWN_SEC") or "1800")
+ANTI_PUMP_PCT_5M = float(os.getenv("ANTI_PUMP_PCT_5M") or "6.0")
 
-# "до движения" — отдельные манипуляции/накопление
 MANIP_ALERT_ENABLED = (os.getenv("MANIP_ALERT_ENABLED") or "1").strip() != "0"
 MANIP_TOP_N = int(os.getenv("MANIP_TOP_N") or "6")
 MANIP_DETAIL_TOP_K = int(os.getenv("MANIP_DETAIL_TOP_K") or "1")
 MANIP_MIN_ACC_SCORE = int(os.getenv("MANIP_MIN_ACC_SCORE") or "3")
-MANIP_COOLDOWN_SEC = int(os.getenv("MANIP_COOLDOWN_SEC") or "1800")  # тоже 30 мин
+MANIP_COOLDOWN_SEC = int(os.getenv("MANIP_COOLDOWN_SEC") or "1800")
 
-# Optional: режим "видеть накопление раньше" (не обязателен)
-# Если 1 — игнорим фильтр по %24h (SCAN_MIN_PCT_24H), но оставляем объём.
 ACCUMULATION_MODE = (os.getenv("ACCUMULATION_MODE") or "0").strip() == "1"
 
 # =========================
-# TRIGGER ENV (NEW)
+# V3 ENV (NEW — лучше профи)
 # =========================
-# Анти-спам для триггера (чтобы не долбило по одной монете каждые 10 минут)
-TRIGGER_COOLDOWN_SEC = int(os.getenv("TRIGGER_COOLDOWN_SEC") or "1800")  # 30 мин
+# Стакан (order book) — включить/выключить
+ORDERBOOK_ENABLED = (os.getenv("ORDERBOOK_ENABLED") or "1").strip() != "0"
+ORDERBOOK_SZ = int(os.getenv("ORDERBOOK_SZ") or "25")  # глубина стакана
+ORDERBOOK_WALL_MULT = float(os.getenv("ORDERBOOK_WALL_MULT") or "2.2")  # "стена" в X раз больше среднего
+ORDERBOOK_IMB_MIN = float(os.getenv("ORDERBOOK_IMB_MIN") or "0.18")  # минимальный дисбаланс (0..1)
+
+# Sweep detector — снятие стопов (вверх/вниз) + возврат
+SWEEP_LOOKBACK = int(os.getenv("SWEEP_LOOKBACK") or "20")
+SWEEP_PIERCE_PCT = float(os.getenv("SWEEP_PIERCE_PCT") or "0.15")  # насколько прокол (в % от цены)
+SWEEP_RECLAIM_ZONE = float(os.getenv("SWEEP_RECLAIM_ZONE") or "0.35")  # насколько закрылись обратно в диапазон
+
+# Анти-шум пробоя: минимальная дистанция от уровня (в %)
+MIN_BREAKOUT_DIST_PCT = float(os.getenv("MIN_BREAKOUT_DIST_PCT") or "0.10")
+
+# 3-уровневый триггер
+TRIGGER_PRE_ACC = int(os.getenv("TRIGGER_PRE_ACC") or "3")
+TRIGGER_PRE_COOLDOWN = int(os.getenv("TRIGGER_PRE_COOLDOWN") or "1800")
+
+TRIGGER_START_COOLDOWN = int(os.getenv("TRIGGER_START_COOLDOWN") or "1800")
+TRIGGER_CONFIRM_COOLDOWN = int(os.getenv("TRIGGER_CONFIRM_COOLDOWN") or "1800")
 
 # OKX
 OKX_TICKERS_URL = "https://www.okx.com/api/v5/market/tickers"
 OKX_CANDLES_URL = "https://www.okx.com/api/v5/market/candles"
+OKX_BOOKS_URL = "https://www.okx.com/api/v5/market/books"  # NEW
 
 # =========================
 # HARD RULES / FILTERS
 # =========================
-EXCLUDE_TOKENS_CONTAINS = ["3L", "3S", "5L", "5S", "BULL", "BEAR", "UP", "DOWN"]  # левередж/мусор
+EXCLUDE_TOKENS_CONTAINS = ["3L", "3S", "5L", "3M", "5M", "BULL", "BEAR", "UP", "DOWN"]
 QUOTE = "USDT"
 
 # =========================
 # HTTP SESSION
 # =========================
 S = requests.Session()
-S.headers.update({"User-Agent": "smart-money-radar/2.1"})
+S.headers.update({"User-Agent": "smart-money-radar/3.0"})
 
 # =========================
 # TELEGRAM
@@ -97,13 +114,16 @@ def save_state(state):
     except:
         pass
 
+def now_ts():
+    return int(time.time())
+
 # =========================
 # OKX HELPERS
 # =========================
 def okx_get(url, params):
     r = S.get(url, params=params, timeout=TIMEOUT)
     if r.status_code == 429:
-        time.sleep(2.5)
+        time.sleep(2.3)
         r = S.get(url, params=params, timeout=TIMEOUT)
     if r.status_code != 200:
         raise RuntimeError(f"OKX HTTP {r.status_code}")
@@ -123,13 +143,29 @@ def get_okx_candles(instId: str, bar: str, limit: int = 120):
     candles = []
     for c in arr:
         try:
-            # [ts, o, h, l, c, vol]
             candles.append([int(c[0]), float(c[1]), float(c[2]), float(c[3]), float(c[4]), float(c[5])])
         except:
             pass
     if len(candles) < 30:
         raise RuntimeError(f"Candle parse failed {instId} {bar}")
     return candles
+
+def get_okx_books(instId: str, sz: int = 25):
+    # OKX books returns: bids/asks as [price, size, ...]
+    arr = okx_get(OKX_BOOKS_URL, {"instId": instId, "sz": str(sz)})
+    if not arr:
+        return None
+    ob = arr[0]
+    bids = ob.get("bids") or []
+    asks = ob.get("asks") or []
+    try:
+        bids_pq = [(float(x[0]), float(x[1])) for x in bids]
+        asks_pq = [(float(x[0]), float(x[1])) for x in asks]
+    except:
+        return None
+    if not bids_pq or not asks_pq:
+        return None
+    return {"bids": bids_pq, "asks": asks_pq}
 
 # =========================
 # CANDLES FEATURES (PRO MAX)
@@ -192,9 +228,12 @@ def breakout_ok(candles, lookback=BREAKOUT_LOOKBACK):
     highs = [c[2] for c in candles[-lookback-1:-1]]
     lows = [c[3] for c in candles[-lookback-1:-1]]
     last_close = candles[-1][4]
-    if last_close > max(highs):
+    hi = max(highs)
+    lo = min(lows)
+    # анти-шум: минимальная дистанция пробоя
+    if last_close > hi * (1.0 + MIN_BREAKOUT_DIST_PCT / 100.0):
         return "UP"
-    if last_close < min(lows):
+    if last_close < lo * (1.0 - MIN_BREAKOUT_DIST_PCT / 100.0):
         return "DOWN"
     return None
 
@@ -203,9 +242,9 @@ def breakout_confirm_ok(candles, lookback=BREAKOUT_LOOKBACK, confirm_bars=BREAKO
     hi = max(x[2] for x in base)
     lo = min(x[3] for x in base)
     closes = [c[4] for c in candles[-confirm_bars:]]
-    if all(cl > hi for cl in closes):
+    if all(cl > hi * (1.0 + MIN_BREAKOUT_DIST_PCT / 100.0) for cl in closes):
         return "UP"
-    if all(cl < lo for cl in closes):
+    if all(cl < lo * (1.0 - MIN_BREAKOUT_DIST_PCT / 100.0) for cl in closes):
         return "DOWN"
     return None
 
@@ -242,13 +281,101 @@ def liquidity_pressure(candles, lookback=PRESSURE_LOOKBACK, zone=PRESSURE_ZONE, 
     return None, {"range_hi": hi, "range_lo": lo, "range_pct": range_pct, "pos": pos}
 
 # =========================
+# V3: ORDERBOOK EDGE (NEW)
+# =========================
+def orderbook_edge(instId: str):
+    """
+    Лучше профи: стакан как фильтр.
+    - имбаланс (перевес бидов/асков)
+    - стены (аномальные заявки)
+    """
+    if not ORDERBOOK_ENABLED:
+        return None
+
+    ob = None
+    try:
+        ob = get_okx_books(instId, ORDERBOOK_SZ)
+    except:
+        return None
+
+    if not ob:
+        return None
+
+    bids = ob["bids"]
+    asks = ob["asks"]
+
+    # total size
+    bid_sum = sum(q for _p, q in bids)
+    ask_sum = sum(q for _p, q in asks)
+    total = bid_sum + ask_sum
+    if total <= 0:
+        return None
+
+    imb = (bid_sum - ask_sum) / total  # [-1..+1]
+    imb_abs = abs(imb)
+
+    # detect walls
+    bid_sizes = [q for _p, q in bids]
+    ask_sizes = [q for _p, q in asks]
+    bid_avg = sum(bid_sizes) / max(len(bid_sizes), 1)
+    ask_avg = sum(ask_sizes) / max(len(ask_sizes), 1)
+
+    bid_wall = max(bid_sizes) > bid_avg * ORDERBOOK_WALL_MULT if bid_avg > 0 else False
+    ask_wall = max(ask_sizes) > ask_avg * ORDERBOOK_WALL_MULT if ask_avg > 0 else False
+
+    # classify
+    if imb_abs < ORDERBOOK_IMB_MIN and not (bid_wall or ask_wall):
+        return {"ob_bias": "NEUTRAL", "imb": imb, "bid_wall": bid_wall, "ask_wall": ask_wall}
+
+    if imb > ORDERBOOK_IMB_MIN or bid_wall:
+        return {"ob_bias": "BIDS", "imb": imb, "bid_wall": bid_wall, "ask_wall": ask_wall}
+    if imb < -ORDERBOOK_IMB_MIN or ask_wall:
+        return {"ob_bias": "ASKS", "imb": imb, "bid_wall": bid_wall, "ask_wall": ask_wall}
+
+    return {"ob_bias": "NEUTRAL", "imb": imb, "bid_wall": bid_wall, "ask_wall": ask_wall}
+
+# =========================
+# V3: SWEEP DETECTOR (NEW)
+# =========================
+def liquidity_sweep(candles, lookback=SWEEP_LOOKBACK):
+    """
+    Sweep = снятие стопов и возврат:
+    - цена прокалывает high/low диапазона
+    - закрывается обратно внутрь диапазона
+    """
+    if len(candles) < lookback + 2:
+        return None, {}
+
+    seg = candles[-lookback-1:-1]
+    hi = max(x[2] for x in seg)
+    lo = min(x[3] for x in seg)
+
+    _ts, o, h, l, c, _v = candles[-1]
+    price = c
+
+    pierce_up = h > hi * (1.0 + SWEEP_PIERCE_PCT / 100.0)
+    pierce_dn = l < lo * (1.0 - SWEEP_PIERCE_PCT / 100.0)
+
+    rng = hi - lo
+    if rng <= 0:
+        return None, {"hi": hi, "lo": lo}
+
+    # "вернулись внутрь" = close обратно в зону
+    # для up-sweep: close должен быть ниже hi - часть диапазона
+    reclaim_up = c < (hi - rng * SWEEP_RECLAIM_ZONE)
+    reclaim_dn = c > (lo + rng * SWEEP_RECLAIM_ZONE)
+
+    if pierce_up and reclaim_up:
+        return "SWEEP_UP", {"hi": hi, "lo": lo, "close": c}
+    if pierce_dn and reclaim_dn:
+        return "SWEEP_DOWN", {"hi": hi, "lo": lo, "close": c}
+
+    return None, {"hi": hi, "lo": lo, "close": c}
+
+# =========================
 # V2: Anti-pump + Accumulation score
 # =========================
 def anti_pump_penalty(candles, threshold_pct):
-    """
-    Если последняя 5m свеча уже дала слишком большой ход,
-    уменьшаем score (чтобы не прыгать в первый памп/дамп).
-    """
     if len(candles) < 2:
         return 0
     prev_close = candles[-2][4]
@@ -261,12 +388,6 @@ def anti_pump_penalty(candles, threshold_pct):
     return 0
 
 def accumulation_bias(flags):
-    """
-    Накопление "до выстрела":
-    - compression на 5m/15m
-    - давление у края диапазона
-    - при этом нет ATR_EXPANSION (движение ещё не началось)
-    """
     s = 0
     if "COMP_5M" in flags:
         s += 1
@@ -287,32 +408,47 @@ def direction_hint(flags):
     reasons = []
 
     if "BREAKOUT_CONFIRM_UP" in flags:
-        up += 3; reasons.append("Confirm UP (+3)")
+        up += 3; reasons.append("Закрепление ВВЕРХ (+3)")
     if "BREAKOUT_CONFIRM_DOWN" in flags:
-        down += 3; reasons.append("Confirm DOWN (+3)")
+        down += 3; reasons.append("Закрепление ВНИЗ (+3)")
 
     if "BREAKOUT_UP" in flags:
-        up += 2; reasons.append("Breakout UP (+2)")
+        up += 2; reasons.append("Пробой ВВЕРХ (+2)")
     if "BREAKOUT_DOWN" in flags:
-        down += 2; reasons.append("Breakout DOWN (+2)")
+        down += 2; reasons.append("Пробой ВНИЗ (+2)")
 
     if "PRESSURE_UP" in flags:
-        up += 1; reasons.append("Pressure UP (+1)")
+        up += 1; reasons.append("Давление к верху (+1)")
     if "PRESSURE_DOWN" in flags:
-        down += 1; reasons.append("Pressure DOWN (+1)")
+        down += 1; reasons.append("Давление к низу (+1)")
 
     if "FAKE_DUMP" in flags:
-        up += 1; reasons.append("Fake dump (+1)")
+        up += 1; reasons.append("Снятие стопов вниз (+1)")
+
+    if "SWEEP_UP" in flags:
+        down += 1; reasons.append("Снятие стопов вверх (часто разворот вниз) (+1)")
+    if "SWEEP_DOWN" in flags:
+        up += 1; reasons.append("Снятие стопов вниз (часто разворот вверх) (+1)")
 
     if "VOL_SPIKE" in flags and ("BREAKOUT_UP" in flags or "BREAKOUT_CONFIRM_UP" in flags or "PRESSURE_UP" in flags):
-        up += 1; reasons.append("Volume→UP (+1)")
+        up += 1; reasons.append("Объём поддержал ВВЕРХ (+1)")
     if "VOL_SPIKE" in flags and ("BREAKOUT_DOWN" in flags or "BREAKOUT_CONFIRM_DOWN" in flags or "PRESSURE_DOWN" in flags):
-        down += 1; reasons.append("Volume→DOWN (+1)")
+        down += 1; reasons.append("Объём поддержал ВНИЗ (+1)")
 
     if "ATR_EXPANSION" in flags and ("BREAKOUT_UP" in flags or "BREAKOUT_CONFIRM_UP" in flags):
-        up += 1; reasons.append("ATR→UP (+1)")
+        up += 1; reasons.append("ATR ускорил ВВЕРХ (+1)")
     if "ATR_EXPANSION" in flags and ("BREAKOUT_DOWN" in flags or "BREAKOUT_CONFIRM_DOWN" in flags):
-        down += 1; reasons.append("ATR→DOWN (+1)")
+        down += 1; reasons.append("ATR ускорил ВНИЗ (+1)")
+
+    # стакан (объективный фильтр)
+    if "OB_BIDS" in flags:
+        up += 1; reasons.append("Стакан: перевес BID (+1)")
+    if "OB_ASKS" in flags:
+        down += 1; reasons.append("Стакан: перевес ASK (+1)")
+    if "OB_WALL_BID" in flags:
+        up += 1; reasons.append("Стена BID (+1)")
+    if "OB_WALL_ASK" in flags:
+        down += 1; reasons.append("Стена ASK (+1)")
 
     if up >= down + 2:
         return "⬆️ ВВЕРХ", reasons, up, down
@@ -342,7 +478,7 @@ def smart_money_stage(score, flags):
     if (("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags) and
         "ATR_EXPANSION" in flags and "VOL_SPIKE" in flags):
         return "🟢 EXPANSION", "Реальное движение"
-    if ("FAKE_DUMP" in flags or
+    if ("FAKE_DUMP" in flags or "SWEEP_UP" in flags or "SWEEP_DOWN" in flags or
         ("PRESSURE_DOWN" in flags and "BREAKOUT_DOWN" in flags) or
         ("PRESSURE_UP" in flags and "BREAKOUT_UP" in flags)):
         return "🟡 MANIPULATION", "Вероятен сбор ликвидности"
@@ -411,7 +547,33 @@ def build_signal(instId: str):
         score += 1
         flags.append(f"PRESSURE_{pres}")
 
-    # V2: anti-pump shield (не ломает логику — просто штраф к score)
+    # V3: sweep detector (снятие стопов вверх/вниз)
+    sw, sw_meta = liquidity_sweep(c5)
+    if sw:
+        score += 1
+        flags.append(sw)  # SWEEP_UP / SWEEP_DOWN
+
+    # V3: стакан
+    ob_meta = None
+    if ORDERBOOK_ENABLED:
+        ob_meta = orderbook_edge(instId)
+        if ob_meta:
+            bias = ob_meta.get("ob_bias")
+            if bias == "BIDS":
+                score += 1
+                flags.append("OB_BIDS")
+            elif bias == "ASKS":
+                score += 1
+                flags.append("OB_ASKS")
+
+            if ob_meta.get("bid_wall"):
+                score += 1
+                flags.append("OB_WALL_BID")
+            if ob_meta.get("ask_wall"):
+                score += 1
+                flags.append("OB_WALL_ASK")
+
+    # V2: anti-pump shield
     score += anti_pump_penalty(c5, ANTI_PUMP_PCT_5M)
 
     direction_text, reasons, up_w, down_w = direction_hint(flags)
@@ -437,7 +599,9 @@ def build_signal(instId: str):
         "stage_reason": stage_reason,
         "target": tgt,
         "pmeta": pmeta,
-        "ts": int(time.time()),
+        "obmeta": ob_meta,
+        "swmeta": sw_meta,
+        "ts": now_ts(),
     }
 
 # =========================
@@ -478,7 +642,6 @@ def get_market_candidates():
         if vol_usdt < SCAN_MIN_VOL_USDT:
             continue
 
-        # В режиме накопления: не режем по % движения (чтобы увидеть "тишину")
         if not ACCUMULATION_MODE:
             if abs(pct) < SCAN_MIN_PCT_24H:
                 continue
@@ -492,10 +655,6 @@ def get_market_candidates():
 # BTC MARKET REGIME (V2)
 # =========================
 def btc_regime():
-    """
-    Контекст рынка (risk-on / risk-off / neutral):
-    если BTC летит вниз импульсом — лонги альтов опаснее.
-    """
     try:
         sig = build_signal("BTC-USDT")
     except:
@@ -509,7 +668,6 @@ def btc_regime():
     return ("NEUTRAL", sig)
 
 def apply_regime_bias(sig, regime):
-    # мягкий bias: не ломает логику, только ранжирование
     if regime == "RISK_OFF":
         if "ВВЕРХ" in sig["direction"]:
             sig["score"] -= 1
@@ -519,13 +677,9 @@ def apply_regime_bias(sig, regime):
     return sig
 
 # =========================
-# TRADER INTERPRETATION (NEW)
+# TRADER INTERPRETATION
 # =========================
 def interpret_combo(sig):
-    """
-    Подсказки-трактовки комбинаций, чтобы ты запоминал и видел смысл.
-    НЕ меняет сигналы, только добавляет объяснение.
-    """
     flags = set(sig.get("flags", []))
     stage = sig.get("stage", "")
     acc = int(sig.get("acc_score", 0))
@@ -534,96 +688,53 @@ def interpret_combo(sig):
 
     notes = []
 
-    # 1) Накопление + давление у края = вероятная ликвидность рядом
     if acc >= 3 and ("PRESSURE_DOWN" in flags or "PRESSURE_UP" in flags):
         if "PRESSURE_DOWN" in flags:
-            notes.append("🟣 COMP+PRESSURE_DOWN: цена у низа диапазона — стопы/ликвидность чаще снизу. Возможен ложный пролив вниз и возврат.")
+            notes.append("🟣 Накопление + цена у низа диапазона: снизу часто стопы лонгов. Возможен ложный пролив и возврат.")
         if "PRESSURE_UP" in flags:
-            notes.append("🟣 COMP+PRESSURE_UP: цена у верха диапазона — ликвидность чаще сверху. Возможен ложный прокол вверх и откат.")
+            notes.append("🟣 Накопление + цена у верха диапазона: сверху часто стопы шортов. Возможен ложный прокол и откат.")
 
-    # 2) Fake dump = снятие стопов (часто)
     if "FAKE_DUMP" in flags:
-        notes.append("🟡 FAKE_DUMP: был прокол вниз и быстрый возврат — похоже на снятие стопов, возможен разворот/импульс.")
+        notes.append("🟡 FAKE_DUMP: прокол вниз и быстрый возврат — похоже на снятие стопов снизу.")
 
-    # 3) Breakout без подтверждения = может быть ловушка
+    if "SWEEP_UP" in flags:
+        notes.append("💣 SWEEP_UP: прокол верхов + возврат внутрь — сняли стопы шортов сверху, часто потом идут вниз.")
+    if "SWEEP_DOWN" in flags:
+        notes.append("💣 SWEEP_DOWN: прокол низов + возврат внутрь — сняли стопы лонгов снизу, часто потом идут вверх.")
+
     if ("BREAKOUT_UP" in flags or "BREAKOUT_DOWN" in flags) and ("BREAKOUT_CONFIRM_UP" not in flags and "BREAKOUT_CONFIRM_DOWN" not in flags):
-        notes.append("🟠 BREAKOUT без CONFIRM: пробили уровень, но ещё не закрепились — часто бывает ловушка/тряска.")
+        notes.append("🟠 Пробой без закрепления: возможна ловушка/вытряхивание.")
 
-    # 4) Confirm + ATR + Vol = реальный импульс
     if ("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags) and ("ATR_EXPANSION" in flags) and ("VOL_SPIKE" in flags):
-        notes.append("🟢 CONFIRM + ATR + VOL: движение подтверждено, импульс реальный (шанс продолжения выше).")
+        notes.append("🟢 Закрепление + ATR + объём: движение подтверждено, шанс продолжения выше.")
 
-    # 5) ATR_EXPANSION = рынок выходит из тишины
-    if "ATR_EXPANSION" in flags and acc >= 3:
-        notes.append("🟢 ATR после накопления: рынок выходит из сжатия — часто начало 'выстрела'.")
+    if "OB_BIDS" in flags:
+        notes.append("📘 Стакан: перевес покупателей (BID). Это усиливает лонг-сценарий.")
+    if "OB_ASKS" in flags:
+        notes.append("📘 Стакан: перевес продавцов (ASK). Это усиливает шорт-сценарий.")
+    if "OB_WALL_BID" in flags:
+        notes.append("🧱 Стена BID: рядом крупная заявка — часто поддержка.")
+    if "OB_WALL_ASK" in flags:
+        notes.append("🧱 Стена ASK: рядом крупная заявка — часто сопротивление.")
 
-    # 6) Stage подсказки
     if "🟣 ACCUMULATION" in stage:
-        notes.append("🟣 STAGE=ACCUMULATION: идёт сжатие/накопление. Это 'до движения' — ждём триггер.")
+        notes.append("🟣 STAGE=ACCUMULATION: идёт сжатие. Это зона ДО движения — ждём триггер.")
     if "🟡 MANIPULATION" in stage:
-        notes.append("🟡 STAGE=MANIPULATION: вероятен сбор ликвидности (тряска) перед настоящим импульсом.")
+        notes.append("🟡 STAGE=MANIPULATION: вероятен сбор ликвидности перед импульсом.")
     if "🟢 EXPANSION" in stage:
-        notes.append("🟢 STAGE=EXPANSION: движение уже пошло. Входы позднее — осторожнее, лучше ждать откат/структуру.")
+        notes.append("🟢 STAGE=EXPANSION: движение уже пошло. Лучше входить по откату/структуре.")
 
-    # 7) Баланс при сильном накоплении
     if acc >= 3 and "БАЛАНС" in direction:
-        notes.append("⚖️ BALANCE при acc≥3: рынок прячет сторону. Часто потом выстрел резкий — держи уровни диапазона.")
+        notes.append("⚖️ Баланс при сильном накоплении: рынок прячет сторону. Часто потом резкий выстрел.")
 
-    # 8) Entry подсказки (как себя вести)
     if "SAFE" in entry:
-        notes.append("✅ SAFE: структура+подтверждение+импульс — самый чистый сценарий.")
+        notes.append("✅ SAFE: самый чистый сценарий по структуре.")
     elif "AGGRESSIVE" in entry:
-        notes.append("⚠️ AGGRESSIVE: ранний вход. Лучше маленький риск и подтверждать глазами на графике.")
+        notes.append("⚠️ AGGRESSIVE: ранний вход — лучше маленький риск.")
     else:
-        notes.append("⏳ WAIT: пока лучше наблюдать. Ждём CONFIRM/объём/ATR или fake move + возврат.")
+        notes.append("⏳ WAIT: пока наблюдаем — ждём подтверждение/объём/ATR/свип.")
 
     return notes
-
-# =========================
-# TRIGGER ENGINE (NEW)
-# =========================
-def is_trigger_event(state, sig):
-    """
-    TRIGGER = ранний старт после накопления.
-    Условие:
-      - ранее acc_score >= 3
-      - сейчас появился импульс (CONFIRM) или (VOL + ATR)
-    Плюс cooldown по монете, чтобы не спамить.
-    """
-    sym = sig["instId"]
-    ss = state["symbols"].get(sym, {})
-    now = int(time.time())
-
-    # cooldown
-    last_tr = int(ss.get("last_trigger_ts", 0) or 0)
-    if now - last_tr < TRIGGER_COOLDOWN_SEC:
-        return False
-
-    prev_acc = int(ss.get("prev_acc_score", 0) or 0)
-    flags = set(sig.get("flags", []))
-
-    impulse_now = (
-        ("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags) or
-        ("VOL_SPIKE" in flags and "ATR_EXPANSION" in flags)
-    )
-
-    return (prev_acc >= 3) and impulse_now
-
-def trigger_message(sig, regime):
-    sym = fmt_symbol(sig["instId"])
-    lines = []
-    lines.append(f"🔥 TRIGGER — {sym} стартует после накопления")
-    lines.append(f"⏱ Cycle: {time.strftime('%Y-%m-%d %H:%M:%S')}")
-    lines.append(f"🧭 BTC regime: {regime}")
-    lines.append(f"💵 {sig['price']:.6g}")
-    lines.append(f"📊 {sig['score']}/10 | {sig['direction']} | acc={sig.get('acc_score', 0)}")
-    lines.append(f"🎯 ENTRY: {sig['entry']}")
-    lines.append(f"🧬 STAGE: {sig['stage']}")
-    if sig.get("target") is not None:
-        lines.append(f"🎯 Target: {sig['target']:.6g}")
-    lines.append("")
-    lines.append("⚡ Это момент старта. Проверь график и уровни диапазона.")
-    return "\n".join(lines)
 
 # =========================
 # MESSAGE FORMATS
@@ -656,14 +767,14 @@ def msg_medium(sig):
         lines.append(f"🎯 Target: {sig['target']:.6g}")
     if sig["flags"]:
         lines.append("Flags:")
-        for f in sig["flags"][:12]:
+        for f in sig["flags"][:14]:
             lines.append(f"• {f}")
 
     interp = interpret_combo(sig)
     if interp:
         lines.append("")
         lines.append("🧠 Как читать ситуацию:")
-        for n in interp[:10]:
+        for n in interp[:12]:
             lines.append(f"• {n}")
 
     return "\n".join(lines)
@@ -691,14 +802,14 @@ def msg_full(sig):
     if sig.get("dir_reasons"):
         lines.append("")
         lines.append("Причины направления:")
-        for r in sig["dir_reasons"][:12]:
+        for r in sig["dir_reasons"][:14]:
             lines.append(f"• {r}")
 
     interp = interpret_combo(sig)
     if interp:
         lines.append("")
         lines.append("🧠 Как читать ситуацию:")
-        for n in interp[:12]:
+        for n in interp[:16]:
             lines.append(f"• {n}")
 
     return "\n".join(lines)
@@ -710,7 +821,6 @@ def choose_detail_message(sig):
         return msg_medium(sig)
     if MESSAGE_MODE == "FULL":
         return msg_full(sig)
-    # AUTO:
     if sig["score"] >= EDGE_HIGH_SCORE:
         return msg_full(sig)
     if sig["score"] >= EDGE_MID_SCORE:
@@ -738,12 +848,6 @@ def summary_message(alerts, cycle_info, regime):
 # PRE-MOVE MANIPULATION WATCH (V2)
 # =========================
 def is_pre_move_manip(sig):
-    """
-    Предупреждать ДО движения:
-    - stage = MANIPULATION или ACCUMULATION
-    - acc_score достаточно высокий
-    - при этом нет явного "движ уже пошёл" (ATR+Confirm)
-    """
     flags = set(sig.get("flags", []))
     stage = sig.get("stage", "")
     acc = int(sig.get("acc_score", 0))
@@ -757,7 +861,7 @@ def is_pre_move_manip(sig):
 
     if "🟡 MANIPULATION" in stage:
         return True
-    if "🟣 ACCUMULATION" in stage and ("PRESSURE_DOWN" in flags or "PRESSURE_UP" in flags or "FAKE_DUMP" in flags):
+    if "🟣 ACCUMULATION" in stage and ("PRESSURE_DOWN" in flags or "PRESSURE_UP" in flags or "FAKE_DUMP" in flags or "SWEEP_UP" in flags or "SWEEP_DOWN" in flags):
         return True
 
     if ("FAKE_DUMP" in flags) and ("COMP_5M" in flags or "COMP_15M" in flags):
@@ -784,7 +888,7 @@ def manip_summary_message(watch, cycle_info, regime):
     return "\n".join(lines)
 
 # =========================
-# SPAM CONTROL (V2 cooldown)
+# SPAM CONTROL (cooldowns)
 # =========================
 def should_alert_symbol(state, sig):
     sym = sig["instId"]
@@ -792,7 +896,7 @@ def should_alert_symbol(state, sig):
     prev_score = ss.get("prev_score")
     prev_flags = ss.get("prev_flags", [])
     last_alert_ts = ss.get("last_alert_ts", 0)
-    now = int(time.time())
+    now = now_ts()
 
     if now - int(last_alert_ts or 0) < ALERT_COOLDOWN_SEC:
         return False
@@ -806,24 +910,14 @@ def should_manip_alert(state, sig):
     ss = state["symbols"].get(sym, {})
     last_ts = ss.get("last_manip_alert_ts", 0)
     prev_m_flags = ss.get("prev_manip_flags", [])
-    now = int(time.time())
+    now = now_ts()
 
     if now - int(last_ts or 0) < MANIP_COOLDOWN_SEC:
         return False
 
     cur_flags = sig.get("flags", [])
     changed = (cur_flags != prev_m_flags)
-
     return changed or (last_ts == 0)
-
-def update_symbol_state(state, sig):
-    sym = sig["instId"]
-    state["symbols"].setdefault(sym, {})
-    state["symbols"][sym]["prev_score"] = sig["score"]
-    state["symbols"][sym]["prev_flags"] = sig["flags"]
-    state["symbols"][sym]["last_ts"] = sig["ts"]
-    # NEW: сохраняем накопление для TRIGGER
-    state["symbols"][sym]["prev_acc_score"] = sig.get("acc_score", 0)
 
 def mark_alert_sent(state, sig):
     sym = sig["instId"]
@@ -836,10 +930,74 @@ def mark_manip_sent(state, sig):
     state["symbols"][sym]["last_manip_alert_ts"] = sig["ts"]
     state["symbols"][sym]["prev_manip_flags"] = sig.get("flags", [])
 
-def mark_trigger_sent(state, sig):
+def update_symbol_state(state, sig):
     sym = sig["instId"]
     state["symbols"].setdefault(sym, {})
-    state["symbols"][sym]["last_trigger_ts"] = int(time.time())
+    state["symbols"][sym]["prev_score"] = sig["score"]
+    state["symbols"][sym]["prev_flags"] = sig["flags"]
+    state["symbols"][sym]["last_ts"] = sig["ts"]
+
+# =========================
+# V3: 3-LEVEL TRIGGER (NEW)
+# =========================
+def trigger_allowed(state, instId, key, cooldown_sec):
+    ss = state["symbols"].get(instId, {})
+    last = int(ss.get(key, 0) or 0)
+    return (now_ts() - last) >= cooldown_sec
+
+def trigger_mark(state, instId, key):
+    state["symbols"].setdefault(instId, {})
+    state["symbols"][instId][key] = now_ts()
+
+def is_pre_trigger(sig):
+    # PRE: накопление + давление/свип/фейк (до движения)
+    flags = set(sig.get("flags", []))
+    acc = int(sig.get("acc_score", 0))
+    if acc < TRIGGER_PRE_ACC:
+        return False
+    if "ATR_EXPANSION" in flags and ("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags):
+        return False  # уже пошло
+    return ("PRESSURE_UP" in flags or "PRESSURE_DOWN" in flags or "FAKE_DUMP" in flags or "SWEEP_UP" in flags or "SWEEP_DOWN" in flags)
+
+def is_start_trigger(sig):
+    # START: был acc>=3 (в этом же сигнале достаточно) + появился импульс
+    flags = set(sig.get("flags", []))
+    acc = int(sig.get("acc_score", 0))
+    if acc < TRIGGER_PRE_ACC:
+        return False
+    impulse = ("ATR_EXPANSION" in flags) or ("VOL_SPIKE" in flags) or ("BREAKOUT_UP" in flags) or ("BREAKOUT_DOWN" in flags)
+    return impulse
+
+def is_confirm_trigger(sig):
+    # CONFIRM: самый чистый старт
+    flags = set(sig.get("flags", []))
+    return (("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags) and ("ATR_EXPANSION" in flags) and ("VOL_SPIKE" in flags))
+
+def msg_pre_trigger(sig):
+    sym = fmt_symbol(sig["instId"])
+    lines = []
+    lines.append(f"🟡 PRE-TRIGGER — зона перед выстрелом: {sym}")
+    lines.append(f"💵 {sig['price']:.6g} | acc={sig.get('acc_score',0)} | {sig['direction']}")
+    lines.append("Смысл: здесь вероятно собирают ликвидность. Готовь уровни диапазона.")
+    return "\n".join(lines)
+
+def msg_start_trigger(sig):
+    sym = fmt_symbol(sig["instId"])
+    lines = []
+    lines.append(f"🔥 TRIGGER START — старт из накопления: {sym}")
+    lines.append(f"💵 {sig['price']:.6g} | score={sig['score']}/10 | acc={sig.get('acc_score',0)} | {sig['direction']}")
+    if sig.get("target") is not None:
+        lines.append(f"🎯 ликвидность/цель: {sig['target']:.6g}")
+    lines.append("Действие: открыть график и искать вход по структуре (малый риск).")
+    return "\n".join(lines)
+
+def msg_confirm_trigger(sig):
+    sym = fmt_symbol(sig["instId"])
+    lines = []
+    lines.append(f"🚀 CONFIRM TRIGGER — самый чистый импульс: {sym}")
+    lines.append(f"💵 {sig['price']:.6g} | score={sig['score']}/10 | {sig['direction']}")
+    lines.append("Условия: CONFIRM + ATR + VOL (шанс продолжения выше).")
+    return "\n".join(lines)
 
 # =========================
 # MAIN LOOP
@@ -849,14 +1007,12 @@ if __name__ == "__main__":
         raise RuntimeError("Missing BOT_TOKEN / CHAT_ID")
 
     state = load_state()
-    send_telegram("🚀 SMART MONEY SCANNER — PRO MAX FINAL + V2 + INTERPRETER + TRIGGER started (OKX market scan)")
+    send_telegram("🚀 SMART MONEY SCANNER — PRO MAX FINAL + V3 (ORDERBOOK + SWEEP + 3-LEVEL TRIGGER) started (OKX market scan)")
 
     while True:
         t0 = time.time()
         try:
-            # BTC контекст рынка (V2)
-            regime, btc_sig = btc_regime()
-
+            regime, _btc = btc_regime()
             candidates = get_market_candidates()
 
             alerts = []
@@ -868,50 +1024,50 @@ if __name__ == "__main__":
                     sig["vol_usdt"] = vol_usdt
                     sig["pct_24h"] = pct
 
-                    # V2: применяем контекст BTC к score (мягко)
                     sig = apply_regime_bias(sig, regime)
 
-                    # 🔥 TRIGGER (ранний старт) — ДО обычных алертов
-                    if is_trigger_event(state, sig):
-                        send_telegram(trigger_message(sig, regime))
-                        mark_trigger_sent(state, sig)
-
-                    # обычные алерты по edge
+                    # обычные алерты
                     if sig["score"] >= ALERT_MIN_SCORE and should_alert_symbol(state, sig):
                         alerts.append(sig)
                         mark_alert_sent(state, sig)
 
-                    # pre-move manipulation watch (отдельно)
+                    # pre-move watch
                     if MANIP_ALERT_ENABLED and is_pre_move_manip(sig):
                         if should_manip_alert(state, sig):
                             manip_watch.append(sig)
                             mark_manip_sent(state, sig)
 
-                    update_symbol_state(state, sig)
+                    # V3 triggers
+                    if is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
+                        send_telegram(msg_pre_trigger(sig))
+                        trigger_mark(state, instId, "last_pre_trigger_ts")
 
-                    # gentle with OKX
-                    time.sleep(0.15)
+                    if is_start_trigger(sig) and trigger_allowed(state, instId, "last_start_trigger_ts", TRIGGER_START_COOLDOWN):
+                        send_telegram(msg_start_trigger(sig))
+                        trigger_mark(state, instId, "last_start_trigger_ts")
+
+                    if is_confirm_trigger(sig) and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN):
+                        send_telegram(msg_confirm_trigger(sig))
+                        trigger_mark(state, instId, "last_confirm_trigger_ts")
+
+                    update_symbol_state(state, sig)
+                    time.sleep(0.16)
                 except:
                     continue
 
-            # сортировки
             alerts.sort(key=lambda s: (s["score"], abs(s.get("pct_24h", 0.0))), reverse=True)
             manip_watch.sort(key=lambda s: (int(s.get("acc_score", 0)), s.get("score", 0)), reverse=True)
 
             cycle_info = time.strftime("%Y-%m-%d %H:%M:%S")
 
-            # 1) Summary по edge
             send_telegram(summary_message(alerts, cycle_info, regime))
 
-            # 2) Detail по топовым edge
             for sig in alerts[:DETAIL_TOP_K]:
                 send_telegram(choose_detail_message(sig))
 
-            # 3) Отдельный блок: предупреждение о манипуляции/накоплении до движения
             if MANIP_ALERT_ENABLED:
                 send_telegram(manip_summary_message(manip_watch, cycle_info, regime))
                 for sig in manip_watch[:MANIP_DETAIL_TOP_K]:
-                    # для pre-move — MEDIUM (чтобы видеть объяснения и привыкать)
                     send_telegram(msg_medium(sig))
 
             save_state(state)
@@ -922,4 +1078,3 @@ if __name__ == "__main__":
         dt = time.time() - t0
         sleep_for = max(1, POLL_SECONDS - int(dt))
         time.sleep(sleep_for)
-
