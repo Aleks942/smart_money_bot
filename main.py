@@ -1,7 +1,6 @@
 import os
 import time
 import json
-import math
 import requests
 from dotenv import load_dotenv
 
@@ -61,7 +60,7 @@ QUOTE = "USDT"
 # HTTP SESSION
 # =========================
 S = requests.Session()
-S.headers.update({"User-Agent": "smart-money-radar/2.0"})
+S.headers.update({"User-Agent": "smart-money-radar/2.1"})
 
 # =========================
 # TELEGRAM
@@ -98,7 +97,6 @@ def save_state(state):
 def okx_get(url, params):
     r = S.get(url, params=params, timeout=TIMEOUT)
     if r.status_code == 429:
-        # мягкий анти-бан
         time.sleep(2.5)
         r = S.get(url, params=params, timeout=TIMEOUT)
     if r.status_code != 200:
@@ -109,8 +107,7 @@ def okx_get(url, params):
     return data.get("data", [])
 
 def get_okx_spot_usdt_tickers():
-    arr = okx_get(OKX_TICKERS_URL, {"instType": "SPOT"})
-    return arr
+    return okx_get(OKX_TICKERS_URL, {"instType": "SPOT"})
 
 def get_okx_candles(instId: str, bar: str, limit: int = 120):
     arr = okx_get(OKX_CANDLES_URL, {"instId": instId, "bar": bar, "limit": str(limit)})
@@ -244,7 +241,7 @@ def liquidity_pressure(candles, lookback=PRESSURE_LOOKBACK, zone=PRESSURE_ZONE, 
 def anti_pump_penalty(candles, threshold_pct):
     """
     Если последняя 5m свеча уже дала слишком большой ход,
-    мы уменьшаем score (чтобы не прыгать в первый памп/дамп).
+    уменьшаем score (чтобы не прыгать в первый памп/дамп).
     """
     if len(candles) < 2:
         return 0
@@ -422,7 +419,7 @@ def build_signal(instId: str):
         "instId": instId,
         "price": price,
         "score": score,
-        "acc_score": acc_score,   # V2
+        "acc_score": acc_score,
         "flags": flags,
         "direction": direction_text,
         "dir_reasons": reasons,
@@ -490,8 +487,8 @@ def get_market_candidates():
 # =========================
 def btc_regime():
     """
-    Очень простой контекст рынка (risk-on / risk-off / neutral),
-    чтобы не лонговать альты, когда BTC валится импульсом.
+    Контекст рынка (risk-on / risk-off / neutral):
+    если BTC летит вниз импульсом — лонги альтов опаснее.
     """
     try:
         sig = build_signal("BTC-USDT")
@@ -506,7 +503,7 @@ def btc_regime():
     return ("NEUTRAL", sig)
 
 def apply_regime_bias(sig, regime):
-    # Не ломаем логику: мягкий bias к score, чтобы ранжирование было трейдерским
+    # мягкий bias: не ломает логику, только ранжирование
     if regime == "RISK_OFF":
         if "ВВЕРХ" in sig["direction"]:
             sig["score"] -= 1
@@ -514,6 +511,67 @@ def apply_regime_bias(sig, regime):
         if "ВНИЗ" in sig["direction"]:
             sig["score"] -= 1
     return sig
+
+# =========================
+# TRADER INTERPRETATION (NEW)
+# =========================
+def interpret_combo(sig):
+    """
+    Подсказки-трактовки комбинаций, чтобы ты запоминал и видел смысл.
+    НЕ меняет сигналы, только добавляет объяснение.
+    """
+    flags = set(sig.get("flags", []))
+    stage = sig.get("stage", "")
+    acc = int(sig.get("acc_score", 0))
+    direction = sig.get("direction", "")
+    entry = sig.get("entry", "")
+
+    notes = []
+
+    # 1) Накопление + давление у края = вероятная ликвидность рядом
+    if acc >= 3 and ("PRESSURE_DOWN" in flags or "PRESSURE_UP" in flags):
+        if "PRESSURE_DOWN" in flags:
+            notes.append("🟣 COMP+PRESSURE_DOWN: цена у низа диапазона — стопы/ликвидность чаще снизу. Возможен ложный пролив вниз и возврат.")
+        if "PRESSURE_UP" in flags:
+            notes.append("🟣 COMP+PRESSURE_UP: цена у верха диапазона — ликвидность чаще сверху. Возможен ложный прокол вверх и откат.")
+
+    # 2) Fake dump = снятие стопов (часто)
+    if "FAKE_DUMP" in flags:
+        notes.append("🟡 FAKE_DUMP: был прокол вниз и быстрый возврат — похоже на снятие стопов, возможен разворот/импульс.")
+
+    # 3) Breakout без подтверждения = может быть ловушка
+    if ("BREAKOUT_UP" in flags or "BREAKOUT_DOWN" in flags) and ("BREAKOUT_CONFIRM_UP" not in flags and "BREAKOUT_CONFIRM_DOWN" not in flags):
+        notes.append("🟠 BREAKOUT без CONFIRM: пробили уровень, но ещё не закрепились — часто бывает ловушка/тряска.")
+
+    # 4) Confirm + ATR + Vol = реальный импульс
+    if ("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags) and ("ATR_EXPANSION" in flags) and ("VOL_SPIKE" in flags):
+        notes.append("🟢 CONFIRM + ATR + VOL: движение подтверждено, импульс реальный (шанс продолжения выше).")
+
+    # 5) ATR_EXPANSION = рынок выходит из тишины
+    if "ATR_EXPANSION" in flags and acc >= 3:
+        notes.append("🟢 ATR после накопления: рынок выходит из сжатия — часто начало 'выстрела'.")
+
+    # 6) Stage подсказки
+    if "🟣 ACCUMULATION" in stage:
+        notes.append("🟣 STAGE=ACCUMULATION: идёт сжатие/накопление. Это 'до движения' — ждём триггер.")
+    if "🟡 MANIPULATION" in stage:
+        notes.append("🟡 STAGE=MANIPULATION: вероятен сбор ликвидности (тряска) перед настоящим импульсом.")
+    if "🟢 EXPANSION" in stage:
+        notes.append("🟢 STAGE=EXPANSION: движение уже пошло. Входы позднее — осторожнее, лучше ждать откат/структуру.")
+
+    # 7) Баланс при сильном накоплении
+    if acc >= 3 and "БАЛАНС" in direction:
+        notes.append("⚖️ BALANCE при acc≥3: рынок прячет сторону. Часто потом выстрел резкий — держи уровни диапазона.")
+
+    # 8) Entry подсказки (как себя вести)
+    if "SAFE" in entry:
+        notes.append("✅ SAFE: структура+подтверждение+импульс — самый чистый сценарий.")
+    elif "AGGRESSIVE" in entry:
+        notes.append("⚠️ AGGRESSIVE: ранний вход. Лучше маленький риск и подтверждать глазами на графике.")
+    else:
+        notes.append("⏳ WAIT: пока лучше наблюдать. Ждём CONFIRM/объём/ATR или fake move + возврат.")
+
+    return notes
 
 # =========================
 # MESSAGE FORMATS
@@ -546,8 +604,17 @@ def msg_medium(sig):
         lines.append(f"🎯 Target: {sig['target']:.6g}")
     if sig["flags"]:
         lines.append("Flags:")
-        for f in sig["flags"][:10]:
+        for f in sig["flags"][:12]:
             lines.append(f"• {f}")
+
+    # NEW: Interpretation block
+    interp = interpret_combo(sig)
+    if interp:
+        lines.append("")
+        lines.append("🧠 Как читать ситуацию:")
+        for n in interp[:10]:
+            lines.append(f"• {n}")
+
     return "\n".join(lines)
 
 def msg_full(sig):
@@ -575,6 +642,15 @@ def msg_full(sig):
         lines.append("Причины направления:")
         for r in sig["dir_reasons"][:12]:
             lines.append(f"• {r}")
+
+    # NEW: Interpretation block
+    interp = interpret_combo(sig)
+    if interp:
+        lines.append("")
+        lines.append("🧠 Как читать ситуацию:")
+        for n in interp[:12]:
+            lines.append(f"• {n}")
+
     return "\n".join(lines)
 
 def choose_detail_message(sig):
@@ -613,7 +689,7 @@ def summary_message(alerts, cycle_info, regime):
 # =========================
 def is_pre_move_manip(sig):
     """
-    Хотим предупреждать ДО движения:
+    Предупреждать ДО движения:
     - stage = MANIPULATION или ACCUMULATION
     - acc_score достаточно высокий
     - при этом нет явного "движ уже пошёл" (ATR+Confirm)
@@ -631,10 +707,9 @@ def is_pre_move_manip(sig):
 
     if "🟡 MANIPULATION" in stage:
         return True
-    if "🟣 ACCUMULATION" in stage and ("PRESSURE_UP" in flags or "PRESSURE_DOWN" in flags or "FAKE_DUMP" in flags):
+    if "🟣 ACCUMULATION" in stage and ("PRESSURE_DOWN" in flags or "PRESSURE_UP" in flags or "FAKE_DUMP" in flags):
         return True
 
-    # запасной вариант: явные признаки сбора ликвидности
     if ("FAKE_DUMP" in flags) and ("COMP_5M" in flags or "COMP_15M" in flags):
         return True
 
@@ -669,7 +744,6 @@ def should_alert_symbol(state, sig):
     last_alert_ts = ss.get("last_alert_ts", 0)
     now = int(time.time())
 
-    # cooldown на обычные алерты
     if now - int(last_alert_ts or 0) < ALERT_COOLDOWN_SEC:
         return False
 
@@ -687,7 +761,6 @@ def should_manip_alert(state, sig):
     if now - int(last_ts or 0) < MANIP_COOLDOWN_SEC:
         return False
 
-    # если признаки pre-move менялись — тоже пушим
     cur_flags = sig.get("flags", [])
     changed = (cur_flags != prev_m_flags)
 
@@ -719,7 +792,7 @@ if __name__ == "__main__":
         raise RuntimeError("Missing BOT_TOKEN / CHAT_ID")
 
     state = load_state()
-    send_telegram("🚀 SMART MONEY SCANNER — PRO MAX FINAL + V2 started (OKX market scan)")
+    send_telegram("🚀 SMART MONEY SCANNER — PRO MAX FINAL + V2 + INTERPRETER started (OKX market scan)")
 
     while True:
         t0 = time.time()
@@ -754,6 +827,7 @@ if __name__ == "__main__":
 
                     update_symbol_state(state, sig)
 
+                    # gentle with OKX
                     time.sleep(0.15)
                 except:
                     continue
@@ -775,7 +849,7 @@ if __name__ == "__main__":
             if MANIP_ALERT_ENABLED:
                 send_telegram(manip_summary_message(manip_watch, cycle_info, regime))
                 for sig in manip_watch[:MANIP_DETAIL_TOP_K]:
-                    # для pre-move я бы всегда слал MEDIUM (как трейдеру)
+                    # для pre-move — MEDIUM (чтобы видеть объяснения и привыкать)
                     send_telegram(msg_medium(sig))
 
             save_state(state)
