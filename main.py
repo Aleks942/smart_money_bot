@@ -46,6 +46,12 @@ MANIP_COOLDOWN_SEC = int(os.getenv("MANIP_COOLDOWN_SEC") or "1800")  # тоже 
 # Если 1 — игнорим фильтр по %24h (SCAN_MIN_PCT_24H), но оставляем объём.
 ACCUMULATION_MODE = (os.getenv("ACCUMULATION_MODE") or "0").strip() == "1"
 
+# =========================
+# TRIGGER ENV (NEW)
+# =========================
+# Анти-спам для триггера (чтобы не долбило по одной монете каждые 10 минут)
+TRIGGER_COOLDOWN_SEC = int(os.getenv("TRIGGER_COOLDOWN_SEC") or "1800")  # 30 мин
+
 # OKX
 OKX_TICKERS_URL = "https://www.okx.com/api/v5/market/tickers"
 OKX_CANDLES_URL = "https://www.okx.com/api/v5/market/candles"
@@ -574,6 +580,52 @@ def interpret_combo(sig):
     return notes
 
 # =========================
+# TRIGGER ENGINE (NEW)
+# =========================
+def is_trigger_event(state, sig):
+    """
+    TRIGGER = ранний старт после накопления.
+    Условие:
+      - ранее acc_score >= 3
+      - сейчас появился импульс (CONFIRM) или (VOL + ATR)
+    Плюс cooldown по монете, чтобы не спамить.
+    """
+    sym = sig["instId"]
+    ss = state["symbols"].get(sym, {})
+    now = int(time.time())
+
+    # cooldown
+    last_tr = int(ss.get("last_trigger_ts", 0) or 0)
+    if now - last_tr < TRIGGER_COOLDOWN_SEC:
+        return False
+
+    prev_acc = int(ss.get("prev_acc_score", 0) or 0)
+    flags = set(sig.get("flags", []))
+
+    impulse_now = (
+        ("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags) or
+        ("VOL_SPIKE" in flags and "ATR_EXPANSION" in flags)
+    )
+
+    return (prev_acc >= 3) and impulse_now
+
+def trigger_message(sig, regime):
+    sym = fmt_symbol(sig["instId"])
+    lines = []
+    lines.append(f"🔥 TRIGGER — {sym} стартует после накопления")
+    lines.append(f"⏱ Cycle: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+    lines.append(f"🧭 BTC regime: {regime}")
+    lines.append(f"💵 {sig['price']:.6g}")
+    lines.append(f"📊 {sig['score']}/10 | {sig['direction']} | acc={sig.get('acc_score', 0)}")
+    lines.append(f"🎯 ENTRY: {sig['entry']}")
+    lines.append(f"🧬 STAGE: {sig['stage']}")
+    if sig.get("target") is not None:
+        lines.append(f"🎯 Target: {sig['target']:.6g}")
+    lines.append("")
+    lines.append("⚡ Это момент старта. Проверь график и уровни диапазона.")
+    return "\n".join(lines)
+
+# =========================
 # MESSAGE FORMATS
 # =========================
 def fmt_symbol(instId: str) -> str:
@@ -607,7 +659,6 @@ def msg_medium(sig):
         for f in sig["flags"][:12]:
             lines.append(f"• {f}")
 
-    # NEW: Interpretation block
     interp = interpret_combo(sig)
     if interp:
         lines.append("")
@@ -643,7 +694,6 @@ def msg_full(sig):
         for r in sig["dir_reasons"][:12]:
             lines.append(f"• {r}")
 
-    # NEW: Interpretation block
     interp = interpret_combo(sig)
     if interp:
         lines.append("")
@@ -772,6 +822,8 @@ def update_symbol_state(state, sig):
     state["symbols"][sym]["prev_score"] = sig["score"]
     state["symbols"][sym]["prev_flags"] = sig["flags"]
     state["symbols"][sym]["last_ts"] = sig["ts"]
+    # NEW: сохраняем накопление для TRIGGER
+    state["symbols"][sym]["prev_acc_score"] = sig.get("acc_score", 0)
 
 def mark_alert_sent(state, sig):
     sym = sig["instId"]
@@ -784,6 +836,11 @@ def mark_manip_sent(state, sig):
     state["symbols"][sym]["last_manip_alert_ts"] = sig["ts"]
     state["symbols"][sym]["prev_manip_flags"] = sig.get("flags", [])
 
+def mark_trigger_sent(state, sig):
+    sym = sig["instId"]
+    state["symbols"].setdefault(sym, {})
+    state["symbols"][sym]["last_trigger_ts"] = int(time.time())
+
 # =========================
 # MAIN LOOP
 # =========================
@@ -792,7 +849,7 @@ if __name__ == "__main__":
         raise RuntimeError("Missing BOT_TOKEN / CHAT_ID")
 
     state = load_state()
-    send_telegram("🚀 SMART MONEY SCANNER — PRO MAX FINAL + V2 + INTERPRETER started (OKX market scan)")
+    send_telegram("🚀 SMART MONEY SCANNER — PRO MAX FINAL + V2 + INTERPRETER + TRIGGER started (OKX market scan)")
 
     while True:
         t0 = time.time()
@@ -813,6 +870,11 @@ if __name__ == "__main__":
 
                     # V2: применяем контекст BTC к score (мягко)
                     sig = apply_regime_bias(sig, regime)
+
+                    # 🔥 TRIGGER (ранний старт) — ДО обычных алертов
+                    if is_trigger_event(state, sig):
+                        send_telegram(trigger_message(sig, regime))
+                        mark_trigger_sent(state, sig)
 
                     # обычные алерты по edge
                     if sig["score"] >= ALERT_MIN_SCORE and should_alert_symbol(state, sig):
@@ -860,3 +922,4 @@ if __name__ == "__main__":
         dt = time.time() - t0
         sleep_for = max(1, POLL_SECONDS - int(dt))
         time.sleep(sleep_for)
+
