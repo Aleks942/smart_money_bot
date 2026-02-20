@@ -68,6 +68,14 @@ TRIGGER_PRE_COOLDOWN = int(os.getenv("TRIGGER_PRE_COOLDOWN") or "1800")
 TRIGGER_START_COOLDOWN = int(os.getenv("TRIGGER_START_COOLDOWN") or "1800")
 TRIGGER_CONFIRM_COOLDOWN = int(os.getenv("TRIGGER_CONFIRM_COOLDOWN") or "1800")
 
+# =========================
+# PRIORITY ALERT SYSTEM (ADDON — ничего не ломает)
+# =========================
+PRIORITY_ENABLED = (os.getenv("PRIORITY_ENABLED") or "1").strip() != "0"
+PRIORITY_SCORE_MIN = int(os.getenv("PRIORITY_SCORE_MIN") or "7")
+PRIORITY_ACC_MIN = int(os.getenv("PRIORITY_ACC_MIN") or "3")
+PRIORITY_COOLDOWN_SEC = int(os.getenv("PRIORITY_COOLDOWN_SEC") or "2400")
+
 # OKX
 OKX_TICKERS_URL = "https://www.okx.com/api/v5/market/tickers"
 OKX_CANDLES_URL = "https://www.okx.com/api/v5/market/candles"
@@ -938,6 +946,55 @@ def update_symbol_state(state, sig):
     state["symbols"][sym]["last_ts"] = sig["ts"]
 
 # =========================
+# PRIORITY ALERT SYSTEM (ADDON — слой сверху)
+# =========================
+def priority_allowed(state, instId):
+    ss = state["symbols"].get(instId, {})
+    last = int(ss.get("last_priority_ts", 0) or 0)
+    return (now_ts() - last) >= PRIORITY_COOLDOWN_SEC
+
+def mark_priority(state, instId):
+    state["symbols"].setdefault(instId, {})
+    state["symbols"][instId]["last_priority_ts"] = now_ts()
+
+def is_priority_signal(sig):
+    if not PRIORITY_ENABLED:
+        return False
+
+    score = int(sig.get("score", 0))
+    acc = int(sig.get("acc_score", 0))
+    flags = set(sig.get("flags", []))
+
+    if score < PRIORITY_SCORE_MIN:
+        return False
+    if acc < PRIORITY_ACC_MIN:
+        return False
+
+    strong_confirm = (("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags) and
+                      ("ATR_EXPANSION" in flags) and
+                      ("VOL_SPIKE" in flags))
+
+    smart_money_extra = ("SWEEP_UP" in flags or "SWEEP_DOWN" in flags or
+                         "FAKE_DUMP" in flags or
+                         "OB_BIDS" in flags or "OB_ASKS" in flags or
+                         "OB_WALL_BID" in flags or "OB_WALL_ASK" in flags)
+
+    # Priority = высокий скор + (confirm либо сильный smart-money контекст)
+    return strong_confirm or smart_money_extra
+
+def msg_priority(sig):
+    sym = fmt_symbol(sig["instId"])
+    lines = []
+    lines.append(f"⭐ PRIORITY ALERT — {sym}")
+    lines.append(f"💵 {sig['price']:.6g} | score={sig['score']}/10 | acc={sig.get('acc_score',0)}")
+    lines.append(f"🧭 {sig['direction']} | {sig['entry']} | {sig['stage']}")
+    if sig.get("target") is not None:
+        lines.append(f"🎯 ликвидность/цель: {sig['target']:.6g}")
+    if sig.get("flags"):
+        fl = ", ".join(sig["flags"][:10])
+        lines.append(f"Flags: {fl}")
+    return "\n".join(lines)
+    # =========================
 # V3: 3-LEVEL TRIGGER (NEW)
 # =========================
 def trigger_allowed(state, instId, key, cooldown_sec):
@@ -1007,7 +1064,7 @@ if __name__ == "__main__":
         raise RuntimeError("Missing BOT_TOKEN / CHAT_ID")
 
     state = load_state()
-    send_telegram("🚀 SMART MONEY SCANNER — PRO MAX FINAL + V3 (ORDERBOOK + SWEEP + 3-LEVEL TRIGGER) started (OKX market scan)")
+    send_telegram("🚀 SMART MONEY SCANNER — PRO MAX FINAL + V3 (ORDERBOOK + SWEEP + 3-LEVEL TRIGGER) + PRIORITY started (OKX market scan)")
 
     while True:
         t0 = time.time()
@@ -1025,6 +1082,13 @@ if __name__ == "__main__":
                     sig["pct_24h"] = pct
 
                     sig = apply_regime_bias(sig, regime)
+
+                    # =====================
+                    # PRIORITY ALERT (NEW ADDON)
+                    # =====================
+                    if is_priority_signal(sig) and priority_allowed(state, instId):
+                        send_telegram(msg_priority(sig))
+                        mark_priority(state, instId)
 
                     # обычные алерты
                     if sig["score"] >= ALERT_MIN_SCORE and should_alert_symbol(state, sig):
