@@ -76,6 +76,16 @@ PRIORITY_SCORE_MIN = int(os.getenv("PRIORITY_SCORE_MIN") or "7")
 PRIORITY_ACC_MIN = int(os.getenv("PRIORITY_ACC_MIN") or "3")
 PRIORITY_COOLDOWN_SEC = int(os.getenv("PRIORITY_COOLDOWN_SEC") or "2400")
 
+# =========================
+# PRO EDGE (NEW, умеренное усиление, без удаления логики)
+# =========================
+PRO_EDGE_ENABLED = (os.getenv("PRO_EDGE_ENABLED") or "1").strip() != "0"
+PRO_EDGE_MIN_SCORE = int(os.getenv("PRO_EDGE_MIN_SCORE") or "6")           # сильнее чем ALERT_MIN_SCORE
+PRO_EDGE_MAX_ALERTS_PER_CYCLE = int(os.getenv("PRO_EDGE_MAX_ALERTS") or "4")
+PRO_EDGE_MIN_RANGE_PCT = float(os.getenv("PRO_EDGE_MIN_RANGE_PCT") or "0.40")  # отсекаем супер-флет
+PRO_EDGE_REQUIRE_IMPULSE = (os.getenv("PRO_EDGE_REQUIRE_IMPULSE") or "1").strip() != "0"
+PRO_EDGE_REJECT_BALANCE = (os.getenv("PRO_EDGE_REJECT_BALANCE") or "1").strip() != "0"
+
 # OKX
 OKX_TICKERS_URL = "https://www.okx.com/api/v5/market/tickers"
 OKX_CANDLES_URL = "https://www.okx.com/api/v5/market/candles"
@@ -91,7 +101,7 @@ QUOTE = "USDT"
 # HTTP SESSION
 # =========================
 S = requests.Session()
-S.headers.update({"User-Agent": "smart-money-radar/3.0"})
+S.headers.update({"User-Agent": "smart-money-radar/PRO-EDGE-4.0"})
 
 # =========================
 # TELEGRAM
@@ -159,7 +169,6 @@ def get_okx_candles(instId: str, bar: str, limit: int = 120):
     return candles
 
 def get_okx_books(instId: str, sz: int = 25):
-    # OKX books returns: bids/asks as [price, size, ...]
     arr = okx_get(OKX_BOOKS_URL, {"instId": instId, "sz": str(sz)})
     if not arr:
         return None
@@ -238,7 +247,6 @@ def breakout_ok(candles, lookback=BREAKOUT_LOOKBACK):
     last_close = candles[-1][4]
     hi = max(highs)
     lo = min(lows)
-    # анти-шум: минимальная дистанция пробоя
     if last_close > hi * (1.0 + MIN_BREAKOUT_DIST_PCT / 100.0):
         return "UP"
     if last_close < lo * (1.0 - MIN_BREAKOUT_DIST_PCT / 100.0):
@@ -292,11 +300,6 @@ def liquidity_pressure(candles, lookback=PRESSURE_LOOKBACK, zone=PRESSURE_ZONE, 
 # V3: ORDERBOOK EDGE (NEW)
 # =========================
 def orderbook_edge(instId: str):
-    """
-    Лучше профи: стакан как фильтр.
-    - имбаланс (перевес бидов/асков)
-    - стены (аномальные заявки)
-    """
     if not ORDERBOOK_ENABLED:
         return None
 
@@ -312,17 +315,15 @@ def orderbook_edge(instId: str):
     bids = ob["bids"]
     asks = ob["asks"]
 
-    # total size
     bid_sum = sum(q for _p, q in bids)
     ask_sum = sum(q for _p, q in asks)
     total = bid_sum + ask_sum
     if total <= 0:
         return None
 
-    imb = (bid_sum - ask_sum) / total  # [-1..+1]
+    imb = (bid_sum - ask_sum) / total
     imb_abs = abs(imb)
 
-    # detect walls
     bid_sizes = [q for _p, q in bids]
     ask_sizes = [q for _p, q in asks]
     bid_avg = sum(bid_sizes) / max(len(bid_sizes), 1)
@@ -331,7 +332,6 @@ def orderbook_edge(instId: str):
     bid_wall = max(bid_sizes) > bid_avg * ORDERBOOK_WALL_MULT if bid_avg > 0 else False
     ask_wall = max(ask_sizes) > ask_avg * ORDERBOOK_WALL_MULT if ask_avg > 0 else False
 
-    # classify
     if imb_abs < ORDERBOOK_IMB_MIN and not (bid_wall or ask_wall):
         return {"ob_bias": "NEUTRAL", "imb": imb, "bid_wall": bid_wall, "ask_wall": ask_wall}
 
@@ -346,11 +346,6 @@ def orderbook_edge(instId: str):
 # V3: SWEEP DETECTOR (NEW)
 # =========================
 def liquidity_sweep(candles, lookback=SWEEP_LOOKBACK):
-    """
-    Sweep = снятие стопов и возврат:
-    - цена прокалывает high/low диапазона
-    - закрывается обратно внутрь диапазона
-    """
     if len(candles) < lookback + 2:
         return None, {}
 
@@ -359,8 +354,6 @@ def liquidity_sweep(candles, lookback=SWEEP_LOOKBACK):
     lo = min(x[3] for x in seg)
 
     _ts, o, h, l, c, _v = candles[-1]
-    price = c
-
     pierce_up = h > hi * (1.0 + SWEEP_PIERCE_PCT / 100.0)
     pierce_dn = l < lo * (1.0 - SWEEP_PIERCE_PCT / 100.0)
 
@@ -368,8 +361,6 @@ def liquidity_sweep(candles, lookback=SWEEP_LOOKBACK):
     if rng <= 0:
         return None, {"hi": hi, "lo": lo}
 
-    # "вернулись внутрь" = close обратно в зону
-    # для up-sweep: close должен быть ниже hi - часть диапазона
     reclaim_up = c < (hi - rng * SWEEP_RECLAIM_ZONE)
     reclaim_dn = c > (lo + rng * SWEEP_RECLAIM_ZONE)
 
@@ -448,7 +439,6 @@ def direction_hint(flags):
     if "ATR_EXPANSION" in flags and ("BREAKOUT_DOWN" in flags or "BREAKOUT_CONFIRM_DOWN" in flags):
         down += 1; reasons.append("ATR ускорил ВНИЗ (+1)")
 
-    # стакан (объективный фильтр)
     if "OB_BIDS" in flags:
         up += 1; reasons.append("Стакан: перевес BID (+1)")
     if "OB_ASKS" in flags:
@@ -555,13 +545,11 @@ def build_signal(instId: str):
         score += 1
         flags.append(f"PRESSURE_{pres}")
 
-    # V3: sweep detector (снятие стопов вверх/вниз)
     sw, sw_meta = liquidity_sweep(c5)
     if sw:
         score += 1
-        flags.append(sw)  # SWEEP_UP / SWEEP_DOWN
+        flags.append(sw)
 
-    # V3: стакан
     ob_meta = None
     if ORDERBOOK_ENABLED:
         ob_meta = orderbook_edge(instId)
@@ -581,7 +569,6 @@ def build_signal(instId: str):
                 score += 1
                 flags.append("OB_WALL_ASK")
 
-    # V2: anti-pump shield
     score += anti_pump_penalty(c5, ANTI_PUMP_PCT_5M)
 
     direction_text, reasons, up_w, down_w = direction_hint(flags)
@@ -683,6 +670,52 @@ def apply_regime_bias(sig, regime):
         if "ВНИЗ" in sig["direction"]:
             sig["score"] -= 1
     return sig
+
+# =========================
+# PRO EDGE FILTER (NEW)
+# =========================
+def pro_edge_filter(sig, regime):
+    """
+    Умеренное усиление без удаления логики:
+    - меньше шума
+    - оставляем ранние (AGGRESSIVE) но только если есть импульс
+    - не трогаем triggers / watch / summary
+    """
+    if not PRO_EDGE_ENABLED:
+        return True
+
+    flags = set(sig.get("flags", []))
+    score = int(sig.get("score", 0))
+    direction = sig.get("direction", "")
+    acc = int(sig.get("acc_score", 0))
+
+    if score < PRO_EDGE_MIN_SCORE:
+        return False
+
+    if PRO_EDGE_REJECT_BALANCE and ("БАЛАНС" in direction):
+        return False
+
+    pm = sig.get("pmeta") or {}
+    range_pct = pm.get("range_pct")
+    if range_pct is not None and float(range_pct) < float(PRO_EDGE_MIN_RANGE_PCT):
+        return False
+
+    if PRO_EDGE_REQUIRE_IMPULSE:
+        strong_impulse = (
+            ("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags) or
+            ("ATR_EXPANSION" in flags and "VOL_SPIKE" in flags) or
+            ("VOL_SPIKE" in flags and ("BREAKOUT_UP" in flags or "BREAKOUT_DOWN" in flags))
+        )
+        if not strong_impulse:
+            return False
+
+    # BTC bias (чуть сильнее)
+    if regime == "RISK_OFF" and "ВВЕРХ" in direction:
+        return False
+    if regime == "RISK_ON" and "ВНИЗ" in direction:
+        return False
+
+    return True
 
 # =========================
 # TRADER INTERPRETATION
@@ -979,7 +1012,6 @@ def is_priority_signal(sig):
                          "OB_BIDS" in flags or "OB_ASKS" in flags or
                          "OB_WALL_BID" in flags or "OB_WALL_ASK" in flags)
 
-    # Priority = высокий скор + (confirm либо сильный smart-money контекст)
     return strong_confirm or smart_money_extra
 
 def msg_priority(sig):
@@ -994,7 +1026,8 @@ def msg_priority(sig):
         fl = ", ".join(sig["flags"][:10])
         lines.append(f"Flags: {fl}")
     return "\n".join(lines)
-    # =========================
+
+# =========================
 # V3: 3-LEVEL TRIGGER (NEW)
 # =========================
 def trigger_allowed(state, instId, key, cooldown_sec):
@@ -1007,17 +1040,15 @@ def trigger_mark(state, instId, key):
     state["symbols"][instId][key] = now_ts()
 
 def is_pre_trigger(sig):
-    # PRE: накопление + давление/свип/фейк (до движения)
     flags = set(sig.get("flags", []))
     acc = int(sig.get("acc_score", 0))
     if acc < TRIGGER_PRE_ACC:
         return False
     if "ATR_EXPANSION" in flags and ("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags):
-        return False  # уже пошло
+        return False
     return ("PRESSURE_UP" in flags or "PRESSURE_DOWN" in flags or "FAKE_DUMP" in flags or "SWEEP_UP" in flags or "SWEEP_DOWN" in flags)
 
 def is_start_trigger(sig):
-    # START: был acc>=3 (в этом же сигнале достаточно) + появился импульс
     flags = set(sig.get("flags", []))
     acc = int(sig.get("acc_score", 0))
     if acc < TRIGGER_PRE_ACC:
@@ -1026,7 +1057,6 @@ def is_start_trigger(sig):
     return impulse
 
 def is_confirm_trigger(sig):
-    # CONFIRM: самый чистый старт
     flags = set(sig.get("flags", []))
     return (("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags) and ("ATR_EXPANSION" in flags) and ("VOL_SPIKE" in flags))
 
@@ -1064,7 +1094,7 @@ if __name__ == "__main__":
         raise RuntimeError("Missing BOT_TOKEN / CHAT_ID")
 
     state = load_state()
-    send_telegram("🚀 SMART MONEY SCANNER — PRO MAX FINAL + V3 (ORDERBOOK + SWEEP + 3-LEVEL TRIGGER) + PRIORITY started (OKX market scan)")
+    send_telegram("🚀 SMART MONEY SCANNER — PRO EDGE v4 started (OKX market scan)")
 
     while True:
         t0 = time.time()
@@ -1084,24 +1114,32 @@ if __name__ == "__main__":
                     sig = apply_regime_bias(sig, regime)
 
                     # =====================
-                    # PRIORITY ALERT (NEW ADDON)
+                    # PRIORITY ALERT (оставляем, но усиливаем качеством)
                     # =====================
                     if is_priority_signal(sig) and priority_allowed(state, instId):
-                        send_telegram(msg_priority(sig))
-                        mark_priority(state, instId)
+                        if pro_edge_filter(sig, regime):
+                            send_telegram(msg_priority(sig))
+                            mark_priority(state, instId)
 
-                    # обычные алерты
-                    if sig["score"] >= ALERT_MIN_SCORE and should_alert_symbol(state, sig):
-                        alerts.append(sig)
-                        mark_alert_sent(state, sig)
+                    # =====================
+                    # ОБЫЧНЫЕ ALERTS (теперь через PRO EDGE)
+                    # =====================
+                    if pro_edge_filter(sig, regime):
+                        if sig["score"] >= ALERT_MIN_SCORE and should_alert_symbol(state, sig):
+                            alerts.append(sig)
+                            mark_alert_sent(state, sig)
 
-                    # pre-move watch
+                    # =====================
+                    # PRE-MOVE WATCH (оставляем как есть)
+                    # =====================
                     if MANIP_ALERT_ENABLED and is_pre_move_manip(sig):
                         if should_manip_alert(state, sig):
                             manip_watch.append(sig)
                             mark_manip_sent(state, sig)
 
-                    # V3 triggers
+                    # =====================
+                    # V3 triggers (оставляем как есть)
+                    # =====================
                     if is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
                         send_telegram(msg_pre_trigger(sig))
                         trigger_mark(state, instId, "last_pre_trigger_ts")
@@ -1115,20 +1153,30 @@ if __name__ == "__main__":
                         trigger_mark(state, instId, "last_confirm_trigger_ts")
 
                     update_symbol_state(state, sig)
-                    time.sleep(0.16)
+                    time.sleep(0.14)
                 except:
                     continue
 
+            # =====================
+            # сортировка + ограничение шума
+            # =====================
             alerts.sort(key=lambda s: (s["score"], abs(s.get("pct_24h", 0.0))), reverse=True)
             manip_watch.sort(key=lambda s: (int(s.get("acc_score", 0)), s.get("score", 0)), reverse=True)
 
+            # PRO EDGE ограничитель: максимум N алертов за цикл
+            if PRO_EDGE_ENABLED and PRO_EDGE_MAX_ALERTS_PER_CYCLE > 0:
+                alerts = alerts[:PRO_EDGE_MAX_ALERTS_PER_CYCLE]
+
             cycle_info = time.strftime("%Y-%m-%d %H:%M:%S")
 
+            # summary всегда
             send_telegram(summary_message(alerts, cycle_info, regime))
 
+            # детали по лучшим
             for sig in alerts[:DETAIL_TOP_K]:
                 send_telegram(choose_detail_message(sig))
 
+            # pre-move watch как раньше
             if MANIP_ALERT_ENABLED:
                 send_telegram(manip_summary_message(manip_watch, cycle_info, regime))
                 for sig in manip_watch[:MANIP_DETAIL_TOP_K]:
