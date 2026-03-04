@@ -1194,6 +1194,7 @@ if __name__ == "__main__":
             alerts = alerts[:PRO_EDGE_MAX_ALERTS_PER_CYCLE]
             manip_watch.sort(key=lambda s: (int(s.get("acc_score", 0)), s.get("score", 0)), reverse=True)
             # =====================
+# =====================
 # GLOBAL PRIORITY ENGINE
 # =====================
 if PRIORITY_ENABLED:
@@ -1210,7 +1211,7 @@ if PRIORITY_ENABLED:
 
                 mark_priority(state, sig["instId"])
 
-    except:
+    except Exception:
         pass
 
             # PRO EDGE ограничитель: максимум N алертов за цикл
