@@ -1040,14 +1040,34 @@ def trigger_mark(state, instId, key):
     state["symbols"][instId][key] = now_ts()
 
 def is_pre_trigger(sig):
+
     flags = set(sig.get("flags", []))
     acc = int(sig.get("acc_score", 0))
+
     if acc < TRIGGER_PRE_ACC:
         return False
-    if "ATR_EXPANSION" in flags and ("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags):
-        return False
-    return ("PRESSURE_UP" in flags or "PRESSURE_DOWN" in flags or "FAKE_DUMP" in flags or "SWEEP_UP" in flags or "SWEEP_DOWN" in flags)
 
+    # если уже есть импульс — это уже не PRE
+    if "ATR_EXPANSION" in flags:
+        return False
+
+    if "BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags:
+        return False
+
+    accumulation = (
+        "COMP_5M" in flags or
+        "COMP_15M" in flags
+    )
+
+    liquidity = (
+        "PRESSURE_UP" in flags or
+        "PRESSURE_DOWN" in flags or
+        "FAKE_DUMP" in flags or
+        "SWEEP_UP" in flags or
+        "SWEEP_DOWN" in flags
+    )
+
+    return accumulation and liquidity
 def is_start_trigger(sig):
     flags = set(sig.get("flags", []))
     acc = int(sig.get("acc_score", 0))
