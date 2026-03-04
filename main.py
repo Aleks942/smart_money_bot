@@ -996,6 +996,12 @@ def is_priority_signal(sig):
 
     score = int(sig.get("score", 0))
     acc = int(sig.get("acc_score", 0))
+    pm = sig.get("pmeta") or {}
+range_pct = pm.get("range_pct")
+
+# фильтр микро-флета
+if range_pct is not None and range_pct < 0.35:
+    return False
     flags = set(sig.get("flags", []))
 
     if score < PRIORITY_SCORE_MIN:
