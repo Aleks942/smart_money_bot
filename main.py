@@ -996,27 +996,31 @@ def is_priority_signal(sig):
 
     score = int(sig.get("score", 0))
     acc = int(sig.get("acc_score", 0))
-    pm = sig.get("pmeta") or {}
-range_pct = pm.get("range_pct")
-
-# фильтр микро-флета
-if range_pct is not None and range_pct < 0.35:
-    return False
     flags = set(sig.get("flags", []))
+
+    # фильтр микро-флета (чтобы не спамило в супер-узком диапазоне)
+    pm = sig.get("pmeta") or {}
+    range_pct = pm.get("range_pct")
+    if range_pct is not None and float(range_pct) < 0.35:
+        return False
 
     if score < PRIORITY_SCORE_MIN:
         return False
     if acc < PRIORITY_ACC_MIN:
         return False
 
-    strong_confirm = (("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags) and
-                      ("ATR_EXPANSION" in flags) and
-                      ("VOL_SPIKE" in flags))
+    strong_confirm = (
+        ("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags) and
+        ("ATR_EXPANSION" in flags) and
+        ("VOL_SPIKE" in flags)
+    )
 
-    smart_money_extra = ("SWEEP_UP" in flags or "SWEEP_DOWN" in flags or
-                         "FAKE_DUMP" in flags or
-                         "OB_BIDS" in flags or "OB_ASKS" in flags or
-                         "OB_WALL_BID" in flags or "OB_WALL_ASK" in flags)
+    smart_money_extra = (
+        ("SWEEP_UP" in flags or "SWEEP_DOWN" in flags) or
+        ("FAKE_DUMP" in flags) or
+        ("OB_BIDS" in flags or "OB_ASKS" in flags) or
+        ("OB_WALL_BID" in flags or "OB_WALL_ASK" in flags)
+    )
 
     return strong_confirm or smart_money_extra
 
