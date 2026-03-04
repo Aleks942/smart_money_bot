@@ -1192,6 +1192,25 @@ if __name__ == "__main__":
             # =====================
             alerts.sort(key=lambda s: (s["score"], abs(s.get("pct_24h", 0.0))), reverse=True)
             manip_watch.sort(key=lambda s: (int(s.get("acc_score", 0)), s.get("score", 0)), reverse=True)
+            # =====================
+# GLOBAL PRIORITY ENGINE
+# =====================
+if PRIORITY_ENABLED:
+
+    try:
+
+        priority_list = find_global_priority(alerts)
+
+        for sig in priority_list:
+
+            if should_send_priority(state, sig["instId"]):
+
+                send_telegram(msg_priority(sig))
+
+                mark_priority(state, sig["instId"])
+
+    except:
+        pass
 
             # PRO EDGE ограничитель: максимум N алертов за цикл
             if PRO_EDGE_ENABLED and PRO_EDGE_MAX_ALERTS_PER_CYCLE > 0:
