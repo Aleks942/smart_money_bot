@@ -1187,32 +1187,27 @@ if __name__ == "__main__":
                 except:
                     continue
 
-            # =====================
+                    # =====================
             # сортировка + ограничение шума
             # =====================
             alerts.sort(key=lambda s: (s["score"], abs(s.get("pct_24h", 0.0))), reverse=True)
             alerts = alerts[:PRO_EDGE_MAX_ALERTS_PER_CYCLE]
             manip_watch.sort(key=lambda s: (int(s.get("acc_score", 0)), s.get("score", 0)), reverse=True)
+
             # =====================
-# =====================
-# GLOBAL PRIORITY ENGINE
-# =====================
-if PRIORITY_ENABLED:
+            # GLOBAL PRIORITY ENGINE
+            # =====================
+            if PRIORITY_ENABLED:
+                try:
+                    priority_list = find_global_priority(alerts)
 
-    try:
+                    for sig in priority_list:
+                        if should_send_priority(state, sig["instId"]):
+                            send_telegram(msg_priority(sig))
+                            mark_priority(state, sig["instId"])
 
-        priority_list = find_global_priority(alerts)
-
-        for sig in priority_list:
-
-            if should_send_priority(state, sig["instId"]):
-
-                send_telegram(msg_priority(sig))
-
-                mark_priority(state, sig["instId"])
-
-    except Exception:
-        pass
+                except Exception:
+                    pass
 
             # PRO EDGE ограничитель: максимум N алертов за цикл
             if PRO_EDGE_ENABLED and PRO_EDGE_MAX_ALERTS_PER_CYCLE > 0:
@@ -1227,13 +1222,13 @@ if PRIORITY_ENABLED:
             for sig in alerts[:DETAIL_TOP_K]:
                 send_telegram(choose_detail_message(sig))
 
-            # pre-move watch как раньше
+            # pre-move watch
             if MANIP_ALERT_ENABLED:
                 send_telegram(manip_summary_message(manip_watch, cycle_info, regime))
                 for sig in manip_watch[:MANIP_DETAIL_TOP_K]:
                     send_telegram(msg_medium(sig))
 
-            save_state(state)
+            save_state(state)   
 
         except Exception as e:
             send_telegram(f"❌ Scan Error:\n{str(e)}")
