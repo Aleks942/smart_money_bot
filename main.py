@@ -649,11 +649,14 @@ def build_signal(instId: str):
     tgt = liquidity_target(pmeta, flags)
 
     acc_score = accumulation_bias(flags)
+    exp_min, exp_max = expected_move_pct(c5, pmeta)
 
     return {
         "instId": instId,
         "price": price,
         "score": score,
+        "exp_move_min": exp_min,
+        "exp_move_max": exp_max,
         "acc_score": acc_score,
         "flags": flags,
         "direction": direction_text,
