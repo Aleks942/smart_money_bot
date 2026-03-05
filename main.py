@@ -540,23 +540,23 @@ def build_signal(instId: str):
     score += 1
     flags.append("ATR_EXPANSION")
 
-pres, pmeta = liquidity_pressure(c5)
-if pres:
+      pres, pmeta = liquidity_pressure(c5)
+    if pres:
     score += 1
     flags.append(f"PRESSURE_{pres}")
 
 # BIG MOVE FILTER
-if pmeta and pmeta.get("range_pct", 0) > 2.0:
+    if pmeta and pmeta.get("range_pct", 0) > 2.0:
     score += 1
     flags.append("BIG_RANGE")
 
 sw, sw_meta = liquidity_sweep(c5)
-if sw:
+    if sw:
     score += 1
     flags.append(sw)
 
 ob_meta = None
-if ORDERBOOK_ENABLED:
+    if ORDERBOOK_ENABLED:
     ob_meta = orderbook_edge(instId)
     if ob_meta:
         bias = ob_meta.get("ob_bias")
