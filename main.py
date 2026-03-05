@@ -1442,8 +1442,8 @@ if __name__ == "__main__":
                             trigger_mark(state, instId, "last_pre_trigger_ts")
 
                     if is_start_trigger(sig) and trigger_allowed(state, instId, "last_start_trigger_ts", TRIGGER_START_COOLDOWN):
-                        # анти-хвост: если цена уже далеко от диапазона — START не шлём
-                        if not too_late_from_range(sig["price"], sig.get("pmeta") or {}, START_MAX_DIST_PCT):
+                        exp_max = float(sig.get("exp_move_max") or 0.0)
+                        if exp_max >= PRE_MIN_EXPECTED_MOVE_PCT and (not too_late_from_range(sig["price"], sig.get("pmeta") or {}, START_MAX_DIST_PCT)):
                             send_telegram(msg_start_trigger(sig))
                             trigger_mark(state, instId, "last_start_trigger_ts")
 
