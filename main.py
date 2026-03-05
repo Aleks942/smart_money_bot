@@ -278,8 +278,9 @@ def atr_expansion_ok(candles, period=14, compare_back=5):
     atr_now = sum(trs[-period:]) / period
     atr_prev = sum(trs[-period-compare_back:-compare_back]) / period
     return atr_now > atr_prev * ATR_EXPANSION_MULT
-    def expected_move_pct(candles, pmeta, atr_period=14):
-    # range_pct
+
+
+def expected_move_pct(candles, pmeta, atr_period=14):
     range_pct = 0.0
     if pmeta and isinstance(pmeta, dict):
         try:
@@ -287,7 +288,6 @@ def atr_expansion_ok(candles, period=14, compare_back=5):
         except:
             range_pct = 0.0
 
-    # ATR% (примерно)
     try:
         trs = []
         for i in range(1, len(candles)):
