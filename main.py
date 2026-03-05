@@ -537,39 +537,42 @@ def build_signal(instId: str):
         flags.append(f"BREAKOUT_CONFIRM_{conf}")
 
     if atr_expansion_ok(c5):
-    score += 1
-    flags.append("ATR_EXPANSION")
+        score += 1
+        flags.append("ATR_EXPANSION")
 
-      pres, pmeta = liquidity_pressure(c5)
+    pres, pmeta = liquidity_pressure(c5)
     if pres:
-    score += 1
-    flags.append(f"PRESSURE_{pres}")
+        score += 1
+        flags.append(f"PRESSURE_{pres}")
 
-# BIG MOVE FILTER
+    # BIG MOVE FILTER
     if pmeta and pmeta.get("range_pct", 0) > 2.0:
-    score += 1
-    flags.append("BIG_RANGE")
+        score += 1
+        flags.append("BIG_RANGE")
 
-sw, sw_meta = liquidity_sweep(c5)
+    sw, sw_meta = liquidity_sweep(c5)
     if sw:
-    score += 1
-    flags.append(sw)
+        score += 1
+        flags.append(sw)
 
-ob_meta = None
+    ob_meta = None
     if ORDERBOOK_ENABLED:
-    ob_meta = orderbook_edge(instId)
-    if ob_meta:
-        bias = ob_meta.get("ob_bias")
-        if bias == "BIDS":
-            score += 1
-            flags.append("OB_BIDS")
-        elif bias == "ASKS":
-            score += 1
-            flags.append("OB_ASKS")
+        ob_meta = orderbook_edge(instId)
+        if ob_meta:
+            bias = ob_meta.get("ob_bias")
+
+            if bias == "BIDS":
+                score += 1
+                flags.append("OB_BIDS")
+
+            elif bias == "ASKS":
+                score += 1
+                flags.append("OB_ASKS")
 
             if ob_meta.get("bid_wall"):
                 score += 1
                 flags.append("OB_WALL_BID")
+
             if ob_meta.get("ask_wall"):
                 score += 1
                 flags.append("OB_WALL_ASK")
