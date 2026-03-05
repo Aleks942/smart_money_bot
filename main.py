@@ -1161,8 +1161,26 @@ def is_start_trigger(sig):
     acc = int(sig.get("acc_score", 0))
     if acc < TRIGGER_PRE_ACC:
         return False
-    impulse = ("ATR_EXPANSION" in flags) or ("VOL_SPIKE" in flags) or ("BREAKOUT_UP" in flags) or ("BREAKOUT_DOWN" in flags)
-    return impulse
+
+    # CONFIRM — всегда сильный импульс, оставляем
+    if ("BREAKOUT_CONFIRM_UP" in flags) or ("BREAKOUT_CONFIRM_DOWN" in flags):
+        return True
+
+    # Контекст "из накопления / у уровня"
+    context_ok = (
+        ("COMP_5M" in flags) or
+        ("COMP_15M" in flags) or
+        ("NEAR_BREAKOUT_UP" in flags) or
+        ("NEAR_BREAKOUT_DOWN" in flags)
+    )
+
+    # Реальный импульс
+    impulse_ok = ("ATR_EXPANSION" in flags) or ("VOL_SPIKE" in flags)
+
+    # Пробой
+    breakout_ok = ("BREAKOUT_UP" in flags) or ("BREAKOUT_DOWN" in flags)
+
+    return context_ok and impulse_ok and breakout_ok
 
 def is_confirm_trigger(sig):
     flags = set(sig.get("flags", []))
