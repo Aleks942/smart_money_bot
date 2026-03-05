@@ -545,7 +545,7 @@ if pres:
     score += 1
     flags.append(f"PRESSURE_{pres}")
 
-# BIG MOVE FILTER (интрадей движения)
+# BIG MOVE FILTER
 if pmeta and pmeta.get("range_pct", 0) > 2.0:
     score += 1
     flags.append("BIG_RANGE")
