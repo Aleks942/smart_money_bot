@@ -847,7 +847,7 @@ def get_market_candidates():
 # =========================
 def btc_regime():
     try:
-        sig = build_signal("BTC-USDT")
+        sig = build_signal(btc_symbol())
     except:
         return ("NEUTRAL", None)
 
