@@ -279,12 +279,6 @@ def atr_expansion_ok(candles, period=14, compare_back=5):
     atr_prev = sum(trs[-period-compare_back:-compare_back]) / period
     return atr_now > atr_prev * ATR_EXPANSION_MULT
     def expected_move_pct(candles, pmeta, atr_period=14):
-    """
-    Оценка ожидаемого движения в %:
-    - берём ширину диапазона range_pct (если есть)
-    - и ATR% по 5m
-    - возвращаем (min_move, max_move) в процентах
-    """
     # range_pct
     range_pct = 0.0
     if pmeta and isinstance(pmeta, dict):
@@ -313,7 +307,6 @@ def atr_expansion_ok(candles, period=14, compare_back=5):
 
     base = max(range_pct, atr_pct)
 
-    # небольшая вилка
     min_move = max(0.5, base * 0.8)
     max_move = base * 1.6
 
