@@ -158,8 +158,8 @@ def get_bybit_books(symbol: str, limit: int = 25):
     if not bids_pq or not asks_pq:
         return None
     return {"bids": bids_pq, "asks": asks_pq}
-    def is_bybit():
-    return (EXCHANGE or "OKX").upper() == "BYBIT"
+
+is_bybit = lambda: (EXCHANGE or "OKX").upper() == "BYBIT"
 
 
 def btc_symbol():
