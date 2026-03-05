@@ -787,6 +787,9 @@ def pro_edge_filter(sig, regime):
     score = int(sig.get("score", 0))
     direction = sig.get("direction", "")
     acc = int(sig.get("acc_score", 0))
+        exp_max = float(sig.get("exp_move_max") or 0.0)
+    if exp_max < 3.0:
+        return False
 
     if score < PRO_EDGE_MIN_SCORE:
         return False
