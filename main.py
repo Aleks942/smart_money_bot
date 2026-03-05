@@ -1116,7 +1116,8 @@ def is_pre_trigger(sig):
         "SWEEP_DOWN" in flags
     )
 
-    return accumulation and liquidity
+    near = ("NEAR_BREAKOUT_UP" in flags) or ("NEAR_BREAKOUT_DOWN" in flags)
+    return (accumulation and liquidity) or (near and liquidity)
 def is_start_trigger(sig):
     flags = set(sig.get("flags", []))
     acc = int(sig.get("acc_score", 0))
