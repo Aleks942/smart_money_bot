@@ -298,17 +298,11 @@ def liquidity_pressure(candles, lookback=PRESSURE_LOOKBACK, zone=PRESSURE_ZONE, 
     return None, {"range_hi": hi, "range_lo": lo, "range_pct": range_pct, "pos": pos}
 
     def near_breakout(pmeta, price, near_pct):
-    """
-    Возвращает 'UP' если цена очень близко к range_hi,
-    'DOWN' если близко к range_lo,
-    иначе None
-    """
     if not pmeta or not isinstance(pmeta, dict):
         return None
 
     hi = pmeta.get("range_hi")
     lo = pmeta.get("range_lo")
-
     if hi is None or lo is None:
         return None
 
@@ -329,25 +323,6 @@ def liquidity_pressure(candles, lookback=PRESSURE_LOOKBACK, zone=PRESSURE_ZONE, 
     if dist_up <= near_pct:
         return "UP"
     if dist_dn <= near_pct:
-        return "DOWN"
-    return None
-
-    try:
-        hi = float(hi)
-        lo = float(lo)
-        price = float(price)
-    except Exception:
-        return None
-
-    if price <= 0:
-        return None
-
-    dist_up = abs(hi - price) / price * 100.0
-    dist_dn = abs(price - lo) / price * 100.0
-
-    if dist_up <= float(near_pct):
-        return "UP"
-    if dist_dn <= float(near_pct):
         return "DOWN"
     return None
 
