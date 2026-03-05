@@ -686,8 +686,8 @@ def liquidity_target(pmeta, flags):
 # BUILD SIGNAL FOR SYMBOL
 # =========================
 def build_signal(instId: str):
-    c5 = get_okx_candles(instId, "5m", 120)
-    c15 = get_okx_candles(instId, "15m", 120)
+    c5 = fetch_candles(instId, "5m", 120)
+c15 = fetch_candles(instId, "15m", 120)
 
     price = c5[-1][4]
     flags = []
