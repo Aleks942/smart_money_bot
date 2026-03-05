@@ -187,7 +187,7 @@ def get_okx_books(instId: str, sz: int = 25):
 # =========================
 # CANDLES FEATURES (PRO MAX)
 # =========================
-COMPRESSION_MULT = 0.70
+COMPRESSION_MULT = 0.82
 VOLUME_SPIKE_MULT = 1.8
 FAKEDUMP_RECOVER = 0.55
 FAKEDUMP_WICK_MULT = 1.8
