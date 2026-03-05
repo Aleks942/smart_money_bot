@@ -91,6 +91,73 @@ PRO_EDGE_REJECT_BALANCE = (os.getenv("PRO_EDGE_REJECT_BALANCE") or "1").strip() 
 OKX_TICKERS_URL = "https://www.okx.com/api/v5/market/tickers"
 OKX_CANDLES_URL = "https://www.okx.com/api/v5/market/candles"
 OKX_BOOKS_URL = "https://www.okx.com/api/v5/market/books"  # NEW
+# =========================
+# EXCHANGE SWITCH (NEW)
+# =========================
+EXCHANGE = (os.getenv("EXCHANGE") or "OKX").upper()  # OKX / BYBIT
+BYBIT_CATEGORY = (os.getenv("BYBIT_CATEGORY") or "linear").lower()  # linear (USDT perp)
+
+# BYBIT
+BYBIT_TICKERS_URL = "https://api.bybit.com/v5/market/tickers"
+BYBIT_KLINE_URL = "https://api.bybit.com/v5/market/kline"
+BYBIT_ORDERBOOK_URL = "https://api.bybit.com/v5/market/orderbook"
+
+
+def bybit_get(url, params):
+    r = S.get(url, params=params, timeout=TIMEOUT)
+    if r.status_code == 429:
+        time.sleep(1.2)
+        r = S.get(url, params=params, timeout=TIMEOUT)
+    if r.status_code != 200:
+        raise RuntimeError(f"BYBIT HTTP {r.status_code}")
+    data = r.json()
+    # Bybit: {"retCode":0,"retMsg":"OK","result":{...}}
+    if int(data.get("retCode", 999)) != 0:
+        raise RuntimeError(f"BYBIT bad response: {str(data)[:250]}")
+    return data.get("result") or {}
+
+
+def get_bybit_tickers_linear():
+    res = bybit_get(BYBIT_TICKERS_URL, {"category": "linear"})
+    lst = res.get("list") or []
+    return lst
+
+
+def get_bybit_candles(symbol: str, interval: str, limit: int = 200):
+    # interval: "5" / "15"
+    res = bybit_get(BYBIT_KLINE_URL, {"category": "linear", "symbol": symbol, "interval": interval, "limit": str(limit)})
+    lst = res.get("list") or []
+    if not lst or len(lst) < 30:
+        raise RuntimeError(f"Not enough bybit candles for {symbol} {interval}")
+
+    # Bybit returns newest -> oldest, we need old -> new
+    lst.reverse()
+
+    candles = []
+    for c in lst:
+        # [startTime, open, high, low, close, volume, turnover]
+        try:
+            candles.append([int(c[0]), float(c[1]), float(c[2]), float(c[3]), float(c[4]), float(c[5])])
+        except:
+            pass
+
+    if len(candles) < 30:
+        raise RuntimeError(f"Bybit candle parse failed {symbol} {interval}")
+    return candles
+
+
+def get_bybit_books(symbol: str, limit: int = 25):
+    res = bybit_get(BYBIT_ORDERBOOK_URL, {"category": "linear", "symbol": symbol, "limit": str(limit)})
+    bids = (res.get("b") or [])
+    asks = (res.get("a") or [])
+    try:
+        bids_pq = [(float(x[0]), float(x[1])) for x in bids]
+        asks_pq = [(float(x[0]), float(x[1])) for x in asks]
+    except:
+        return None
+    if not bids_pq or not asks_pq:
+        return None
+    return {"bids": bids_pq, "asks": asks_pq}
 
 # =========================
 # HARD RULES / FILTERS
