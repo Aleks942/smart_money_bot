@@ -158,6 +158,36 @@ def get_bybit_books(symbol: str, limit: int = 25):
     if not bids_pq or not asks_pq:
         return None
     return {"bids": bids_pq, "asks": asks_pq}
+    def is_bybit():
+    return (EXCHANGE or "OKX").upper() == "BYBIT"
+
+
+def btc_symbol():
+    return "BTCUSDT" if is_bybit() else "BTC-USDT"
+
+
+def normalize_symbol(instId: str) -> str:
+    if is_bybit():
+        return instId.replace("-", "")
+    return instId
+
+
+def fetch_candles(instId: str, bar: str, limit: int = 120):
+    if is_bybit():
+        sym = normalize_symbol(instId)
+        if bar == "5m":
+            return get_bybit_candles(sym, "5", max(200, limit))
+        if bar == "15m":
+            return get_bybit_candles(sym, "15", max(200, limit))
+        raise RuntimeError(f"Bybit bar not supported: {bar}")
+    return get_okx_candles(instId, bar, limit)
+
+
+def fetch_books(instId: str, sz: int = 25):
+    if is_bybit():
+        sym = normalize_symbol(instId)
+        return get_bybit_books(sym, limit=sz)
+    return get_okx_books(instId, sz)
 
 # =========================
 # HARD RULES / FILTERS
