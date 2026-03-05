@@ -804,6 +804,39 @@ def is_bad_symbol(instId: str) -> bool:
         if s in base:
             return True
     return False
+    def get_market_candidates_bybit():
+    tickers = get_bybit_tickers_linear()
+    cands = []
+
+    for t in tickers:
+        sym = t.get("symbol", "")
+        if not sym.endswith("USDT"):
+            continue
+
+        try:
+            vol_usdt = float(t.get("turnover24h") or 0.0)
+        except:
+            vol_usdt = 0.0
+
+        try:
+            last = float(t.get("lastPrice") or 0.0)
+            prev = float(t.get("prevPrice24h") or 0.0)
+            pct = ((last - prev) / prev * 100.0) if prev > 0 else 0.0
+        except:
+            pct = 0.0
+
+        if vol_usdt < SCAN_MIN_VOL_USDT:
+            continue
+
+        if not ACCUMULATION_MODE:
+            if abs(pct) < SCAN_MIN_PCT_24H:
+                continue
+
+        instId = sym  # BYBIT symbol format, e.g. BTCUSDT
+        cands.append((instId, vol_usdt, pct))
+
+    cands.sort(key=lambda x: (x[1], abs(x[2])), reverse=True)
+    return cands[:SCAN_TOP_N]
 
 def get_market_candidates():
     tickers = get_okx_spot_usdt_tickers()
