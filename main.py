@@ -296,7 +296,8 @@ def liquidity_pressure(candles, lookback=PRESSURE_LOOKBACK, zone=PRESSURE_ZONE, 
     if pos <= zone:
         return "DOWN", {"range_hi": hi, "range_lo": lo, "range_pct": range_pct, "pos": pos}
     return None, {"range_hi": hi, "range_lo": lo, "range_pct": range_pct, "pos": pos}
-  def near_breakout(pmeta, price, near_pct):
+
+    def near_breakout(pmeta, price, near_pct):
     """
     Возвращает 'UP' если цена очень близко к range_hi,
     'DOWN' если близко к range_lo,
