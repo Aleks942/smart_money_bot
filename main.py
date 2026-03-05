@@ -490,7 +490,7 @@ def orderbook_edge(instId: str):
 
     ob = None
     try:
-        ob = get_okx_books(instId, ORDERBOOK_SZ)
+        ob = fetch_books(instId, ORDERBOOK_SZ)
     except:
         return None
 
