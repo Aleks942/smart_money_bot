@@ -278,6 +278,46 @@ def atr_expansion_ok(candles, period=14, compare_back=5):
     atr_now = sum(trs[-period:]) / period
     atr_prev = sum(trs[-period-compare_back:-compare_back]) / period
     return atr_now > atr_prev * ATR_EXPANSION_MULT
+    def expected_move_pct(candles, pmeta, atr_period=14):
+    """
+    Оценка ожидаемого движения в %:
+    - берём ширину диапазона range_pct (если есть)
+    - и ATR% по 5m
+    - возвращаем (min_move, max_move) в процентах
+    """
+    # range_pct
+    range_pct = 0.0
+    if pmeta and isinstance(pmeta, dict):
+        try:
+            range_pct = float(pmeta.get("range_pct") or 0.0)
+        except:
+            range_pct = 0.0
+
+    # ATR% (примерно)
+    try:
+        trs = []
+        for i in range(1, len(candles)):
+            h = candles[i][2]
+            l = candles[i][3]
+            prev_close = candles[i-1][4]
+            tr = max(h - l, abs(h - prev_close), abs(l - prev_close))
+            trs.append(tr)
+
+        if len(trs) >= atr_period and candles[-1][4] > 0:
+            atr = sum(trs[-atr_period:]) / atr_period
+            atr_pct = (atr / candles[-1][4]) * 100.0
+        else:
+            atr_pct = 0.0
+    except:
+        atr_pct = 0.0
+
+    base = max(range_pct, atr_pct)
+
+    # небольшая вилка
+    min_move = max(0.5, base * 0.8)
+    max_move = base * 1.6
+
+    return round(min_move, 2), round(max_move, 2)
 
 def liquidity_pressure(candles, lookback=PRESSURE_LOOKBACK, zone=PRESSURE_ZONE, min_range_pct=MIN_RANGE_PCT):
     segment = candles[-lookback-1:-1]
