@@ -873,6 +873,7 @@ def msg_medium(sig):
     lines = []
     lines.append(f"🧠 RADAR MEDIUM — {fmt_symbol(sig['instId'])}")
     lines.append(f"💵 {sig['price']:.6g}")
+    lines.append(f"🎯 Expected move: {sig.get('exp_move_min',0)}–{sig.get('exp_move_max',0)}%")
     lines.append(f"📊 {sig['score']}/10 | {sig['direction']} (up={sig['up_w']}, down={sig['down_w']}) | acc={sig.get('acc_score', 0)}")
     lines.append(f"🎯 ENTRY: {sig['entry']} — {sig['entry_reason']}")
     lines.append(f"🧬 STAGE: {sig['stage']} — {sig['stage_reason']}")
@@ -899,6 +900,7 @@ def msg_full(sig):
     lines = []
     lines.append(f"🧠 RADAR FULL — {fmt_symbol(sig['instId'])}")
     lines.append(f"💵 {sig['price']:.6g}")
+    lines.append(f"🎯 Expected move: {sig.get('exp_move_min',0)}–{sig.get('exp_move_max',0)}%")
     lines.append(f"📊 Score: {sig['score']}/10 | acc={sig.get('acc_score', 0)}")
     lines.append(f"🎯 Direction: {sig['direction']} (up={sig['up_w']}, down={sig['down_w']})")
     lines.append(f"🎯 ENTRY: {sig['entry']} — {sig['entry_reason']}")
