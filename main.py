@@ -804,7 +804,7 @@ def is_bad_symbol(instId: str) -> bool:
         if s in base:
             return True
     return False
-    def get_market_candidates_bybit():
+def get_market_candidates_bybit():
     tickers = get_bybit_tickers_linear()
     cands = []
 
