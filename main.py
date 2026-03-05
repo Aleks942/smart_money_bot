@@ -60,6 +60,7 @@ SWEEP_RECLAIM_ZONE = float(os.getenv("SWEEP_RECLAIM_ZONE") or "0.35")  # нас�
 
 # Анти-шум пробоя: минимальная дистанция от уровня (в %)
 MIN_BREAKOUT_DIST_PCT = float(os.getenv("MIN_BREAKOUT_DIST_PCT") or "0.10")
+NEAR_BREAKOUT_PCT = float(os.getenv("NEAR_BREAKOUT_PCT") or "0.25")
 
 # 3-уровневый триггер
 TRIGGER_PRE_ACC = int(os.getenv("TRIGGER_PRE_ACC") or "3")
