@@ -687,7 +687,7 @@ def liquidity_target(pmeta, flags):
 # =========================
 def build_signal(instId: str):
     c5 = fetch_candles(instId, "5m", 120)
-c15 = fetch_candles(instId, "15m", 120)
+    c15 = fetch_candles(instId, "15m", 120)
 
     price = c5[-1][4]
     flags = []
