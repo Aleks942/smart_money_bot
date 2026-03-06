@@ -1604,8 +1604,10 @@ if __name__ == "__main__":
 
     state = load_state()
     send_telegram(f"🚀 SMART MONEY SCANNER — PRO EDGE v4 started ({EXCHANGE} market scan)")
+
     while True:
         t0 = time.time()
+
         try:
             regime, _btc = btc_regime()
             candidates = get_market_candidates()
@@ -1613,37 +1615,37 @@ if __name__ == "__main__":
             alerts = []
             manip_watch = []
 
-for (instId, vol_usdt, pct) in candidates:
-    try:
-        sig = build_signal(instId)
-        sig["vol_usdt"] = vol_usdt
-        sig["pct_24h"] = pct
+            for (instId, vol_usdt, pct) in candidates:
+                try:
+                    sig = build_signal(instId)
+                    sig["vol_usdt"] = vol_usdt
+                    sig["pct_24h"] = pct
 
-        sig = apply_regime_bias(sig, regime)
+                    sig = apply_regime_bias(sig, regime)
 
-        # =====================
-        # PRIORITY ALERT
-        # =====================
-        if is_priority_signal(sig) and priority_allowed(state, instId):
-            if pro_edge_filter(sig, regime):
-                send_telegram(msg_priority(sig))
-                mark_priority(state, instId)
+                    # =====================
+                    # PRIORITY ALERT
+                    # =====================
+                    if is_priority_signal(sig) and priority_allowed(state, instId):
+                        if pro_edge_filter(sig, regime):
+                            send_telegram(msg_priority(sig))
+                            mark_priority(state, instId)
 
-        # =====================
-        # ОБЫЧНЫЕ ALERTS
-        # =====================
-        if pro_edge_filter(sig, regime):
-            if sig["score"] >= ALERT_MIN_SCORE and should_alert_symbol(state, sig):
-                alerts.append(sig)
-                mark_alert_sent(state, sig)
+                    # =====================
+                    # ОБЫЧНЫЕ ALERTS
+                    # =====================
+                    if pro_edge_filter(sig, regime):
+                        if sig["score"] >= ALERT_MIN_SCORE and should_alert_symbol(state, sig):
+                            alerts.append(sig)
+                            mark_alert_sent(state, sig)
 
-        # =====================
-        # PRE-MOVE WATCH
-        # =====================
-        if MANIP_ALERT_ENABLED and is_pre_move_manip(sig):
-            if should_manip_alert(state, sig):
-                manip_watch.append(sig)
-                mark_manip_sent(state, sig)
+                    # =====================
+                    # PRE-MOVE WATCH
+                    # =====================
+                    if MANIP_ALERT_ENABLED and is_pre_move_manip(sig):
+                        if should_manip_alert(state, sig):
+                            manip_watch.append(sig)
+                            mark_manip_sent(state, sig)
 
         # =====================
         # V3 triggers
