@@ -601,6 +601,34 @@ def too_late_from_range(price, pmeta, max_dist_pct=0.8):
     return nearest > max_dist_pct
 
 
+def too_close_to_target(price, target, min_room_pct=0.35):
+    if target is None or price <= 0:
+        return False
+    try:
+        dist_pct = abs(float(target) - float(price)) / float(price) * 100.0
+        return dist_pct < float(min_room_pct)
+    except Exception:
+        return False
+
+
+def has_counter_book_or_trap(direction_text, flags):
+    fs = set(flags)
+
+    if "ВВЕРХ" in direction_text:
+        if "OB_ASKS" in fs or "OB_WALL_ASK" in fs:
+            return True
+        if "SWEEP_UP" in fs:
+            return True
+
+    if "ВНИЗ" in direction_text:
+        if "OB_BIDS" in fs or "OB_WALL_BID" in fs:
+            return True
+        if "FAKE_DUMP" in fs or "SWEEP_DOWN" in fs:
+            return True
+
+    return False
+
+
 # =========================
 # V3: ORDERBOOK EDGE (NEW)
 # =========================
