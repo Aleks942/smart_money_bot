@@ -1591,7 +1591,15 @@ if __name__ == "__main__":
                                        # =====================
                     # V3 triggers (оставляем как есть + анти-хвост для START)
                     # =====================
-                                        # =====================
+                                                          # =====================
+                    # PRE-MOVE WATCH (оставляем как есть)
+                    # =====================
+                    if MANIP_ALERT_ENABLED and is_pre_move_manip(sig):
+                        if should_manip_alert(state, sig):
+                            manip_watch.append(sig)
+                            mark_manip_sent(state, sig)
+
+                    # =====================
                     # V3 triggers (оставляем как есть + анти-хвост для START)
                     # =====================
                     if is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
