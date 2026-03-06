@@ -1039,8 +1039,7 @@ def get_market_candidates():
     if is_bybit():
         return get_market_candidates_bybit()
 
-    tickers = get_okx_spot_usdt_tickers()
-    ...
+
     tickers = get_okx_spot_usdt_tickers()
     cands = []
     for t in tickers:
