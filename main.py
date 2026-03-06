@@ -1640,14 +1640,17 @@ if __name__ == "__main__":
                             trigger_mark(state, instId, "last_pre_trigger_ts")
 
                     if is_start_trigger(sig) and trigger_allowed(state, instId, "last_start_trigger_ts", TRIGGER_START_COOLDOWN):
-                        exp_max = float(sig.get("exp_move_max") or 0.0)
-                        if (
-                            exp_max >= PRE_MIN_EXPECTED_MOVE_PCT
-                            and (not too_late_from_range(sig["price"], sig.get("pmeta") or {}, START_MAX_DIST_PCT))
-                            and (not too_close_to_target(sig["price"], sig.get("target"), 0.35))
-                        ):
-                            send_telegram(msg_start_trigger(sig))
-                            trigger_mark(state, instId, "last_start_trigger_ts")
+    exp_max = float(sig.get("exp_move_max") or 0.0)
+    entry_text = str(sig.get("entry") or "")
+
+    if (
+        exp_max >= PRE_MIN_EXPECTED_MOVE_PCT
+        and ("WAIT" not in entry_text)
+        and (not too_late_from_range(sig["price"], sig.get("pmeta") or {}, START_MAX_DIST_PCT))
+        and (not too_close_to_target(sig["price"], sig.get("target"), 0.35))
+    ):
+        send_telegram(msg_start_trigger(sig))
+        trigger_mark(state, instId, "last_start_trigger_ts")
 
                     if is_confirm_trigger(sig) and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN):
                         send_telegram(msg_confirm_trigger(sig))
