@@ -1590,8 +1590,7 @@ if __name__ == "__main__":
         raise RuntimeError("Missing BOT_TOKEN / CHAT_ID")
 
     state = load_state()
-    send_telegram("🚀 SMART MONEY SCANNER — PRO EDGE v4 started (OKX market scan)")
-
+    send_telegram(f"🚀 SMART MONEY SCANNER — PRO EDGE v4 started ({EXCHANGE} market scan)")
     while True:
         t0 = time.time()
         try:
