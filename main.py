@@ -1612,6 +1612,7 @@ if __name__ == "__main__":
 
             alerts = []
             manip_watch = []
+
 for (instId, vol_usdt, pct) in candidates:
     try:
         sig = build_signal(instId)
@@ -1619,6 +1620,30 @@ for (instId, vol_usdt, pct) in candidates:
         sig["pct_24h"] = pct
 
         sig = apply_regime_bias(sig, regime)
+
+        # =====================
+        # PRIORITY ALERT
+        # =====================
+        if is_priority_signal(sig) and priority_allowed(state, instId):
+            if pro_edge_filter(sig, regime):
+                send_telegram(msg_priority(sig))
+                mark_priority(state, instId)
+
+        # =====================
+        # ОБЫЧНЫЕ ALERTS
+        # =====================
+        if pro_edge_filter(sig, regime):
+            if sig["score"] >= ALERT_MIN_SCORE and should_alert_symbol(state, sig):
+                alerts.append(sig)
+                mark_alert_sent(state, sig)
+
+        # =====================
+        # PRE-MOVE WATCH
+        # =====================
+        if MANIP_ALERT_ENABLED and is_pre_move_manip(sig):
+            if should_manip_alert(state, sig):
+                manip_watch.append(sig)
+                mark_manip_sent(state, sig)
 
         # =====================
         # V3 triggers
