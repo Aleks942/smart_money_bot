@@ -930,6 +930,11 @@ def build_signal(instId: str):
     entry, entry_reason = entry_engine(score, flags, direction_text, up_w, down_w)
     stage, stage_reason = smart_money_stage(score, flags)
     tgt = liquidity_target(pmeta, flags)
+    counter_block = has_counter_book_or_trap(direction_text, flags)
+
+if counter_block and "AGGRESSIVE" in entry:
+    entry = "⚠️ WAIT"
+    entry_reason = "Есть встречный стакан / ловушка против направления"
 
     dir_key = None
     if "ВВЕРХ" in direction_text:
