@@ -850,6 +850,12 @@ def build_signal(instId: str):
         score += 1
         flags.append(f"PRESSURE_{pres}")
 
+    # NEW: near breakout
+    nb = near_breakout(pmeta, price, NEAR_BREAKOUT_PCT)
+    if nb:
+        score += 1
+        flags.append(f"NEAR_BREAKOUT_{nb}")
+
     # BIG MOVE FILTER
     if pmeta and pmeta.get("range_pct", 0) > 2.0:
         score += 1
@@ -884,13 +890,33 @@ def build_signal(instId: str):
 
     score += anti_pump_penalty(c5, ANTI_PUMP_PCT_5M)
 
+    acc_score = accumulation_bias(flags)
+    exp_min, exp_max = expected_move_pct(c5, pmeta)
+
+    # NEW: RSI
+    rsi_state = get_rsi_state(c5)
+    rsi7 = rsi_state.get("rsi7")
+    rsi14 = rsi_state.get("rsi14")
+
     direction_text, reasons, up_w, down_w = direction_hint(flags)
     entry, entry_reason = entry_engine(score, flags, direction_text, up_w, down_w)
     stage, stage_reason = smart_money_stage(score, flags)
     tgt = liquidity_target(pmeta, flags)
 
-    acc_score = accumulation_bias(flags)
-    exp_min, exp_max = expected_move_pct(c5, pmeta)
+    dir_key = None
+    if "ВВЕРХ" in direction_text:
+        dir_key = "UP"
+    elif "ВНИЗ" in direction_text:
+        dir_key = "DOWN"
+
+    if USE_RSI_FILTER and dir_key:
+        if rsi_warns_direction(dir_key, rsi_state):
+            flags.append(f"RSI_{rsi_state.get('state')}")
+
+        if BLOCK_AGGRESSIVE_ON_RSI_EXTREME and rsi_blocks_aggressive_entry(dir_key, rsi_state):
+            if "AGGRESSIVE" in entry:
+                entry = "⚠️ WAIT"
+                entry_reason = "RSI: рынок уже перегрет / перепродан"
 
     return {
         "instId": instId,
@@ -912,6 +938,9 @@ def build_signal(instId: str):
         "pmeta": pmeta,
         "obmeta": ob_meta,
         "swmeta": sw_meta,
+        "rsi7": rsi7,
+        "rsi14": rsi14,
+        "rsi_state": rsi_state.get("state"),
         "ts": now_ts(),
     }
 
