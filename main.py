@@ -1607,9 +1607,6 @@ if __name__ == "__main__":
                         send_telegram(msg_confirm_trigger(sig))
                         trigger_mark(state, instId, "last_confirm_trigger_ts")
 
-                    if is_confirm_trigger(sig) and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN):
-                        send_telegram(msg_confirm_trigger(sig))
-                        trigger_mark(state, instId, "last_confirm_trigger_ts")
 
                     update_symbol_state(state, sig)
                     time.sleep(0.14)
