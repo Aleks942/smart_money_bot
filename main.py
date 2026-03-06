@@ -1591,7 +1591,7 @@ if __name__ == "__main__":
                                        # =====================
                     # V3 triggers (оставляем как есть + анти-хвост для START)
                     # =====================
-                    if is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
+                   if is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
     exp_max = float(sig.get("exp_move_max") or 0.0)
     if exp_max >= PRE_MIN_EXPECTED_MOVE_PCT:
         send_telegram(msg_pre_trigger(sig))
@@ -1607,13 +1607,12 @@ if is_start_trigger(sig) and trigger_allowed(state, instId, "last_start_trigger_
         send_telegram(msg_start_trigger(sig))
         trigger_mark(state, instId, "last_start_trigger_ts")
 
-                    if is_confirm_trigger(sig) and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN):
-                        send_telegram(msg_confirm_trigger(sig))
-                        trigger_mark(state, instId, "last_confirm_trigger_ts")
+if is_confirm_trigger(sig) and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN):
+    send_telegram(msg_confirm_trigger(sig))
+    trigger_mark(state, instId, "last_confirm_trigger_ts")
 
-  
-                    update_symbol_state(state, sig)
-                    time.sleep(0.14)
+update_symbol_state(state, sig)
+time.sleep(0.14)
                 except Exception as e:
                     print(f"[SCAN ERROR] {instId}: {e}", flush=True)
                     continue
