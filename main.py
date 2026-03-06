@@ -1661,10 +1661,10 @@ if __name__ == "__main__":
                     if (
                            exp_max >= PRE_MIN_EXPECTED_MOVE_PCT
                           and (not too_late_from_range(sig["price"], sig.get("pmeta") or {}, START_MAX_DIST_PCT))
-                        and (not too_close_to_target(sig["price"], sig.get("target"), 0.35))
+                          and (not too_close_to_target(sig["price"], sig.get("target"), 0.35))
     ):
-        send_telegram(msg_start_trigger(sig))
-        trigger_mark(state, instId, "last_start_trigger_ts")
+                          send_telegram(msg_start_trigger(sig))
+                          trigger_mark(state, instId, "last_start_trigger_ts")
 
 
                     if is_confirm_trigger(sig) and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN):
