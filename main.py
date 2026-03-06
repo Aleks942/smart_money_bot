@@ -1613,8 +1613,8 @@ if __name__ == "__main__":
             alerts = []
             manip_watch = []
 
-            for (instId, vol_usdt, pct) in candidates:
-                try:
+ for (instId, vol_usdt, pct) in candidates:
+    try:
         sig = build_signal(instId)
         sig["vol_usdt"] = vol_usdt
         sig["pct_24h"] = pct
