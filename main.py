@@ -430,59 +430,6 @@ def liquidity_pressure(candles, lookback=PRESSURE_LOOKBACK, zone=PRESSURE_ZONE, 
     return None, {"range_hi": hi, "range_lo": lo, "range_pct": range_pct, "pos": pos}
 
 
-def near_breakout(pmeta, price, near_pct):
-    if not pmeta or not isinstance(pmeta, dict):
-        return None
-
-    hi = pmeta.get("range_hi")
-    lo = pmeta.get("range_lo")
-    if hi is None or lo is None:
-        return None
-
-    try:
-        hi = float(hi)
-        lo = float(lo)
-        price = float(price)
-        near_pct = float(near_pct)
-    except Exception:
-        return None
-
-    if price <= 0:
-        return None
-
-    dist_up = abs(hi - price) / price * 100.0
-    dist_dn = abs(price - lo) / price * 100.0
-    if dist_up <= near_pct:
-        return "UP"
-    if dist_dn <= near_pct:
-        return "DOWN"
-    return None
-
-
-def too_late_from_range(price, pmeta, max_dist_pct=0.8):
-    if not pmeta or price <= 0:
-        return False
-
-    hi = pmeta.get("range_hi")
-    lo = pmeta.get("range_lo")
-    if hi is None or lo is None:
-        return False
-
-    try:
-        hi = float(hi)
-        lo = float(lo)
-        price = float(price)
-        max_dist_pct = float(max_dist_pct)
-    except:
-        return False
-
-    dist_to_hi = abs(hi - price) / price * 100.0
-    dist_to_lo = abs(price - lo) / price * 100.0
-    nearest = min(dist_to_hi, dist_to_lo)
-
-    return nearest > max_dist_pct
-    
-
 # =========================
 # V3: ORDERBOOK EDGE (NEW)
 # =========================
