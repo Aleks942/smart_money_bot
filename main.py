@@ -1612,7 +1612,6 @@ if __name__ == "__main__":
 
             alerts = []
             manip_watch = []
-
 for (instId, vol_usdt, pct) in candidates:
     try:
         sig = build_signal(instId)
