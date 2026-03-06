@@ -1672,7 +1672,7 @@ if __name__ == "__main__":
                            trigger_mark(state, instId, "last_confirm_trigger_ts")
 
 
-                             update_symbol_state(state, sig)
+                    update_symbol_state(state, sig)
                             time.sleep(0.14)
 
                      except Exception as e:
