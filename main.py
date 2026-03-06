@@ -817,17 +817,36 @@ def smart_money_stage(score, flags):
         return "🟣 ACCUMULATION", "Накопление/сжатие"
     return "⚪ NEUTRAL", "Смешанные признаки"
 
-def liquidity_target(pmeta, flags):
+def liquidity_target(pmeta, flags, price=None):
     if not pmeta:
         return None
+
     lo = pmeta.get("range_lo")
     hi = pmeta.get("range_hi")
     if lo is None or hi is None:
         return None
-    if "BREAKOUT_UP" in flags or "PRESSURE_UP" in flags:
-        return float(hi)
-    if "BREAKOUT_DOWN" in flags or "PRESSURE_DOWN" in flags:
-        return float(lo)
+
+    try:
+        lo = float(lo)
+        hi = float(hi)
+        price = float(price) if price is not None else None
+    except Exception:
+        return None
+
+    rng = hi - lo
+    if rng <= 0:
+        return None
+
+    if "BREAKOUT_UP" in flags or "BREAKOUT_CONFIRM_UP" in flags or "PRESSURE_UP" in flags:
+        if price is not None and price >= hi:
+            return round(hi + rng * 0.35, 6)
+        return round(hi, 6)
+
+    if "BREAKOUT_DOWN" in flags or "BREAKOUT_CONFIRM_DOWN" in flags or "PRESSURE_DOWN" in flags:
+        if price is not None and price <= lo:
+            return round(lo - rng * 0.35, 6)
+        return round(lo, 6)
+
     return None
 
 # =========================
