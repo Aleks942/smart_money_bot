@@ -1676,9 +1676,25 @@ if __name__ == "__main__":
                     update_symbol_state(state, sig)
                     time.sleep(0.14)
 
+            if is_confirm_trigger(sig) and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN):
+                        send_telegram(msg_confirm_trigger(sig))
+                        trigger_mark(state, instId, "last_confirm_trigger_ts")
+
+
+                    update_symbol_state(state, sig)
+                    time.sleep(0.14)
+
                      except Exception as e:
                              print(f"[SCAN ERROR] {instId}: {e}", flush=True)
                              continue
+
+                    # =====================
+            # сортировка + ограничение шума
+            # =====================
+            alerts.sort(key=lambda s: (s["score"], abs(s.get("pct_24h", 0.0))), reverse=True)
+            alerts = alerts[:PRO_EDGE_MAX_ALERTS_PER_CYCLE]
+            manip_watch.sort(key=lambda s: (int(s.get("acc_score", 0)), s.get("score", 0)), reverse=True)
+
 
                     # =====================
             # сортировка + ограничение шума
