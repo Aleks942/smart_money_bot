@@ -1654,8 +1654,8 @@ if __name__ == "__main__":
                             trigger_mark(state, instId, "last_pre_trigger_ts")
 
                     if is_start_trigger(sig) and trigger_allowed(state, instId, "last_start_trigger_ts", TRIGGER_START_COOLDOWN):
-    exp_max = float(sig.get("exp_move_max") or 0.0)
-    entry_text = str(sig.get("entry") or "")
+                        exp_max = float(sig.get("exp_move_max") or 0.0)
+                         entry_text = str(sig.get("entry") or "")
 
     if (
         exp_max >= PRE_MIN_EXPECTED_MOVE_PCT
