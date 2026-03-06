@@ -577,6 +577,29 @@ def rsi_warns_direction(direction, rsi_state):
 
     return False
 
+def too_late_from_range(price, pmeta, max_dist_pct=0.8):
+    if not pmeta or price <= 0:
+        return False
+
+    hi = pmeta.get("range_hi")
+    lo = pmeta.get("range_lo")
+    if hi is None or lo is None:
+        return False
+
+    try:
+        hi = float(hi)
+        lo = float(lo)
+        price = float(price)
+        max_dist_pct = float(max_dist_pct)
+    except Exception:
+        return False
+
+    dist_to_hi = abs(hi - price) / price * 100.0
+    dist_to_lo = abs(price - lo) / price * 100.0
+    nearest = min(dist_to_hi, dist_to_lo)
+
+    return nearest > max_dist_pct
+
 
 # =========================
 # V3: ORDERBOOK EDGE (NEW)
