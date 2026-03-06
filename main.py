@@ -1614,79 +1614,48 @@ if __name__ == "__main__":
             manip_watch = []
 
             for (instId, vol_usdt, pct) in candidates:
-                try:
-                    sig = build_signal(instId)
-                    sig["vol_usdt"] = vol_usdt
-                    sig["pct_24h"] = pct
+    try:
+        sig = build_signal(instId)
+        sig["vol_usdt"] = vol_usdt
+        sig["pct_24h"] = pct
 
-                    sig = apply_regime_bias(sig, regime)
+        sig = apply_regime_bias(sig, regime)
 
-                    # =====================
-                    # PRIORITY ALERT (оставляем, но усиливаем качеством)
-                    # =====================
-                    if is_priority_signal(sig) and priority_allowed(state, instId):
-                        if pro_edge_filter(sig, regime):
-                            send_telegram(msg_priority(sig))
-                            mark_priority(state, instId)
+        # =====================
+        # V3 triggers
+        # =====================
 
-                    # =====================
-                    # ОБЫЧНЫЕ ALERTS (теперь через PRO EDGE)
-                    # =====================
-                    if pro_edge_filter(sig, regime):
-                        if sig["score"] >= ALERT_MIN_SCORE and should_alert_symbol(state, sig):
-                            alerts.append(sig)
-                            mark_alert_sent(state, sig)
+        if is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
+            exp_max = float(sig.get("exp_move_max") or 0.0)
 
-                    
-                   
-                    if MANIP_ALERT_ENABLED and is_pre_move_manip(sig):
-                        if should_manip_alert(state, sig):
-                            manip_watch.append(sig)
-                            mark_manip_sent(state, sig)
-
-                                         # =====================
-                    # V3 triggers
-                    # =====================
-
-                    if is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
-                        exp_max = float(sig.get("exp_move_max") or 0.0)
-
-                        if exp_max >= PRE_MIN_EXPECTED_MOVE_PCT:
-                            send_telegram(msg_pre_trigger(sig))
-                            trigger_mark(state, instId, "last_pre_trigger_ts")
+            if exp_max >= PRE_MIN_EXPECTED_MOVE_PCT:
+                send_telegram(msg_pre_trigger(sig))
+                trigger_mark(state, instId, "last_pre_trigger_ts")
 
 
-                    if is_start_trigger(sig) and trigger_allowed(state, instId, "last_start_trigger_ts", TRIGGER_START_COOLDOWN):
-                        exp_max = float(sig.get("exp_move_max") or 0.0)
+        if is_start_trigger(sig) and trigger_allowed(state, instId, "last_start_trigger_ts", TRIGGER_START_COOLDOWN):
+            exp_max = float(sig.get("exp_move_max") or 0.0)
 
-                        if (
-                            exp_max >= PRE_MIN_EXPECTED_MOVE_PCT
-                            and (not too_late_from_range(sig["price"], sig.get("pmeta") or {}, START_MAX_DIST_PCT))
-                            and (not too_close_to_target(sig["price"], sig.get("target"), 0.35))
-                        ):
-                            send_telegram(msg_start_trigger(sig))
-                            trigger_mark(state, instId, "last_start_trigger_ts")
-
-
-                    if is_confirm_trigger(sig) and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN):
-                        send_telegram(msg_confirm_trigger(sig))
-                        trigger_mark(state, instId, "last_confirm_trigger_ts")
+            if (
+                exp_max >= PRE_MIN_EXPECTED_MOVE_PCT
+                and (not too_late_from_range(sig["price"], sig.get("pmeta") or {}, START_MAX_DIST_PCT))
+                and (not too_close_to_target(sig["price"], sig.get("target"), 0.35))
+            ):
+                send_telegram(msg_start_trigger(sig))
+                trigger_mark(state, instId, "last_start_trigger_ts")
 
 
-                    update_symbol_state(state, sig)
-                    time.sleep(0.14)
-
-                    if is_confirm_trigger(sig) and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN):
-                        send_telegram(msg_confirm_trigger(sig))
-                        trigger_mark(state, instId, "last_confirm_trigger_ts")
+        if is_confirm_trigger(sig) and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN):
+            send_telegram(msg_confirm_trigger(sig))
+            trigger_mark(state, instId, "last_confirm_trigger_ts")
 
 
-                    update_symbol_state(state, sig)
-                    time.sleep(0.14)
+        update_symbol_state(state, sig)
+        time.sleep(0.14)
 
-                     except Exception as e:
-                             print(f"[SCAN ERROR] {instId}: {e}", flush=True)
-                             continue
+    except Exception as e:
+        print(f"[SCAN ERROR] {instId}: {e}", flush=True)
+        continue
 
                     # =====================
             # сортировка + ограничение шума
