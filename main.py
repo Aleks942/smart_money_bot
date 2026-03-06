@@ -429,6 +429,142 @@ def liquidity_pressure(candles, lookback=PRESSURE_LOOKBACK, zone=PRESSURE_ZONE, 
         return "DOWN", {"range_hi": hi, "range_lo": lo, "range_pct": range_pct, "pos": pos}
     return None, {"range_hi": hi, "range_lo": lo, "range_pct": range_pct, "pos": pos}
 
+def near_breakout(pmeta, price, near_pct):
+    if not pmeta or not isinstance(pmeta, dict):
+        return None
+
+    hi = pmeta.get("range_hi")
+    lo = pmeta.get("range_lo")
+    if hi is None or lo is None:
+        return None
+
+    try:
+        hi = float(hi)
+        lo = float(lo)
+        price = float(price)
+        near_pct = float(near_pct)
+    except Exception:
+        return None
+
+    if price <= 0:
+        return None
+
+    dist_up = abs(hi - price) / price * 100.0
+    dist_dn = abs(price - lo) / price * 100.0
+
+    if dist_up <= near_pct:
+        return "UP"
+    if dist_dn <= near_pct:
+        return "DOWN"
+    return None
+
+
+def _close_from_candle(c):
+    try:
+        return float(c[4])
+    except Exception:
+        return None
+
+
+def extract_closes(candles):
+    closes = []
+    for c in candles or []:
+        v = _close_from_candle(c)
+        if v is not None:
+            closes.append(v)
+    return closes
+
+
+def calc_rsi(closes, period=14):
+    if not closes or len(closes) < period + 1:
+        return None
+
+    gains = []
+    losses = []
+
+    for i in range(1, period + 1):
+        ch = closes[i] - closes[i - 1]
+        gains.append(max(ch, 0.0))
+        losses.append(abs(min(ch, 0.0)))
+
+    avg_gain = sum(gains) / period
+    avg_loss = sum(losses) / period
+
+    for i in range(period + 1, len(closes)):
+        ch = closes[i] - closes[i - 1]
+        gain = max(ch, 0.0)
+        loss = abs(min(ch, 0.0))
+
+        avg_gain = ((avg_gain * (period - 1)) + gain) / period
+        avg_loss = ((avg_loss * (period - 1)) + loss) / period
+
+    if avg_loss == 0:
+        return 100.0
+
+    rs = avg_gain / avg_loss
+    return 100.0 - (100.0 / (1.0 + rs))
+
+
+def get_rsi_state(candles):
+    closes = extract_closes(candles)
+    if not closes:
+        return {
+            "rsi7": None,
+            "rsi14": None,
+            "state": "UNKNOWN",
+        }
+
+    rsi7 = calc_rsi(closes, RSI_FAST_LEN)
+    rsi14 = calc_rsi(closes, RSI_SLOW_LEN)
+
+    state = "NORMAL"
+
+    if rsi7 is not None:
+        if rsi7 >= RSI_OB_BLOCK:
+            state = "EXTREME_OVERBOUGHT"
+        elif rsi7 <= RSI_OS_BLOCK:
+            state = "EXTREME_OVERSOLD"
+        elif rsi7 >= RSI_OB_WARN:
+            state = "OVERBOUGHT"
+        elif rsi7 <= RSI_OS_WARN:
+            state = "OVERSOLD"
+
+    return {
+        "rsi7": rsi7,
+        "rsi14": rsi14,
+        "state": state,
+    }
+
+
+def rsi_blocks_aggressive_entry(direction, rsi_state):
+    if not rsi_state:
+        return False
+
+    state = rsi_state.get("state", "UNKNOWN")
+
+    if direction == "UP" and state == "EXTREME_OVERBOUGHT":
+        return True
+
+    if direction == "DOWN" and state == "EXTREME_OVERSOLD":
+        return True
+
+    return False
+
+
+def rsi_warns_direction(direction, rsi_state):
+    if not rsi_state:
+        return False
+
+    state = rsi_state.get("state", "UNKNOWN")
+
+    if direction == "UP" and state in ("OVERBOUGHT", "EXTREME_OVERBOUGHT"):
+        return True
+
+    if direction == "DOWN" and state in ("OVERSOLD", "EXTREME_OVERSOLD"):
+        return True
+
+    return False
+
 
 # =========================
 # V3: ORDERBOOK EDGE (NEW)
