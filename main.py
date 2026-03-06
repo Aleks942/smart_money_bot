@@ -1616,6 +1616,7 @@ if __name__ == "__main__":
             manip_watch = []
 
             for (instId, vol_usdt, pct) in candidates:
+
                 try:
                     sig = build_signal(instId)
                     sig["vol_usdt"] = vol_usdt
@@ -1647,60 +1648,57 @@ if __name__ == "__main__":
                             manip_watch.append(sig)
                             mark_manip_sent(state, sig)
 
-        # =====================
-        # V3 triggers
-        # =====================
-
-        if is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
-            exp_max = float(sig.get("exp_move_max") or 0.0)
-
-            if exp_max >= PRE_MIN_EXPECTED_MOVE_PCT:
-                send_telegram(msg_pre_trigger(sig))
-                trigger_mark(state, instId, "last_pre_trigger_ts")
-
-
-        if is_start_trigger(sig) and trigger_allowed(state, instId, "last_start_trigger_ts", TRIGGER_START_COOLDOWN):
-            exp_max = float(sig.get("exp_move_max") or 0.0)
-
-            if (
-                exp_max >= PRE_MIN_EXPECTED_MOVE_PCT
-                and (not too_late_from_range(sig["price"], sig.get("pmeta") or {}, START_MAX_DIST_PCT))
-                and (not too_close_to_target(sig["price"], sig.get("target"), 0.35))
-            ):
-                send_telegram(msg_start_trigger(sig))
-                trigger_mark(state, instId, "last_start_trigger_ts")
-
-
-        if is_confirm_trigger(sig) and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN):
-            send_telegram(msg_confirm_trigger(sig))
-            trigger_mark(state, instId, "last_confirm_trigger_ts")
-
-
-        update_symbol_state(state, sig)
-        time.sleep(0.14)
-
-    except Exception as e:
-        print(f"[SCAN ERROR] {instId}: {e}", flush=True)
-        continue
-
                     # =====================
-            # сортировка + ограничение шума
+                    # V3 TRIGGERS
+                    # =====================
+
+                    if is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
+                        exp_max = float(sig.get("exp_move_max") or 0.0)
+
+                        if exp_max >= PRE_MIN_EXPECTED_MOVE_PCT:
+                            send_telegram(msg_pre_trigger(sig))
+                            trigger_mark(state, instId, "last_pre_trigger_ts")
+
+
+                    if is_start_trigger(sig) and trigger_allowed(state, instId, "last_start_trigger_ts", TRIGGER_START_COOLDOWN):
+                        exp_max = float(sig.get("exp_move_max") or 0.0)
+
+                        if (
+                            exp_max >= PRE_MIN_EXPECTED_MOVE_PCT
+                            and (not too_late_from_range(sig["price"], sig.get("pmeta") or {}, START_MAX_DIST_PCT))
+                            and (not too_close_to_target(sig["price"], sig.get("target"), 0.35))
+                        ):
+                            send_telegram(msg_start_trigger(sig))
+                            trigger_mark(state, instId, "last_start_trigger_ts")
+
+
+                    if is_confirm_trigger(sig) and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN):
+                        send_telegram(msg_confirm_trigger(sig))
+                        trigger_mark(state, instId, "last_confirm_trigger_ts")
+
+
+                    update_symbol_state(state, sig)
+                    time.sleep(0.14)
+
+                except Exception as e:
+                    print(f"[SCAN ERROR] {instId}: {e}", flush=True)
+                    continue
+
+
             # =====================
+            # сортировка сигналов
+            # =====================
+
             alerts.sort(key=lambda s: (s["score"], abs(s.get("pct_24h", 0.0))), reverse=True)
             alerts = alerts[:PRO_EDGE_MAX_ALERTS_PER_CYCLE]
+
             manip_watch.sort(key=lambda s: (int(s.get("acc_score", 0)), s.get("score", 0)), reverse=True)
 
-
-                    # =====================
-            # сортировка + ограничение шума
-            # =====================
-            alerts.sort(key=lambda s: (s["score"], abs(s.get("pct_24h", 0.0))), reverse=True)
-            alerts = alerts[:PRO_EDGE_MAX_ALERTS_PER_CYCLE]
-            manip_watch.sort(key=lambda s: (int(s.get("acc_score", 0)), s.get("score", 0)), reverse=True)
 
             # =====================
             # GLOBAL PRIORITY ENGINE
             # =====================
+
             if PRIORITY_ENABLED:
                 try:
                     priority_list = find_global_priority(alerts)
@@ -1713,29 +1711,38 @@ if __name__ == "__main__":
                 except Exception:
                     pass
 
-            # PRO EDGE ограничитель: максимум N алертов за цикл
+
+            # ограничение сигналов
             if PRO_EDGE_ENABLED and PRO_EDGE_MAX_ALERTS_PER_CYCLE > 0:
                 alerts = alerts[:PRO_EDGE_MAX_ALERTS_PER_CYCLE]
 
+
             cycle_info = time.strftime("%Y-%m-%d %H:%M:%S")
 
-            # summary всегда
+
+            # MARKET SUMMARY
             send_telegram(summary_message(alerts, cycle_info, regime))
 
-            # детали по лучшим
+
+            # DETAILS
             for sig in alerts[:DETAIL_TOP_K]:
                 send_telegram(choose_detail_message(sig))
 
-            # pre-move watch
+
+            # PRE MOVE WATCH
             if MANIP_ALERT_ENABLED:
                 send_telegram(manip_summary_message(manip_watch, cycle_info, regime))
+
                 for sig in manip_watch[:MANIP_DETAIL_TOP_K]:
                     send_telegram(msg_medium(sig))
 
-            save_state(state)   
+
+            save_state(state)
+
 
         except Exception as e:
             send_telegram(f"❌ Scan Error:\n{str(e)}")
+
 
         dt = time.time() - t0
         sleep_for = max(1, POLL_SECONDS - int(dt))
