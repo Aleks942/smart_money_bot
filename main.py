@@ -1647,7 +1647,7 @@ if __name__ == "__main__":
         exp_max >= PRE_MIN_EXPECTED_MOVE_PCT
         and ("WAIT" not in entry_text)
         and (not too_late_from_range(sig["price"], sig.get("pmeta") or {}, START_MAX_DIST_PCT))
-        and (not too_close_to_target(sig["price"], sig.get("target"), 0.35))
+        and (not too_close_to_target(sig["price"], sig.get("target"), 0.60))
     ):
         send_telegram(msg_start_trigger(sig))
         trigger_mark(state, instId, "last_start_trigger_ts")
