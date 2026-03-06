@@ -1625,9 +1625,7 @@ if __name__ == "__main__":
                             alerts.append(sig)
                             mark_alert_sent(state, sig)
 
-                    # =====================
-                    # PRE-MOVE WATCH (оставляем как есть)
-                    # =====================
+                    
                    
                     if MANIP_ALERT_ENABLED and is_pre_move_manip(sig):
                         if should_manip_alert(state, sig):
