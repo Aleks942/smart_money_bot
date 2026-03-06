@@ -63,6 +63,18 @@ MIN_BREAKOUT_DIST_PCT = float(os.getenv("MIN_BREAKOUT_DIST_PCT") or "0.10")
 NEAR_BREAKOUT_PCT = float(os.getenv("NEAR_BREAKOUT_PCT") or "0.25")
 START_MAX_DIST_PCT = float(os.getenv("START_MAX_DIST_PCT") or "0.8")
 PRE_MIN_EXPECTED_MOVE_PCT = float(os.getenv("PRE_MIN_EXPECTED_MOVE_PCT") or "2.3")
+USE_RSI_FILTER = int(os.getenv("USE_RSI_FILTER", "1"))
+
+RSI_FAST_LEN = int(os.getenv("RSI_FAST_LEN", "7"))
+RSI_SLOW_LEN = int(os.getenv("RSI_SLOW_LEN", "14"))
+
+RSI_OB_WARN = float(os.getenv("RSI_OB_WARN", "74"))
+RSI_OB_BLOCK = float(os.getenv("RSI_OB_BLOCK", "80"))
+
+RSI_OS_WARN = float(os.getenv("RSI_OS_WARN", "26"))
+RSI_OS_BLOCK = float(os.getenv("RSI_OS_BLOCK", "20"))
+
+BLOCK_AGGRESSIVE_ON_RSI_EXTREME = int(os.getenv("BLOCK_AGGRESSIVE_ON_RSI_EXTREME", "1"))
 
 # 3-уровневый триггер
 TRIGGER_PRE_ACC = int(os.getenv("TRIGGER_PRE_ACC") or "3")
