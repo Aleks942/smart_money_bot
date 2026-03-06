@@ -1644,32 +1644,32 @@ if __name__ == "__main__":
                             manip_watch.append(sig)
                             mark_manip_sent(state, sig)
 
-# =====================
-# V3 triggers
-# =====================
+                     # =====================
+                     # V3 triggers
+                     # =====================
 
-if is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
-    exp_max = float(sig.get("exp_move_max") or 0.0)
-    if exp_max >= PRE_MIN_EXPECTED_MOVE_PCT:
-        send_telegram(msg_pre_trigger(sig))
-        trigger_mark(state, instId, "last_pre_trigger_ts")
+                    if is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
+                        exp_max = float(sig.get("exp_move_max") or 0.0)
+                    if exp_max >= PRE_MIN_EXPECTED_MOVE_PCT:
+                          send_telegram(msg_pre_trigger(sig))
+                          trigger_mark(state, instId, "last_pre_trigger_ts")
 
 
-if is_start_trigger(sig) and trigger_allowed(state, instId, "last_start_trigger_ts", TRIGGER_START_COOLDOWN):
-    exp_max = float(sig.get("exp_move_max") or 0.0)
+                    if is_start_trigger(sig) and trigger_allowed(state, instId, "last_start_trigger_ts", TRIGGER_START_COOLDOWN):
+                        exp_max = float(sig.get("exp_move_max") or 0.0)
 
-    if (
-        exp_max >= PRE_MIN_EXPECTED_MOVE_PCT
-        and (not too_late_from_range(sig["price"], sig.get("pmeta") or {}, START_MAX_DIST_PCT))
-        and (not too_close_to_target(sig["price"], sig.get("target"), 0.35))
+                    if (
+                           exp_max >= PRE_MIN_EXPECTED_MOVE_PCT
+                          and (not too_late_from_range(sig["price"], sig.get("pmeta") or {}, START_MAX_DIST_PCT))
+                        and (not too_close_to_target(sig["price"], sig.get("target"), 0.35))
     ):
         send_telegram(msg_start_trigger(sig))
         trigger_mark(state, instId, "last_start_trigger_ts")
 
 
-if is_confirm_trigger(sig) and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN):
-    send_telegram(msg_confirm_trigger(sig))
-    trigger_mark(state, instId, "last_confirm_trigger_ts")
+                    if is_confirm_trigger(sig) and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN):
+                           send_telegram(msg_confirm_trigger(sig))
+                           trigger_mark(state, instId, "last_confirm_trigger_ts")
 
 
 update_symbol_state(state, sig)
