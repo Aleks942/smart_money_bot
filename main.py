@@ -1187,6 +1187,9 @@ def msg_medium(sig):
     lines.append(f"🧠 RADAR MEDIUM — {fmt_symbol(sig['instId'])}")
     lines.append(f"💵 {sig['price']:.6g}")
     lines.append(f"🎯 Expected move: {sig.get('exp_move_min',0)}–{sig.get('exp_move_max',0)}%")
+    if sig.get("rsi7") is not None and sig.get("rsi14") is not None:
+        lines.append(f"📍 RSI7={sig['rsi7']:.1f} | RSI14={sig['rsi14']:.1f} | {sig.get('rsi_state', 'UNKNOWN')}")
+    
     lines.append(f"📊 {sig['score']}/10 | {sig['direction']} (up={sig['up_w']}, down={sig['down_w']}) | acc={sig.get('acc_score', 0)}")
     lines.append(f"🎯 ENTRY: {sig['entry']} — {sig['entry_reason']}")
     lines.append(f"🧬 STAGE: {sig['stage']} — {sig['stage_reason']}")
