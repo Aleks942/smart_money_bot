@@ -932,6 +932,18 @@ def build_signal(instId: str):
     if pres:
         score += 1
         flags.append(f"PRESSURE_{pres}")
+        # Liquidity magnet (куда тянет цену)
+    if pmeta:
+        hi = pmeta.get("range_hi")
+        lo = pmeta.get("range_lo")
+
+    if hi and price >= hi * 0.998:
+        flags.append("LIQUIDITY_MAGNET_UP")
+        score += 1
+
+    if lo and price <= lo * 1.002:
+        flags.append("LIQUIDITY_MAGNET_DOWN")
+        score += 1
 
     nb = near_breakout(pmeta, price, NEAR_BREAKOUT_PCT)
     if nb:
