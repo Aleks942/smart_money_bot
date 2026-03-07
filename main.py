@@ -941,10 +941,12 @@ def liquidity_target(pmeta, flags, price=None):
 # BUILD SIGNAL FOR SYMBOL
 # =========================
 def build_signal(instId: str):
+
     c5 = fetch_candles(instId, "5m", 120)
     c15 = fetch_candles(instId, "15m", 120)
 
     price = c5[-1][4]
+
     flags = []
     score = 0
 
@@ -984,18 +986,18 @@ def build_signal(instId: str):
     if pres:
         score += 1
         flags.append(f"PRESSURE_{pres}")
-        # Liquidity magnet (куда тянет цену)
+
     if pmeta:
         hi = pmeta.get("range_hi")
         lo = pmeta.get("range_lo")
 
-    if hi and price >= hi * 0.998:
-        flags.append("LIQUIDITY_MAGNET_UP")
-        score += 1
+        if hi and price >= hi * 0.998:
+            score += 1
+            flags.append("LIQUIDITY_MAGNET_UP")
 
-    if lo and price <= lo * 1.002:
-        flags.append("LIQUIDITY_MAGNET_DOWN")
-        score += 1
+        if lo and price <= lo * 1.002:
+            score += 1
+            flags.append("LIQUIDITY_MAGNET_DOWN")
 
     nb = near_breakout(pmeta, price, NEAR_BREAKOUT_PCT)
     if nb:
@@ -1006,29 +1008,16 @@ def build_signal(instId: str):
         score += 1
         flags.append("BIG_RANGE")
 
-    # =========================
-# SWEEP
-# =========================
+    sw, sw_meta = liquidity_sweep(c5)
+    if sw:
+        score += 1
+        flags.append(sw)
 
-sw, sw_meta = liquidity_sweep(c5)
+    trap = trap_detector(c5)
+    if trap:
+        score += 1
+        flags.append(trap)
 
-if sw:
-    score += 1
-    flags.append(sw)
-
-# =========================
-# TRAP
-# =========================
-
-trap = trap_detector(c5)
-
-if trap:
-    score += 1
-    flags.append(trap)
-
-    # =========================
-    # ORDERBOOK
-    # =========================
     ob_meta = None
 
     if ORDERBOOK_ENABLED:
