@@ -659,22 +659,49 @@ def orderbook_edge(instId: str):
     imb = (bid_sum - ask_sum) / total
     imb_abs = abs(imb)
 
-   bid_sizes = [q for _p, q in bids]
-ask_sizes = [q for _p, q in asks]
+      bid_sizes = [q for _p, q in bids]
+    ask_sizes = [q for _p, q in asks]
 
-bid_avg = sum(bid_sizes) / max(len(bid_sizes), 1)
-ask_avg = sum(ask_sizes) / max(len(ask_sizes), 1)
+    bid_avg = sum(bid_sizes) / max(len(bid_sizes), 1)
+    ask_avg = sum(ask_sizes) / max(len(ask_sizes), 1)
 
-ask_wall_size = max(ask_sizes) if ask_sizes else 0
-wall_state = wall_tracker.check_wall(ask_wall_size)
+    ask_wall_size = max(ask_sizes) if ask_sizes else 0
+    wall_state = wall_tracker.check_wall(ask_wall_size)
 
-wall_removed = wall_state.get("wall_removed", False)
+    wall_removed = wall_state.get("wall_removed", False)
 
-bid_wall = max(bid_sizes) > bid_avg * ORDERBOOK_WALL_MULT if bid_avg > 0 else False
-ask_wall = max(ask_sizes) > ask_avg * ORDERBOOK_WALL_MULT if ask_avg > 0 else False
+    bid_wall = max(bid_sizes) > bid_avg * ORDERBOOK_WALL_MULT if bid_avg > 0 else False
+    ask_wall = max(ask_sizes) > ask_avg * ORDERBOOK_WALL_MULT if ask_avg > 0 else False
 
+    if imb_abs < ORDERBOOK_IMB_MIN and not (bid_wall or ask_wall):
 
-if imb_abs < ORDERBOOK_IMB_MIN and not (bid_wall or ask_wall):
+        return {
+            "ob_bias": "NEUTRAL",
+            "imb": imb,
+            "bid_wall": bid_wall,
+            "ask_wall": ask_wall,
+            "wall_removed": wall_removed
+        }
+
+    if imb > ORDERBOOK_IMB_MIN or bid_wall:
+
+        return {
+            "ob_bias": "BIDS",
+            "imb": imb,
+            "bid_wall": bid_wall,
+            "ask_wall": ask_wall,
+            "wall_removed": wall_removed
+        }
+
+    if imb < -ORDERBOOK_IMB_MIN or ask_wall:
+
+        return {
+            "ob_bias": "ASKS",
+            "imb": imb,
+            "bid_wall": bid_wall,
+            "ask_wall": ask_wall,
+            "wall_removed": wall_removed
+        }
 
     return {
         "ob_bias": "NEUTRAL",
@@ -683,38 +710,6 @@ if imb_abs < ORDERBOOK_IMB_MIN and not (bid_wall or ask_wall):
         "ask_wall": ask_wall,
         "wall_removed": wall_removed
     }
-
-
-if imb > ORDERBOOK_IMB_MIN or bid_wall:
-
-    return {
-        "ob_bias": "BIDS",
-        "imb": imb,
-        "bid_wall": bid_wall,
-        "ask_wall": ask_wall,
-        "wall_removed": wall_removed
-    }
-
-
-if imb < -ORDERBOOK_IMB_MIN or ask_wall:
-
-    return {
-        "ob_bias": "ASKS",
-        "imb": imb,
-        "bid_wall": bid_wall,
-        "ask_wall": ask_wall,
-        "wall_removed": wall_removed
-    }
-
-
-return {
-    "ob_bias": "NEUTRAL",
-    "imb": imb,
-    "bid_wall": bid_wall,
-    "ask_wall": ask_wall,
-    "wall_removed": wall_removed
-}
-
 # =========================
 # V3: SWEEP DETECTOR (NEW)
 # =========================
