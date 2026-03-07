@@ -1006,17 +1006,55 @@ def build_signal(instId: str):
         score += 1
         flags.append("BIG_RANGE")
 
-    sw, sw_meta = liquidity_sweep(c5)
-    if sw:
-        score += 1
-        flags.append(sw)
-        trap = trap_detector(c5)
-    if trap:
-        score += 1
-        flags.append(trap)
+    # =========================
+# SWEEP
+# =========================
 
-        ob_meta = None
-    if ORDERBOOK_ENABLED:
+sw, sw_meta = liquidity_sweep(c5)
+
+if sw:
+    score += 1
+    flags.append(sw)
+
+# =========================
+# TRAP
+# =========================
+
+trap = trap_detector(c5)
+
+if trap:
+    score += 1
+    flags.append(trap)
+
+# =========================
+# ORDERBOOK
+# =========================
+
+ob_meta = None
+
+if ORDERBOOK_ENABLED:
+
+    ob_meta = orderbook_edge(instId)
+
+    if ob_meta:
+
+        bias = ob_meta.get("ob_bias")
+
+        if bias == "BIDS":
+            score += 1
+            flags.append("OB_BIDS")
+
+        elif bias == "ASKS":
+            score += 1
+            flags.append("OB_ASKS")
+
+        if ob_meta.get("bid_wall"):
+            score += 1
+            flags.append("OB_WALL_BID")
+
+        if ob_meta.get("ask_wall"):
+            score += 1
+            flags.append("OB_WALL_ASK")
         ob_meta = orderbook_edge(instId)
         if ob_meta:
             bias = ob_meta.get("ob_bias")
