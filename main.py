@@ -1093,17 +1093,20 @@ if ORDERBOOK_ENABLED:
         entry = "⚠️ WAIT"
         entry_reason = "Есть встречный стакан / ловушка против направления"
 
-    dir_key = None
+        dir_key = None
+
     if "ВВЕРХ" in direction_text:
         dir_key = "UP"
     elif "ВНИЗ" in direction_text:
         dir_key = "DOWN"
 
     if USE_RSI_FILTER and dir_key:
+
         if rsi_warns_direction(dir_key, rsi_state):
             flags.append(f"RSI_{rsi_state.get('state')}")
 
         if BLOCK_AGGRESSIVE_ON_RSI_EXTREME and rsi_blocks_aggressive_entry(dir_key, rsi_state):
+
             if "AGGRESSIVE" in entry:
                 entry = "⚠️ WAIT"
                 entry_reason = "RSI: рынок уже перегрет / перепродан"
