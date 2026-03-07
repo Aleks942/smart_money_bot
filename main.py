@@ -1231,6 +1231,7 @@ def pro_edge_filter(sig, regime):
 # TRADER INTERPRETATION
 # =========================
 def interpret_combo(sig):
+
     flags = set(sig.get("flags", []))
     stage = sig.get("stage", "")
     acc = int(sig.get("acc_score", 0))
@@ -1239,56 +1240,58 @@ def interpret_combo(sig):
 
     notes = []
 
-if acc >= 3 and ("PRESSURE_DOWN" in flags or "PRESSURE_UP" in flags):
-if "PRESSURE_DOWN" in flags:
-    notes.append("🟣 Накопление + цена у низа диапазона: снизу часто стопы лонгов. Возможен ложный пролив и возврат.")
-if "PRESSURE_UP" in flags:
-        notes.append("🟣 Накопление + цена у верха диапазона: сверху часто стопы шортов. Возможен ложный прокол и откат.")
+    if acc >= 3 and ("PRESSURE_DOWN" in flags or "PRESSURE_UP" in flags):
+        if "PRESSURE_DOWN" in flags:
+            notes.append("🟣 Накопление + цена у низа диапазона: снизу часто стопы лонгов. Возможен ложный пролив и возврат.")
+        if "PRESSURE_UP" in flags:
+            notes.append("🟣 Накопление + цена у верха диапазона: сверху часто стопы шортов. Возможен ложный прокол и откат.")
 
-if "FAKE_DUMP" in flags:
-    notes.append("🟡 FAKE_DUMP: прокол вниз и быстрый возврат — похоже на снятие стопов снизу.")
+    if "FAKE_DUMP" in flags:
+        notes.append("🟡 FAKE_DUMP: прокол вниз и быстрый возврат — похоже на снятие стопов снизу.")
 
-if "SWEEP_UP" in flags:
-    notes.append("💣 SWEEP_UP: прокол верхов + возврат внутрь — сняли стопы шортов сверху, часто потом идут вниз.")
+    if "SWEEP_UP" in flags:
+        notes.append("💣 SWEEP_UP: прокол верхов + возврат внутрь — сняли стопы шортов сверху, часто потом идут вниз.")
 
-if "SWEEP_DOWN" in flags:
-    notes.append("💣 SWEEP_DOWN: прокол низов + возврат внутрь — сняли стопы лонгов снизу, часто потом идут вверх.")
+    if "SWEEP_DOWN" in flags:
+        notes.append("💣 SWEEP_DOWN: прокол низов + возврат внутрь — сняли стопы лонгов снизу, часто потом идут вверх.")
 
-if "BULL_TRAP" in flags:
-    notes.append("⚠️ BULL TRAP: пробой вверх оказался ложным — часто после этого цена идёт вниз.")
+    if "BULL_TRAP" in flags:
+        notes.append("⚠️ BULL TRAP: пробой вверх оказался ложным — часто после этого цена идёт вниз.")
 
-if "BEAR_TRAP" in flags:
-    notes.append("⚠️ BEAR TRAP: пробой вниз оказался ложным — часто после этого цена разворачивается вверх.")
+    if "BEAR_TRAP" in flags:
+        notes.append("⚠️ BEAR TRAP: пробой вниз оказался ложным — часто после этого цена разворачивается вверх.")
 
-if "LIQUIDITY_MAGNET_UP" in flags:
-    notes.append("🧲 Сверху ликвидность — цена может тянуться к стопам шортов.")
+    if "LIQUIDITY_MAGNET_UP" in flags:
+        notes.append("🧲 Сверху ликвидность — цена может тянуться к стопам шортов.")
 
-if "LIQUIDITY_MAGNET_DOWN" in flags:
-    notes.append("🧲 Снизу ликвидность — цена может тянуться к стопам лонгов.")
+    if "LIQUIDITY_MAGNET_DOWN" in flags:
+        notes.append("🧲 Снизу ликвидность — цена может тянуться к стопам лонгов.")
 
-if ("BREAKOUT_UP" in flags or "BREAKOUT_DOWN" in flags) and ("BREAKOUT_CONFIRM_UP" not in flags and "BREAKOUT_CONFIRM_DOWN" not in flags):
-    notes.append("🟠 Пробой без закрепления: возможна ловушка/вытряхивание.")
+    if ("BREAKOUT_UP" in flags or "BREAKOUT_DOWN" in flags) and ("BREAKOUT_CONFIRM_UP" not in flags and "BREAKOUT_CONFIRM_DOWN" not in flags):
+        notes.append("🟠 Пробой без закрепления: возможна ловушка/вытряхивание.")
 
-if ("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags) and ("ATR_EXPANSION" in flags) and ("VOL_SPIKE" in flags):
-    notes.append("🟢 Закрепление + ATR + объём: движение подтверждено, шанс продолжения выше.")
+    if ("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags) and ("ATR_EXPANSION" in flags) and ("VOL_SPIKE" in flags):
+        notes.append("🟢 Закрепление + ATR + объём: движение подтверждено, шанс продолжения выше.")
 
-if "OB_BIDS" in flags:
-    notes.append("📘 Стакан: перевес покупателей (BID). Это усиливает лонг-сценарий.")
+    if "OB_BIDS" in flags:
+        notes.append("📘 Стакан: перевес покупателей (BID). Это усиливает лонг-сценарий.")
 
-if "OB_ASKS" in flags:
-    notes.append("📘 Стакан: перевес продавцов (ASK). Это усиливает шорт-сценарий.")
+    if "OB_ASKS" in flags:
+        notes.append("📘 Стакан: перевес продавцов (ASK). Это усиливает шорт-сценарий.")
 
-if "OB_WALL_BID" in flags:
-    notes.append("🧱 Стена BID: рядом крупная заявка — часто поддержка.")
+    if "OB_WALL_BID" in flags:
+        notes.append("🧱 Стена BID: рядом крупная заявка — часто поддержка.")
 
-if "OB_WALL_ASK" in flags:
-    notes.append("🧱 Стена ASK: рядом крупная заявка — часто сопротивление.")
+    if "OB_WALL_ASK" in flags:
+        notes.append("🧱 Стена ASK: рядом крупная заявка — часто сопротивление.")
 
-    if "🟣 ACCUMULATION" in stage:
+    if "ACCUMULATION" in stage:
         notes.append("🟣 STAGE=ACCUMULATION: идёт сжатие. Это зона ДО движения — ждём триггер.")
-    if "🟡 MANIPULATION" in stage:
+
+    if "MANIPULATION" in stage:
         notes.append("🟡 STAGE=MANIPULATION: вероятен сбор ликвидности перед импульсом.")
-    if "🟢 EXPANSION" in stage:
+
+    if "EXPANSION" in stage:
         notes.append("🟢 STAGE=EXPANSION: движение уже пошло. Лучше входить по откату/структуре.")
 
     if acc >= 3 and "БАЛАНС" in direction:
