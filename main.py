@@ -981,8 +981,12 @@ def build_signal(instId: str):
     if sw:
         score += 1
         flags.append(sw)
+        trap = trap_detector(c5)
+    if trap:
+        score += 1
+        flags.append(trap)
 
-    ob_meta = None
+        ob_meta = None
     if ORDERBOOK_ENABLED:
         ob_meta = orderbook_edge(instId)
         if ob_meta:
