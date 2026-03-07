@@ -1026,18 +1026,15 @@ if trap:
     score += 1
     flags.append(trap)
 
-# =========================
-# ORDERBOOK
-# =========================
-
+    # =========================
+    # ORDERBOOK
+    # =========================
     ob_meta = None
 
     if ORDERBOOK_ENABLED:
-
         ob_meta = orderbook_edge(instId)
 
         if ob_meta:
-
             bias = ob_meta.get("ob_bias")
 
             if bias == "BIDS":
