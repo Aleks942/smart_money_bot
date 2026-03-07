@@ -5,6 +5,7 @@ import math
 import requests
 from dotenv import load_dotenv
 from priority_engine import find_global_priority, should_send_priority
+from wall_detector import WallTracker
 load_dotenv()
 
 # =========================
