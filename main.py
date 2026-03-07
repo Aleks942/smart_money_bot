@@ -378,6 +378,29 @@ def breakout_confirm_ok(candles, lookback=BREAKOUT_LOOKBACK, confirm_bars=BREAKO
     if all(cl < lo * (1.0 - MIN_BREAKOUT_DIST_PCT / 100.0) for cl in closes):
         return "DOWN"
     return None
+def trap_detector(candles, lookback=12):
+    if len(candles) < lookback + 2:
+        return None
+
+    base = candles[-lookback-1:-1]
+    hi = max(x[2] for x in base)
+    lo = min(x[3] for x in base)
+
+    last = candles[-1]
+    o = last[1]
+    h = last[2]
+    l = last[3]
+    c = last[4]
+
+    # Bull trap: пробой вверх, но закрытие обратно ниже уровня
+    if h > hi and c < hi:
+        return "BULL_TRAP"
+
+    # Bear trap: пробой вниз, но закрытие обратно выше уровня
+    if l < lo and c > lo:
+        return "BEAR_TRAP"
+
+    return None
 
 def atr_expansion_ok(candles, period=14, compare_back=5):
     trs = []
