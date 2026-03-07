@@ -6,6 +6,7 @@ import requests
 from dotenv import load_dotenv
 from priority_engine import find_global_priority, should_send_priority
 from wall_detector import WallTracker
+from compression_detector import detect_compression
 load_dotenv()
 wall_tracker = WallTracker()
 
