@@ -1253,7 +1253,7 @@ def interpret_combo(sig):
     if "SWEEP_DOWN" in flags:
         notes.append("💣 SWEEP_DOWN: прокол низов + возврат внутрь — сняли стопы лонгов снизу, часто потом идут вверх.")
         if "BULL_TRAP" in flags:
-    notes.append("⚠️ BULL TRAP: пробой вверх оказался ложным — часто после этого цена идёт вниз.")
+            notes.append("⚠️ BULL TRAP: пробой вверх оказался ложным — часто после этого цена идёт вниз.")
 
 if "BEAR_TRAP" in flags:
     notes.append("⚠️ BEAR TRAP: пробой вниз оказался ложным — часто после этого цена разворачивается вверх.")
