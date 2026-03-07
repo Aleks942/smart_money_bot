@@ -1030,38 +1030,20 @@ if trap:
 # ORDERBOOK
 # =========================
 
-ob_meta = None
+    ob_meta = None
 
-if ORDERBOOK_ENABLED:
+    if ORDERBOOK_ENABLED:
 
-    ob_meta = orderbook_edge(instId)
-
-    if ob_meta:
-
-        bias = ob_meta.get("ob_bias")
-
-        if bias == "BIDS":
-            score += 1
-            flags.append("OB_BIDS")
-
-        elif bias == "ASKS":
-            score += 1
-            flags.append("OB_ASKS")
-
-        if ob_meta.get("bid_wall"):
-            score += 1
-            flags.append("OB_WALL_BID")
-
-        if ob_meta.get("ask_wall"):
-            score += 1
-            flags.append("OB_WALL_ASK")
         ob_meta = orderbook_edge(instId)
+
         if ob_meta:
+
             bias = ob_meta.get("ob_bias")
 
             if bias == "BIDS":
                 score += 1
                 flags.append("OB_BIDS")
+
             elif bias == "ASKS":
                 score += 1
                 flags.append("OB_ASKS")
@@ -1084,16 +1066,20 @@ if ORDERBOOK_ENABLED:
     rsi14 = rsi_state.get("rsi14")
 
     direction_text, reasons, up_w, down_w = direction_hint(flags)
+
     entry, entry_reason = entry_engine(score, flags, direction_text, up_w, down_w)
+
     stage, stage_reason = smart_money_stage(score, flags)
+
     tgt = liquidity_target(pmeta, flags, price)
+
     counter_block = has_counter_book_or_trap(direction_text, flags)
 
     if counter_block and "AGGRESSIVE" in entry:
         entry = "⚠️ WAIT"
         entry_reason = "Есть встречный стакан / ловушка против направления"
 
-        dir_key = None
+    dir_key = None
 
     if "ВВЕРХ" in direction_text:
         dir_key = "UP"
@@ -1110,6 +1096,7 @@ if ORDERBOOK_ENABLED:
             if "AGGRESSIVE" in entry:
                 entry = "⚠️ WAIT"
                 entry_reason = "RSI: рынок уже перегрет / перепродан"
+
     return {
         "instId": instId,
         "price": price,
@@ -1135,7 +1122,6 @@ if ORDERBOOK_ENABLED:
         "rsi_state": rsi_state.get("state"),
         "ts": now_ts(),
     }
-
 # =========================
 # SCANNER (LEVEL 1 FAST FILTER)
 # =========================
