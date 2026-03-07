@@ -1110,8 +1110,7 @@ if ORDERBOOK_ENABLED:
             if "AGGRESSIVE" in entry:
                 entry = "⚠️ WAIT"
                 entry_reason = "RSI: рынок уже перегрет / перепродан"
-
-     return {
+                return {
         "instId": instId,
         "price": price,
         "score": score,
