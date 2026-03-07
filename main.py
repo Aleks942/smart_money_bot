@@ -341,10 +341,13 @@ def volume_spike_ok(candles):
 def fake_dump_ok(candles):
     if len(candles) < 10:
         return False
+
     _, o, h, l, c, _v = candles[-1]
+
     rng = h - l
     if rng <= 0:
         return False
+
     body = abs(c - o)
     lower_wick = min(o, c) - l
 
@@ -353,8 +356,101 @@ def fake_dump_ok(candles):
 
     pierced = l < prev_min * 0.997
     recovered = c > (l + rng * FAKEDUMP_RECOVER)
-    wick_strong = (body > 0 and lower_wick > body * FAKEDUMP_WICK_MULT) or (body == 0 and lower_wick > rng * 0.4)
+
+    wick_strong = (
+        (body > 0 and lower_wick > body * FAKEDUMP_WICK_MULT)
+        or (body == 0 and lower_wick > rng * 0.4)
+    )
+
     return pierced and recovered and wick_strong
+
+
+# =========================
+# BREAKOUT DETECTOR
+# =========================
+
+def breakout_ok(candles, lookback=BREAKOUT_LOOKBACK):
+
+    if len(candles) < lookback + 1:
+        return None
+
+    highs = [c[2] for c in candles[-lookback-1:-1]]
+    lows = [c[3] for c in candles[-lookback-1:-1]]
+
+    last_close = candles[-1][4]
+
+    hi = max(highs)
+    lo = min(lows)
+
+    if last_close > hi * (1.0 + MIN_BREAKOUT_DIST_PCT / 100.0):
+        return "UP"
+
+    if last_close < lo * (1.0 - MIN_BREAKOUT_DIST_PCT / 100.0):
+        return "DOWN"
+
+    return None
+
+
+# =========================
+# LIQUIDITY SWEEP DETECTOR
+# =========================
+
+def liquidity_sweep_ok(candles, lookback=20):
+
+    if len(candles) < lookback + 2:
+        return None
+
+    recent = candles[-lookback-1:-1]
+
+    hi = max(c[2] for c in recent)
+    lo = min(c[3] for c in recent)
+
+    last = candles[-1]
+
+    last_high = last[2]
+    last_low = last[3]
+    last_close = last[4]
+
+    if last_high > hi and last_close < hi:
+        return "SWEEP_UP"
+
+    if last_low < lo and last_close > lo:
+        return "SWEEP_DOWN"
+
+    return None
+
+
+# =========================
+# EARLY EDGE DETECTOR
+# =========================
+
+def early_edge_detector(candles, flags):
+
+    if len(candles) < 20:
+        return False
+
+    highs = [c[2] for c in candles[-20:]]
+    lows = [c[3] for c in candles[-20:]]
+    closes = [c[4] for c in candles[-20:]]
+
+    hi = max(highs)
+    lo = min(lows)
+
+    price = closes[-1]
+
+    range_pct = (hi - lo) / price * 100
+
+    compression = range_pct < 1.2
+
+    flow_up = closes[-1] > closes[-2] > closes[-3]
+    flow_down = closes[-1] < closes[-2] < closes[-3]
+
+    pressure = "PRESSURE_UP" in flags or "PRESSURE_DOWN" in flags
+
+    if compression and pressure and (flow_up or flow_down):
+        return True
+
+    return False
 
 def breakout_ok(candles, lookback=BREAKOUT_LOOKBACK):
     highs = [c[2] for c in candles[-lookback-1:-1]]
