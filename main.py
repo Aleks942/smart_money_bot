@@ -1225,6 +1225,11 @@ def interpret_combo(sig):
         notes.append("💣 SWEEP_UP: прокол верхов + возврат внутрь — сняли стопы шортов сверху, часто потом идут вниз.")
     if "SWEEP_DOWN" in flags:
         notes.append("💣 SWEEP_DOWN: прокол низов + возврат внутрь — сняли стопы лонгов снизу, часто потом идут вверх.")
+    if "LIQUIDITY_MAGNET_UP" in flags:
+        notes.append("🧲 Сверху ликвидность — цена может тянуться к стопам шортов.")
+
+    if "LIQUIDITY_MAGNET_DOWN" in flags:
+        notes.append("🧲 Снизу ликвидность — цена может тянуться к стопам лонгов.")
 
     if ("BREAKOUT_UP" in flags or "BREAKOUT_DOWN" in flags) and ("BREAKOUT_CONFIRM_UP" not in flags and "BREAKOUT_CONFIRM_DOWN" not in flags):
         notes.append("🟠 Пробой без закрепления: возможна ловушка/вытряхивание.")
