@@ -1239,10 +1239,10 @@ def interpret_combo(sig):
 
     notes = []
 
-    if acc >= 3 and ("PRESSURE_DOWN" in flags or "PRESSURE_UP" in flags):
-    if "PRESSURE_DOWN" in flags:
-        notes.append("🟣 Накопление + цена у низа диапазона: снизу часто стопы лонгов. Возможен ложный пролив и возврат.")
-    if "PRESSURE_UP" in flags:
+if acc >= 3 and ("PRESSURE_DOWN" in flags or "PRESSURE_UP" in flags):
+if "PRESSURE_DOWN" in flags:
+    notes.append("🟣 Накопление + цена у низа диапазона: снизу часто стопы лонгов. Возможен ложный пролив и возврат.")
+if "PRESSURE_UP" in flags:
         notes.append("🟣 Накопление + цена у верха диапазона: сверху часто стопы шортов. Возможен ложный прокол и откат.")
 
 if "FAKE_DUMP" in flags:
