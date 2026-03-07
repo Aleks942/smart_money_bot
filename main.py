@@ -663,6 +663,8 @@ def orderbook_edge(instId: str):
     ask_sizes = [q for _p, q in asks]
     bid_avg = sum(bid_sizes) / max(len(bid_sizes), 1)
     ask_avg = sum(ask_sizes) / max(len(ask_sizes), 1)
+    ask_wall_size = max(ask_sizes) if ask_sizes else 0
+wall_state = wall_tracker.check_wall(ask_wall_size)
 
     bid_wall = max(bid_sizes) > bid_avg * ORDERBOOK_WALL_MULT if bid_avg > 0 else False
     ask_wall = max(ask_sizes) > ask_avg * ORDERBOOK_WALL_MULT if ask_avg > 0 else False
