@@ -367,6 +367,35 @@ def breakout_ok(candles, lookback=BREAKOUT_LOOKBACK):
     if last_close < lo * (1.0 - MIN_BREAKOUT_DIST_PCT / 100.0):
         return "DOWN"
     return None
+    # =========================
+# LIQUIDITY SWEEP DETECTOR
+# =========================
+
+def liquidity_sweep_ok(candles, lookback=20):
+
+    if len(candles) < lookback + 2:
+        return None
+
+    recent = candles[-lookback-1:-1]
+
+    hi = max(c[2] for c in recent)
+    lo = min(c[3] for c in recent)
+
+    last = candles[-1]
+
+    last_high = last[2]
+    last_low = last[3]
+    last_close = last[4]
+
+    # сняли стопы сверху
+    if last_high > hi and last_close < hi:
+        return "SWEEP_UP"
+
+    # сняли стопы снизу
+    if last_low < lo and last_close > lo:
+        return "SWEEP_DOWN"
+
+    return None
 
 def breakout_confirm_ok(candles, lookback=BREAKOUT_LOOKBACK, confirm_bars=BREAKOUT_CONFIRM_BARS):
     base = candles[-(lookback + confirm_bars + 1):-(confirm_bars + 1)]
