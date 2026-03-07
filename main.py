@@ -659,7 +659,7 @@ def orderbook_edge(instId: str):
     imb = (bid_sum - ask_sum) / total
     imb_abs = abs(imb)
 
-      bid_sizes = [q for _p, q in bids]
+    bid_sizes = [q for _p, q in bids]
     ask_sizes = [q for _p, q in asks]
 
     bid_avg = sum(bid_sizes) / max(len(bid_sizes), 1)
