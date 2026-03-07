@@ -1111,7 +1111,7 @@ if ORDERBOOK_ENABLED:
                 entry = "⚠️ WAIT"
                 entry_reason = "RSI: рынок уже перегрет / перепродан"
 
-    return {
+     return {
         "instId": instId,
         "price": price,
         "score": score,
