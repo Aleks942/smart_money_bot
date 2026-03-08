@@ -476,23 +476,35 @@ def breakout_confirm_ok(candles, lookback=BREAKOUT_LOOKBACK, confirm_bars=BREAKO
     return None
     
 def trap_detector(candles, lookback=12):
+
     if len(candles) < lookback + 2:
         return None
 
     base = candles[-lookback-1:-1]
+
     hi = max(x[2] for x in base)
     lo = min(x[3] for x in base)
 
     last = candles[-1]
+
     o = last[1]
     h = last[2]
     l = last[3]
     c = last[4]
 
-    if h > hi and c < hi:
+    rng = h - l
+
+    if rng <= 0:
+        return None
+
+    body = abs(c - o)
+
+    # bull trap
+    if h > hi and c < hi and body < rng * 0.6:
         return "BULL_TRAP"
 
-    if l < lo and c > lo:
+    # bear trap
+    if l < lo and c > lo and body < rng * 0.6:
         return "BEAR_TRAP"
 
     return None
