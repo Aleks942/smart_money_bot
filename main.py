@@ -1630,6 +1630,8 @@ def build_signal(instId: str):
     # ==============================
     # 📊 MARKET ANALYSIS
     # ==============================
+    
+    strong_setup = False
 
     score += anti_pump_penalty(c5, ANTI_PUMP_PCT_5M)
 
