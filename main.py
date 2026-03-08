@@ -1325,6 +1325,7 @@ def build_signal(instId: str):
         "price": price,
         "score": score,
         "strong_setup": strong,
+        "pump_warning": pump,
         "exp_move_min": exp_min,
         "exp_move_max": exp_max,
         "acc_score": acc_score,
