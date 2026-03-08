@@ -1704,35 +1704,35 @@ def build_signal(instId: str):
                 entry_reason = "RSI: рынок уже перегрет / перепродан"
 
     strong = strong_setup(flags, score)
-    pump = pump_warning(flags, score)
+pump = pump_warning(flags, score)
 
-    return {
-        "instId": instId,
-        "price": price,
-        "score": score,
-        "strong_setup": strong,
-        "pump_warning": pump,
-        "exp_move_min": exp_min,
-        "exp_move_max": exp_max,
-        "acc_score": acc_score,
-        "flags": flags,
-        "direction": direction_text,
-        "dir_reasons": reasons,
-        "up_w": up_w,
-        "down_w": down_w,
-        "entry": entry,
-        "entry_reason": entry_reason,
-        "stage": stage,
-        "stage_reason": stage_reason,
-        "target": tgt,
-        "pmeta": pmeta,
-        "obmeta": ob_meta,
-        "swmeta": sw_meta,
-        "rsi7": rsi7,
-        "rsi14": rsi14,
-        "rsi_state": rsi_state.get("state"),
-        "ts": now_ts(),
-    }
+return {
+    "instId": instId,
+    "price": price,
+    "score": score,
+    "strong_setup": strong,
+    "pump_warning": pump,
+    "exp_move_min": exp_min,
+    "exp_move_max": exp_max,
+    "acc_score": acc_score,
+    "flags": flags,
+    "direction": direction_text,
+    "dir_reasons": reasons,
+    "up_w": up_w,
+    "down_w": down_w,
+    "entry": entry,
+    "entry_reason": entry_reason,
+    "stage": stage,
+    "stage_reason": stage_reason,
+    "target": tgt,
+    "pmeta": pmeta,
+    "obmeta": ob_meta,
+    "swmeta": sw_meta,
+    "rsi7": rsi7,
+    "rsi14": rsi14,
+    "rsi_state": rsi_state.get("state"),
+    "ts": now_ts(),
+}
 
 # =========================
 # SCANNER (LEVEL 1 FAST FILTER)
