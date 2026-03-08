@@ -535,6 +535,39 @@ def trap_detector(candles, lookback=12):
 
     return None
 # ==============================
+# 🧨 LIQUIDITY VACUUM DETECTOR
+# ==============================
+
+def liquidity_vacuum_ok(candles):
+
+    try:
+
+        if len(candles) < VAC_LOOKBACK + 3:
+            return False
+
+        vols = [float(c[5]) for c in candles[-VAC_LOOKBACK:]]
+        highs = [float(c[2]) for c in candles[-VAC_LOOKBACK:]]
+        lows = [float(c[3]) for c in candles[-VAC_LOOKBACK:]]
+
+        ranges = [h - l for h, l in zip(highs, lows)]
+
+        avg_vol = sum(vols[:-1]) / max(len(vols[:-1]), 1)
+        last_vol = vols[-1]
+
+        avg_range = sum(ranges[:-1]) / max(len(ranges[:-1]), 1)
+        last_range = ranges[-1]
+
+        vol_spike = last_vol > avg_vol * VAC_VOL_MULT
+        compression = last_range < avg_range * VAC_RANGE_COMPRESSION
+
+        if vol_spike and compression:
+            return True
+
+    except Exception:
+        return False
+
+    return False
+# ==============================
 # 🐋 WHALE ACCUMULATION DETECTOR
 # ==============================
 
