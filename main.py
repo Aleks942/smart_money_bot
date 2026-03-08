@@ -1134,6 +1134,16 @@ def build_signal(instId: str):
         flags.append("VOL_SPIKE")
 
     # ==============================
+# 🧨 LIQUIDITY VACUUM
+# ==============================
+
+vacuum = liquidity_vacuum_ok(c5)
+
+if vacuum:
+    score += 2
+    flags.append("LIQUIDITY_VACUUM")
+
+    # ==============================
     # 🐋 WHALE ACCUMULATION
     # ==============================
 
