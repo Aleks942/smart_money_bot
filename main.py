@@ -21,13 +21,13 @@ MESSAGE_MODE = (os.getenv("MESSAGE_MODE") or "AUTO").upper()   # AUTO / SHORT / 
 EDGE_MID_SCORE = int(os.getenv("EDGE_MID_SCORE") or "4")
 EDGE_HIGH_SCORE = int(os.getenv("EDGE_HIGH_SCORE") or "7")
 
-POLL_SECONDS = int(os.getenv("POLL_SECONDS") or "120")
+POLL_SECONDS = int(os.getenv("POLL_SECONDS") or "30")
 TIMEOUT = int(os.getenv("TIMEOUT") or "12")
 STATE_FILE = os.getenv("STATE_FILE") or "state.json"
 
 SCAN_TOP_N = int(os.getenv("SCAN_TOP_N") or "120")
 SCAN_MIN_VOL_USDT = float(os.getenv("SCAN_MIN_VOL_USDT") or "800000")
-SCAN_MIN_PCT_24H = float(os.getenv("SCAN_MIN_PCT_24H") or "2")
+SCAN_MIN_PCT_24H = float(os.getenv("SCAN_MIN_PCT_24H") or "-15")
 
 ALERT_MIN_SCORE = int(os.getenv("ALERT_MIN_SCORE") or "4")
 ALERT_TOP_M = int(os.getenv("ALERT_TOP_M") or "8")
@@ -37,7 +37,7 @@ DETAIL_TOP_K = int(os.getenv("DETAIL_TOP_K") or "1")
 # V2 ENV
 # =========================
 ALERT_COOLDOWN_SEC = int(os.getenv("ALERT_COOLDOWN_SEC") or "1800")
-ANTI_PUMP_PCT_5M = float(os.getenv("ANTI_PUMP_PCT_5M") or "6.0")
+ANTI_PUMP_PCT_5M = float(os.getenv("ANTI_PUMP_PCT_5M") or "9.0")
 
 MANIP_ALERT_ENABLED = (os.getenv("MANIP_ALERT_ENABLED") or "1").strip() != "0"
 MANIP_TOP_N = int(os.getenv("MANIP_TOP_N") or "6")
