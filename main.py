@@ -875,6 +875,60 @@ def near_breakout(pmeta, price, near_pct):
     if hi is None or lo is None:
         return None
 
+# ==============================
+# 📈 CVD (Cumulative Volume Delta)
+# ==============================
+
+def cvd_detector(candles, lookback=12):
+
+    if not candles or len(candles) < lookback + 2:
+        return None
+
+    delta = 0.0
+    deltas = []
+
+    segment = candles[-lookback:]
+
+    for c in segment:
+
+        try:
+            o = float(c[1])
+            cl = float(c[4])
+            vol = float(c[5])
+        except:
+            continue
+
+        if cl > o:
+            d = vol
+        elif cl < o:
+            d = -vol
+        else:
+            d = 0.0
+
+        delta += d
+        deltas.append(delta)
+
+    if len(deltas) < 4:
+        return None
+
+    first = deltas[0]
+    last = deltas[-1]
+
+    change = last - first
+
+    if abs(first) < 1e-9:
+        return None
+
+    change_pct = change / abs(first) * 100.0
+
+    if change_pct > 25:
+        return "CVD_ACCUMULATION"
+
+    if change_pct < -25:
+        return "CVD_DISTRIBUTION"
+
+    return None
+
     try:
         hi = float(hi)
         lo = float(lo)
