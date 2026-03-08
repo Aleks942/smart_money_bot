@@ -596,7 +596,6 @@ def whale_accumulation_ok(candles):
 
     return False
 
-return False
 
 
 # ==============================
