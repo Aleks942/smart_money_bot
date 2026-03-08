@@ -1436,8 +1436,16 @@ def liquidity_target(pmeta, flags, price=None):
 # BUILD SIGNAL FOR SYMBOL
 # =========================
 def build_signal(instId: str):
+
     ob_meta = None
 
+    if ORDERBOOK_ENABLED:
+        try:
+            ob_meta = orderbook_edge(instId)
+        except:
+            ob_meta = None
+
+    c5 = fetch_candles(instId, "5m", 120)
     c5 = fetch_candles(instId, "5m", 120)
     c15 = fetch_candles(instId, "15m", 120)
 
