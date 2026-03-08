@@ -1562,6 +1562,7 @@ def build_signal(instId: str):
 
     ob_meta = None
 
+try:
     if ORDERBOOK_ENABLED:
         ob_meta = orderbook_edge(instId)
 
@@ -1583,6 +1584,9 @@ def build_signal(instId: str):
             if ob_meta.get("ask_wall"):
                 score += 1
                 flags.append("OB_WALL_ASK")
+
+except Exception as e:
+    print(f"[ORDERBOOK ERROR] {instId}: {e}")
 
     # ==============================
     # 📊 MARKET ANALYSIS
