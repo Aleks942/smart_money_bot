@@ -67,6 +67,7 @@ NEAR_BREAKOUT_PCT = float(os.getenv("NEAR_BREAKOUT_PCT") or "0.25")
 START_MAX_DIST_PCT = float(os.getenv("START_MAX_DIST_PCT") or "0.8")
 PRE_MIN_EXPECTED_MOVE_PCT = float(os.getenv("PRE_MIN_EXPECTED_MOVE_PCT") or "2.3")
 USE_RSI_FILTER = int(os.getenv("USE_RSI_FILTER", "1"))
+
 # ==============================
 # 🧨 LIQUIDITY VACUUM SETTINGS
 # ==============================
