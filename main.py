@@ -1561,31 +1561,36 @@ def build_signal(instId: str):
     # 📚 ORDERBOOK EDGE
     # ==============================
 
-    if ORDERBOOK_ENABLED:
+    ob_meta = None
 
-    ob_meta = orderbook_edge(instId)
+    try:
 
-    if ob_meta:
-        bias = ob_meta.get("ob_bias")
+        if ORDERBOOK_ENABLED:
 
-        if bias == "BIDS":
-            score += 1
-            flags.append("OB_BIDS")
+            ob_meta = orderbook_edge(instId)
 
-        elif bias == "ASKS":
-            score += 1
-            flags.append("OB_ASKS")
+            if ob_meta:
 
-        if ob_meta.get("bid_wall"):
-            score += 1
-            flags.append("OB_WALL_BID")
+                bias = ob_meta.get("ob_bias")
 
-        if ob_meta.get("ask_wall"):
-            score += 1
-            flags.append("OB_WALL_ASK")
+                if bias == "BIDS":
+                    score += 1
+                    flags.append("OB_BIDS")
 
-except Exception as e:
-    print(f"[ORDERBOOK ERROR] {instId}: {e}")
+                elif bias == "ASKS":
+                    score += 1
+                    flags.append("OB_ASKS")
+
+                if ob_meta.get("bid_wall"):
+                    score += 1
+                    flags.append("OB_WALL_BID")
+
+                if ob_meta.get("ask_wall"):
+                    score += 1
+                    flags.append("OB_WALL_ASK")
+
+    except Exception as e:
+        print(f"[ORDERBOOK ERROR] {instId}: {e}")
 
     # ==============================
     # 📊 MARKET ANALYSIS
