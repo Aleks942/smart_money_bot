@@ -1066,158 +1066,158 @@ def liquidity_target(pmeta, flags, price=None):
 # =========================
 def build_signal(instId: str):
 
-    c5 = fetch_candles(instId, "5m", 120)
-    c15 = fetch_candles(instId, "15m", 120)
-
-    price = c5[-1][4]
-
-    flags = []
-    score = 0
-
-    comp5, _ = compression_ok(c5)
-    if comp5:
-        score += 1
-        flags.append("COMP_5M")
-
-    comp15, _ = compression_ok(c15)
-    if comp15:
-        score += 1
-        flags.append("COMP_15M")
-
-    if fake_dump_ok(c5):
-        score += 1
-        flags.append("FAKE_DUMP")
-
-    if volume_spike_ok(c5):
-        score += 1
-        flags.append("VOL_SPIKE")
-        
-# ==============================
-# 🐋 WHALE ACCUMULATION
-# ==============================
-
-whale_acc = whale_accumulation_ok(c5)
-
-if whale_acc:
-    score += 1
-    flags.append("WHALE_ACC")
-
-# --------------------------------
-
-br = breakout_ok(c5)
-if br:
-    score += 1
-    flags.append(f"BREAKOUT_{br}")
-
-conf = breakout_confirm_ok(c5)
-if conf:
-    score += 1
-    flags.append(f"BREAKOUT_CONFIRM_{conf}")
-
-if atr_expansion_ok(c5):
-    score += 1
-    flags.append("ATR_EXPANSION")
-
-pres, pmeta = liquidity_pressure(c5)
-if pres:
-    score += 1
-    flags.append(f"PRESSURE_{pres}")
-
-if pmeta:
-    hi = pmeta.get("range_hi")
-    lo = pmeta.get("range_lo")
-
-    if hi and price >= hi * 0.998:
-        score += 1
-        flags.append("LIQUIDITY_MAGNET_UP")
-
-    if lo and price <= lo * 1.002:
-        score += 1
-        flags.append("LIQUIDITY_MAGNET_DOWN")
-
-nb = near_breakout(pmeta, price, NEAR_BREAKOUT_PCT)
-if nb:
-    score += 1
-    flags.append(f"NEAR_BREAKOUT_{nb}")
-
-if pmeta and pmeta.get("range_pct", 0) > 2.0:
-    score += 1
-    flags.append("BIG_RANGE")
-
-sw, sw_meta = liquidity_sweep(c5)
-if sw:
-    score += 1
-    flags.append(sw)
-
-trap = trap_detector(c5)
-if trap:
-    score += 1
-    flags.append(trap)
-
-ob_meta = None
-
-if ORDERBOOK_ENABLED:
-    ob_meta = orderbook_edge(instId)
-
-    if ob_meta:
-        bias = ob_meta.get("ob_bias")
-
-        if bias == "BIDS":
+        c5 = fetch_candles(instId, "5m", 120)
+        c15 = fetch_candles(instId, "15m", 120)
+    
+        price = c5[-1][4]
+    
+        flags = []
+        score = 0
+    
+        comp5, _ = compression_ok(c5)
+        if comp5:
             score += 1
-            flags.append("OB_BIDS")
-
-        elif bias == "ASKS":
+            flags.append("COMP_5M")
+    
+        comp15, _ = compression_ok(c15)
+        if comp15:
             score += 1
-            flags.append("OB_ASKS")
-
-        if ob_meta.get("bid_wall"):
+            flags.append("COMP_15M")
+    
+        if fake_dump_ok(c5):
             score += 1
-            flags.append("OB_WALL_BID")
-
-        if ob_meta.get("ask_wall"):
+            flags.append("FAKE_DUMP")
+    
+        if volume_spike_ok(c5):
             score += 1
-            flags.append("OB_WALL_ASK")
-
-score += anti_pump_penalty(c5, ANTI_PUMP_PCT_5M)
-
-acc_score = accumulation_bias(flags)
-exp_min, exp_max = expected_move_pct(c5, pmeta)
-
-rsi_state = get_rsi_state(c5)
-rsi7 = rsi_state.get("rsi7")
-rsi14 = rsi_state.get("rsi14")
-
-direction_text, reasons, up_w, down_w = direction_hint(flags)
-
-entry, entry_reason = entry_engine(score, flags, direction_text, up_w, down_w)
-
-stage, stage_reason = smart_money_stage(score, flags)
-
-tgt = liquidity_target(pmeta, flags, price)
-
-counter_block = has_counter_book_or_trap(direction_text, flags)
-
-if counter_block and "AGGRESSIVE" in entry:
-    entry = "⚠️ WAIT"
-    entry_reason = "Есть встречный стакан / ловушка против направления"
-
-dir_key = None
-
-if "ВВЕРХ" in direction_text:
-    dir_key = "UP"
-elif "ВНИЗ" in direction_text:
-    dir_key = "DOWN"
-
-if USE_RSI_FILTER and dir_key:
-
-    if rsi_warns_direction(dir_key, rsi_state):
-        flags.append(f"RSI_{rsi_state.get('state')}")
-
-    if BLOCK_AGGRESSIVE_ON_RSI_EXTREME and rsi_blocks_aggressive_entry(dir_key, rsi_state):
-
-        if "AGGRESSIVE" in entry:
-            entry = "⚠️ WAIT"
-            entry_reason = "RSI: рынок уже перегрет / перепродан"
+            flags.append("VOL_SPIKE")
+            
+    # ==============================
+    # 🐋 WHALE ACCUMULATION
+    # ==============================
+    
+    whale_acc = whale_accumulation_ok(c5)
+    
+    if whale_acc:
+        score += 1
+        flags.append("WHALE_ACC")
+    
+    # --------------------------------
+    
+    br = breakout_ok(c5)
+    if br:
+        score += 1
+        flags.append(f"BREAKOUT_{br}")
+    
+    conf = breakout_confirm_ok(c5)
+    if conf:
+        score += 1
+        flags.append(f"BREAKOUT_CONFIRM_{conf}")
+    
+    if atr_expansion_ok(c5):
+        score += 1
+        flags.append("ATR_EXPANSION")
+    
+    pres, pmeta = liquidity_pressure(c5)
+    if pres:
+        score += 1
+        flags.append(f"PRESSURE_{pres}")
+    
+    if pmeta:
+        hi = pmeta.get("range_hi")
+        lo = pmeta.get("range_lo")
+    
+        if hi and price >= hi * 0.998:
+            score += 1
+            flags.append("LIQUIDITY_MAGNET_UP")
+    
+        if lo and price <= lo * 1.002:
+            score += 1
+            flags.append("LIQUIDITY_MAGNET_DOWN")
+    
+    nb = near_breakout(pmeta, price, NEAR_BREAKOUT_PCT)
+    if nb:
+        score += 1
+        flags.append(f"NEAR_BREAKOUT_{nb}")
+    
+    if pmeta and pmeta.get("range_pct", 0) > 2.0:
+        score += 1
+        flags.append("BIG_RANGE")
+    
+    sw, sw_meta = liquidity_sweep(c5)
+    if sw:
+        score += 1
+        flags.append(sw)
+    
+    trap = trap_detector(c5)
+    if trap:
+        score += 1
+        flags.append(trap)
+    
+    ob_meta = None
+    
+    if ORDERBOOK_ENABLED:
+        ob_meta = orderbook_edge(instId)
+    
+        if ob_meta:
+            bias = ob_meta.get("ob_bias")
+    
+            if bias == "BIDS":
+                score += 1
+                flags.append("OB_BIDS")
+    
+            elif bias == "ASKS":
+                score += 1
+                flags.append("OB_ASKS")
+    
+            if ob_meta.get("bid_wall"):
+                score += 1
+                flags.append("OB_WALL_BID")
+    
+            if ob_meta.get("ask_wall"):
+                score += 1
+                flags.append("OB_WALL_ASK")
+    
+    score += anti_pump_penalty(c5, ANTI_PUMP_PCT_5M)
+    
+    acc_score = accumulation_bias(flags)
+    exp_min, exp_max = expected_move_pct(c5, pmeta)
+    
+    rsi_state = get_rsi_state(c5)
+    rsi7 = rsi_state.get("rsi7")
+    rsi14 = rsi_state.get("rsi14")
+    
+    direction_text, reasons, up_w, down_w = direction_hint(flags)
+    
+    entry, entry_reason = entry_engine(score, flags, direction_text, up_w, down_w)
+    
+    stage, stage_reason = smart_money_stage(score, flags)
+    
+    tgt = liquidity_target(pmeta, flags, price)
+    
+    counter_block = has_counter_book_or_trap(direction_text, flags)
+    
+    if counter_block and "AGGRESSIVE" in entry:
+        entry = "⚠️ WAIT"
+        entry_reason = "Есть встречный стакан / ловушка против направления"
+    
+    dir_key = None
+    
+    if "ВВЕРХ" in direction_text:
+        dir_key = "UP"
+    elif "ВНИЗ" in direction_text:
+        dir_key = "DOWN"
+    
+    if USE_RSI_FILTER and dir_key:
+    
+        if rsi_warns_direction(dir_key, rsi_state):
+            flags.append(f"RSI_{rsi_state.get('state')}")
+    
+        if BLOCK_AGGRESSIVE_ON_RSI_EXTREME and rsi_blocks_aggressive_entry(dir_key, rsi_state):
+    
+            if "AGGRESSIVE" in entry:
+                entry = "⚠️ WAIT"
+                entry_reason = "RSI: рынок уже перегрет / перепродан"
     return {
         "instId": instId,
         "price": price,
