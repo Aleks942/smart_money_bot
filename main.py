@@ -1364,8 +1364,8 @@ def build_signal(instId: str):
         flags.append(f"NEAR_BREAKOUT_{nb}")
 
     if pmeta and pmeta.get("range_pct", 0) > 2.0:
-    score += 1
-    flags.append("BIG_RANGE")
+       score += 1
+       flags.append("BIG_RANGE")
 
 liq_map = liquidity_map(c5)
 
