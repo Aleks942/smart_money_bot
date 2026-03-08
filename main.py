@@ -1471,9 +1471,9 @@ def build_signal(instId: str):
 
     liq_signal = liquidation_radar(liqs)
 
-if liq_signal:
-    score += 1
-    flags.append(liq_signal)
+    if liq_signal:
+        score += 1
+        flags.append(liq_signal)
 
     ob_meta = None
 
