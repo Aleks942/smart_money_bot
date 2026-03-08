@@ -1556,7 +1556,7 @@ def build_signal(instId: str):
         score += 1
         flags.append(liq_signal)
 
-     # ==============================
+    # ==============================
     # 💥 LIQUIDATION RADAR
     # ==============================
 
