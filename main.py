@@ -1269,6 +1269,12 @@ def build_signal(instId: str):
         score += 1
         flags.append(trap)
 
+    stop_hunt = stop_hunt_detector(c5)
+
+if stop_hunt:
+    score += 2
+    flags.append(stop_hunt)
+
     ob_meta = None
 
     if ORDERBOOK_ENABLED:
