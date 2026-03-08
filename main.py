@@ -1339,7 +1339,7 @@ def build_signal(instId: str):
         score += 1
         flags.append(f"PRESSURE_{pres}")
 
-        if pmeta:
+    if pmeta:
         hi = pmeta.get("range_hi")
         lo = pmeta.get("range_lo")
 
