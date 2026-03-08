@@ -67,6 +67,13 @@ NEAR_BREAKOUT_PCT = float(os.getenv("NEAR_BREAKOUT_PCT") or "0.25")
 START_MAX_DIST_PCT = float(os.getenv("START_MAX_DIST_PCT") or "0.8")
 PRE_MIN_EXPECTED_MOVE_PCT = float(os.getenv("PRE_MIN_EXPECTED_MOVE_PCT") or "2.3")
 USE_RSI_FILTER = int(os.getenv("USE_RSI_FILTER", "1"))
+# ==============================
+# 🧨 LIQUIDITY VACUUM SETTINGS
+# ==============================
+
+VAC_LOOKBACK = 12
+VAC_VOL_MULT = 2.2
+VAC_RANGE_COMPRESSION = 0.9
 
 RSI_FAST_LEN = int(os.getenv("RSI_FAST_LEN", "7"))
 RSI_SLOW_LEN = int(os.getenv("RSI_SLOW_LEN", "14"))
