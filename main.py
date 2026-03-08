@@ -497,6 +497,44 @@ def trap_detector(candles, lookback=12):
         return "BEAR_TRAP"
 
     return None
+
+# ==============================
+# 🧨 STOP HUNT DETECTOR
+# ==============================
+
+def stop_hunt_detector(candles, lookback=15):
+
+    if len(candles) < lookback + 2:
+        return None
+
+    segment = candles[-lookback-1:-1]
+
+    hi = max(c[2] for c in segment)
+    lo = min(c[3] for c in segment)
+
+    last = candles[-1]
+
+    o = last[1]
+    h = last[2]
+    l = last[3]
+    c = last[4]
+
+    rng = h - l
+
+    if rng <= 0:
+        return None
+
+    body = abs(c - o)
+
+    # прокол вверх и возврат
+    if h > hi and c < hi and body < rng * 0.6:
+        return "STOP_HUNT_UP"
+
+    # прокол вниз и возврат
+    if l < lo and c > lo and body < rng * 0.6:
+        return "STOP_HUNT_DOWN"
+
+    return None
 # ==============================
 # 🧨 LIQUIDITY VACUUM DETECTOR
 # ==============================
