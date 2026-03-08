@@ -1596,82 +1596,81 @@ if ORDERBOOK_ENABLED:
             score += 1
             flags.append("OB_WALL_ASK")
 
-# ==============================
-# 📊 MARKET ANALYSIS
-# ==============================
+    # ==============================
+    # 📊 MARKET ANALYSIS
+    # ==============================
 
-score += anti_pump_penalty(c5, ANTI_PUMP_PCT_5M)
+    score += anti_pump_penalty(c5, ANTI_PUMP_PCT_5M)
 
-acc_score = accumulation_bias(flags)
-exp_min, exp_max = expected_move_pct(c5, pmeta)
+    acc_score = accumulation_bias(flags)
+    exp_min, exp_max = expected_move_pct(c5, pmeta)
 
-rsi_state = get_rsi_state(c5)
-rsi7 = rsi_state.get("rsi7")
-rsi14 = rsi_state.get("rsi14")
+    rsi_state = get_rsi_state(c5)
+    rsi7 = rsi_state.get("rsi7")
+    rsi14 = rsi_state.get("rsi14")
 
-direction_text, reasons, up_w, down_w = direction_hint(flags)
+    direction_text, reasons, up_w, down_w = direction_hint(flags)
 
-entry, entry_reason = entry_engine(score, flags, direction_text, up_w, down_w)
+    entry, entry_reason = entry_engine(score, flags, direction_text, up_w, down_w)
 
-stage, stage_reason = smart_money_stage(score, flags)
+    stage, stage_reason = smart_money_stage(score, flags)
 
-tgt = liquidity_target(pmeta, flags, price)
+    tgt = liquidity_target(pmeta, flags, price)
 
-counter_block = has_counter_book_or_trap(direction_text, flags)
+    counter_block = has_counter_book_or_trap(direction_text, flags)
 
-if counter_block and "AGGRESSIVE" in entry:
-    entry = "⚠️ WAIT"
-    entry_reason = "Есть встречный стакан / ловушка против направления"
+    if counter_block and "AGGRESSIVE" in entry:
+        entry = "⚠️ WAIT"
+        entry_reason = "Есть встречный стакан / ловушка против направления"
 
-dir_key = None
+    dir_key = None
 
-if "ВВЕРХ" in direction_text:
-    dir_key = "UP"
-elif "ВНИЗ" in direction_text:
-    dir_key = "DOWN"
+    if "ВВЕРХ" in direction_text:
+        dir_key = "UP"
+    elif "ВНИЗ" in direction_text:
+        dir_key = "DOWN"
 
-if USE_RSI_FILTER and dir_key:
+    if USE_RSI_FILTER and dir_key:
 
-    if rsi_warns_direction(dir_key, rsi_state):
-        flags.append(f"RSI_{rsi_state.get('state')}")
+        if rsi_warns_direction(dir_key, rsi_state):
+            flags.append(f"RSI_{rsi_state.get('state')}")
 
-    if BLOCK_AGGRESSIVE_ON_RSI_EXTREME and rsi_blocks_aggressive_entry(dir_key, rsi_state):
+        if BLOCK_AGGRESSIVE_ON_RSI_EXTREME and rsi_blocks_aggressive_entry(dir_key, rsi_state):
 
-        if "AGGRESSIVE" in entry:
-            entry = "⚠️ WAIT"
-            entry_reason = "RSI: рынок уже перегрет / перепродан"
+            if "AGGRESSIVE" in entry:
+                entry = "⚠️ WAIT"
+                entry_reason = "RSI: рынок уже перегрет / перепродан"
 
-strong = strong_setup(flags, score)
-pump = pump_warning(flags, score)
+    strong = strong_setup(flags, score)
+    pump = pump_warning(flags, score)
 
-return {
-    "instId": instId,
-    "price": price,
-    "score": score,
-    "strong_setup": strong,
-    "pump_warning": pump,
-    "exp_move_min": exp_min,
-    "exp_move_max": exp_max,
-    "acc_score": acc_score,
-    "flags": flags,
-    "direction": direction_text,
-    "dir_reasons": reasons,
-    "up_w": up_w,
-    "down_w": down_w,
-    "entry": entry,
-    "entry_reason": entry_reason,
-    "stage": stage,
-    "stage_reason": stage_reason,
-    "target": tgt,
-    "pmeta": pmeta,
-    "obmeta": ob_meta,
-    "swmeta": sw_meta,
-    "rsi7": rsi7,
-    "rsi14": rsi14,
-    "rsi_state": rsi_state.get("state"),
-    "ts": now_ts(),
-}
-
+    return {
+        "instId": instId,
+        "price": price,
+        "score": score,
+        "strong_setup": strong,
+        "pump_warning": pump,
+        "exp_move_min": exp_min,
+        "exp_move_max": exp_max,
+        "acc_score": acc_score,
+        "flags": flags,
+        "direction": direction_text,
+        "dir_reasons": reasons,
+        "up_w": up_w,
+        "down_w": down_w,
+        "entry": entry,
+        "entry_reason": entry_reason,
+        "stage": stage,
+        "stage_reason": stage_reason,
+        "target": tgt,
+        "pmeta": pmeta,
+        "obmeta": ob_meta,
+        "swmeta": sw_meta,
+        "rsi7": rsi7,
+        "rsi14": rsi14,
+        "rsi_state": rsi_state.get("state"),
+        "ts": now_ts(),
+    }
 # =========================
 # SCANNER (LEVEL 1 FAST FILTER)
 # =========================
