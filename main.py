@@ -1409,6 +1409,7 @@ def strong_setup(flags, score):
 # BUILD SIGNAL FOR SYMBOL
 # =========================
 def build_signal(instId: str):
+    ob_meta = None
 
     c5 = fetch_candles(instId, "5m", 120)
     c15 = fetch_candles(instId, "15m", 120)
