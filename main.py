@@ -1674,7 +1674,7 @@ def build_signal(instId: str):
                 entry = "⚠️ WAIT"
                 entry_reason = "RSI: рынок уже перегрет / перепродан"
 
-    pump = False
+pump = False
 
 if strong_setup:
     pump = pump_warning(flags, score)
