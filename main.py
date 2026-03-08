@@ -532,6 +532,9 @@ def trap_detector(candles, lookback=12):
 
 def whale_accumulation_ok(candles):
 
+    if not candles or len(candles) < 6:
+        return False
+
     try:
         vols = [float(c[5]) for c in candles[-6:]]
         highs = [float(c[2]) for c in candles[-6:]]
