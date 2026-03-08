@@ -1074,7 +1074,7 @@ def liquidity_target(pmeta, flags, price=None):
     if not pmeta:
         return None
 
-    def strong_setup(flags, score):
+def strong_setup(flags, score):
 
     if score < 8:
         return False
