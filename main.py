@@ -460,17 +460,6 @@ def early_edge_detector(candles, flags):
 
     return False
 
-def breakout_ok(candles, lookback=BREAKOUT_LOOKBACK):
-    highs = [c[2] for c in candles[-lookback-1:-1]]
-    lows = [c[3] for c in candles[-lookback-1:-1]]
-    last_close = candles[-1][4]
-    hi = max(highs)
-    lo = min(lows)
-    if last_close > hi * (1.0 + MIN_BREAKOUT_DIST_PCT / 100.0):
-        return "UP"
-    if last_close < lo * (1.0 - MIN_BREAKOUT_DIST_PCT / 100.0):
-        return "DOWN"
-    return None
     # =========================
 # LIQUIDITY SWEEP DETECTOR
 # =========================
