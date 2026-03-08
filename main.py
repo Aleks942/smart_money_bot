@@ -119,8 +119,8 @@ OKX_BOOKS_URL = "https://www.okx.com/api/v5/market/books"  # NEW
 # =========================
 # EXCHANGE SWITCH (NEW)
 # =========================
-EXCHANGE = (os.getenv("EXCHANGE") or "OKX").upper()  # OKX / BYBIT
-BYBIT_CATEGORY = (os.getenv("BYBIT_CATEGORY") or "linear").lower()  # linear (USDT perp)
+EXCHANGE = "BYBIT"
+BYBIT_CATEGORY = "linear"
 
 # BYBIT
 BYBIT_TICKERS_URL = "https://api.bybit.com/v5/market/tickers"
