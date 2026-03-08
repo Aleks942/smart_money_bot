@@ -1292,7 +1292,7 @@ if vacuum:
         "rsi14": rsi14,
         "rsi_state": rsi_state.get("state"),
         "ts": now_ts(),
-    }
+
 # =========================
 # SCANNER (LEVEL 1 FAST FILTER)
 # =========================
