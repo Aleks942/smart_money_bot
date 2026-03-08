@@ -399,33 +399,7 @@ def breakout_ok(candles, lookback=BREAKOUT_LOOKBACK):
     return None
 
 
-# =========================
-# LIQUIDITY SWEEP DETECTOR
-# =========================
 
-def liquidity_sweep_ok(candles, lookback=20):
-
-    if len(candles) < lookback + 2:
-        return None
-
-    recent = candles[-lookback-1:-1]
-
-    hi = max(c[2] for c in recent)
-    lo = min(c[3] for c in recent)
-
-    last = candles[-1]
-
-    last_high = last[2]
-    last_low = last[3]
-    last_close = last[4]
-
-    if last_high > hi and last_close < hi:
-        return "SWEEP_UP"
-
-    if last_low < lo and last_close > lo:
-        return "SWEEP_DOWN"
-
-    return None
 
 
 # =========================
