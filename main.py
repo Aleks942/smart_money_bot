@@ -1339,7 +1339,7 @@ def build_signal(instId: str):
         score += 1
         flags.append(f"PRESSURE_{pres}")
 
-    if pmeta:
+        if pmeta:
         hi = pmeta.get("range_hi")
         lo = pmeta.get("range_lo")
 
@@ -1351,12 +1351,6 @@ def build_signal(instId: str):
             score += 1
             flags.append("LIQUIDITY_MAGNET_DOWN")
 
-    liq_map = liquidity_map(c5)
-
-    if liq_map:
-        score += 1
-        flags.append(liq_map)
-
     nb = near_breakout(pmeta, price, NEAR_BREAKOUT_PCT)
 
     if nb:
@@ -1364,34 +1358,50 @@ def build_signal(instId: str):
         flags.append(f"NEAR_BREAKOUT_{nb}")
 
     if pmeta and pmeta.get("range_pct", 0) > 2.0:
-       score += 1
-       flags.append("BIG_RANGE")
+        score += 1
+        flags.append("BIG_RANGE")
 
-liq_map = liquidity_map(c5)
+    # ==============================
+    # 🎯 LIQUIDITY MAP
+    # ==============================
 
-if liq_map:
-    score += 1
-    flags.append(liq_map)
+    liq_map = liquidity_map(c5)
 
-sw, sw_meta = liquidity_sweep(c5)
+    if liq_map:
+        score += 1
+        flags.append(liq_map)
 
-if sw:
-    score += 1
-    flags.append(sw)
+    # ==============================
+    # 💧 LIQUIDITY SWEEP
+    # ==============================
 
-trap = trap_detector(c5)
+    sw, sw_meta = liquidity_sweep(c5)
 
-if trap:
-    score += 1
-    flags.append(trap)
+    if sw:
+        score += 1
+        flags.append(sw)
 
-stop_hunt = stop_hunt_detector(c5)
+    # ==============================
+    # 🪤 TRAP
+    # ==============================
 
-if stop_hunt:
-    score += 2
-    flags.append(stop_hunt)
+    trap = trap_detector(c5)
 
-ob_meta = None
+    if trap:
+        score += 1
+        flags.append(trap)
+
+    # ==============================
+    # 🎯 STOP HUNT
+    # ==============================
+
+    stop_hunt = stop_hunt_detector(c5)
+
+    if stop_hunt:
+        score += 2
+        flags.append(stop_hunt)
+
+    ob_meta = None
 
     if ORDERBOOK_ENABLED:
         ob_meta = orderbook_edge(instId)
