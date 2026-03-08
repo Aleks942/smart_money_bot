@@ -240,6 +240,33 @@ def fetch_bybit_liquidations(instId: str):
 
     except Exception:
         return []
+# ==============================
+# 📊 BYBIT OPEN INTEREST API
+# ==============================
+
+def fetch_bybit_open_interest(instId: str, limit: int = 20):
+
+    if not is_bybit():
+        return []
+
+    try:
+        sym = normalize_symbol(instId)
+
+        url = "https://api.bybit.com/v5/market/open-interest"
+
+        params = {
+            "category": "linear",
+            "symbol": sym,
+            "intervalTime": "5min",
+            "limit": str(limit)
+        }
+
+        res = bybit_get(url, params)
+
+        return res.get("list") or []
+
+    except Exception:
+        return []
 
 # =========================
 # HARD RULES / FILTERS
