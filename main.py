@@ -596,6 +596,37 @@ def whale_accumulation_ok(candles):
 
     return False
 
+return False
+
+
+# ==============================
+# ⚡ EARLY PUMP DETECTOR
+# ==============================
+
+def pump_warning(flags, score):
+
+    if score < 6:
+        return False
+
+    compression = ("COMP_5M" in flags or "COMP_15M" in flags)
+
+    pressure = (
+        "PRESSURE_UP" in flags or
+        "PRESSURE_DOWN" in flags
+    )
+
+    volume = "VOL_SPIKE" in flags
+    vacuum = "LIQUIDITY_VACUUM" in flags
+    whale = "WHALE_ACC" in flags
+
+    if compression and pressure and (volume or vacuum or whale):
+        return True
+
+    return False
+
+
+def atr_expansion_ok(candles, period=14, compare_back=5):
+
 def atr_expansion_ok(candles, period=14, compare_back=5):
     trs = []
     for i in range(1, len(candles)):
