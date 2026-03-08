@@ -1256,9 +1256,9 @@ def build_signal(instId: str):
 
     whale_flow = whale_flow_radar(c5)
 
-if whale_flow:
-    score += 1
-    flags.append("WHALE_FLOW")
+    if whale_flow:
+        score += 1
+        flags.append("WHALE_FLOW")
 
     br = breakout_ok(c5)
     if br:
