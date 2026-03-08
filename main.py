@@ -624,6 +624,35 @@ def whale_accumulation_ok(candles):
 
     return False
 
+# ==============================
+# 🐋 WHALE FLOW RADAR
+# ==============================
+
+def whale_flow_radar(candles):
+
+    if len(candles) < 8:
+        return False
+
+    vols = [float(c[5]) for c in candles[-8:]]
+    highs = [float(c[2]) for c in candles[-8:]]
+    lows = [float(c[3]) for c in candles[-8:]]
+
+    ranges = [h - l for h, l in zip(highs, lows)]
+
+    avg_vol = sum(vols[:-1]) / max(len(vols[:-1]), 1)
+    last_vol = vols[-1]
+
+    avg_range = sum(ranges[:-1]) / max(len(ranges[:-1]), 1)
+    last_range = ranges[-1]
+
+    volume_build = last_vol > avg_vol * 1.6
+    price_hold = last_range < avg_range * 0.9
+
+    if volume_build and price_hold:
+        return True
+
+    return False
+
 
 
 # ==============================
