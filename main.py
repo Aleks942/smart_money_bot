@@ -1556,17 +1556,6 @@ def build_signal(instId: str):
         score += 1
         flags.append(liq_signal)
 
-# ==============================
-# 💥 LIQUIDATION RADAR
-# ==============================
-
-liqs = fetch_bybit_liquidations(instId)
-
-liq_signal = liquidation_radar(liqs)
-
-if liq_signal:
-    score += 1
-    flags.append(liq_signal)
 
 # ==============================
 # 📚 ORDERBOOK EDGE
