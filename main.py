@@ -1269,7 +1269,7 @@ def build_signal(instId: str):
 
     stop_hunt = stop_hunt_detector(c5)
 
-if stop_hunt:
+    if stop_hunt:
     score += 2
     flags.append(stop_hunt)
 
