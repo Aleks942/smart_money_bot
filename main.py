@@ -1394,26 +1394,13 @@ def smart_money_stage(score, flags):
     return "⚪ NEUTRAL", "Смешанные признаки"
 
 def liquidity_target(pmeta, flags, price=None):
-    
+
     if not pmeta:
         return None
 
-def strong_setup(flags, score):
-
-    if score < 8:
-        return False
-
-    has_pressure = any("PRESSURE" in f for f in flags)
-    has_breakout = any("BREAKOUT" in f for f in flags)
-    has_volume = "VOL_SPIKE" in flags
-
-    if has_pressure and has_breakout and has_volume:
-        return True
-
-    return False
-
     lo = pmeta.get("range_lo")
     hi = pmeta.get("range_hi")
+
     if lo is None or hi is None:
         return None
 
@@ -1421,21 +1408,26 @@ def strong_setup(flags, score):
         lo = float(lo)
         hi = float(hi)
         price = float(price) if price is not None else None
-    except Exception:
+    except:
         return None
 
     rng = hi - lo
+
     if rng <= 0:
         return None
 
     if "BREAKOUT_UP" in flags or "BREAKOUT_CONFIRM_UP" in flags or "PRESSURE_UP" in flags:
+
         if price is not None and price >= hi:
             return round(hi + rng * 0.35, 6)
+
         return round(hi, 6)
 
     if "BREAKOUT_DOWN" in flags or "BREAKOUT_CONFIRM_DOWN" in flags or "PRESSURE_DOWN" in flags:
+
         if price is not None and price <= lo:
             return round(lo - rng * 0.35, 6)
+
         return round(lo, 6)
 
     return None
