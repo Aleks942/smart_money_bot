@@ -1644,7 +1644,7 @@ if ORDERBOOK_ENABLED:
     strong = strong_setup(flags, score)
     pump = pump_warning(flags, score)
 
-    return {
+    signal = {
         "instId": instId,
         "price": price,
         "score": score,
@@ -1671,6 +1671,8 @@ if ORDERBOOK_ENABLED:
         "rsi_state": rsi_state.get("state"),
         "ts": now_ts(),
     }
+
+    return signal
 # =========================
 # SCANNER (LEVEL 1 FAST FILTER)
 # =========================
