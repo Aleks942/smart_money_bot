@@ -489,18 +489,17 @@ def trap_detector(candles, lookback=12):
     l = last[3]
     c = last[4]
 
-    # Bull trap: пробой вверх, но закрытие обратно ниже уровня
     if h > hi and c < hi:
         return "BULL_TRAP"
 
-    # Bear trap: пробой вниз, но закрытие обратно выше уровня
     if l < lo and c > lo:
         return "BEAR_TRAP"
 
     return None
 
+
 # ==============================
-# 🧨 STOP HUNT DETECTOR
+# STOP HUNT DETECTOR
 # ==============================
 
 def stop_hunt_detector(candles, lookback=15):
@@ -527,11 +526,9 @@ def stop_hunt_detector(candles, lookback=15):
 
     body = abs(c - o)
 
-    # прокол вверх и возврат
     if h > hi and c < hi and body < rng * 0.6:
         return "STOP_HUNT_UP"
 
-    # прокол вниз и возврат
     if l < lo and c > lo and body < rng * 0.6:
         return "STOP_HUNT_DOWN"
 
