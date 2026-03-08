@@ -1813,16 +1813,27 @@ def is_priority_signal(sig):
     return strong_confirm or smart_money_extra
 
 def msg_priority(sig):
+
     sym = fmt_symbol(sig["instId"])
+
+    strong = sig.get("strong_setup", False)
+
+    icon = "⭐"
+    if strong:
+        icon = "🟢🟢🟢"
+
     lines = []
-    lines.append(f"⭐ PRIORITY ALERT — {sym}")
+    lines.append(f"{icon} PRIORITY ALERT — {sym}")
     lines.append(f"💵 {sig['price']:.6g} | score={sig['score']}/10 | acc={sig.get('acc_score',0)}")
     lines.append(f"🧭 {sig['direction']} | {sig['entry']} | {sig['stage']}")
+
     if sig.get("target") is not None:
         lines.append(f"🎯 ликвидность/цель: {sig['target']:.6g}")
+
     if sig.get("flags"):
         fl = ", ".join(sig["flags"][:10])
         lines.append(f"Flags: {fl}")
+
     return "\n".join(lines)
 
 # =========================
