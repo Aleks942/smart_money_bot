@@ -501,7 +501,7 @@ def trap_detector(candles, lookback=12):
 # 🧨 LIQUIDITY VACUUM DETECTOR
 # ==============================
 
-def liquidity_vacuum_ok(candles):
+def liquidity_vacuum_ok(candles, orderbook=None):
 
     try:
 
@@ -523,8 +523,25 @@ def liquidity_vacuum_ok(candles):
         vol_spike = last_vol > avg_vol * VAC_VOL_MULT
         compression = last_range < avg_range * VAC_RANGE_COMPRESSION
 
+        # NEW: проверяем ликвидность стакана
+        ob_thin = False
+
+        if orderbook:
+            bids = orderbook.get("bids", [])
+            asks = orderbook.get("asks", [])
+
+            bid_sum = sum(q for _, q in bids)
+            ask_sum = sum(q for _, q in asks)
+
+            total_liq = bid_sum + ask_sum
+
+            # если ликвидность маленькая → vacuum
+            if total_liq > 0 and total_liq < 50000:
+                ob_thin = True
+
         if vol_spike and compression:
-            return True
+            if ob_thin:
+                return True
 
     except Exception:
         return False
