@@ -1134,14 +1134,14 @@ def build_signal(instId: str):
         flags.append("VOL_SPIKE")
 
     # ==============================
-# 🧨 LIQUIDITY VACUUM
-# ==============================
+    # 🧨 LIQUIDITY VACUUM
+    # ==============================
 
-vacuum = liquidity_vacuum_ok(c5)
+    vacuum = liquidity_vacuum_ok(c5)
 
-if vacuum:
-    score += 2
-    flags.append("LIQUIDITY_VACUUM")
+    if vacuum:
+        score += 2
+        flags.append("LIQUIDITY_VACUUM")
 
     # ==============================
     # 🐋 WHALE ACCUMULATION
@@ -1168,6 +1168,7 @@ if vacuum:
         flags.append("ATR_EXPANSION")
 
     pres, pmeta = liquidity_pressure(c5)
+
     if pres:
         score += 1
         flags.append(f"PRESSURE_{pres}")
@@ -1185,6 +1186,7 @@ if vacuum:
             flags.append("LIQUIDITY_MAGNET_DOWN")
 
     nb = near_breakout(pmeta, price, NEAR_BREAKOUT_PCT)
+
     if nb:
         score += 1
         flags.append(f"NEAR_BREAKOUT_{nb}")
@@ -1194,11 +1196,13 @@ if vacuum:
         flags.append("BIG_RANGE")
 
     sw, sw_meta = liquidity_sweep(c5)
+
     if sw:
         score += 1
         flags.append(sw)
 
     trap = trap_detector(c5)
+
     if trap:
         score += 1
         flags.append(trap)
@@ -1292,6 +1296,7 @@ if vacuum:
         "rsi14": rsi14,
         "rsi_state": rsi_state.get("state"),
         "ts": now_ts(),
+    }
 
 # =========================
 # SCANNER (LEVEL 1 FAST FILTER)
