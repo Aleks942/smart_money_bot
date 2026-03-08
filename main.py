@@ -1840,6 +1840,8 @@ else:
     lines.append(f"{icon} {title} — {sym}")
     lines.append(f"💵 {sig['price']:.6g} | score={sig['score']}/10 | acc={sig.get('acc_score',0)}")
     lines.append(f"🧭 {sig['direction']} | {sig['entry']} | {sig['stage']}")
+    if pump:
+        lines.append("⚠️ Возможен ранний памп")
 
     if sig.get("target") is not None:
         lines.append(f"🎯 ликвидность/цель: {sig['target']:.6g}")
