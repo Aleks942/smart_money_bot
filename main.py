@@ -526,6 +526,31 @@ def trap_detector(candles, lookback=12):
         return "BEAR_TRAP"
 
     return None
+# ==============================
+# 🐋 WHALE ACCUMULATION DETECTOR
+# ==============================
+
+def whale_accumulation_ok(candles):
+
+    try:
+        vols = [float(c[5]) for c in candles[-6:]]
+        highs = [float(c[2]) for c in candles[-6:]]
+        lows = [float(c[3]) for c in candles[-6:]]
+
+        avg_vol = sum(vols[:-1]) / max(len(vols[:-1]), 1)
+        last_vol = vols[-1]
+
+        ranges = [h - l for h, l in zip(highs, lows)]
+        avg_range = sum(ranges[:-1]) / max(len(ranges[:-1]), 1)
+        last_range = ranges[-1]
+
+        if last_vol > avg_vol * 2 and last_range < avg_range * 0.8:
+            return True
+
+    except Exception:
+        return False
+
+    return False
 
 def atr_expansion_ok(candles, period=14, compare_back=5):
     trs = []
