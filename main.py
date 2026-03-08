@@ -1627,11 +1627,11 @@ def build_signal(instId: str):
     except Exception as e:
         print(f"[ORDERBOOK ERROR] {instId}: {e}")
 
-    # ==============================
+        # ==============================
     # 📊 MARKET ANALYSIS
     # ==============================
-    
-    strong_setup = False
+
+    strong_setup = score >= PRO_EDGE_MIN_SCORE
 
     score += anti_pump_penalty(c5, ANTI_PUMP_PCT_5M)
 
@@ -1674,7 +1674,7 @@ def build_signal(instId: str):
                 entry = "⚠️ WAIT"
                 entry_reason = "RSI: рынок уже перегрет / перепродан"
 
-         pump = False
+    pump = False
 
     if strong_setup:
         pump = pump_warning(flags, score)
