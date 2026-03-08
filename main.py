@@ -214,6 +214,33 @@ def fetch_books(instId: str, sz: int = 25):
         return get_bybit_books(sym, limit=sz)
     return get_okx_books(instId, sz)
 
+# ==============================
+# ⚡ BYBIT LIQUIDATIONS API
+# ==============================
+
+def fetch_bybit_liquidations(instId: str):
+
+    if not is_bybit():
+        return []
+
+    try:
+        sym = normalize_symbol(instId)
+
+        url = "https://api.bybit.com/v5/market/liquidation"
+
+        params = {
+            "category": "linear",
+            "symbol": sym,
+            "limit": "20"
+        }
+
+        res = bybit_get(url, params)
+
+        return res.get("list") or []
+
+    except Exception:
+        return []
+
 # =========================
 # HARD RULES / FILTERS
 # =========================
