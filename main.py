@@ -1636,11 +1636,7 @@ def build_signal(instId: str):
     strong = strong_setup(flags, score)
     pump = pump_warning(flags, score)
 
-    return {
-
-    ob_meta = None
-
-    if ORDERBOOK_ENABLED:
+    
         ob_meta = orderbook_edge(instId)
 
         if ob_meta:
