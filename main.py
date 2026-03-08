@@ -1816,14 +1816,24 @@ def msg_priority(sig):
 
     sym = fmt_symbol(sig["instId"])
 
+    score = sig.get("score", 0)
     strong = sig.get("strong_setup", False)
 
-    icon = "⭐"
-    if strong:
+    # уровни силы сигнала
+    if score >= 9 and strong:
         icon = "🟢🟢🟢"
+        title = "ELITE SETUP"
+
+    elif strong:
+        icon = "🟢🟢"
+        title = "STRONG SETUP"
+
+    else:
+        icon = "⭐"
+        title = "PRIORITY ALERT"
 
     lines = []
-    lines.append(f"{icon} PRIORITY ALERT — {sym}")
+    lines.append(f"{icon} {title} — {sym}")
     lines.append(f"💵 {sig['price']:.6g} | score={sig['score']}/10 | acc={sig.get('acc_score',0)}")
     lines.append(f"🧭 {sig['direction']} | {sig['entry']} | {sig['stage']}")
 
