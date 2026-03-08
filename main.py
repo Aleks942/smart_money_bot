@@ -624,7 +624,6 @@ def pump_warning(flags, score):
     return False
 
 
-def atr_expansion_ok(candles, period=14, compare_back=5):
 
 def atr_expansion_ok(candles, period=14, compare_back=5):
     trs = []
