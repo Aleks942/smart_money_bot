@@ -1321,6 +1321,12 @@ def build_signal(instId: str):
             score += 1
             flags.append("LIQUIDITY_MAGNET_DOWN")
 
+    liq_map = liquidity_map(c5)
+
+    if liq_map:
+        score += 1
+        flags.append(liq_map)
+
     nb = near_breakout(pmeta, price, NEAR_BREAKOUT_PCT)
 
     if nb:
