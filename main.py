@@ -776,6 +776,35 @@ def near_breakout(pmeta, price, near_pct):
         return "DOWN"
     return None
 
+# ==============================
+# 🎯 LIQUIDITY MAP
+# ==============================
+
+def liquidity_map(candles, lookback=40):
+
+    if len(candles) < lookback:
+        return None
+
+    highs = [c[2] for c in candles[-lookback:]]
+    lows = [c[3] for c in candles[-lookback:]]
+
+    hi = max(highs)
+    lo = min(lows)
+
+    last = candles[-1]
+    price = last[4]
+
+    dist_up = abs(hi - price) / price * 100
+    dist_down = abs(price - lo) / price * 100
+
+    if dist_up < 0.35:
+        return "STOP_CLUSTER_UP"
+
+    if dist_down < 0.35:
+        return "STOP_CLUSTER_DOWN"
+
+    return None
+
 
 def _close_from_candle(c):
     try:
