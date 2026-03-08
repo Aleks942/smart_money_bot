@@ -1161,7 +1161,7 @@ def build_signal(instId: str):
     # 🧨 LIQUIDITY VACUUM
     # ==============================
 
-    vacuum = liquidity_vacuum_ok(c5)
+    vacuum = liquidity_vacuum_ok(c5, ob_meta)
 
     if vacuum:
         score += 2
