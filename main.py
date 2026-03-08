@@ -240,6 +240,41 @@ def fetch_bybit_liquidations(instId: str):
 
     except Exception:
         return []
+
+    # ==============================
+# 💥 LIQUIDATION RADAR
+# ==============================
+
+def liquidation_radar(liqs):
+
+    if not liqs:
+        return None
+
+    long_liq = 0
+    short_liq = 0
+
+    for l in liqs:
+
+        try:
+            side = l.get("side")
+            size = float(l.get("size", 0))
+
+            if side == "Sell":
+                long_liq += size
+
+            if side == "Buy":
+                short_liq += size
+
+        except:
+            continue
+
+    if long_liq > short_liq * 1.8:
+        return "LONG_LIQUIDATIONS"
+
+    if short_liq > long_liq * 1.8:
+        return "SHORT_LIQUIDATIONS"
+
+    return None
 # ==============================
 # 📊 BYBIT OPEN INTEREST API
 # ==============================
