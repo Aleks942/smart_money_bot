@@ -474,6 +474,7 @@ def breakout_confirm_ok(candles, lookback=BREAKOUT_LOOKBACK, confirm_bars=BREAKO
     if all(cl < lo * (1.0 - MIN_BREAKOUT_DIST_PCT / 100.0) for cl in closes):
         return "DOWN"
     return None
+    
 def trap_detector(candles, lookback=12):
     if len(candles) < lookback + 2:
         return None
