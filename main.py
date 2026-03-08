@@ -1091,6 +1091,16 @@ def build_signal(instId: str):
     if volume_spike_ok(c5):
         score += 1
         flags.append("VOL_SPIKE")
+        
+# ==============================
+# 🐋 WHALE ACCUMULATION
+# ==============================
+
+whale_acc = whale_accumulation_ok(c5)
+
+if whale_acc:
+    score += 1
+    flags.append("WHALE_ACC")
 
     br = breakout_ok(c5)
     if br:
