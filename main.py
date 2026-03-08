@@ -653,6 +653,36 @@ def whale_flow_radar(candles):
 
     return False
 
+# ==============================
+# 📈 OPEN INTEREST BUILDUP
+# ==============================
+
+def open_interest_buildup(oi_series, price_series):
+
+    if not oi_series or len(oi_series) < 5:
+        return False
+
+    try:
+        last_oi = float(oi_series[-1])
+        prev_oi = sum(float(x) for x in oi_series[-5:-1]) / 4.0
+
+        oi_growth = last_oi > prev_oi * 1.03
+
+        last_price = float(price_series[-1])
+        prev_price = float(price_series[-5])
+
+        price_change = abs(last_price - prev_price) / prev_price * 100.0
+
+        price_flat = price_change < 0.4
+
+        if oi_growth and price_flat:
+            return True
+
+    except Exception:
+        return False
+
+    return False
+
 
 
 # ==============================
