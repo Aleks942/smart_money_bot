@@ -1286,6 +1286,8 @@ def build_signal(instId: str):
                 entry = "⚠️ WAIT"
                 entry_reason = "RSI: рынок уже перегрет / перепродан"
 
+    strong = strong_setup(flags, score)
+
     return {
         "instId": instId,
         "price": price,
