@@ -2036,7 +2036,7 @@ if __name__ == "__main__":
 
 
                     update_symbol_state(state, sig)
-                    time.sleep(0.14)
+                    time.sleep(0.12)
 
                 except Exception as e:
                     print(f"[SCAN ERROR] {instId}: {e}", flush=True)
