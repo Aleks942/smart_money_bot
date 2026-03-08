@@ -1556,150 +1556,92 @@ def build_signal(instId: str):
         score += 1
         flags.append(liq_signal)
 
-    # ==============================
-    # 💥 LIQUIDATION RADAR
-    # ==============================
+# ==============================
+# 💥 LIQUIDATION RADAR
+# ==============================
 
-    liqs = fetch_bybit_liquidations(instId)
+liqs = fetch_bybit_liquidations(instId)
 
-    liq_signal = liquidation_radar(liqs)
+liq_signal = liquidation_radar(liqs)
 
-    if liq_signal:
-        score += 1
-        flags.append(liq_signal)
+if liq_signal:
+    score += 1
+    flags.append(liq_signal)
 
-    ob_meta = None
+# ==============================
+# 📚 ORDERBOOK EDGE
+# ==============================
 
-    if ORDERBOOK_ENABLED:
-        ob_meta = orderbook_edge(instId)
+ob_meta = None
 
-        if ob_meta:
-            bias = ob_meta.get("ob_bias")
+if ORDERBOOK_ENABLED:
+    ob_meta = orderbook_edge(instId)
 
-            if bias == "BIDS":
-                score += 1
-                flags.append("OB_BIDS")
+    if ob_meta:
+        bias = ob_meta.get("ob_bias")
 
-            elif bias == "ASKS":
-                score += 1
-                flags.append("OB_ASKS")
+        if bias == "BIDS":
+            score += 1
+            flags.append("OB_BIDS")
 
-            if ob_meta.get("bid_wall"):
-                score += 1
-                flags.append("OB_WALL_BID")
+        elif bias == "ASKS":
+            score += 1
+            flags.append("OB_ASKS")
 
-            if ob_meta.get("ask_wall"):
-                score += 1
-                flags.append("OB_WALL_ASK")
+        if ob_meta.get("bid_wall"):
+            score += 1
+            flags.append("OB_WALL_BID")
 
-    score += anti_pump_penalty(c5, ANTI_PUMP_PCT_5M)
+        if ob_meta.get("ask_wall"):
+            score += 1
+            flags.append("OB_WALL_ASK")
 
-    acc_score = accumulation_bias(flags)
-    exp_min, exp_max = expected_move_pct(c5, pmeta)
+# ==============================
+# 📊 MARKET ANALYSIS
+# ==============================
 
-    rsi_state = get_rsi_state(c5)
-    rsi7 = rsi_state.get("rsi7")
-    rsi14 = rsi_state.get("rsi14")
+score += anti_pump_penalty(c5, ANTI_PUMP_PCT_5M)
 
-    direction_text, reasons, up_w, down_w = direction_hint(flags)
+acc_score = accumulation_bias(flags)
+exp_min, exp_max = expected_move_pct(c5, pmeta)
 
-    entry, entry_reason = entry_engine(score, flags, direction_text, up_w, down_w)
+rsi_state = get_rsi_state(c5)
+rsi7 = rsi_state.get("rsi7")
+rsi14 = rsi_state.get("rsi14")
 
-    stage, stage_reason = smart_money_stage(score, flags)
+direction_text, reasons, up_w, down_w = direction_hint(flags)
 
-    tgt = liquidity_target(pmeta, flags, price)
+entry, entry_reason = entry_engine(score, flags, direction_text, up_w, down_w)
 
-    counter_block = has_counter_book_or_trap(direction_text, flags)
+stage, stage_reason = smart_money_stage(score, flags)
 
-    if counter_block and "AGGRESSIVE" in entry:
-        entry = "⚠️ WAIT"
-        entry_reason = "Есть встречный стакан / ловушка против направления"
+tgt = liquidity_target(pmeta, flags, price)
 
-    dir_key = None
+counter_block = has_counter_book_or_trap(direction_text, flags)
 
-    if "ВВЕРХ" in direction_text:
-        dir_key = "UP"
-    elif "ВНИЗ" in direction_text:
-        dir_key = "DOWN"
+if counter_block and "AGGRESSIVE" in entry:
+    entry = "⚠️ WAIT"
+    entry_reason = "Есть встречный стакан / ловушка против направления"
 
-    if USE_RSI_FILTER and dir_key:
+dir_key = None
 
-        if rsi_warns_direction(dir_key, rsi_state):
-            flags.append(f"RSI_{rsi_state.get('state')}")
+if "ВВЕРХ" in direction_text:
+    dir_key = "UP"
+elif "ВНИЗ" in direction_text:
+    dir_key = "DOWN"
 
-        if BLOCK_AGGRESSIVE_ON_RSI_EXTREME and rsi_blocks_aggressive_entry(dir_key, rsi_state):
+if USE_RSI_FILTER and dir_key:
 
-            if "AGGRESSIVE" in entry:
-                entry = "⚠️ WAIT"
-                entry_reason = "RSI: рынок уже перегрет / перепродан"
+    if rsi_warns_direction(dir_key, rsi_state):
+        flags.append(f"RSI_{rsi_state.get('state')}")
 
-    strong = strong_setup(flags, score)
-    pump = pump_warning(flags, score)
+    if BLOCK_AGGRESSIVE_ON_RSI_EXTREME and rsi_blocks_aggressive_entry(dir_key, rsi_state):
 
-    
-        ob_meta = orderbook_edge(instId)
+        if "AGGRESSIVE" in entry:
+            entry = "⚠️ WAIT"
+            entry_reason = "RSI: рынок уже перегрет / перепродан"
 
-        if ob_meta:
-            bias = ob_meta.get("ob_bias")
-
-            if bias == "BIDS":
-                score += 1
-                flags.append("OB_BIDS")
-
-            elif bias == "ASKS":
-                score += 1
-                flags.append("OB_ASKS")
-
-            if ob_meta.get("bid_wall"):
-                score += 1
-                flags.append("OB_WALL_BID")
-
-            if ob_meta.get("ask_wall"):
-                score += 1
-                flags.append("OB_WALL_ASK")
-
-    score += anti_pump_penalty(c5, ANTI_PUMP_PCT_5M)
-
-    acc_score = accumulation_bias(flags)
-    exp_min, exp_max = expected_move_pct(c5, pmeta)
-
-    rsi_state = get_rsi_state(c5)
-    rsi7 = rsi_state.get("rsi7")
-    rsi14 = rsi_state.get("rsi14")
-
-    direction_text, reasons, up_w, down_w = direction_hint(flags)
-
-    entry, entry_reason = entry_engine(score, flags, direction_text, up_w, down_w)
-
-    stage, stage_reason = smart_money_stage(score, flags)
-
-    tgt = liquidity_target(pmeta, flags, price)
-
-    counter_block = has_counter_book_or_trap(direction_text, flags)
-
-    if counter_block and "AGGRESSIVE" in entry:
-        entry = "⚠️ WAIT"
-        entry_reason = "Есть встречный стакан / ловушка против направления"
-
-    dir_key = None
-
-    if "ВВЕРХ" in direction_text:
-        dir_key = "UP"
-    elif "ВНИЗ" in direction_text:
-        dir_key = "DOWN"
-
-    if USE_RSI_FILTER and dir_key:
-
-        if rsi_warns_direction(dir_key, rsi_state):
-            flags.append(f"RSI_{rsi_state.get('state')}")
-
-        if BLOCK_AGGRESSIVE_ON_RSI_EXTREME and rsi_blocks_aggressive_entry(dir_key, rsi_state):
-
-            if "AGGRESSIVE" in entry:
-                entry = "⚠️ WAIT"
-                entry_reason = "RSI: рынок уже перегрет / перепродан"
-
-    strong = strong_setup(flags, score)
+strong = strong_setup(flags, score)
 pump = pump_warning(flags, score)
 
 return {
