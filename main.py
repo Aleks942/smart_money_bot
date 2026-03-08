@@ -27,7 +27,7 @@ STATE_FILE = os.getenv("STATE_FILE") or "state.json"
 
 SCAN_TOP_N = int(os.getenv("SCAN_TOP_N") or "120")
 SCAN_MIN_VOL_USDT = float(os.getenv("SCAN_MIN_VOL_USDT") or "800000")
-SCAN_MIN_PCT_24H = float(os.getenv("SCAN_MIN_PCT_24H") or "-15")
+SCAN_MIN_PCT_24H = float(os.getenv("SCAN_MIN_PCT_24H") or "2")
 
 ALERT_MIN_SCORE = int(os.getenv("ALERT_MIN_SCORE") or "4")
 ALERT_TOP_M = int(os.getenv("ALERT_TOP_M") or "8")
