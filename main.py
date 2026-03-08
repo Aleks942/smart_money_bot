@@ -1334,28 +1334,34 @@ def build_signal(instId: str):
         flags.append(f"NEAR_BREAKOUT_{nb}")
 
     if pmeta and pmeta.get("range_pct", 0) > 2.0:
-        score += 1
-        flags.append("BIG_RANGE")
+    score += 1
+    flags.append("BIG_RANGE")
 
-    sw, sw_meta = liquidity_sweep(c5)
+liq_map = liquidity_map(c5)
 
-    if sw:
-        score += 1
-        flags.append(sw)
+if liq_map:
+    score += 1
+    flags.append(liq_map)
 
-    trap = trap_detector(c5)
+sw, sw_meta = liquidity_sweep(c5)
 
-    if trap:
-        score += 1
-        flags.append(trap)
+if sw:
+    score += 1
+    flags.append(sw)
 
-    stop_hunt = stop_hunt_detector(c5)
+trap = trap_detector(c5)
 
-    if stop_hunt:
-        score += 2
-        flags.append(stop_hunt)
+if trap:
+    score += 1
+    flags.append(trap)
 
-    ob_meta = None
+stop_hunt = stop_hunt_detector(c5)
+
+if stop_hunt:
+    score += 2
+    flags.append(stop_hunt)
+
+ob_meta = None
 
     if ORDERBOOK_ENABLED:
         ob_meta = orderbook_edge(instId)
