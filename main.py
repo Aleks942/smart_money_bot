@@ -1100,6 +1100,7 @@ def smart_money_stage(score, flags):
     return "⚪ NEUTRAL", "Смешанные признаки"
 
 def liquidity_target(pmeta, flags, price=None):
+    
     if not pmeta:
         return None
 
