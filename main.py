@@ -1813,19 +1813,28 @@ def msg_priority(sig):
 
     score = sig.get("score", 0)
     strong = sig.get("strong_setup", False)
+    pump = sig.get("pump_warning", False)
 
     # уровни силы сигнала
-    if score >= 9 and strong:
-        icon = "🟢🟢🟢"
-        title = "ELITE SETUP"
+    if pump and strong and score >= 9:
+    icon = "🚀🚀🚀"
+    title = "ELITE PUMP"
 
-    elif strong:
-        icon = "🟢🟢"
-        title = "STRONG SETUP"
+elif pump and strong:
+    icon = "🚀🚀"
+    title = "PUMP WARNING"
 
-    else:
-        icon = "⭐"
-        title = "PRIORITY ALERT"
+elif score >= 9 and strong:
+    icon = "🟢🟢🟢"
+    title = "ELITE SETUP"
+
+elif strong:
+    icon = "🟢🟢"
+    title = "STRONG SETUP"
+
+else:
+    icon = "⭐"
+    title = "PRIORITY ALERT"
 
     lines = []
     lines.append(f"{icon} {title} — {sym}")
