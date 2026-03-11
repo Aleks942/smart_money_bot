@@ -2423,8 +2423,7 @@ if __name__ == "__main__":
             alerts = []
             manip_watch = []
 
-            for (instId, vol_usdt, pct) in candidates:
-
+for (instId, vol_usdt, pct) in candidates:
     try:
         sig = build_signal(instId)
         sig["vol_usdt"] = vol_usdt
@@ -2435,12 +2434,13 @@ if __name__ == "__main__":
         # =====================
         # PRIORITY ALERT
         # =====================
+        # ... дальше твоя логика обработки sig
 
     except Exception as e:
         # если у тебя тут уже есть обработка — оставь её
         pass
 
-    time.sleep(0.12)  # ✅ ВСЕГДА в конце одной монеты
+    time.sleep(0.12)  # ✅ пауза после каждой монеты
 
                     # =====================
                     # PRIORITY ALERT
