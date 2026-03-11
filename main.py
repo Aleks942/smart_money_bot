@@ -1450,27 +1450,22 @@ def build_signal(instId: str):
     c5 = fetch_candles(instId, "5m", 120)
     c15 = fetch_candles(instId, "15m", 240)  # ✅ важно: 240, чтобы хватало для M15-trend/continuation
 
-    price = c5[-1][4]
+        price = c5[-1][4]
 
     flags = []
     score = 0
 
-    # ✅ CONTINUATION (M15 откат → продолжение)
-    # если модуль сработал — добавим флаг и усилим score
-   try:
-    cont = continuation_engine(c15)
-       except Exception as e:
-    print(f"[CONT-ERR] {instId}: {e}", flush=True)
-    cont = None
-
+    # CONTINUATION (M15 откат → продолжение)
+    try:
+        cont = continuation_engine(c15)
+    except Exception as e:
+        print(f"[CONT-ERR] {instId}: {e}", flush=True)
+        cont = None
 
     if cont:
         flags.append(cont)   # CONTINUATION_UP или CONTINUATION_DOWN
         score += 2
-    if cont:
-    flags.append(cont)
-    score += 2
-    print(f"[CONT-OK] {instId}: {cont}", flush=True)
+        print(f"[CONT-OK] {instId}: {cont}", flush=True)
 
     comp5, _ = compression_ok(c5)
     if comp5:
