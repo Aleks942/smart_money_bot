@@ -2528,20 +2528,20 @@ if __name__ == "__main__":
             cycle_info = time.strftime("%Y-%m-%d %H:%M:%S")
 
 
-            # MARKET SUMMARY (не шлём пустое)
+                        # MARKET SUMMARY (не шлём пустое)
             msg = summary_message(alerts, cycle_info, regime)
-           if msg:
-              send_telegram(msg)
-
+            if msg:
+                send_telegram(msg)
 
             # DETAILS
             for sig in alerts[:DETAIL_TOP_K]:
                 send_telegram(choose_detail_message(sig))
 
-
-            # PRE MOVE WATCH
+            # PRE MOVE WATCH (не шлём "Тихо")
             if MANIP_ALERT_ENABLED:
-                send_telegram(manip_summary_message(manip_watch, cycle_info, regime))
+                msg2 = manip_summary_message(manip_watch, cycle_info, regime)
+                if msg2:
+                    send_telegram(msg2)
 
                 for sig in manip_watch[:MANIP_DETAIL_TOP_K]:
                     send_telegram(msg_medium(sig))
