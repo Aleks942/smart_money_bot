@@ -1465,7 +1465,7 @@ def build_signal(instId: str):
     if cont:
         flags.append(cont)   # CONTINUATION_UP или CONTINUATION_DOWN
         score += 2
-        print(f"[CONT-OK] {instId}: {cont}", flush=True)
+        
 
     comp5, _ = compression_ok(c5)
     if comp5:
