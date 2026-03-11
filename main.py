@@ -2504,8 +2504,10 @@ if __name__ == "__main__":
             cycle_info = time.strftime("%Y-%m-%d %H:%M:%S")
 
 
-            # MARKET SUMMARY
-            send_telegram(summary_message(alerts, cycle_info, regime))
+            # MARKET SUMMARY (не шлём пустое)
+msg = summary_message(alerts, cycle_info, regime)
+if msg:
+    send_telegram(msg)
 
 
             # DETAILS
