@@ -6,6 +6,7 @@ import requests
 from dotenv import load_dotenv
 from priority_engine import find_global_priority, should_send_priority
 from wall_detector import WallTracker
+from continuation_engine import continuation_engine
 
 load_dotenv()
 wall_tracker = WallTracker()
