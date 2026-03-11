@@ -2505,9 +2505,9 @@ if __name__ == "__main__":
 
 
             # MARKET SUMMARY (не шлём пустое)
-msg = summary_message(alerts, cycle_info, regime)
-if msg:
-    send_telegram(msg)
+            msg = summary_message(alerts, cycle_info, regime)
+           if msg:
+              send_telegram(msg)
 
 
             # DETAILS
