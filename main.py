@@ -2064,15 +2064,28 @@ def summary_message(alerts, cycle_info, regime):
     lines.append("🚨 SMART MONEY SCAN — MARKET SUMMARY")
     lines.append(f"⏱ Cycle: {cycle_info}")
     lines.append(f"🧭 BTC regime: {regime}")
-        if not alerts:
+
+    # ✅ если пусто — НИЧЕГО не отправляем
+    if not alerts:
         return None
 
-    lines.append(f"Top {min(ALERT_TOP_M, len(alerts))}:")
-    for sig in alerts[:ALERT_TOP_M]:
-        sym = fmt_symbol(sig["instId"])
-        tgt = f" | tgt {sig['target']:.6g}" if sig["target"] is not None else ""
+    top_n = min(len(alerts), 3)
+    lines.append(f"Top {top_n}:")
+
+    for sig in alerts[:top_n]:
+        sym = sig.get("instId") or sig.get("symbol") or sig.get("sym") or "?"
+        score = sig.get("score", 0)
         acc = sig.get("acc_score", 0)
-        lines.append(f"• {sym}: {sig['score']}/10 acc={acc} {sig['direction']} | {sig['entry']} | {sig['stage']}{tgt}")
+        direction = sig.get("direction", "")
+        entry = sig.get("entry", "")
+        stage = sig.get("stage", "")
+        tgt = sig.get("target", None)
+
+        if tgt is not None:
+            lines.append(f"• {sym}: {score}/10 acc={acc} {direction} | {entry} | {stage} | tgt {tgt}")
+        else:
+            lines.append(f"• {sym}: {score}/10 acc={acc} {direction} | {entry} | {stage}")
+
     return "\n".join(lines)
 
 # =========================
