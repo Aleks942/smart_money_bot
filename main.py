@@ -2424,10 +2424,10 @@ if __name__ == "__main__":
             manip_watch = []
 
 for (instId, vol_usdt, pct) in candidates:
-    try:
-        sig = build_signal(instId)
-        sig["vol_usdt"] = vol_usdt
-        sig["pct_24h"] = pct
+       try:
+           sig = build_signal(instId)
+           sig["vol_usdt"] = vol_usdt
+           sig["pct_24h"] = pct
 
         sig = apply_regime_bias(sig, regime)
 
