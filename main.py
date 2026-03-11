@@ -1450,7 +1450,7 @@ def build_signal(instId: str):
     c5 = fetch_candles(instId, "5m", 120)
     c15 = fetch_candles(instId, "15m", 240)  # ✅ важно: 240, чтобы хватало для M15-trend/continuation
 
-        price = c5[-1][4]
+    price = c5[-1][4]
 
     flags = []
     score = 0
