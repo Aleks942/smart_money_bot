@@ -2413,14 +2413,14 @@ if __name__ == "__main__":
     state = load_state()
     send_telegram(f"🚀 SMART MONEY SCANNER — PRO EDGE v4 started ({EXCHANGE} market scan)")
 
-    while True:
+        while True:
         t0 = time.time()
 
         try:
             regime, _btc = btc_regime()
             candidates = get_market_candidates()
 
-                        alerts = []
+            alerts = []
             manip_watch = []
 
             for instId, vol_usdt, pct in candidates:
@@ -2431,44 +2431,49 @@ if __name__ == "__main__":
 
                     sig = apply_regime_bias(sig, regime)
 
-                    # =====================
-                    # PRIORITY ALERT
-                    # =====================
-                    # ✅ сюда оставь твою текущую логику обработки sig:
-                    # - добавление в alerts
-                    # - manip_watch
-                    # - send_telegram(...)
-                    # - фильтры и т.п.
+                    # ✅ твоя логика: добавление в alerts / manip_watch
+                    # (если у тебя уже есть готовые условия — вставь их сюда)
+                    # Пример безопасный (можешь оставить временно):
+                    if sig.get("score", 0) >= PRO_EDGE_MIN_SCORE:
+                        alerts.append(sig)
 
-                except Exception as e:
-                    # ✅ не падаем на одной монете
+                    if MANIP_ALERT_ENABLED and sig.get("acc_score", 0) >= MANIP_MIN_ACC_SCORE:
+                        manip_watch.append(sig)
+
+                except Exception:
                     pass
 
-                time.sleep(0.12)  # ✅ пауза после каждой монеты
+                time.sleep(0.12)  # ✅ анти-рейткеп
 
-                    # =====================
-                    # PRIORITY ALERT
-                    # =====================
-                    if is_priority_signal(sig) and priority_allowed(state, instId):
-                        if pro_edge_filter(sig, regime):
-                            send_telegram(msg_priority(sig))
-                            mark_priority(state, instId)
+            # cycle_info — без datetime, чтобы не ломалось
+            cycle_info = time.strftime("%Y-%m-%d %H:%M:%S")
 
-                    # =====================
-                    # ОБЫЧНЫЕ ALERTS
-                    # =====================
-                    if pro_edge_filter(sig, regime):
-                        if sig["score"] >= ALERT_MIN_SCORE and should_alert_symbol(state, sig):
-                            alerts.append(sig)
-                            mark_alert_sent(state, sig)
+            # MARKET SUMMARY (не шлём пустое)
+            msg = summary_message(alerts, cycle_info, regime)
+            if msg:
+                send_telegram(msg)
 
-                    # =====================
-                    # PRE-MOVE WATCH
-                    # =====================
-                    if MANIP_ALERT_ENABLED and is_pre_move_manip(sig):
-                        if should_manip_alert(state, sig):
-                            manip_watch.append(sig)
-                            mark_manip_sent(state, sig)
+            # DETAILS
+            for sig in alerts[:DETAIL_TOP_K]:
+                send_telegram(choose_detail_message(sig))
+
+            # PRE MOVE WATCH (не шлём "Тихо")
+            if MANIP_ALERT_ENABLED:
+                msg2 = manip_summary_message(manip_watch, cycle_info, regime)
+                if msg2:
+                    send_telegram(msg2)
+
+                for sig in manip_watch[:MANIP_DETAIL_TOP_K]:
+                    send_telegram(msg_medium(sig))
+
+            save_state(state)
+
+        except Exception as e:
+            send_telegram(f"❌ Scan Error:\n{str(e)}")
+
+        dt = time.time() - t0
+        sleep_for = max(1, POLL_SECONDS - int(dt))
+        time.sleep(sleep_for)
 
                     # =====================
                     # V3 TRIGGERS
