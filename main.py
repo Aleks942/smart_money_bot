@@ -1455,11 +1455,11 @@ def build_signal(instId: str):
     flags = []
     score = 0
 
-    # CONTINUATION (M15 откат → продолжение)
+        # CONTINUATION (M15 откат → продолжение)
+    cont = None
     try:
         cont = continuation_engine(c15)
-    except Exception as e:
-        print(f"[CONT-ERR] {instId}: {e}", flush=True)
+    except Exception:
         cont = None
 
     if cont:
