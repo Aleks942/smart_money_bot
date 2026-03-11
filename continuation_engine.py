@@ -1,106 +1,90 @@
 # continuation_engine.py
 
-from typing import List, Dict, Optional
-
+from typing import List, Dict, Optional, Any
 
 def ema(values: List[float], period: int) -> float:
-    if not values or len(values) < period:
-        return values[-1] if values else 0.0
+    if not values:
+        return 0.0
+    if len(values) < period:
+        return float(values[-1])
 
-    k = 2 / (period + 1)
-    ema_val = sum(values[:period]) / period
+    k = 2.0 / (period + 1.0)
+    ema_val = sum(values[:period]) / float(period)
 
     for v in values[period:]:
-        ema_val = v * k + ema_val * (1 - k)
+        ema_val = float(v) * k + ema_val * (1.0 - k)
 
-    return ema_val
-
-
-def trend_m15(ema20: float, ema50: float, ema200: float) -> str:
-
-    if ema20 > ema50 > ema200:
-        return "UP"
-
-    if ema20 < ema50 < ema200:
-        return "DOWN"
-
-    return "RANGE"
+    return float(ema_val)
 
 
-def pullback_detect(price: float, ema20: float, ema50: float, trend: str) -> bool:
-
-    if trend == "UP":
-        if price <= ema20 or price <= ema50:
-            return True
-
-    if trend == "DOWN":
-        if price >= ema20 or price >= ema50:
-            return True
-
-    return False
+def _get_close(c: Any) -> float:
+    # dict: {"close": "..."}
+    if isinstance(c, dict):
+        return float(c["close"])
+    # list/tuple: [ts, open, high, low, close, ...]
+    return float(c[4])
 
 
-def continuation_trigger(last_close: float,
-                         prev_high: float,
-                         prev_low: float,
-                         trend: str) -> bool:
-
-    if trend == "UP":
-        if last_close > prev_high:
-            return True
-
-    if trend == "DOWN":
-        if last_close < prev_low:
-            return True
-
-    return False
+def _get_high(c: Any) -> float:
+    if isinstance(c, dict):
+        return float(c["high"])
+    return float(c[2])
 
 
-def continuation_engine(candles_m15: List[Dict]) -> Optional[str]:
+def _get_low(c: Any) -> float:
+    if isinstance(c, dict):
+        return float(c["low"])
+    return float(c[3])
+
+
+def continuation_engine(candles_m15: List[Any]) -> Optional[str]:
     """
-    candles_m15: список свечей M15
-    формат как у Bybit:
-    {
-        "open": ...,
-        "high": ...,
-        "low": ...,
-        "close": ...
-    }
+    Возвращает:
+      CONTINUATION_UP / CONTINUATION_DOWN / None
+    Логика:
+      1) тренд по EMA20/50/200 на M15
+      2) откат к EMA20 (цена вернулась к средней)
+      3) триггер продолжения: close пробивает high/low предыдущей свечи
     """
 
-    if len(candles_m15) < 220:
+    if not candles_m15 or len(candles_m15) < 210:
         return None
 
-    closes = [float(c["close"]) for c in candles_m15]
+    closes = [_get_close(c) for c in candles_m15]
 
     ema20 = ema(closes, 20)
     ema50 = ema(closes, 50)
     ema200 = ema(closes, 200)
 
-    trend = trend_m15(ema20, ema50, ema200)
-
-    if trend == "RANGE":
-        return None
-
     price = closes[-1]
 
-    pullback = pullback_detect(price, ema20, ema50, trend)
+    # тренд
+    up_trend = (price > ema20) and (ema20 > ema50) and (ema50 > ema200)
+    dn_trend = (price < ema20) and (ema20 < ema50) and (ema50 < ema200)
 
-    if not pullback:
+    if not up_trend and not dn_trend:
         return None
 
+    # откат: цена должна "потрогать" EMA20 (упрощённо — быть рядом/ниже/выше)
+    # UP: откат = цена опускалась к EMA20 (сейчас допускаем price <= ema20)
+    if up_trend and price > ema20:
+        # если хочешь строже — оставь так, но тогда ловить будет реже
+        return None
+
+    # DOWN: откат = цена поднималась к EMA20 (price >= ema20)
+    if dn_trend and price < ema20:
+        return None
+
+    prev = candles_m15[-2]
+    prev_high = _get_high(prev)
+    prev_low = _get_low(prev)
     last_close = closes[-1]
-    prev_high = float(candles_m15[-2]["high"])
-    prev_low = float(candles_m15[-2]["low"])
 
-    trigger = continuation_trigger(last_close, prev_high, prev_low, trend)
+    # триггер продолжения
+    if up_trend and (last_close > prev_high):
+        return "CONTINUATION_UP"
 
-    if trigger:
-
-        if trend == "UP":
-            return "CONTINUATION_UP"
-
-        if trend == "DOWN":
-            return "CONTINUATION_DOWN"
+    if dn_trend and (last_close < prev_low):
+        return "CONTINUATION_DOWN"
 
     return None
