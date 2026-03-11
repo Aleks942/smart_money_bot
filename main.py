@@ -2420,27 +2420,31 @@ if __name__ == "__main__":
             regime, _btc = btc_regime()
             candidates = get_market_candidates()
 
-            alerts = []
+                        alerts = []
             manip_watch = []
 
-   for (instId, vol_usdt, pct) in candidates:
-       try:
-           sig = build_signal(instId)
-           sig["vol_usdt"] = vol_usdt
-           sig["pct_24h"] = pct
+            for instId, vol_usdt, pct in candidates:
+                try:
+                    sig = build_signal(instId)
+                    sig["vol_usdt"] = vol_usdt
+                    sig["pct_24h"] = pct
 
-        sig = apply_regime_bias(sig, regime)
+                    sig = apply_regime_bias(sig, regime)
 
-        # =====================
-        # PRIORITY ALERT
-        # =====================
-        # ... дальше твоя логика обработки sig
+                    # =====================
+                    # PRIORITY ALERT
+                    # =====================
+                    # ✅ сюда оставь твою текущую логику обработки sig:
+                    # - добавление в alerts
+                    # - manip_watch
+                    # - send_telegram(...)
+                    # - фильтры и т.п.
 
-    except Exception as e:
-        # если у тебя тут уже есть обработка — оставь её
-        pass
+                except Exception as e:
+                    # ✅ не падаем на одной монете
+                    pass
 
-    time.sleep(0.12)  # ✅ пауза после каждой монеты
+                time.sleep(0.12)  # ✅ пауза после каждой монеты
 
                     # =====================
                     # PRIORITY ALERT
