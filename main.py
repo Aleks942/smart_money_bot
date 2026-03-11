@@ -2249,6 +2249,11 @@ def msg_priority(sig):
 
     lines = []
     lines.append(f"{icon} {title} — {sym}")
+        # ✅ Continuation highlight (чтобы сразу видно было)
+    if "CONTINUATION_UP" in sig.get("flags", []):
+        lines.append("📈 M15 CONTINUATION: рост после коррекции")
+    elif "CONTINUATION_DOWN" in sig.get("flags", []):
+        lines.append("📉 M15 CONTINUATION: падение после коррекции")
     lines.append(f"💵 {sig['price']:.6g} | score={sig['score']}/10 | acc={sig.get('acc_score',0)}")
     lines.append(f"🧭 {sig['direction']} | {sig['entry']} | {sig['stage']}")
 
