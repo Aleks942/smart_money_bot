@@ -2425,12 +2425,22 @@ if __name__ == "__main__":
 
             for (instId, vol_usdt, pct) in candidates:
 
-                try:
-                    sig = build_signal(instId)
-                    sig["vol_usdt"] = vol_usdt
-                    sig["pct_24h"] = pct
+    try:
+        sig = build_signal(instId)
+        sig["vol_usdt"] = vol_usdt
+        sig["pct_24h"] = pct
 
-                    sig = apply_regime_bias(sig, regime)
+        sig = apply_regime_bias(sig, regime)
+
+        # =====================
+        # PRIORITY ALERT
+        # =====================
+
+    except Exception as e:
+        # если у тебя тут уже есть обработка — оставь её
+        pass
+
+    time.sleep(0.12)  # ✅ ВСЕГДА в конце одной монеты
 
                     # =====================
                     # PRIORITY ALERT
