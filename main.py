@@ -2413,7 +2413,7 @@ if __name__ == "__main__":
     state = load_state()
     send_telegram(f"🚀 SMART MONEY SCANNER — PRO EDGE v4 started ({EXCHANGE} market scan)")
 
-        while True:
+    while True:
         t0 = time.time()
 
         try:
@@ -2431,21 +2431,35 @@ if __name__ == "__main__":
 
                     sig = apply_regime_bias(sig, regime)
 
-                    # ✅ твоя логика: добавление в alerts / manip_watch
-                    # (если у тебя уже есть готовые условия — вставь их сюда)
-                    # Пример безопасный (можешь оставить временно):
-                    if sig.get("score", 0) >= PRO_EDGE_MIN_SCORE:
-                        alerts.append(sig)
+                    # =====================
+                    # PRIORITY ALERT
+                    # =====================
+                    if is_priority_signal(sig) and priority_allowed(state, instId):
+                        if pro_edge_filter(sig, regime):
+                            send_telegram(msg_priority(sig))
+                            mark_priority(state, instId)
 
-                    if MANIP_ALERT_ENABLED and sig.get("acc_score", 0) >= MANIP_MIN_ACC_SCORE:
-                        manip_watch.append(sig)
+                    # =====================
+                    # ОБЫЧНЫЕ ALERTS
+                    # =====================
+                    if pro_edge_filter(sig, regime):
+                        if sig["score"] >= ALERT_MIN_SCORE and should_alert_symbol(state, sig):
+                            alerts.append(sig)
+                            mark_alert_sent(state, sig)
+
+                    # =====================
+                    # PRE-MOVE WATCH
+                    # =====================
+                    if MANIP_ALERT_ENABLED and is_pre_move_manip(sig):
+                        if should_manip_alert(state, sig):
+                            manip_watch.append(sig)
+                            mark_manip_sent(state, sig)
 
                 except Exception:
                     pass
 
-                time.sleep(0.12)  # ✅ анти-рейткеп
+                time.sleep(0.12)
 
-            # cycle_info — без datetime, чтобы не ломалось
             cycle_info = time.strftime("%Y-%m-%d %H:%M:%S")
 
             # MARKET SUMMARY (не шлём пустое)
