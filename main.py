@@ -2105,16 +2105,27 @@ def manip_summary_message(watch, cycle_info, regime):
     lines.append("🟡 PRE-MOVE WATCH — MANIPULATION / ACCUMULATION")
     lines.append(f"⏱ Cycle: {cycle_info}")
     lines.append(f"🧭 BTC regime: {regime}")
-        if not watch:
+
+    # ✅ если пусто — НИЧЕГО не отправляем
+    if not watch:
         return None
 
-    lines.append(f"Top {min(MANIP_TOP_N, len(watch))}:")
-    for sig in watch[:MANIP_TOP_N]:
-        sym = fmt_symbol(sig["instId"])
+    # показываем топ
+    top_n = min(len(watch), 3)
+    lines.append(f"Top {top_n}:")
+
+    for sig in watch[:top_n]:
+        sym = sig.get("instId") or sig.get("symbol") or sig.get("sym") or "?"
         acc = sig.get("acc_score", 0)
-        lines.append(f"• {sym}: acc={acc} | {sig['stage']} | {sig['direction']} | score={sig['score']}/10")
+        stage = sig.get("stage", "")
+        direction = sig.get("direction", "")
+        score = sig.get("score", 0)
+
+        lines.append(f"• {sym}: acc={acc} | {stage} | {direction} | score={score}/10")
+
     lines.append("")
     lines.append("🎯 Идея: ловим выстрел после манипуляции (не прыгаем в первый памп).")
+
     return "\n".join(lines)
 
 # =========================
