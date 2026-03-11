@@ -2064,9 +2064,8 @@ def summary_message(alerts, cycle_info, regime):
     lines.append("🚨 SMART MONEY SCAN — MARKET SUMMARY")
     lines.append(f"⏱ Cycle: {cycle_info}")
     lines.append(f"🧭 BTC regime: {regime}")
-    if not alerts:
-        lines.append("Нет монет с edge по фильтрам (пока тихо).")
-        return "\n".join(lines)
+        if not alerts:
+        return None
 
     lines.append(f"Top {min(ALERT_TOP_M, len(alerts))}:")
     for sig in alerts[:ALERT_TOP_M]:
@@ -2106,9 +2105,8 @@ def manip_summary_message(watch, cycle_info, regime):
     lines.append("🟡 PRE-MOVE WATCH — MANIPULATION / ACCUMULATION")
     lines.append(f"⏱ Cycle: {cycle_info}")
     lines.append(f"🧭 BTC regime: {regime}")
-    if not watch:
-        lines.append("Тихо: явных pre-move зон нет.")
-        return "\n".join(lines)
+        if not watch:
+        return None
 
     lines.append(f"Top {min(MANIP_TOP_N, len(watch))}:")
     for sig in watch[:MANIP_TOP_N]:
