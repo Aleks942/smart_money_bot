@@ -1,6 +1,7 @@
 # continuation_engine.py
 
-from typing import List, Dict, Optional, Any
+from typing import List, Optional, Any
+
 
 def ema(values: List[float], period: int) -> float:
     if not values:
@@ -9,82 +10,64 @@ def ema(values: List[float], period: int) -> float:
         return float(values[-1])
 
     k = 2.0 / (period + 1.0)
-    ema_val = sum(values[:period]) / float(period)
+    e = sum(values[:period]) / float(period)
 
     for v in values[period:]:
-        ema_val = float(v) * k + ema_val * (1.0 - k)
+        e = float(v) * k + e * (1.0 - k)
 
-    return float(ema_val)
-
-
-def _get_close(c: Any) -> float:
-    # dict: {"close": "..."}
-    if isinstance(c, dict):
-        return float(c["close"])
-    # list/tuple: [ts, open, high, low, close, ...]
-    return float(c[4])
-
-
-def _get_high(c: Any) -> float:
-    if isinstance(c, dict):
-        return float(c["high"])
-    return float(c[2])
-
-
-def _get_low(c: Any) -> float:
-    if isinstance(c, dict):
-        return float(c["low"])
-    return float(c[3])
+    return float(e)
 
 
 def continuation_engine(candles_m15: List[Any]) -> Optional[str]:
     """
-    Возвращает:
-      CONTINUATION_UP / CONTINUATION_DOWN / None
-    Логика:
-      1) тренд по EMA20/50/200 на M15
-      2) откат к EMA20 (цена вернулась к средней)
-      3) триггер продолжения: close пробивает high/low предыдущей свечи
+    candles_m15: свечи как у Bybit:
+    [ts, open, high, low, close, volume, turnover]
+    return: CONTINUATION_UP / CONTINUATION_DOWN / None
     """
 
     if not candles_m15 or len(candles_m15) < 210:
         return None
 
-    closes = [_get_close(c) for c in candles_m15]
+    closes = [float(c[4]) for c in candles_m15]
+    highs = [float(c[2]) for c in candles_m15]
+    lows  = [float(c[3]) for c in candles_m15]
 
     ema20 = ema(closes, 20)
     ema50 = ema(closes, 50)
     ema200 = ema(closes, 200)
 
-    price = closes[-1]
+    last_close = closes[-1]
 
-    # тренд
-    up_trend = (price > ema20) and (ema20 > ema50) and (ema50 > ema200)
-    dn_trend = (price < ema20) and (ema20 < ema50) and (ema50 < ema200)
+    # 1) Тренд по M15 (без привязки к price>ema20 — так корректнее)
+    up_trend = (ema20 > ema50 > ema200)
+    dn_trend = (ema20 < ema50 < ema200)
 
     if not up_trend and not dn_trend:
         return None
 
-    # откат: цена должна "потрогать" EMA20 (упрощённо — быть рядом/ниже/выше)
-    # UP: откат = цена опускалась к EMA20 (сейчас допускаем price <= ema20)
-    if up_trend and price > ema20:
-        # если хочешь строже — оставь так, но тогда ловить будет реже
-        return None
+    # 2) Был откат к EMA20 в последние N свечей
+    LOOKBACK = 8
+    pullback_margin = 0.002  # 0.2% допуск
 
-    # DOWN: откат = цена поднималась к EMA20 (price >= ema20)
-    if dn_trend and price < ema20:
-        return None
+    recent_lows = lows[-LOOKBACK:]
+    recent_highs = highs[-LOOKBACK:]
 
-    prev = candles_m15[-2]
-    prev_high = _get_high(prev)
-    prev_low = _get_low(prev)
-    last_close = closes[-1]
+    touched_ema20_up = (min(recent_lows) <= ema20 * (1.0 + pullback_margin))
+    touched_ema20_dn = (max(recent_highs) >= ema20 * (1.0 - pullback_margin))
 
-    # триггер продолжения
-    if up_trend and (last_close > prev_high):
-        return "CONTINUATION_UP"
+    # 3) Триггер продолжения: пробой локального high/low после отката
+    TRIG = 3
+    prev_swing_high = max(highs[-(TRIG+1):-1])
+    prev_swing_low  = min(lows[-(TRIG+1):-1])
 
-    if dn_trend and (last_close < prev_low):
-        return "CONTINUATION_DOWN"
+    if up_trend and touched_ema20_up:
+        # подтверждение: цена снова выше EMA20 и пробила локальный high
+        if (last_close > ema20) and (last_close > prev_swing_high):
+            return "CONTINUATION_UP"
+
+    if dn_trend and touched_ema20_dn:
+        # подтверждение: цена снова ниже EMA20 и пробила локальный low
+        if (last_close < ema20) and (last_close < prev_swing_low):
+            return "CONTINUATION_DOWN"
 
     return None
