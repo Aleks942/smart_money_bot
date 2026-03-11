@@ -1459,9 +1459,10 @@ def build_signal(instId: str):
     # если модуль сработал — добавим флаг и усилим score
    try:
     cont = continuation_engine(c15)
-except Exception as e:
+       except Exception as e:
     print(f"[CONT-ERR] {instId}: {e}", flush=True)
     cont = None
+
 
     if cont:
         flags.append(cont)   # CONTINUATION_UP или CONTINUATION_DOWN
