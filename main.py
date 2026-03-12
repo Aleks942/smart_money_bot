@@ -1692,7 +1692,7 @@ def sniper_signal(sig):
     except Exception as e:
         print(f"[ORDERBOOK ERROR] {instId}: {e}")
 
-        # ==============================
+    # ==============================
     # 📊 MARKET ANALYSIS
     # ==============================
 
