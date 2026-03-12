@@ -1496,7 +1496,7 @@ def sniper_signal(sig):
     if not isinstance(sig, dict):
         return False
 
-    flags = set(sig.get("flags", []))
+    flags = set(sig.get("flags") or [])
     score = int(sig.get("score", 0))
 
     breakout = (
