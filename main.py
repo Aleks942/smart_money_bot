@@ -2540,33 +2540,8 @@ if __name__ == "__main__":
         dt = time.time() - t0
         sleep_for = max(1, POLL_SECONDS - int(dt))
         time.sleep(sleep_for)
-
-
-            # =====================
-            # GLOBAL PRIORITY ENGINE
-            # =====================
-
-            if PRIORITY_ENABLED:
-                try:
-                    priority_list = find_global_priority(alerts)
-
-                    for sig in priority_list:
-                        if should_send_priority(state, sig["instId"]):
-                            send_telegram(msg_priority(sig))
-                            mark_priority(state, sig["instId"])
-
-                except Exception:
-                    pass
-
-
-            # ограничение сигналов
-            if PRO_EDGE_ENABLED and PRO_EDGE_MAX_ALERTS_PER_CYCLE > 0:
-                alerts = alerts[:PRO_EDGE_MAX_ALERTS_PER_CYCLE]
-
-
-            cycle_info = time.strftime("%Y-%m-%d %H:%M:%S")
-
-
+        
+          
                         # MARKET SUMMARY (не шлём пустое)
             msg = summary_message(alerts, cycle_info, regime)
             if msg:
