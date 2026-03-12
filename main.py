@@ -1921,8 +1921,10 @@ def pro_edge_filter(sig, regime):
 
     pm = sig.get("pmeta") or {}
     range_pct = pm.get("range_pct")
-    if range_pct is not None and float(range_pct) < float(PRO_EDGE_MIN_RANGE_PCT):
-        return False
+
+    if range_pct is not None:
+        if float(range_pct) < float(PRO_EDGE_MIN_RANGE_PCT) and score < EDGE_MID_SCORE:
+            return False
 
     if PRO_EDGE_REQUIRE_IMPULSE:
         strong_impulse = (
