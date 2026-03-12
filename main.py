@@ -2469,11 +2469,14 @@ if __name__ == "__main__":
             for instId, vol_usdt, pct in candidates:
                 try:
                     sig = build_signal(instId)
+                    if not sig:
+                        continue
 
-                    # SNIPER CHECK
+                     # SNIPER CHECK
                     if sniper_signal(sig):
                         sig["stage"] = "⭐⭐⭐⭐⭐ SNIPER SIGNAL"
                         sig["score"] = sig.get("score", 0) + 2
+
                     sig["vol_usdt"] = vol_usdt
                     sig["pct_24h"] = pct
 
