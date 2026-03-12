@@ -1899,12 +1899,7 @@ def apply_regime_bias(sig, regime):
 # PRO EDGE FILTER (NEW)
 # =========================
 def pro_edge_filter(sig, regime):
-    """
-    Умеренное усиление без удаления логики:
-    - меньше шума
-    - оставляем ранние (AGGRESSIVE) но только если есть импульс
-    - не трогаем triggers / watch / summary
-    """
+
     if not PRO_EDGE_ENABLED:
         return True
 
@@ -1913,17 +1908,16 @@ def pro_edge_filter(sig, regime):
     direction = sig.get("direction", "")
     acc = int(sig.get("acc_score", 0))
 
-    flags = set(sig.get("flags", []))
+    # 🔥 фильтр реального импульса
+    real_impulse = (
+        "ATR_EXPANSION" in flags or
+        "VOL_SPIKE" in flags or
+        "BREAKOUT_CONFIRM_UP" in flags or
+        "BREAKOUT_CONFIRM_DOWN" in flags
+    )
 
-real_impulse = (
-    "ATR_EXPANSION" in flags or
-    "VOL_SPIKE" in flags or
-    "BREAKOUT_CONFIRM_UP" in flags or
-    "BREAKOUT_CONFIRM_DOWN" in flags
-)
-
-if not real_impulse and score < EDGE_HIGH_SCORE:
-    return False
+    if not real_impulse and score < EDGE_HIGH_SCORE:
+        return False
 
     # Expected move filter (NEW)
     exp_max = float(sig.get("exp_move_max") or 0.0)
