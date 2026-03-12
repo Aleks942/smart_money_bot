@@ -1913,6 +1913,18 @@ def pro_edge_filter(sig, regime):
     direction = sig.get("direction", "")
     acc = int(sig.get("acc_score", 0))
 
+    flags = set(sig.get("flags", []))
+
+real_impulse = (
+    "ATR_EXPANSION" in flags or
+    "VOL_SPIKE" in flags or
+    "BREAKOUT_CONFIRM_UP" in flags or
+    "BREAKOUT_CONFIRM_DOWN" in flags
+)
+
+if not real_impulse and score < EDGE_HIGH_SCORE:
+    return False
+
     # Expected move filter (NEW)
     exp_max = float(sig.get("exp_move_max") or 0.0)
     
