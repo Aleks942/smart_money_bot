@@ -1925,7 +1925,7 @@ def pro_edge_filter(sig, regime):
     if exp_max < PRE_MIN_EXPECTED_MOVE_PCT and score < EDGE_MID_SCORE:
         return False
 
-    if score < PRO_EDGE_MIN_SCORE:
+    if score < PRO_EDGE_MIN_SCORE and score < EDGE_HIGH_SCORE:
         return False
 
     if PRO_EDGE_REJECT_BALANCE and ("БАЛАНС" in direction):
