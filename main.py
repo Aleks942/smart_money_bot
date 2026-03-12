@@ -2474,8 +2474,8 @@ if __name__ == "__main__":
                 try:
                     sig = build_signal(instId)
 
-                    if sig is None:
-                        continue
+                    if not isinstance(sig, dict):
+                       continue
 
                     # SNIPER CHECK
                     if sniper_signal(sig):
