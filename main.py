@@ -1929,7 +1929,7 @@ def pro_edge_filter(sig, regime):
         return False
 
     if PRO_EDGE_REJECT_BALANCE and ("БАЛАНС" in direction) and score < EDGE_HIGH_SCORE:
-    return False
+        return False
 
     pm = sig.get("pmeta") or {}
     range_pct = pm.get("range_pct")
