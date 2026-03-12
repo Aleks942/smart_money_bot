@@ -2588,7 +2588,7 @@ if __name__ == "__main__":
             save_state(state)
 
         except Exception as e:
-            send_telegram(f"❌ Scan Error:\n{str(e)}")
+            send_telegram(f"❌ Scan Error: {type(e).__name__} | {str(e)}")
 
         dt = time.time() - t0
         sleep_for = max(1, POLL_SECONDS - int(dt))
