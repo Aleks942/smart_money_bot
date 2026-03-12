@@ -2402,7 +2402,6 @@ def msg_confirm_trigger(sig):
     lines.append(f"💵 {sig['price']:.6g} | score={sig['score']}/10 | {sig['direction']}")
     lines.append("Условия: CONFIRM + ATR + VOL (шанс продолжения выше).")
     return "\n".join(lines)
-
 # =========================
 # MAIN LOOP
 # =========================
@@ -2423,6 +2422,9 @@ if __name__ == "__main__":
             alerts = []
             manip_watch = []
 
+            # =====================
+            # SCAN MONETS
+            # =====================
             for instId, vol_usdt, pct in candidates:
                 try:
                     sig = build_signal(instId)
@@ -2443,6 +2445,7 @@ if __name__ == "__main__":
 
                     if is_start_trigger(sig) and trigger_allowed(state, instId, "last_start_trigger_ts", TRIGGER_START_COOLDOWN):
                         exp_max = float(sig.get("exp_move_max") or 0.0)
+
                         if (
                             exp_max >= PRE_MIN_EXPECTED_MOVE_PCT
                             and (not too_late_from_range(sig["price"], sig.get("pmeta") or {}, START_MAX_DIST_PCT))
@@ -2484,11 +2487,30 @@ if __name__ == "__main__":
                 except Exception:
                     pass
 
-                time.sleep(0.12)
+                # защита от API limit
+                time.sleep(0.15)
+
+            # =====================
+            # SORT SIGNALS
+            # =====================
+
+            alerts.sort(
+                key=lambda s: (s["score"], abs(s.get("pct_24h", 0.0))),
+                reverse=True
+            )
+            alerts = alerts[:PRO_EDGE_MAX_ALERTS_PER_CYCLE]
+
+            manip_watch.sort(
+                key=lambda s: (int(s.get("acc_score", 0)), s.get("score", 0)),
+                reverse=True
+            )
 
             cycle_info = time.strftime("%Y-%m-%d %H:%M:%S")
 
-            # MARKET SUMMARY (не шлём пустое)
+            # =====================
+            # MARKET SUMMARY
+            # =====================
+
             msg = summary_message(alerts, cycle_info, regime)
             if msg:
                 send_telegram(msg)
@@ -2497,9 +2519,13 @@ if __name__ == "__main__":
             for sig in alerts[:DETAIL_TOP_K]:
                 send_telegram(choose_detail_message(sig))
 
-            # PRE MOVE WATCH (не шлём "Тихо")
+            # =====================
+            # PRE MOVE WATCH
+            # =====================
+
             if MANIP_ALERT_ENABLED:
                 msg2 = manip_summary_message(manip_watch, cycle_info, regime)
+
                 if msg2:
                     send_telegram(msg2)
 
