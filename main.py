@@ -1909,6 +1909,7 @@ def pro_edge_filter(sig, regime):
 
     # Expected move filter (NEW)
     exp_max = float(sig.get("exp_move_max") or 0.0)
+    
     if exp_max < PRE_MIN_EXPECTED_MOVE_PCT and score < EDGE_MID_SCORE:
         return False
 
