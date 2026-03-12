@@ -1703,7 +1703,7 @@ def sniper_signal(sig):
     acc_score = accumulation_bias(flags)
     exp_min, exp_max = expected_move_pct(c5, pmeta)
 
-    rsi_state = get_rsi_state(c5)
+    rsi_state = get_rsi_state(c5) or {}
     rsi7 = rsi_state.get("rsi7")
     rsi14 = rsi_state.get("rsi14")
 
