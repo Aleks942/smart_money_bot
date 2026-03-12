@@ -2587,8 +2587,7 @@ if __name__ == "__main__":
 
             save_state(state)
 
-        import traceback
-
+    
         except Exception as e:
             err = traceback.format_exc()
             send_telegram(f"❌ Scan Error:\n{err}")
