@@ -2479,6 +2479,8 @@ if __name__ == "__main__":
             for instId, vol_usdt, pct in candidates:
                 try:
                     sig = build_signal(instId)
+                    if not isinstance(sig, dict):
+                       continue
 
                     if not isinstance(sig, dict):
                        continue
