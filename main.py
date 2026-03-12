@@ -1860,6 +1860,10 @@ def btc_regime():
     except:
         return ("NEUTRAL", None)
 
+    # защита от None
+    if not isinstance(sig, dict):
+        return ("NEUTRAL", None)
+
     flags = set(sig.get("flags", []))
     if ("BREAKOUT_CONFIRM_DOWN" in flags and "ATR_EXPANSION" in flags and "VOL_SPIKE" in flags):
         return ("RISK_OFF", sig)
