@@ -8,6 +8,11 @@ from dotenv import load_dotenv
 from priority_engine import find_global_priority, should_send_priority
 from wall_detector import WallTracker
 from continuation_engine import continuation_engine
+# =========================
+# SIGNAL COOLDOWN
+# =========================
+SIGNAL_COOLDOWN = 900   # 15 минут
+last_signal_time = {}
 
 load_dotenv()
 wall_tracker = WallTracker()
