@@ -1491,7 +1491,8 @@ def build_signal(instId: str):
 
 def sniper_signal(sig):
 
-    if not sig:
+    # защита
+    if not isinstance(sig, dict):
         return False
 
     flags = set(sig.get("flags", []))
@@ -1524,7 +1525,7 @@ def sniper_signal(sig):
         "WHALE_ACC" in flags
     )
 
-    if breakout and impulse and liquidity and orderbook and whale and score >= 7:
+    return breakout and impulse and liquidity and orderbook and whale and score >= 7
         return True
 
     return False
