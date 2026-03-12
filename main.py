@@ -1491,6 +1491,9 @@ def build_signal(instId: str):
 
 def sniper_signal(sig):
 
+    if not sig:
+        return False
+
     flags = set(sig.get("flags", []))
     score = int(sig.get("score", 0))
 
