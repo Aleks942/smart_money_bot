@@ -2525,7 +2525,6 @@ if __name__ == "__main__":
 
             if MANIP_ALERT_ENABLED:
                 msg2 = manip_summary_message(manip_watch, cycle_info, regime)
-
                 if msg2:
                     send_telegram(msg2)
 
@@ -2540,34 +2539,7 @@ if __name__ == "__main__":
         dt = time.time() - t0
         sleep_for = max(1, POLL_SECONDS - int(dt))
         time.sleep(sleep_for)
-        
-          
-                        # MARKET SUMMARY (не шлём пустое)
-            msg = summary_message(alerts, cycle_info, regime)
-            if msg:
-                send_telegram(msg)
 
-            # DETAILS
-            for sig in alerts[:DETAIL_TOP_K]:
-                send_telegram(choose_detail_message(sig))
-
-            # PRE MOVE WATCH (не шлём "Тихо")
-            if MANIP_ALERT_ENABLED:
-                msg2 = manip_summary_message(manip_watch, cycle_info, regime)
-                if msg2:
-                    send_telegram(msg2)
-
-                for sig in manip_watch[:MANIP_DETAIL_TOP_K]:
-                    send_telegram(msg_medium(sig))
+            
 
 
-            save_state(state)
-
-
-        except Exception as e:
-            send_telegram(f"❌ Scan Error:\n{str(e)}")
-
-
-        dt = time.time() - t0
-        sleep_for = max(1, POLL_SECONDS - int(dt))
-        time.sleep(sleep_for)
