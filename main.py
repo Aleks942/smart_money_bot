@@ -2468,7 +2468,7 @@ if __name__ == "__main__":
         try:
             regime, _btc = btc_regime()
             candidates = get_market_candidates()
-            send_telegram(f"DEBUG: candidates={len(candidates)} regime={regime}")
+        
 
             alerts = []
             manip_watch = []
