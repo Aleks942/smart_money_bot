@@ -2587,8 +2587,11 @@ if __name__ == "__main__":
 
             save_state(state)
 
+        import traceback
+
         except Exception as e:
-            send_telegram(f"❌ Scan Error: {type(e).__name__} | {str(e)}")
+            err = traceback.format_exc()
+            send_telegram(f"❌ Scan Error:\n{err}")
 
         dt = time.time() - t0
         sleep_for = max(1, POLL_SECONDS - int(dt))
