@@ -1485,6 +1485,47 @@ def build_signal(instId: str):
         score += 1
         flags.append("VOL_SPIKE")
 
+# ==============================
+# 🎯 SNIPER SIGNAL ENGINE
+# ==============================
+
+def sniper_signal(sig):
+
+    flags = set(sig.get("flags", []))
+    score = int(sig.get("score", 0))
+
+    breakout = (
+        "BREAKOUT_CONFIRM_UP" in flags or
+        "BREAKOUT_CONFIRM_DOWN" in flags
+    )
+
+    impulse = (
+        "VOL_SPIKE" in flags and
+        "ATR_EXPANSION" in flags
+    )
+
+    liquidity = (
+        "SWEEP_UP" in flags or
+        "SWEEP_DOWN" in flags or
+        "STOP_HUNT_UP" in flags or
+        "STOP_HUNT_DOWN" in flags
+    )
+
+    orderbook = (
+        "OB_BIDS" in flags or
+        "OB_ASKS" in flags
+    )
+
+    whale = (
+        "WHALE_FLOW" in flags or
+        "WHALE_ACC" in flags
+    )
+
+    if breakout and impulse and liquidity and orderbook and whale and score >= 7:
+        return True
+
+    return False
+
     # ==============================
     # 🧨 LIQUIDITY VACUUM
     # ==============================
