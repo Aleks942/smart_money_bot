@@ -1449,9 +1449,15 @@ def build_signal(instId: str):
 
     # ✅ свечи (убрал дубль c5)
     c5 = fetch_candles(instId, "5m", 120)
-    c15 = fetch_candles(instId, "15m", 240)  # ✅ важно: 240, чтобы хватало для M15-trend/continuation
+    c15 = fetch_candles(instId, "15m", 240)
 
-    price = c5[-1][4]
+    if not c5 or len(c5) < 20:
+        return None
+
+    if not c15 or len(c15) < 20:
+        return None
+
+    price = float(c5[-1][4])
 
     flags = []
     score = 0
