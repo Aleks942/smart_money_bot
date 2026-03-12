@@ -2471,9 +2471,9 @@ if __name__ == "__main__":
                     sig = build_signal(instId)
 
                     # SNIPER CHECK
-                   if sniper_signal(sig):
-                       sig["stage"] = "🎯 SNIPER SIGNAL"
-                       sig["score"] = sig.get("score", 0) + 2
+                    if sniper_signal(sig):
+                        sig["stage"] = "⭐⭐⭐⭐⭐ SNIPER SIGNAL"
+                        sig["score"] = sig.get("score", 0) + 2
                     sig["vol_usdt"] = vol_usdt
                     sig["pct_24h"] = pct
 
