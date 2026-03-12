@@ -1525,7 +1525,7 @@ def sniper_signal(sig):
         "WHALE_ACC" in flags
     )
 
-    return breakout and impulse and liquidity and orderbook and whale and score >= 7
+    if breakout and impulse and liquidity and orderbook and whale and score >= 7:
         return True
 
     return False
