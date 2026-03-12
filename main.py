@@ -1707,6 +1707,8 @@ def sniper_signal(sig):
     rsi7 = rsi_state.get("rsi7")
     rsi14 = rsi_state.get("rsi14")
 
+    flags = list(flags or [])
+
     direction_text, reasons, up_w, down_w = direction_hint(flags)
 
     entry, entry_reason = entry_engine(score, flags, direction_text, up_w, down_w)
