@@ -2541,18 +2541,6 @@ if __name__ == "__main__":
         sleep_for = max(1, POLL_SECONDS - int(dt))
         time.sleep(sleep_for)
 
-                   
-
-
-            # =====================
-            # сортировка сигналов
-            # =====================
-
-            alerts.sort(key=lambda s: (s["score"], abs(s.get("pct_24h", 0.0))), reverse=True)
-            alerts = alerts[:PRO_EDGE_MAX_ALERTS_PER_CYCLE]
-
-            manip_watch.sort(key=lambda s: (int(s.get("acc_score", 0)), s.get("score", 0)), reverse=True)
-
 
             # =====================
             # GLOBAL PRIORITY ENGINE
