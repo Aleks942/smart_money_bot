@@ -2551,10 +2551,20 @@ if __name__ == "__main__":
                     # =====================
                     # ОБЫЧНЫЕ ALERTS
                     # =====================
+
                     if pro_edge_filter(sig, regime):
-                        if sig["score"] >= ALERT_MIN_SCORE and should_alert_symbol(state, sig):
-                            alerts.append(sig)
-                            mark_alert_sent(state, sig)
+
+                        now = time.time()
+                        last = last_signal_time.get(sig["instId"], 0)
+
+                        if now - last >= SIGNAL_COOLDOWN:
+
+                            if sig["score"] >= ALERT_MIN_SCORE and should_alert_symbol(state, sig):
+
+                                alerts.append(sig)
+                                mark_alert_sent(state, sig)
+
+                                last_signal_time[sig["instId"]] = now
 
                     # =====================
                     # PRE-MOVE WATCH
