@@ -1771,6 +1771,7 @@ def sniper_signal(sig):
         "rsi_state": rsi_state.get("state"),
         "ts": now_ts(),
     }
+    signal["sniper"] = sniper_signal(signal)
 
     return signal
 # =========================
