@@ -1509,9 +1509,9 @@ signal = {
 
 return signal
 
-    # ==============================
-    # 📊 MARKET ANALYSIS
-    # ==============================
+# ==============================
+# 📊 MARKET ANALYSIS
+# ==============================
 
     strong_setup = score >= PRO_EDGE_MIN_SCORE
 
