@@ -1541,7 +1541,7 @@ signal = {
 
 signal["sniper"] = sniper_signal(signal)
 
-return signal
+     return signal
 
 # ==============================
 # 🎯 SNIPER SIGNAL ENGINE
