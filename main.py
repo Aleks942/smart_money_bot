@@ -1513,17 +1513,17 @@ return signal
 # 📊 MARKET ANALYSIS
 # ==============================
 
-    strong_setup = score >= PRO_EDGE_MIN_SCORE
+strong_setup = score >= PRO_EDGE_MIN_SCORE
 
-    rsi_state = get_rsi_state(c5) or {}
-    rsi7 = rsi_state.get("rsi7")
-    rsi14 = rsi_state.get("rsi14")
+rsi_state = get_rsi_state(c5) or {}
+rsi7 = rsi_state.get("rsi7")
+rsi14 = rsi_state.get("rsi14")
 
-    direction_text, reasons, up_w, down_w = direction_hint(flags)
+direction_text, reasons, up_w, down_w = direction_hint(flags)
 
-    entry, entry_reason = entry_engine(score, flags, direction_text, up_w, down_w)
+entry, entry_reason = entry_engine(score, flags, direction_text, up_w, down_w)
 
-    stage, stage_reason = smart_money_stage(score, flags)
+stage, stage_reason = smart_money_stage(score, flags)
 
     tgt = None
 
