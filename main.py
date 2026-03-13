@@ -1551,8 +1551,6 @@ elif pressure == "DOWN":
 
     tgt = None
 
-    tgt = None
-
     # ==============================
     # EXPECTED MOVE
     # ==============================
