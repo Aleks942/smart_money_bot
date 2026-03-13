@@ -1501,6 +1501,49 @@ def build_signal(instId: str):
         flags.append("VOL_SPIKE")
 
 # ==============================
+# 📊 MARKET ANALYSIS
+# ==============================
+
+strong_setup = score >= PRO_EDGE_MIN_SCORE
+
+rsi_state = get_rsi_state(c5) or {}
+rsi7 = rsi_state.get("rsi7")
+rsi14 = rsi_state.get("rsi14")
+
+direction_text, reasons, up_w, down_w = direction_hint(flags)
+
+entry, entry_reason = entry_engine(score, flags, direction_text, up_w, down_w)
+
+stage, stage_reason = smart_money_stage(score, flags)
+
+tgt = None
+
+signal = {
+    "instId": instId,
+    "price": price,
+    "score": score,
+    "strong_setup": strong_setup,
+    "flags": flags,
+    "direction": direction_text,
+    "dir_reasons": reasons,
+    "up_w": up_w,
+    "down_w": down_w,
+    "entry": entry,
+    "entry_reason": entry_reason,
+    "stage": stage,
+    "stage_reason": stage_reason,
+    "target": tgt,
+    "rsi7": rsi7,
+    "rsi14": rsi14,
+    "rsi_state": rsi_state.get("state"),
+    "ts": now_ts(),
+}
+
+signal["sniper"] = sniper_signal(signal)
+
+return signal
+
+# ==============================
 # 🎯 SNIPER SIGNAL ENGINE
 # ==============================
 
