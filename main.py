@@ -2495,11 +2495,13 @@ if __name__ == "__main__":
                             manip_watch.append(sig)
                             mark_manip_sent(state, sig)
 
-                except Exception:
-                    pass
+            except Exception as e:
+                print("SCAN ERROR:", e)
 
-                # защита от API limit
-                time.sleep(0.15)
+            # защита от API limit
+            time.sleep(0.15)
+
+                
 
             # =====================
             # SORT SIGNALS
