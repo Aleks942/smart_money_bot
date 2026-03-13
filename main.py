@@ -1560,10 +1560,10 @@ elif pressure == "DOWN":
     exp_min, exp_max = expected_move_pct(c5, None)
 
 
-    # ==============================
+        # ==============================
     # SIGNAL OBJECT
     # ==============================
-    
+
     exp_min, exp_max = expected_move_pct(c5, None)
 
     signal = {
@@ -1583,6 +1583,8 @@ elif pressure == "DOWN":
         "stage": stage,
         "stage_reason": stage_reason,
         "target": tgt,
+        "exp_move_min": exp_min,
+        "exp_move_max": exp_max,
         "rsi7": rsi7,
         "rsi14": rsi14,
         "rsi_state": rsi_state.get("state"),
