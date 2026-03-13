@@ -2364,7 +2364,7 @@ if __name__ == "__main__":
                     # ОБЫЧНЫЕ ALERTS
                     # =====================
 
-                    if sig["score"] >= 2:
+                    if sig["score"] >= PRO_EDGE_MIN_SCORE:
 
                          now = time.time()
                          last = last_signal_time.get(sig["instId"], 0)
