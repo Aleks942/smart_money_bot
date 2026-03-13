@@ -1562,7 +1562,7 @@ elif pressure == "DOWN":
     # SIGNAL OBJECT
     # ==============================
 
-    exp_min, exp_max = expected_move_pct(c5, None)
+    
 
     signal = {
         "instId": instId,
