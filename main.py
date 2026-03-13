@@ -1507,6 +1507,14 @@ def build_signal(instId: str):
         flags.append("VOL_SPIKE")
 
     # ==============================
+    # ATR EXPANSION
+    # ==============================
+
+    if atr_expansion_ok(c5):
+        flags.append("ATR_EXPANSION")
+        score += 1
+
+    # ==============================
     # BREAKOUT DETECTOR
     # ==============================
 
