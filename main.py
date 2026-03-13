@@ -2433,9 +2433,6 @@ while True:
     except Exception as e:
         print("MAIN LOOP ERROR:", e)
 
-    dt = time.time() - t0
-    sleep_for = max(1, POLL_SECONDS - int(dt))
-    time.sleep(sleep_for)
         # =====================
         # V3 TRIGGERS
         # =====================
