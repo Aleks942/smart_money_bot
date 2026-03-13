@@ -1513,6 +1513,14 @@ def build_signal(instId: str):
 
     tgt = None
 
+    tgt = None
+
+    # ==============================
+    # EXPECTED MOVE
+    # ==============================
+
+    exp_min, exp_max = expected_move_pct(c5, None)
+
 
     # ==============================
     # SIGNAL OBJECT
