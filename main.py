@@ -2417,18 +2417,18 @@ while True:
         # =====================
         for instId, vol_usdt, pct in candidates:
 
-            try:
-                sig = build_signal(instId)
+    try:
+        sig = build_signal(instId)
 
-                if not isinstance(sig, dict):
-                    continue
+        if not isinstance(sig, dict):
+            continue
 
-                print(f"[SCAN] {instId} score={sig.get('score')} flags={sig.get('flags')}")
+        print(f"[SCAN] {instId} score={sig.get('score')} flags={sig.get('flags')}")
 
-            except Exception as e:
-                print("SCAN ERROR:", e)
+    except Exception as e:
+        print("SCAN ERROR:", e)
 
-            time.sleep(0.15)
+    time.sleep(0.15)
 
     except Exception as e:
         print("MAIN LOOP ERROR:", e)
