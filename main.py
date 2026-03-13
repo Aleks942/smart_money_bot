@@ -1455,6 +1455,20 @@ def build_signal(instId: str):
 
     price = float(c5[-1][4])
 
+# ==============================
+# LIQUIDITY PRESSURE
+# ==============================
+
+pressure, pmeta = liquidity_pressure(c5)
+
+if pressure == "UP":
+    flags.append("PRESSURE_UP")
+    score += 1
+
+elif pressure == "DOWN":
+    flags.append("PRESSURE_DOWN")
+    score += 1
+
     flags = []
     score = 0
 
