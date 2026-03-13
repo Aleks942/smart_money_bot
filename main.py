@@ -2430,14 +2430,14 @@ while True:
 
             time.sleep(0.15)
 
-        except Exception as e:
-            print("MAIN LOOP ERROR:", e)
+    except Exception as e:
+        print("MAIN LOOP ERROR:", e)
 
-        # =====================
-        # V3 TRIGGERS
-        # =====================
+    # =====================
+    # V3 TRIGGERS
+    # =====================
 
-        if is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
+    if is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
             exp_max = float(sig.get("exp_move_max") or 0.0)
             if exp_max >= PRE_MIN_EXPECTED_MOVE_PCT:
                 send_telegram(msg_pre_trigger(sig))
