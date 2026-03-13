@@ -1560,7 +1560,7 @@ elif pressure == "DOWN":
     exp_min, exp_max = expected_move_pct(c5, None)
 
 
-        # ==============================
+    # ==============================
     # SIGNAL OBJECT
     # ==============================
 
