@@ -2371,10 +2371,16 @@ def msg_confirm_trigger(sig):
 # MAIN LOOP
 # =========================
 if __name__ == "__main__":
+    print("PROGRAM STARTED")
+
     if not BOT_TOKEN or not CHAT_ID:
         raise RuntimeError("Missing BOT_TOKEN / CHAT_ID")
 
+    print("TOKENS OK")
+
     state = load_state()
+    print("STATE LOADED")
+
     send_telegram(f"🚀 SMART MONEY SCANNER — PRO EDGE v4 started ({EXCHANGE} market scan)")
 
     while True:
