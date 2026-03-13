@@ -2410,96 +2410,95 @@ if __name__ == "__main__":
 
             alerts = []
             manip_watch = []
+            
+# =====================
+# SCAN MONETS
+# =====================
+for instId, vol_usdt, pct in candidates:
+    try:
+        sig = build_signal(instId)
 
-            # =====================
-            # SCAN MONETS
-            # =====================
-            for instId, vol_usdt, pct in candidates:
-                try:
-                    sig = build_signal(instId)
-                    print(f"[SCAN] {instId} score={sig.get('score')} flags={sig.get('flags')}")
-                    if not isinstance(sig, dict):
-                       continue
+        if not isinstance(sig, dict):
+            continue
 
-                    if not isinstance(sig, dict):
-                       continue
+        print(f"[SCAN] {instId} score={sig.get('score')} flags={sig.get('flags')}")
 
-                    # SNIPER CHECK
-                    if sniper_signal(sig):
-                        sig["stage"] = "⭐⭐⭐⭐⭐ SNIPER SIGNAL"
-                        sig["score"] = sig.get("score", 0) + 2
+        # SNIPER CHECK
+        if sniper_signal(sig):
+            sig["stage"] = "⭐⭐⭐⭐⭐ SNIPER SIGNAL"
+            sig["score"] = sig.get("score", 0) + 2
 
-                    sig["vol_usdt"] = vol_usdt
-                    sig["pct_24h"] = pct
+        sig["vol_usdt"] = vol_usdt
+        sig["pct_24h"] = pct
 
-                    sig = apply_regime_bias(sig, regime)
+        sig = apply_regime_bias(sig, regime)
 
-                    # =====================
-                    # V3 TRIGGERS
-                    # =====================
+        # =====================
+        # V3 TRIGGERS
+        # =====================
 
-                    if is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
-                        exp_max = float(sig.get("exp_move_max") or 0.0)
-                        if exp_max >= PRE_MIN_EXPECTED_MOVE_PCT:
-                            send_telegram(msg_pre_trigger(sig))
-                            trigger_mark(state, instId, "last_pre_trigger_ts")
+        if is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
+            exp_max = float(sig.get("exp_move_max") or 0.0)
+            if exp_max >= PRE_MIN_EXPECTED_MOVE_PCT:
+                send_telegram(msg_pre_trigger(sig))
+                trigger_mark(state, instId, "last_pre_trigger_ts")
 
-                    if is_start_trigger(sig) and trigger_allowed(state, instId, "last_start_trigger_ts", TRIGGER_START_COOLDOWN):
-                        exp_max = float(sig.get("exp_move_max") or 0.0)
+        if is_start_trigger(sig) and trigger_allowed(state, instId, "last_start_trigger_ts", TRIGGER_START_COOLDOWN):
+            exp_max = float(sig.get("exp_move_max") or 0.0)
 
-                        if (
-                            exp_max >= PRE_MIN_EXPECTED_MOVE_PCT
-                            and (not too_late_from_range(sig["price"], sig.get("pmeta") or {}, START_MAX_DIST_PCT))
-                            and (not too_close_to_target(sig["price"], sig.get("target"), 0.35))
-                        ):
-                            send_telegram(msg_start_trigger(sig))
-                            trigger_mark(state, instId, "last_start_trigger_ts")
+            if (
+                exp_max >= PRE_MIN_EXPECTED_MOVE_PCT
+                and (not too_late_from_range(sig["price"], sig.get("pmeta") or {}, START_MAX_DIST_PCT))
+                and (not too_close_to_target(sig["price"], sig.get("target"), 0.35))
+            ):
+                send_telegram(msg_start_trigger(sig))
+                trigger_mark(state, instId, "last_start_trigger_ts")
 
-                    if is_confirm_trigger(sig) and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN):
-                        send_telegram(msg_confirm_trigger(sig))
-                        trigger_mark(state, instId, "last_confirm_trigger_ts")
+        if is_confirm_trigger(sig) and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN):
+            send_telegram(msg_confirm_trigger(sig))
+            trigger_mark(state, instId, "last_confirm_trigger_ts")
 
-                    update_symbol_state(state, sig)
+        update_symbol_state(state, sig)
 
-                    # =====================
-                    # PRIORITY ALERT
-                    # =====================
-                    if is_priority_signal(sig) and priority_allowed(state, instId):
-                        if pro_edge_filter(sig, regime):
-                            send_telegram(msg_priority(sig))
-                            mark_priority(state, instId)
+        # =====================
+        # PRIORITY ALERT
+        # =====================
+        if is_priority_signal(sig) and priority_allowed(state, instId):
+            if pro_edge_filter(sig, regime):
+                send_telegram(msg_priority(sig))
+                mark_priority(state, instId)
 
-                    # =====================
-                    # ОБЫЧНЫЕ ALERTS
-                    # =====================
+        # =====================
+        # ОБЫЧНЫЕ ALERTS
+        # =====================
 
-                    if sig["score"] >= PRO_EDGE_MIN_SCORE:
+        if sig.get("score", 0) >= PRO_EDGE_MIN_SCORE:
 
-                         now = time.time()
-                         last = last_signal_time.get(sig["instId"], 0)
+            now = time.time()
+            last = last_signal_time.get(sig["instId"], 0)
 
-                         if now - last >= SIGNAL_COOLDOWN:
+            if now - last >= SIGNAL_COOLDOWN:
 
-                            if sig["score"] >= ALERT_MIN_SCORE and should_alert_symbol(state, sig):
+                if sig.get("score", 0) >= ALERT_MIN_SCORE and should_alert_symbol(state, sig):
 
-                                alerts.append(sig)
-                                mark_alert_sent(state, sig)
+                    alerts.append(sig)
+                    mark_alert_sent(state, sig)
 
-                                last_signal_time[sig["instId"]] = now
+                    last_signal_time[sig["instId"]] = now
 
-                    # =====================
-                    # PRE-MOVE WATCH
-                    # =====================
-                    if MANIP_ALERT_ENABLED and is_pre_move_manip(sig):
-                        if should_manip_alert(state, sig):
-                            manip_watch.append(sig)
-                            mark_manip_sent(state, sig)
-                    
-                    except Exception as e:
-                        print("SCAN ERROR:", e)
-                    
-                    # защита от API limit
-                    time.sleep(0.15)
+        # =====================
+        # PRE-MOVE WATCH
+        # =====================
+        if MANIP_ALERT_ENABLED and is_pre_move_manip(sig):
+            if should_manip_alert(state, sig):
+                manip_watch.append(sig)
+                mark_manip_sent(state, sig)
+
+    except Exception as e:
+        print("SCAN ERROR:", e)
+
+    # защита от API limit
+    time.sleep(0.15)
 
                 
 
