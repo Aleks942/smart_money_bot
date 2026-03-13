@@ -1525,6 +1525,7 @@ def build_signal(instId: str):
     # ==============================
     # SIGNAL OBJECT
     # ==============================
+    
     exp_min, exp_max = expected_move_pct(c5, None)
 
     signal = {
