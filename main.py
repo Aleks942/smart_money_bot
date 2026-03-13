@@ -1512,9 +1512,19 @@ elif pressure == "DOWN":
       flags.append("BREAKOUT_UP")
       score += 1
 
-elif br == "DOWN":
+    elif br == "DOWN":
     flags.append("BREAKOUT_DOWN")
-    score += 1    
+    score += 1
+
+    # ==============================
+    # LIQUIDITY SWEEP
+    # ==============================
+
+    sweep, _meta = liquidity_sweep(c5)
+
+    if sweep:
+        flags.append(sweep)
+        score += 1
 
     # ==============================
     # ACCUMULATION SCORE
