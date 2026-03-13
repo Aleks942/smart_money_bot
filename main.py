@@ -2415,6 +2415,7 @@ if __name__ == "__main__":
 # SCAN MONETS
 # =====================
 for instId, vol_usdt, pct in candidates:
+
     try:
         sig = build_signal(instId)
 
@@ -2444,6 +2445,7 @@ for instId, vol_usdt, pct in candidates:
                 trigger_mark(state, instId, "last_pre_trigger_ts")
 
         if is_start_trigger(sig) and trigger_allowed(state, instId, "last_start_trigger_ts", TRIGGER_START_COOLDOWN):
+
             exp_max = float(sig.get("exp_move_max") or 0.0)
 
             if (
@@ -2471,7 +2473,6 @@ for instId, vol_usdt, pct in candidates:
         # =====================
         # ОБЫЧНЫЕ ALERTS
         # =====================
-
         if sig.get("score", 0) >= PRO_EDGE_MIN_SCORE:
 
             now = time.time()
@@ -2490,6 +2491,7 @@ for instId, vol_usdt, pct in candidates:
         # PRE-MOVE WATCH
         # =====================
         if MANIP_ALERT_ENABLED and is_pre_move_manip(sig):
+
             if should_manip_alert(state, sig):
                 manip_watch.append(sig)
                 mark_manip_sent(state, sig)
