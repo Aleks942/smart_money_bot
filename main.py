@@ -2395,7 +2395,10 @@ if __name__ == "__main__":
     state = load_state()
     print("STATE LOADED")
 
+    try:
     send_telegram(f"🚀 SMART MONEY SCANNER — PRO EDGE v4 started ({EXCHANGE} market scan)")
+    except Exception as e:
+        print("START TELEGRAM ERROR:", e)
 
     while True:
         t0 = time.time()
