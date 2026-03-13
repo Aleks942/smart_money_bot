@@ -1433,13 +1433,16 @@ def liquidity_target(pmeta, flags, price=None):
 # =========================
 def build_signal(instId: str):
 
+    flags = []
+    score = 0
+
     ob_meta = None
 
-if ORDERBOOK_ENABLED:
-    try:
-        ob_meta = orderbook_edge(instId)
-    except:
-        ob_meta = None
+    if ORDERBOOK_ENABLED:
+        try:
+            ob_meta = orderbook_edge(instId)
+        except:
+            ob_meta = None
 
     # ==============================
     # ORDERBOOK ANALYSIS
@@ -1459,7 +1462,10 @@ if ORDERBOOK_ENABLED:
         if ob_meta.get("ask_wall"):
             flags.append("OB_WALL_ASK")
 
-    # ✅ свечи (убрал дубль c5)
+    # ==============================
+    # CANDLES
+    # ==============================
+
     c5 = fetch_candles(instId, "5m", 120)
     c15 = fetch_candles(instId, "15m", 240)
 
