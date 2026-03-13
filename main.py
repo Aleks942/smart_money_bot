@@ -329,11 +329,25 @@ S.headers.update({"User-Agent": "smart-money-radar/PRO-EDGE-4.0"})
 def send_telegram(text: str):
     if not BOT_TOKEN or not CHAT_ID:
         return
+
     try:
         url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-        S.post(url, data={"chat_id": CHAT_ID, "text": text}, timeout=TIMEOUT)
-    except:
-        pass
+
+        # защита от слишком длинных сообщений
+        text = str(text)[:4000]
+
+        S.post(
+            url,
+            data={
+                "chat_id": CHAT_ID,
+                "text": text,
+                "disable_web_page_preview": True
+            },
+            timeout=10
+        )
+
+    except Exception as e:
+        print("TELEGRAM ERROR:", e)
 
 # =========================
 # STATE
