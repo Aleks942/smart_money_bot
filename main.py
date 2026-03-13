@@ -1469,7 +1469,7 @@ def build_signal(instId: str):
         flags.append("PRESSURE_DOWN")
         score += 1
 
-elif pressure == "DOWN":
+    elif pressure == "DOWN":
     flags.append("PRESSURE_DOWN")
     score += 1
 
