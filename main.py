@@ -2363,12 +2363,12 @@ if __name__ == "__main__":
                     # ОБЫЧНЫЕ ALERTS
                     # =====================
 
-                    if pro_edge_filter(sig, regime):
+                    if sig["score"] >= 2:
 
-                        now = time.time()
-                        last = last_signal_time.get(sig["instId"], 0)
+                         now = time.time()
+                         last = last_signal_time.get(sig["instId"], 0)
 
-                        if now - last >= SIGNAL_COOLDOWN:
+                         if now - last >= SIGNAL_COOLDOWN:
 
                             if sig["score"] >= ALERT_MIN_SCORE and should_alert_symbol(state, sig):
 
