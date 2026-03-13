@@ -2396,7 +2396,7 @@ if __name__ == "__main__":
     print("STATE LOADED")
 
     try:
-    send_telegram(f"🚀 SMART MONEY SCANNER — PRO EDGE v4 started ({EXCHANGE} market scan)")
+        send_telegram(f"🚀 SMART MONEY SCANNER — PRO EDGE v4 started ({EXCHANGE} market scan)")
     except Exception as e:
         print("START TELEGRAM ERROR:", e)
 
