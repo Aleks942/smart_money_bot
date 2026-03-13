@@ -1513,8 +1513,8 @@ elif pressure == "DOWN":
       score += 1
 
     elif br == "DOWN":
-    flags.append("BREAKOUT_DOWN")
-    score += 1
+        flags.append("BREAKOUT_DOWN")
+        score += 1
 
     # ==============================
     # LIQUIDITY SWEEP
