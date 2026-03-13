@@ -1513,7 +1513,7 @@ return signal
 # 📊 MARKET ANALYSIS
 # ==============================
 
-strong_setup = score >= PRO_EDGE_MIN_SCORE
+    strong_setup = score >= PRO_EDGE_MIN_SCORE
 
     rsi_state = get_rsi_state(c5) or {}
     rsi7 = rsi_state.get("rsi7")
