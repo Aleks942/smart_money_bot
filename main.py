@@ -1527,12 +1527,18 @@ stage, stage_reason = smart_money_stage(score, flags)
 
 tgt = None
 
+
+# ==============================
+# SIGNAL OBJECT
+# ==============================
+
 signal = {
     "instId": instId,
     "price": price,
     "score": score,
-    "strong_setup": strong_setup,
     "flags": flags,
+    "acc_score": acc_score,
+    "strong_setup": strong_setup,
     "direction": direction_text,
     "dir_reasons": reasons,
     "up_w": up_w,
@@ -1543,7 +1549,7 @@ signal = {
     "stage_reason": stage_reason,
     "target": tgt,
     "rsi7": rsi7,
-     "rsi14": rsi14,
+    "rsi14": rsi14,
     "rsi_state": rsi_state.get("state"),
     "ts": now_ts(),
 }
