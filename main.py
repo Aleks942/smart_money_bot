@@ -2395,45 +2395,47 @@ if __name__ == "__main__":
     state = load_state()
     print("STATE LOADED")
 
-    try:
-        send_telegram(f"🚀 SMART MONEY SCANNER — PRO EDGE v4 started ({EXCHANGE} market scan)")
-    except Exception as e:
-        print("START TELEGRAM ERROR:", e)
-
-    while True:
-        t0 = time.time()
-
-        try:
-            regime, _btc = btc_regime()
-            candidates = get_market_candidates()
-        
-
-            alerts = []
-            manip_watch = []
+   
             
-# =====================
-# SCAN MONETS
-# =====================
-for instId, vol_usdt, pct in candidates:
+try:
+    send_telegram(f"🚀 SMART MONEY SCANNER — PRO EDGE v4 started ({EXCHANGE} market scan)")
+except Exception as e:
+    print("START TELEGRAM ERROR:", e)
+
+while True:
+    t0 = time.time()
 
     try:
-        sig = build_signal(instId)
+        regime, _btc = btc_regime()
+        candidates = get_market_candidates()
 
-        if not isinstance(sig, dict):
-            continue
+        alerts = []
+        manip_watch = []
 
-        print(f"[SCAN] {instId} score={sig.get('score')} flags={sig.get('flags')}")
+        # =====================
+        # SCAN MONETS
+        # =====================
+        for instId, vol_usdt, pct in candidates:
 
-        # SNIPER CHECK
-        if sniper_signal(sig):
-            sig["stage"] = "⭐⭐⭐⭐⭐ SNIPER SIGNAL"
-            sig["score"] = sig.get("score", 0) + 2
+            try:
+                sig = build_signal(instId)
 
-        sig["vol_usdt"] = vol_usdt
-        sig["pct_24h"] = pct
+                if not isinstance(sig, dict):
+                    continue
 
-        sig = apply_regime_bias(sig, regime)
+                print(f"[SCAN] {instId} score={sig.get('score')} flags={sig.get('flags')}")
 
+            except Exception as e:
+                print("SCAN ERROR:", e)
+
+            time.sleep(0.15)
+
+    except Exception as e:
+        print("MAIN LOOP ERROR:", e)
+
+    dt = time.time() - t0
+    sleep_for = max(1, POLL_SECONDS - int(dt))
+    time.sleep(sleep_for)
         # =====================
         # V3 TRIGGERS
         # =====================
