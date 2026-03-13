@@ -1525,32 +1525,32 @@ entry, entry_reason = entry_engine(score, flags, direction_text, up_w, down_w)
 
 stage, stage_reason = smart_money_stage(score, flags)
 
-    tgt = None
+tgt = None
 
-    signal = {
-        "instId": instId,
-        "price": price,
-        "score": score,
-        "strong_setup": strong_setup,
-        "flags": flags,
-        "direction": direction_text,
-        "dir_reasons": reasons,
-        "up_w": up_w,
-        "down_w": down_w,
-        "entry": entry,
-        "entry_reason": entry_reason,
-        "stage": stage,
-        "stage_reason": stage_reason,
-        "target": tgt,
-        "rsi7": rsi7,
-        "rsi14": rsi14,
-        "rsi_state": rsi_state.get("state"),
-        "ts": now_ts(),
-    }
+signal = {
+    "instId": instId,
+    "price": price,
+    "score": score,
+    "strong_setup": strong_setup,
+    "flags": flags,
+    "direction": direction_text,
+    "dir_reasons": reasons,
+    "up_w": up_w,
+    "down_w": down_w,
+    "entry": entry,
+    "entry_reason": entry_reason,
+    "stage": stage,
+    "stage_reason": stage_reason,
+    "target": tgt,
+    "rsi7": rsi7,
+     "rsi14": rsi14,
+    "rsi_state": rsi_state.get("state"),
+    "ts": now_ts(),
+}
 
-    signal["sniper"] = sniper_signal(signal)
+signal["sniper"] = sniper_signal(signal)
 
-    return signal
+return signal
 
 # ==============================
 # 🎯 SNIPER SIGNAL ENGINE
