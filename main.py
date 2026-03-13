@@ -2307,7 +2307,7 @@ if __name__ == "__main__":
             for instId, vol_usdt, pct in candidates:
                 try:
                     sig = build_signal(instId)
-                   print(f"[SCAN] {instId} score={sig['score']} flags={sig['flags']}")
+                    print(f"[SCAN] {instId} score={sig['score']} flags={sig['flags']}")
                     if not isinstance(sig, dict):
                        continue
 
