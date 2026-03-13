@@ -2493,14 +2493,7 @@ while True:
 
             if should_manip_alert(state, sig):
                 manip_watch.append(sig)
-                mark_manip_sent(state, sig)
-
-    except Exception as e:
-        print("SCAN ERROR:", e)
-
-    # защита от API limit
-    time.sleep(0.15)
-
+                mark_manip_sent(state, sig)   
                 
 
             # =====================
