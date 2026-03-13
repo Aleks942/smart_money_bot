@@ -2530,6 +2530,14 @@ if __name__ == "__main__":
         sleep_for = max(1, POLL_SECONDS - int(dt))
         time.sleep(sleep_for)
 
+            # =========================
+            # PROGRAM ENTRY
+            # =========================
+            
+            if __name__ == "__main__":
+                print("🚀 SMART MONEY SCANNER — starting")
+                run_scanner()
+
             
 
 
