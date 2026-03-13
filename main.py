@@ -2395,106 +2395,104 @@ if __name__ == "__main__":
     state = load_state()
     print("STATE LOADED")
 
-   
-            
-try:
-    send_telegram(f"🚀 SMART MONEY SCANNER — PRO EDGE v4 started ({EXCHANGE} market scan)")
-except Exception as e:
-    print("START TELEGRAM ERROR:", e)
-
-while True:
-    t0 = time.time()
-
     try:
-        regime, _btc = btc_regime()
-        candidates = get_market_candidates()
-
-        alerts = []
-        manip_watch = []
-
-        # =====================
-        # SCAN MONETS
-        # =====================
-        for instId, vol_usdt, pct in candidates:
-
-    try:
-        sig = build_signal(instId)
-
-        if not isinstance(sig, dict):
-            continue
-
-        print(f"[SCAN] {instId} score={sig.get('score')} flags={sig.get('flags')}")
-
+        send_telegram(f"🚀 SMART MONEY SCANNER — PRO EDGE v4 started ({EXCHANGE} market scan)")
     except Exception as e:
-        print("SCAN ERROR:", e)
+        print("START TELEGRAM ERROR:", e)
 
-    time.sleep(0.15)
+    while True:
+        t0 = time.time()
 
-    except Exception as e:
-        print("MAIN LOOP ERROR:", e)
+        try:
+            regime, _btc = btc_regime()
+            candidates = get_market_candidates()
 
-    # =====================
-    # V3 TRIGGERS
-    # =====================
+            alerts = []
+            manip_watch = []
 
-    if is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
-            exp_max = float(sig.get("exp_move_max") or 0.0)
-            if exp_max >= PRE_MIN_EXPECTED_MOVE_PCT:
-                send_telegram(msg_pre_trigger(sig))
-                trigger_mark(state, instId, "last_pre_trigger_ts")
+            # =====================
+            # SCAN MONETS
+            # =====================
+            for instId, vol_usdt, pct in candidates:
 
-        if is_start_trigger(sig) and trigger_allowed(state, instId, "last_start_trigger_ts", TRIGGER_START_COOLDOWN):
+                try:
+                    sig = build_signal(instId)
 
-            exp_max = float(sig.get("exp_move_max") or 0.0)
+                    if not isinstance(sig, dict):
+                        continue
 
-            if (
-                exp_max >= PRE_MIN_EXPECTED_MOVE_PCT
-                and (not too_late_from_range(sig["price"], sig.get("pmeta") or {}, START_MAX_DIST_PCT))
-                and (not too_close_to_target(sig["price"], sig.get("target"), 0.35))
-            ):
-                send_telegram(msg_start_trigger(sig))
-                trigger_mark(state, instId, "last_start_trigger_ts")
+                    print(f"[SCAN] {instId} score={sig.get('score')} flags={sig.get('flags')}")
 
-        if is_confirm_trigger(sig) and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN):
-            send_telegram(msg_confirm_trigger(sig))
-            trigger_mark(state, instId, "last_confirm_trigger_ts")
+                    # =====================
+                    # V3 TRIGGERS
+                    # =====================
 
-        update_symbol_state(state, sig)
+                    if is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
+                        exp_max = float(sig.get("exp_move_max") or 0.0)
+                        if exp_max >= PRE_MIN_EXPECTED_MOVE_PCT:
+                            send_telegram(msg_pre_trigger(sig))
+                            trigger_mark(state, instId, "last_pre_trigger_ts")
 
-        # =====================
-        # PRIORITY ALERT
-        # =====================
-        if is_priority_signal(sig) and priority_allowed(state, instId):
-            if pro_edge_filter(sig, regime):
-                send_telegram(msg_priority(sig))
-                mark_priority(state, instId)
+                    if is_start_trigger(sig) and trigger_allowed(state, instId, "last_start_trigger_ts", TRIGGER_START_COOLDOWN):
 
-        # =====================
-        # ОБЫЧНЫЕ ALERTS
-        # =====================
-        if sig.get("score", 0) >= PRO_EDGE_MIN_SCORE:
+                        exp_max = float(sig.get("exp_move_max") or 0.0)
 
-            now = time.time()
-            last = last_signal_time.get(sig["instId"], 0)
+                        if (
+                            exp_max >= PRE_MIN_EXPECTED_MOVE_PCT
+                            and (not too_late_from_range(sig["price"], sig.get("pmeta") or {}, START_MAX_DIST_PCT))
+                            and (not too_close_to_target(sig["price"], sig.get("target"), 0.35))
+                        ):
+                            send_telegram(msg_start_trigger(sig))
+                            trigger_mark(state, instId, "last_start_trigger_ts")
 
-            if now - last >= SIGNAL_COOLDOWN:
+                    if is_confirm_trigger(sig) and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN):
+                        send_telegram(msg_confirm_trigger(sig))
+                        trigger_mark(state, instId, "last_confirm_trigger_ts")
 
-                if sig.get("score", 0) >= ALERT_MIN_SCORE and should_alert_symbol(state, sig):
+                    update_symbol_state(state, sig)
 
-                    alerts.append(sig)
-                    mark_alert_sent(state, sig)
+                    # =====================
+                    # PRIORITY ALERT
+                    # =====================
 
-                    last_signal_time[sig["instId"]] = now
+                    if is_priority_signal(sig) and priority_allowed(state, instId):
+                        if pro_edge_filter(sig, regime):
+                            send_telegram(msg_priority(sig))
+                            mark_priority(state, instId)
 
-        # =====================
-        # PRE-MOVE WATCH
-        # =====================
-        if MANIP_ALERT_ENABLED and is_pre_move_manip(sig):
+                    # =====================
+                    # ОБЫЧНЫЕ ALERTS
+                    # =====================
 
-            if should_manip_alert(state, sig):
-                manip_watch.append(sig)
-                mark_manip_sent(state, sig)   
-                
+                    if sig.get("score", 0) >= PRO_EDGE_MIN_SCORE:
+
+                        now = time.time()
+                        last = last_signal_time.get(sig["instId"], 0)
+
+                        if now - last >= SIGNAL_COOLDOWN:
+
+                            if sig.get("score", 0) >= ALERT_MIN_SCORE and should_alert_symbol(state, sig):
+
+                                alerts.append(sig)
+                                mark_alert_sent(state, sig)
+
+                                last_signal_time[sig["instId"]] = now
+
+                    # =====================
+                    # PRE-MOVE WATCH
+                    # =====================
+
+                    if MANIP_ALERT_ENABLED and is_pre_move_manip(sig):
+
+                        if should_manip_alert(state, sig):
+                            manip_watch.append(sig)
+                            mark_manip_sent(state, sig)
+
+                except Exception as e:
+                    print("SCAN ERROR:", e)
+
+                # защита от API limit
+                time.sleep(0.15)
 
             # =====================
             # SORT SIGNALS
@@ -2526,10 +2524,11 @@ while True:
                 send_telegram(choose_detail_message(sig))
 
             # =====================
-            # PRE MOVE WATCH
+            # PRE MOVE WATCH SUMMARY
             # =====================
 
             if MANIP_ALERT_ENABLED:
+
                 msg2 = manip_summary_message(manip_watch, cycle_info, regime)
                 if msg2:
                     send_telegram(msg2)
@@ -2539,8 +2538,8 @@ while True:
 
             save_state(state)
 
-    
         except Exception as e:
+
             err = traceback.format_exc()
             send_telegram(f"❌ Scan Error:\n{err}")
 
