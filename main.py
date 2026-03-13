@@ -2529,14 +2529,16 @@ if __name__ == "__main__":
         dt = time.time() - t0
         sleep_for = max(1, POLL_SECONDS - int(dt))
         time.sleep(sleep_for)
+        
+        # =========================
+        # PROGRAM ENTRY
+        # =========================
 
-            # =========================
-            # PROGRAM ENTRY
-            # =========================
+        if __name__ == "__main__":
+            print("🚀 SMART MONEY SCANNER — starting")
+            run_scanner()
+
             
-            if __name__ == "__main__":
-                print("🚀 SMART MONEY SCANNER — starting")
-                run_scanner()
 
             
 
