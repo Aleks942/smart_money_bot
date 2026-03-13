@@ -1487,76 +1487,62 @@ def build_signal(instId: str):
     if volume_spike_ok(c5):
         score += 1
         flags.append("VOL_SPIKE")
-# ==============================
-# ACCUMULATION SCORE
-# ==============================
 
-acc_score = accumulation_bias(flags)
+    # ==============================
+    # ACCUMULATION SCORE
+    # ==============================
 
-
-# ==============================
-# SIGNAL OBJECT
-# ==============================
-
-signal = {
-    "instId": instId,
-    "price": price,
-    "score": score,
-    "flags": flags,
-    "acc_score": acc_score,
-    "ts": time.time()
-}
-
-return signal
-
-# ==============================
-# 📊 MARKET ANALYSIS
-# ==============================
-
-strong_setup = score >= PRO_EDGE_MIN_SCORE
-
-rsi_state = get_rsi_state(c5) or {}
-rsi7 = rsi_state.get("rsi7")
-rsi14 = rsi_state.get("rsi14")
-
-direction_text, reasons, up_w, down_w = direction_hint(flags)
-
-entry, entry_reason = entry_engine(score, flags, direction_text, up_w, down_w)
-
-stage, stage_reason = smart_money_stage(score, flags)
-
-tgt = None
+    acc_score = accumulation_bias(flags)
 
 
-# ==============================
-# SIGNAL OBJECT
-# ==============================
+    # ==============================
+    # 📊 MARKET ANALYSIS
+    # ==============================
 
-signal = {
-    "instId": instId,
-    "price": price,
-    "score": score,
-    "flags": flags,
-    "acc_score": acc_score,
-    "strong_setup": strong_setup,
-    "direction": direction_text,
-    "dir_reasons": reasons,
-    "up_w": up_w,
-    "down_w": down_w,
-    "entry": entry,
-    "entry_reason": entry_reason,
-    "stage": stage,
-    "stage_reason": stage_reason,
-    "target": tgt,
-    "rsi7": rsi7,
-    "rsi14": rsi14,
-    "rsi_state": rsi_state.get("state"),
-    "ts": now_ts(),
-}
+    strong_setup = score >= PRO_EDGE_MIN_SCORE
 
-signal["sniper"] = sniper_signal(signal)
+    rsi_state = get_rsi_state(c5) or {}
+    rsi7 = rsi_state.get("rsi7")
+    rsi14 = rsi_state.get("rsi14")
 
-return signal
+    direction_text, reasons, up_w, down_w = direction_hint(flags)
+
+    entry, entry_reason = entry_engine(score, flags, direction_text, up_w, down_w)
+
+    stage, stage_reason = smart_money_stage(score, flags)
+
+    tgt = None
+
+
+    # ==============================
+    # SIGNAL OBJECT
+    # ==============================
+
+    signal = {
+        "instId": instId,
+        "price": price,
+        "score": score,
+        "flags": flags,
+        "acc_score": acc_score,
+        "strong_setup": strong_setup,
+        "direction": direction_text,
+        "dir_reasons": reasons,
+        "up_w": up_w,
+        "down_w": down_w,
+        "entry": entry,
+        "entry_reason": entry_reason,
+        "stage": stage,
+        "stage_reason": stage_reason,
+        "target": tgt,
+        "rsi7": rsi7,
+        "rsi14": rsi14,
+        "rsi_state": rsi_state.get("state"),
+        "ts": now_ts(),
+    }
+
+    signal["sniper"] = sniper_signal(signal)
+
+    return signal
 
 # ==============================
 # 🎯 SNIPER SIGNAL ENGINE
