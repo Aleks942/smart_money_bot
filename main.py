@@ -875,14 +875,36 @@ def liquidity_pressure(candles, lookback=PRESSURE_LOOKBACK, zone=PRESSURE_ZONE, 
         return "DOWN", {"range_hi": hi, "range_lo": lo, "range_pct": range_pct, "pos": pos}
     return None, {"range_hi": hi, "range_lo": lo, "range_pct": range_pct, "pos": pos}
 
+# ==============================
+# NEAR BREAKOUT DETECTOR
+# ==============================
+
 def near_breakout(pmeta, price, near_pct):
+
     if not pmeta or not isinstance(pmeta, dict):
         return None
 
     hi = pmeta.get("range_hi")
     lo = pmeta.get("range_lo")
+
     if hi is None or lo is None:
         return None
+
+    # расстояние до верхней границы
+    dist_hi = abs(price - hi) / hi * 100
+
+    # расстояние до нижней границы
+    dist_lo = abs(price - lo) / lo * 100
+
+    # почти пробой вверх
+    if price < hi and dist_hi <= near_pct:
+        return "NEAR_BREAKOUT_UP"
+
+    # почти пробой вниз
+    if price > lo and dist_lo <= near_pct:
+        return "NEAR_BREAKOUT_DOWN"
+
+    return None
 
 # ==============================
 # 📈 CVD (Cumulative Volume Delta)
