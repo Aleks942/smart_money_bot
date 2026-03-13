@@ -2430,8 +2430,8 @@ while True:
 
             time.sleep(0.15)
 
-    except Exception as e:
-        print("MAIN LOOP ERROR:", e)
+        except Exception as e:
+            print("MAIN LOOP ERROR:", e)
 
         # =====================
         # V3 TRIGGERS
