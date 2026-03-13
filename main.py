@@ -1547,6 +1547,7 @@ elif pressure == "DOWN":
         "price": price,
         "score": score,
         "flags": flags,
+        "pmeta": pmeta,
         "acc_score": acc_score,
         "strong_setup": strong_setup,
         "direction": direction_text,
