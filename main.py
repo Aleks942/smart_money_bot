@@ -1487,6 +1487,27 @@ def build_signal(instId: str):
     if volume_spike_ok(c5):
         score += 1
         flags.append("VOL_SPIKE")
+# ==============================
+# ACCUMULATION SCORE
+# ==============================
+
+acc_score = accumulation_bias(flags)
+
+
+# ==============================
+# SIGNAL OBJECT
+# ==============================
+
+signal = {
+    "instId": instId,
+    "price": price,
+    "score": score,
+    "flags": flags,
+    "acc_score": acc_score,
+    "ts": time.time()
+}
+
+return signal
 
     # ==============================
     # 📊 MARKET ANALYSIS
