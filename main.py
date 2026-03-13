@@ -1531,8 +1531,9 @@ elif pressure == "DOWN":
     # ==============================
 
     acc_score = accumulation_bias(flags)
+    
 
-
+def build_signal(instId: str):
     # ==============================
     # 📊 MARKET ANALYSIS
     # ==============================
