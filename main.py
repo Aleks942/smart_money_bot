@@ -1503,6 +1503,20 @@ elif pressure == "DOWN":
         flags.append("VOL_SPIKE")
 
     # ==============================
+    # BREAKOUT DETECTOR
+    # ==============================
+
+    br = breakout_ok(c5)
+
+    if br == "UP":
+      flags.append("BREAKOUT_UP")
+      score += 1
+
+elif br == "DOWN":
+    flags.append("BREAKOUT_DOWN")
+    score += 1    
+
+    # ==============================
     # ACCUMULATION SCORE
     # ==============================
 
