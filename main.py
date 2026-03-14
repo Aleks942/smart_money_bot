@@ -1475,7 +1475,9 @@ def build_signal(instId: str):
     score = 0
     ob_meta = None
 
+    # =========================
     # ORDERBOOK
+    # =========================
     if ORDERBOOK_ENABLED:
         try:
             ob_meta = orderbook_edge(instId)
@@ -1497,9 +1499,9 @@ def build_signal(instId: str):
             flags.add("OB_WALL_ASK")
 
 
-    # ==============================
+    # =========================
     # CANDLES
-    # ==============================
+    # =========================
 
     c5 = fetch_candles(instId, "5m", 120)
     c15 = fetch_candles(instId, "15m", 240)
@@ -1515,9 +1517,9 @@ def build_signal(instId: str):
     price = float(c5[-1][4])
 
 
-    # ==============================
-    # LIQUIDITY PRESSURE
-    # ==============================
+    # =========================
+    # PRESSURE
+    # =========================
 
     pressure, pmeta = liquidity_pressure(c5)
 
@@ -1530,9 +1532,9 @@ def build_signal(instId: str):
         score += 1
 
 
-    # ==============================
-    # RESULT
-    # ==============================
+    # =========================
+    # RETURN RESULT
+    # =========================
 
     return {
         "symbol": instId,
@@ -1541,7 +1543,6 @@ def build_signal(instId: str):
         "flags": list(flags),
         "pmeta": pmeta
     }
-
 
 # ==============================
 # CONTINUATION ENGINE
