@@ -1529,13 +1529,7 @@ def build_signal(instId: str):
     elif pressure == "DOWN":
         flags.append("PRESSURE_DOWN")
         score += 1
-
-    elif pressure == "DOWN":
-        flags.append("PRESSURE_DOWN")
-        score += 1
-
-        flags = []
-        score = 0
+        
 
     # CONTINUATION (M15 откат → продолжение)
     cont = None
