@@ -1487,17 +1487,17 @@ def build_signal(instId: str):
 
     if ob_meta:
 
-        if ob_meta.get("ob_bias") == "BIDS":
-            flags.add("OB_BIDS")
+    if ob_meta.get("ob_bias") == "BIDS":
+        flags.add("OB_BIDS")
 
-        if ob_meta.get("ob_bias") == "ASKS":
-            flags.append("OB_ASKS")
+    if ob_meta.get("ob_bias") == "ASKS":
+        flags.add("OB_ASKS")
 
-        if ob_meta.get("bid_wall"):
-            flags.append("OB_WALL_BID")
+    if ob_meta.get("bid_wall"):
+        flags.add("OB_WALL_BID")
 
-        if ob_meta.get("ask_wall"):
-            flags.append("OB_WALL_ASK")
+    if ob_meta.get("ask_wall"):
+        flags.add("OB_WALL_ASK")
 
     # ==============================
     # CANDLES
