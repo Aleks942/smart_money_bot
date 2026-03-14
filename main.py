@@ -2469,11 +2469,13 @@ if __name__ == "__main__":
             alerts = []
             manip_watch = []
 
-            for instId in candidates:
+            for inst in candidates:
 
-               time.sleep(0.30)   # защита от лимита BYBIT
+                time.sleep(0.30)
 
-               sig = build_signal(instId)
+                instId = inst[0] if isinstance(inst, tuple) else inst
+
+                sig = build_signal(instId)
 
                if not sig:
                    continue
