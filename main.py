@@ -1604,23 +1604,25 @@ def build_signal(instId: str):
     # ==============================
 
     acc_score = accumulation_bias(flags)
-    
 
 # ==============================
 # 📊 MARKET ANALYSIS
 # ==============================
-def build_signal_analysis(instId: str):
 
-    flags = []
-    score = 0
+strong_setup = score >= PRO_EDGE_MIN_SCORE
 
-    ob_meta = None
+rsi_state = get_rsi_state(c5) or {}
+rsi7 = rsi_state.get("rsi7")
+rsi14 = rsi_state.get("rsi14")
 
-    if ORDERBOOK_ENABLED:
-        try:
-            ob_meta = orderbook_edge(instId)
-        except:
-            ob_meta = None
+direction_text, reasons, up_w, down_w = direction_hint(flags)
+
+entry, entry_reason = entry_engine(score, flags, direction_text, up_w, down_w)
+
+stage, stage_reason = smart_money_stage(score, flags)
+
+tgt = None
+
 
     # ==============================
     # ORDERBOOK ANALYSIS
