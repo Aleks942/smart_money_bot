@@ -29,7 +29,7 @@ MESSAGE_MODE = (os.getenv("MESSAGE_MODE") or "AUTO").upper()   # AUTO / SHORT / 
 EDGE_MID_SCORE = int(os.getenv("EDGE_MID_SCORE") or "4")
 EDGE_HIGH_SCORE = int(os.getenv("EDGE_HIGH_SCORE") or "7")
 
-POLL_SECONDS = int(os.getenv("POLL_SECONDS") or "30")
+POLL_SECONDS = int(os.getenv("POLL_SECONDS") or "60")
 TIMEOUT = int(os.getenv("TIMEOUT") or "12")
 STATE_FILE = os.getenv("STATE_FILE") or "state.json"
 
