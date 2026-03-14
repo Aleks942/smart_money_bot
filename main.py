@@ -1468,21 +1468,20 @@ def liquidity_target(pmeta, flags, price=None):
 # =========================
 # BUILD SIGNAL FOR SYMBOL
 # =========================
+
 def build_signal(instId: str):
 
     flags = set()
     score = 0
-
     ob_meta = None
 
+    # ORDERBOOK
     if ORDERBOOK_ENABLED:
         try:
             ob_meta = orderbook_edge(instId)
         except:
             ob_meta = None
 
-
-    # ORDERBOOK
     if ob_meta:
 
         if ob_meta.get("ob_bias") == "BIDS":
@@ -1498,9 +1497,14 @@ def build_signal(instId: str):
             flags.add("OB_WALL_ASK")
 
 
+    # ==============================
     # CANDLES
+    # ==============================
+
     c5 = fetch_candles(instId, "5m", 120)
     c15 = fetch_candles(instId, "15m", 240)
+
+    print(f"[CANDLES] {instId} c5={len(c5) if c5 else 0} c15={len(c15) if c15 else 0}")
 
     if not c5 or len(c5) < 20:
         return None
@@ -1511,19 +1515,32 @@ def build_signal(instId: str):
     price = float(c5[-1][4])
 
 
-# ==============================
-# LIQUIDITY PRESSURE
-# ==============================
+    # ==============================
+    # LIQUIDITY PRESSURE
+    # ==============================
 
-pressure, pmeta = liquidity_pressure(c5)
+    pressure, pmeta = liquidity_pressure(c5)
 
-if pressure == "UP":
-    flags.add("PRESSURE_UP")
-    score += 1
+    if pressure == "UP":
+        flags.add("PRESSURE_UP")
+        score += 1
 
-elif pressure == "DOWN":
-    flags.add("PRESSURE_DOWN")
-    score += 1
+    elif pressure == "DOWN":
+        flags.add("PRESSURE_DOWN")
+        score += 1
+
+
+    # ==============================
+    # RESULT
+    # ==============================
+
+    return {
+        "symbol": instId,
+        "price": price,
+        "score": score,
+        "flags": list(flags),
+        "pmeta": pmeta
+    }
 
 
 # ==============================
