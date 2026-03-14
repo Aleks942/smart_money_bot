@@ -1583,24 +1583,146 @@ def build_signal(instId: str):
     acc_score = accumulation_bias(flags)
     
 
-def build_signal(instId: str):
+# ==============================
+# 📊 MARKET ANALYSIS
+# ==============================
+def build_signal_analysis(instId: str):
+
+    flags = []
+    score = 0
+
+    ob_meta = None
+
+    if ORDERBOOK_ENABLED:
+        try:
+            ob_meta = orderbook_edge(instId)
+        except:
+            ob_meta = None
+
     # ==============================
-    # 📊 MARKET ANALYSIS
+    # ORDERBOOK ANALYSIS
     # ==============================
 
-    strong_setup = score >= PRO_EDGE_MIN_SCORE
+    if ob_meta:
 
-    rsi_state = get_rsi_state(c5) or {}
-    rsi7 = rsi_state.get("rsi7")
-    rsi14 = rsi_state.get("rsi14")
+        if ob_meta.get("ob_bias") == "BIDS":
+            flags.append("OB_BIDS")
 
-    direction_text, reasons, up_w, down_w = direction_hint(flags)
+        if ob_meta.get("ob_bias") == "ASKS":
+            flags.append("OB_ASKS")
 
-    entry, entry_reason = entry_engine(score, flags, direction_text, up_w, down_w)
+        if ob_meta.get("bid_wall"):
+            flags.append("OB_WALL_BID")
 
-    stage, stage_reason = smart_money_stage(score, flags)
+        if ob_meta.get("ask_wall"):
+            flags.append("OB_WALL_ASK")
 
-    tgt = None
+    # ==============================
+    # CANDLES
+    # ==============================
+
+    c5 = fetch_candles(instId, "5m", 120)
+    c15 = fetch_candles(instId, "15m", 240)
+
+    if not c5 or len(c5) < 20:
+        return None
+
+    if not c15 or len(c15) < 20:
+        return None
+
+    price = float(c5[-1][4])
+
+    # ==============================
+    # LIQUIDITY PRESSURE
+    # ==============================
+
+    pressure, pmeta = liquidity_pressure(c5)
+
+    if pressure == "UP":
+        flags.append("PRESSURE_UP")
+        score += 1
+
+    elif pressure == "DOWN":
+        flags.append("PRESSURE_DOWN")
+        score += 1
+
+    # ==============================
+    # CONTINUATION
+    # ==============================
+
+    cont = None
+
+    try:
+        cont = continuation_engine(c15)
+    except:
+        cont = None
+
+    if cont:
+        flags.append(cont)
+        score += 2
+
+    comp5, _ = compression_ok(c5)
+    if comp5:
+        score += 1
+        flags.append("COMP_5M")
+
+    comp15, _ = compression_ok(c15)
+    if comp15:
+        score += 1
+        flags.append("COMP_15M")
+
+    if fake_dump_ok(c5):
+        score += 1
+        flags.append("FAKE_DUMP")
+
+    if volume_spike_ok(c5):
+        score += 1
+        flags.append("VOL_SPIKE")
+
+    # ==============================
+    # ATR EXPANSION
+    # ==============================
+
+    if atr_expansion_ok(c5):
+        flags.append("ATR_EXPANSION")
+        score += 1
+
+    # ==============================
+    # BREAKOUT DETECTOR
+    # ==============================
+
+    br = breakout_ok(c5)
+
+    if br == "UP":
+        flags.append("BREAKOUT_UP")
+        score += 1
+
+    elif br == "DOWN":
+        flags.append("BREAKOUT_DOWN")
+        score += 1
+
+    # ==============================
+    # LIQUIDITY SWEEP
+    # ==============================
+
+    sweep, _meta = liquidity_sweep(c5)
+
+    if sweep:
+        flags.append(sweep)
+        score += 1
+
+    acc_score = accumulation_bias(flags)
+
+    return {
+        "instId": instId,
+        "price": price,
+        "flags": flags,
+        "score": score,
+        "acc_score": acc_score,
+        "c5": c5,
+        "c15": c15,
+        "pmeta": pmeta
+    }
 
     # ==============================
     # EXPECTED MOVE
