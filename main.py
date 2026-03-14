@@ -2010,34 +2010,73 @@ def fmt_symbol(instId: str) -> str:
 
 def msg_short(sig):
     lines = []
-    lines.append(f"🧠 RADAR SHORT — {fmt_symbol(sig['instId'])}")
-    lines.append(f"💵 {sig['price']:.6g}")
-    lines.append(f"📊 {sig['score']}/10 | {sig['direction']} | acc={sig.get('acc_score', 0)}")
-    lines.append(f"🎯 ENTRY: {sig['entry']}")
-    lines.append(f"🧬 STAGE: {sig['stage']}")
-    if sig["target"] is not None:
-        lines.append(f"🎯 Target: {sig['target']:.6g}")
+
+    inst = sig.get("instId", "?")
+    price = sig.get("price", 0)
+    score = sig.get("score", 0)
+    direction = sig.get("direction", "⚖️ БАЛАНС")
+    acc = sig.get("acc_score", 0)
+    entry = sig.get("entry", "WAIT")
+    stage = sig.get("stage", "UNKNOWN")
+    target = sig.get("target")
+
+    lines.append(f"🧠 RADAR SHORT — {fmt_symbol(inst)}")
+    lines.append(f"💵 {price:.6g}")
+    lines.append(f"📊 {score}/10 | {direction} | acc={acc}")
+    lines.append(f"🎯 ENTRY: {entry}")
+    lines.append(f"🧬 STAGE: {stage}")
+
+    if target is not None:
+        lines.append(f"🎯 Target: {target:.6g}")
+
     return "\n".join(lines)
 
 def msg_medium(sig):
     lines = []
-    lines.append(f"🧠 RADAR MEDIUM — {fmt_symbol(sig['instId'])}")
-    lines.append(f"💵 {sig['price']:.6g}")
+
+    inst = sig.get("instId", "?")
+    price = sig.get("price", 0)
+    score = sig.get("score", 0)
+    direction = sig.get("direction", "⚖️ БАЛАНС")
+    up_w = sig.get("up_w", 0)
+    down_w = sig.get("down_w", 0)
+    acc = sig.get("acc_score", 0)
+    entry = sig.get("entry", "WAIT")
+    entry_reason = sig.get("entry_reason", "")
+    stage = sig.get("stage", "UNKNOWN")
+    stage_reason = sig.get("stage_reason", "")
+    target = sig.get("target")
+    flags = sig.get("flags", [])
+
+    lines.append(f"🧠 RADAR MEDIUM — {fmt_symbol(inst)}")
+    lines.append(f"💵 {price:.6g}")
     lines.append(f"🎯 Expected move: {sig.get('exp_move_min',0)}–{sig.get('exp_move_max',0)}%")
+
     if sig.get("rsi7") is not None and sig.get("rsi14") is not None:
-        lines.append(f"📍 RSI7={sig['rsi7']:.1f} | RSI14={sig['rsi14']:.1f} | {sig.get('rsi_state', 'UNKNOWN')}")
-    
-    lines.append(f"📊 {sig['score']}/10 | {sig['direction']} (up={sig['up_w']}, down={sig['down_w']}) | acc={sig.get('acc_score', 0)}")
-    lines.append(f"🎯 ENTRY: {sig['entry']} — {sig['entry_reason']}")
-    lines.append(f"🧬 STAGE: {sig['stage']} — {sig['stage_reason']}")
+        lines.append(
+            f"📍 RSI7={sig['rsi7']:.1f} | RSI14={sig['rsi14']:.1f} | {sig.get('rsi_state', 'UNKNOWN')}"
+        )
+
+    lines.append(f"📊 {score}/10 | {direction} (up={up_w}, down={down_w}) | acc={acc}")
+    lines.append(f"🎯 ENTRY: {entry} — {entry_reason}")
+    lines.append(f"🧬 STAGE: {stage} — {stage_reason}")
+
     pm = sig.get("pmeta") or {}
-    if pm.get("range_lo") is not None and pm.get("range_hi") is not None and pm.get("range_pct") is not None:
-        lines.append(f"🧲 Range: {pm['range_lo']:.6g} → {pm['range_hi']:.6g} | {pm['range_pct']:.2f}%")
-    if sig["target"] is not None:
-        lines.append(f"🎯 Target: {sig['target']:.6g}")
-    if sig["flags"]:
+    if (
+        pm.get("range_lo") is not None
+        and pm.get("range_hi") is not None
+        and pm.get("range_pct") is not None
+    ):
+        lines.append(
+            f"🧲 Range: {pm['range_lo']:.6g} → {pm['range_hi']:.6g} | {pm['range_pct']:.2f}%"
+        )
+
+    if target is not None:
+        lines.append(f"🎯 Target: {target:.6g}")
+
+    if flags:
         lines.append("Flags:")
-        for f in sig["flags"][:14]:
+        for f in flags[:14]:
             lines.append(f"• {f}")
 
     interp = interpret_combo(sig)
