@@ -173,26 +173,43 @@ def get_bybit_tickers_linear():
 
 
 def get_bybit_candles(symbol: str, interval: str, limit: int = 200):
-    # interval: "5" / "15"
-    res = bybit_get(BYBIT_KLINE_URL, {"category": "linear", "symbol": symbol, "interval": interval, "limit": str(limit)})
-    lst = res.get("list") or []
-    if not lst or len(lst) < 30:
-        raise RuntimeError(f"Not enough bybit candles for {symbol} {interval}")
+    try:
+        res = bybit_get(
+            BYBIT_KLINE_URL,
+            {"category": "linear", "symbol": symbol, "interval": interval, "limit": str(limit)}
+        )
 
-    # Bybit returns newest -> oldest, we need old -> new
-    lst.reverse()
+        result = res.get("result") or {}
+        lst = result.get("list") or []
 
-    candles = []
-    for c in lst:
-        # [startTime, open, high, low, close, volume, turnover]
-        try:
-            candles.append([int(c[0]), float(c[1]), float(c[2]), float(c[3]), float(c[4]), float(c[5])])
-        except:
-            pass
+        if not lst or len(lst) < 30:
+            print(f"⚠️ Not enough bybit candles for {symbol} {interval}")
+            return []
 
-    if len(candles) < 30:
-        raise RuntimeError(f"Bybit candle parse failed {symbol} {interval}")
-    return candles
+        # Bybit returns newest -> oldest
+        lst.reverse()
+
+        candles = []
+        for c in lst:
+            try:
+                candles.append([
+                    int(c[0]),
+                    float(c[1]),
+                    float(c[2]),
+                    float(c[3]),
+                    float(c[4]),
+                    float(c[5])
+                ])
+            except:
+                continue
+
+        if len(candles) < 30:
+            print(f"⚠️ Candle parse failed {symbol} {interval}")
+            return []
+
+        return candles
+
+    except Exception as
 
 
 def get_bybit_books(symbol: str, limit: int = 25):
