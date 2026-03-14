@@ -1775,6 +1775,7 @@ def is_bad_symbol(instId: str) -> bool:
     return False
 def get_market_candidates_bybit():
     tickers = get_bybit_tickers_linear()
+    print("BYBIT TICKERS COUNT:", len(tickers))
     cands = []
 
     for t in tickers:
