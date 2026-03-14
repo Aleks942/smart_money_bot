@@ -2550,22 +2550,31 @@ if __name__ == "__main__":
             alerts = []
             manip_watch = []
 
-            
+# =====================
+# SCAN MONETS (ONE PASS ONLY)
+# =====================
+for instId, vol_usdt, pct in candidates:
+
+    time.sleep(0.2)
+
+    try:
+        sig = build_signal(instId)
+
+        if not isinstance(sig, dict):
+            continue
+
+        sig = apply_regime_bias(sig, regime)
+
+        print(f"[SCAN] {instId} price={sig.get('price')} score={sig.get('score')} acc={sig.get('acc_score')} flags={sig.get('flags')}")
+
+        alerts.append(sig)
+
+        # дальше твоя логика триггеров здесь ↓
+
+    except Exception as e:
+        print("SCAN ERROR:", e)
 
             
-
-            # =====================
-            # SCAN MONETS
-            # =====================
-            for instId, vol_usdt, pct in candidates:
-
-                try:
-                    sig = build_signal(instId)
-
-                    if not isinstance(sig, dict):
-                        continue
-
-                    print(f"[SCAN] {instId} price={sig.get('price')} score={sig.get('score')} flags={sig.get('flags')}")
 
                     # =====================
                     # V3 TRIGGERS
