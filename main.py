@@ -1481,11 +1481,11 @@ def build_signal(instId: str):
         except:
             ob_meta = None
 
-    # ==============================
-    # ORDERBOOK ANALYSIS
-    # ==============================
+# ==============================
+# ORDERBOOK
+# ==============================
 
-    if ob_meta:
+if ob_meta:
 
     if ob_meta.get("ob_bias") == "BIDS":
         flags.add("OB_BIDS")
