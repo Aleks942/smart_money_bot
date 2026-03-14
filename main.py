@@ -1481,38 +1481,34 @@ def build_signal(instId: str):
         except:
             ob_meta = None
 
-# ==============================
-# ORDERBOOK
-# ==============================
 
-if ob_meta:
+    # ORDERBOOK
+    if ob_meta:
 
-    if ob_meta.get("ob_bias") == "BIDS":
-        flags.add("OB_BIDS")
+        if ob_meta.get("ob_bias") == "BIDS":
+            flags.add("OB_BIDS")
 
-    if ob_meta.get("ob_bias") == "ASKS":
-        flags.add("OB_ASKS")
+        if ob_meta.get("ob_bias") == "ASKS":
+            flags.add("OB_ASKS")
 
-    if ob_meta.get("bid_wall"):
-        flags.add("OB_WALL_BID")
+        if ob_meta.get("bid_wall"):
+            flags.add("OB_WALL_BID")
 
-    if ob_meta.get("ask_wall"):
-        flags.add("OB_WALL_ASK")
+        if ob_meta.get("ask_wall"):
+            flags.add("OB_WALL_ASK")
 
 
-# ==============================
-# CANDLES
-# ==============================
+    # CANDLES
+    c5 = fetch_candles(instId, "5m", 120)
+    c15 = fetch_candles(instId, "15m", 240)
 
-c5 = fetch_candles(instId, "5m", 120)
-c15 = fetch_candles(instId, "15m", 240)
+    if not c5 or len(c5) < 20:
+        return None
 
-print(f"[CANDLES] {instId} c5={len(c5) if c5 else 0} c15={len(c15) if c15 else 0}")
+    if not c15 or len(c15) < 20:
+        return None
 
-if not c15 or len(c15) < 20:
-    return None
-
-price = float(c5[-1][4])
+    price = float(c5[-1][4])
 
 
 # ==============================
