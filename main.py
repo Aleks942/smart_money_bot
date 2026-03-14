@@ -1469,44 +1469,22 @@ def liquidity_target(pmeta, flags, price=None):
 # BUILD SIGNAL FOR SYMBOL
 # =========================
 
-def build_signal(instId: str):
+def build_signal(instId):
 
     flags = set()
     score = 0
+
     ob_meta = None
 
-    # =========================
-    # ORDERBOOK
-    # =========================
     if ORDERBOOK_ENABLED:
         try:
             ob_meta = orderbook_edge(instId)
         except:
             ob_meta = None
 
-    if ob_meta:
-
-        if ob_meta.get("ob_bias") == "BIDS":
-            flags.add("OB_BIDS")
-
-        if ob_meta.get("ob_bias") == "ASKS":
-            flags.add("OB_ASKS")
-
-        if ob_meta.get("bid_wall"):
-            flags.add("OB_WALL_BID")
-
-        if ob_meta.get("ask_wall"):
-            flags.add("OB_WALL_ASK")
-
-
-    # =========================
     # CANDLES
-    # =========================
-
     c5 = fetch_candles(instId, "5m", 120)
     c15 = fetch_candles(instId, "15m", 240)
-
-    print(f"[CANDLES] {instId} c5={len(c5) if c5 else 0} c15={len(c15) if c15 else 0}")
 
     if not c5 or len(c5) < 20:
         return None
@@ -1515,6 +1493,16 @@ def build_signal(instId: str):
         return None
 
     price = float(c5[-1][4])
+
+    if score < MIN_SCORE:
+        return None
+
+    return {
+        "symbol": instId,
+        "price": price,
+        "score": score,
+        "flags": list(flags)
+    }
 
 
     # =========================
