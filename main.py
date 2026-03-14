@@ -1150,21 +1150,25 @@ def rsi_warns_direction(direction, rsi_state):
     return False
 
 def too_late_from_range(price, pmeta, max_dist_pct=0.8):
+
     if not pmeta or price <= 0:
         return False
 
-    hi = pmeta.get("range_hi")
-    lo = pmeta.get("range_lo")
-    if hi is None or lo is None:
+    low = pmeta.get("range_low")
+    high = pmeta.get("range_high")
+
+    if low is None or high is None:
         return False
 
     try:
-        hi = float(hi)
-        lo = float(lo)
-        price = float(price)
-        max_dist_pct = float(max_dist_pct)
+        dist_pct = abs(price - high) / price * 100
     except Exception:
         return False
+
+    if dist_pct > max_dist_pct:
+        return True
+
+    return False
 
     dist_to_hi = abs(hi - price) / price * 100.0
     dist_to_lo = abs(price - lo) / price * 100.0
