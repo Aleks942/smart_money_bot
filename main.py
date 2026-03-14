@@ -1470,7 +1470,7 @@ def liquidity_target(pmeta, flags, price=None):
 # =========================
 def build_signal(instId: str):
 
-    flags = []
+    flags = set()
     score = 0
 
     ob_meta = None
