@@ -1519,6 +1519,9 @@ def build_signal(instId):
     ob_meta = None
     pmeta = None
 
+    tgt = None
+    strong_setup = False
+
     # =========================
     # ORDERBOOK
     # =========================
