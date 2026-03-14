@@ -1472,6 +1472,9 @@ def liquidity_target(pmeta, flags, price=None):
 
 def build_signal(instId):
 
+    if isinstance(instId, tuple):
+        instId = instId[0]
+
     flags = set()
     score = 0
 
