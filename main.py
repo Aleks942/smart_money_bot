@@ -167,7 +167,8 @@ def bybit_get(url, params, retries=3):
 
 def get_bybit_tickers_linear():
     res = bybit_get(BYBIT_TICKERS_URL, {"category": "linear"})
-    lst = res.get("list") or []
+    result = res.get("result") or {}
+    lst = result.get("list") or []
     return lst
 
 
