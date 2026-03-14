@@ -1509,9 +1509,6 @@ c15 = fetch_candles(instId, "15m", 240)
 
 print(f"[CANDLES] {instId} c5={len(c5) if c5 else 0} c15={len(c15) if c15 else 0}")
 
-if not c5 or len(c5) < 20:
-    return None
-
 if not c15 or len(c15) < 20:
     return None
 
