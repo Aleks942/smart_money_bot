@@ -1625,24 +1625,6 @@ def build_signal(instId: str):
 
 
     # ==============================
-    # ORDERBOOK ANALYSIS
-    # ==============================
-
-    if ob_meta:
-
-        if ob_meta.get("ob_bias") == "BIDS":
-            flags.append("OB_BIDS")
-
-        if ob_meta.get("ob_bias") == "ASKS":
-            flags.append("OB_ASKS")
-
-        if ob_meta.get("bid_wall"):
-            flags.append("OB_WALL_BID")
-
-        if ob_meta.get("ask_wall"):
-            flags.append("OB_WALL_ASK")
-
-    # ==============================
     # CANDLES
     # ==============================
 
