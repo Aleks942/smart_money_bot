@@ -2533,7 +2533,7 @@ if __name__ == "__main__":
                     if not isinstance(sig, dict):
                         continue
 
-                    print(f"[SCAN] {instId} score={sig.get('score')} flags={sig.get('flags')}")
+                    print(f"[SCAN] {instId} price={sig.get('price')} score={sig.get('score')} flags={sig.get('flags')}")
 
                     # =====================
                     # V3 TRIGGERS
