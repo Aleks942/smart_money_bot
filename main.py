@@ -1133,8 +1133,11 @@ def rsi_blocks_aggressive_entry(direction, rsi_state):
 
 
 def rsi_warns_direction(direction, rsi_state):
+
     if not rsi_state:
         return False
+
+    direction = str(direction).upper()
 
     state = rsi_state.get("state", "UNKNOWN")
 
