@@ -2528,7 +2528,7 @@ if __name__ == "__main__":
 
             for inst in candidates:
 
-                time.sleep(0.30)
+                time.sleep(0.2)
 
                 instId = inst[0] if isinstance(inst, tuple) else inst
 
