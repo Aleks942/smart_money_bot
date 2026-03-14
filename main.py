@@ -137,18 +137,32 @@ BYBIT_KLINE_URL = "https://api.bybit.com/v5/market/kline"
 BYBIT_ORDERBOOK_URL = "https://api.bybit.com/v5/market/orderbook"
 
 
-def bybit_get(url, params):
-    r = S.get(url, params=params, timeout=TIMEOUT)
-    if r.status_code == 429:
-        time.sleep(1.2)
-        r = S.get(url, params=params, timeout=TIMEOUT)
-    if r.status_code != 200:
-        raise RuntimeError(f"BYBIT HTTP {r.status_code}")
-    data = r.json()
-    # Bybit: {"retCode":0,"retMsg":"OK","result":{...}}
-    if int(data.get("retCode", 999)) != 0:
-        raise RuntimeError(f"BYBIT bad response: {str(data)[:250]}")
-    return data.get("result") or {}
+import time
+import requests
+
+def bybit_get(url, params, retries=3):
+    for attempt in range(retries):
+        try:
+            r = requests.get(url, params=params, timeout=10)
+            data = r.json()
+
+            if data.get("retCode") == 0:
+                return data
+
+            # RATE LIMIT
+            if data.get("retCode") == 10006:
+                print("⚠️ BYBIT RATE LIMIT — sleeping 1.5 sec")
+                time.sleep(1.5)
+                continue
+
+            raise RuntimeError(f"BYBIT bad response: {str(data)[:250]}")
+
+        except Exception as e:
+            if attempt == retries - 1:
+                raise
+            time.sleep(1.0)
+
+    raise RuntimeError("BYBIT failed after retries")
 
 
 def get_bybit_tickers_linear():
