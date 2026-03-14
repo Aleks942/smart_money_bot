@@ -2469,6 +2469,21 @@ if __name__ == "__main__":
             alerts = []
             manip_watch = []
 
+            for instId in candidates:
+
+               time.sleep(0.30)   # защита от лимита BYBIT
+
+               sig = build_signal(instId)
+
+               if not sig:
+                   continue
+
+               sig = apply_regime_bias(sig, regime)
+
+               alerts.append(sig)
+
+            
+
             # =====================
             # SCAN MONETS
             # =====================
