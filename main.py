@@ -2550,20 +2550,7 @@ if __name__ == "__main__":
             alerts = []
             manip_watch = []
 
-            for inst in candidates:
-
-                time.sleep(0.2)
-
-                instId = inst[0] if isinstance(inst, tuple) else inst
-
-                sig = build_signal(instId)
-
-                if not sig:
-                    continue
-
-                sig = apply_regime_bias(sig, regime)
-
-                alerts.append(sig)
+            
 
             
 
