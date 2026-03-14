@@ -1713,16 +1713,6 @@ def build_signal_analysis(instId: str):
 
     acc_score = accumulation_bias(flags)
 
-    return {
-        "instId": instId,
-        "price": price,
-        "flags": flags,
-        "score": score,
-        "acc_score": acc_score,
-        "c5": c5,
-        "c15": c15,
-        "pmeta": pmeta
-    }
 
     # ==============================
     # EXPECTED MOVE
