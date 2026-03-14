@@ -1499,89 +1499,91 @@ if ob_meta:
     if ob_meta.get("ask_wall"):
         flags.add("OB_WALL_ASK")
 
-    # ==============================
-    # CANDLES
-    # ==============================
 
-    c5 = fetch_candles(instId, "5m", 120)
-    c15 = fetch_candles(instId, "15m", 240)
+# ==============================
+# CANDLES
+# ==============================
 
-    print(f"[CANDLES] {instId} c5={len(c5) if c5 else 0} c15={len(c15) if c15 else 0}")
+c5 = fetch_candles(instId, "5m", 120)
+c15 = fetch_candles(instId, "15m", 240)
 
-    if not c5 or len(c5) < 20:
-        return None
+print(f"[CANDLES] {instId} c5={len(c5) if c5 else 0} c15={len(c15) if c15 else 0}")
 
-    if not c15 or len(c15) < 20:
-        return None
+if not c5 or len(c5) < 20:
+    return None
 
-    price = float(c5[-1][4])
+if not c15 or len(c15) < 20:
+    return None
 
-    # ==============================
-    # LIQUIDITY PRESSURE
-    # ==============================
+price = float(c5[-1][4])
 
-    pressure, pmeta = liquidity_pressure(c5)
 
-    if pressure == "UP":
-        flags.append("PRESSURE_UP")
-        score += 1
+# ==============================
+# LIQUIDITY PRESSURE
+# ==============================
 
-    elif pressure == "DOWN":
-        flags.append("PRESSURE_DOWN")
-        score += 1
-        
+pressure, pmeta = liquidity_pressure(c5)
 
-    # CONTINUATION (M15 откат → продолжение)
+if pressure == "UP":
+    flags.add("PRESSURE_UP")
+    score += 1
+
+elif pressure == "DOWN":
+    flags.add("PRESSURE_DOWN")
+    score += 1
+
+
+# ==============================
+# CONTINUATION ENGINE
+# ==============================
+
+cont = None
+
+try:
+    cont = continuation_engine(c15)
+except Exception:
     cont = None
-    try:
-        cont = continuation_engine(c15)
-    except Exception:
-        cont = None
 
-    if cont:
-        flags.append(cont)   # CONTINUATION_UP или CONTINUATION_DOWN
-        score += 2
-        
+if cont:
+    flags.add(cont)
+    score += 2
 
-    comp5, _ = compression_ok(c5)
-    if comp5:
-        score += 1
-        flags.append("COMP_5M")
 
-    comp15, _ = compression_ok(c15)
-    if comp15:
-        score += 1
-        flags.append("COMP_15M")
+# ==============================
+# COMPRESSION
+# ==============================
 
-    if fake_dump_ok(c5):
-        score += 1
-        flags.append("FAKE_DUMP")
+comp5, _ = compression_ok(c5)
 
-    if volume_spike_ok(c5):
-        score += 1
-        flags.append("VOL_SPIKE")
+if comp5:
+    score += 1
+    flags.add("COMP_5M")
 
-    # ==============================
-    # ATR EXPANSION
-    # ==============================
 
-    if atr_expansion_ok(c5):
-        flags.append("ATR_EXPANSION")
-        score += 1
+comp15, _ = compression_ok(c15)
 
-    # ==============================
-    # BREAKOUT DETECTOR
-    # ==============================
+if comp15:
+    score += 1
+    flags.add("COMP_15M")
 
-    br = breakout_ok(c5)
 
-    if br == "UP":
-      flags.append("BREAKOUT_UP")
-      score += 1
+# ==============================
+# FAKE DUMP
+# ==============================
 
-    elif br == "DOWN":
-        flags.append("BREAKOUT_DOWN")
-        score += 1
+if fake_dump_ok(c5):
+    score += 1
+    flags.add("FAKE_DUMP")
+
+
+# ==============================
+# VOLUME SPIKE
+# ==============================
+
+if volume_spike_ok(c5):
+    score += 1
+    flags.add("VOL_SPIKE")
+    
 
     # ==============================
     # LIQUIDITY SWEEP
