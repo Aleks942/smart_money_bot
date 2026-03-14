@@ -1475,6 +1475,11 @@ def build_signal(instId):
     score = 0
 
     ob_meta = None
+    pmeta = None
+
+    # =========================
+    # ORDERBOOK
+    # =========================
 
     if ORDERBOOK_ENABLED:
         try:
@@ -1482,7 +1487,11 @@ def build_signal(instId):
         except:
             ob_meta = None
 
+
+    # =========================
     # CANDLES
+    # =========================
+
     c5 = fetch_candles(instId, "5m", 120)
     c15 = fetch_candles(instId, "15m", 240)
 
@@ -1493,16 +1502,6 @@ def build_signal(instId):
         return None
 
     price = float(c5[-1][4])
-
-    if score < MIN_SCORE:
-        return None
-
-    return {
-        "symbol": instId,
-        "price": price,
-        "score": score,
-        "flags": list(flags)
-    }
 
 
     # =========================
@@ -1521,135 +1520,8 @@ def build_signal(instId):
 
 
     # =========================
-    # RETURN RESULT
+    # CONTINUATION ENGINE
     # =========================
-
-    return {
-        "symbol": instId,
-        "price": price,
-        "score": score,
-        "flags": list(flags),
-        "pmeta": pmeta
-    }
-# ==============================
-# CONTINUATION ENGINE
-# ==============================
-
-cont = None
-
-try:
-    cont = continuation_engine(c15)
-except Exception:
-    cont = None
-
-if cont:
-    flags.add(cont)
-    score += 2
-
-
-# ==============================
-# COMPRESSION
-# ==============================
-
-comp5, _ = compression_ok(c5)
-
-if comp5:
-    score += 1
-    flags.add("COMP_5M")
-
-
-comp15, _ = compression_ok(c15)
-
-if comp15:
-    score += 1
-    flags.add("COMP_15M")
-
-
-# ==============================
-# FAKE DUMP
-# ==============================
-
-if fake_dump_ok(c5):
-    score += 1
-    flags.add("FAKE_DUMP")
-
-
-# ==============================
-# VOLUME SPIKE
-# ==============================
-
-if volume_spike_ok(c5):
-    score += 1
-    flags.add("VOL_SPIKE")
-    
-
-    # ==============================
-    # LIQUIDITY SWEEP
-    # ==============================
-
-    sweep, _meta = liquidity_sweep(c5)
-
-    if sweep:
-        flags.append(sweep)
-        score += 1
-
-    # ==============================
-    # ACCUMULATION SCORE
-    # ==============================
-
-    acc_score = accumulation_bias(flags)
-
-    # ==============================
-    # 📊 MARKET ANALYSIS
-    # ==============================
-    
-    strong_setup = score >= PRO_EDGE_MIN_SCORE
-    
-    rsi_state = get_rsi_state(c5) or {}
-    rsi7 = rsi_state.get("rsi7")
-    rsi14 = rsi_state.get("rsi14")
-    
-    direction_text, reasons, up_w, down_w = direction_hint(flags)
-    
-    entry, entry_reason = entry_engine(score, flags, direction_text, up_w, down_w)
-    
-    stage, stage_reason = smart_money_stage(score, flags)
-    
-    tgt = None
-
-
-    # ==============================
-    # CANDLES
-    # ==============================
-
-    c5 = fetch_candles(instId, "5m", 120)
-    c15 = fetch_candles(instId, "15m", 240)
-
-    if not c5 or len(c5) < 20:
-        return None
-
-    if not c15 or len(c15) < 20:
-        return None
-
-    price = float(c5[-1][4])
-
-    # ==============================
-    # LIQUIDITY PRESSURE
-    # ==============================
-
-    pressure, pmeta = liquidity_pressure(c5)
-
-    if pressure == "UP":
-        flags.append("PRESSURE_UP")
-        score += 1
-
-    elif pressure == "DOWN":
-        flags.append("PRESSURE_DOWN")
-        score += 1
-
-    # ==============================
-    # CONTINUATION
-    # ==============================
 
     cont = None
 
@@ -1659,26 +1531,99 @@ if volume_spike_ok(c5):
         cont = None
 
     if cont:
-        flags.append(cont)
+        flags.add(cont)
         score += 2
 
+
+    # =========================
+    # COMPRESSION
+    # =========================
+
     comp5, _ = compression_ok(c5)
+
     if comp5:
         score += 1
-        flags.append("COMP_5M")
+        flags.add("COMP_5M")
 
     comp15, _ = compression_ok(c15)
+
     if comp15:
         score += 1
-        flags.append("COMP_15M")
+        flags.add("COMP_15M")
+
+
+    # =========================
+    # FAKE DUMP
+    # =========================
 
     if fake_dump_ok(c5):
         score += 1
-        flags.append("FAKE_DUMP")
+        flags.add("FAKE_DUMP")
+
+
+    # =========================
+    # VOLUME SPIKE
+    # =========================
 
     if volume_spike_ok(c5):
         score += 1
-        flags.append("VOL_SPIKE")
+        flags.add("VOL_SPIKE")
+
+
+    # =========================
+    # LIQUIDITY SWEEP
+    # =========================
+
+    sweep, _meta = liquidity_sweep(c5)
+
+    if sweep:
+        flags.add(sweep)
+        score += 1
+
+
+    # =========================
+    # ACCUMULATION SCORE
+    # =========================
+
+    acc_score = accumulation_bias(flags)
+
+
+    # =========================
+    # MARKET ANALYSIS
+    # =========================
+
+    strong_setup = score >= PRO_EDGE_MIN_SCORE
+
+    rsi_state = get_rsi_state(c5) or {}
+    rsi7 = rsi_state.get("rsi7")
+    rsi14 = rsi_state.get("rsi14")
+
+    direction_text, reasons, up_w, down_w = direction_hint(flags)
+
+    entry, entry_reason = entry_engine(score, flags, direction_text, up_w, down_w)
+
+    stage, stage_reason = smart_money_stage(score, flags)
+
+
+    # =========================
+    # RESULT FILTER
+    # =========================
+
+    if score < MIN_SCORE:
+        return None
+
+
+    # =========================
+    # FINAL RESULT
+    # =========================
+
+    return {
+        "symbol": instId,
+        "price": price,
+        "score": score,
+        "flags": list(flags),
+        "pmeta": pmeta
+    }
 
     # ==============================
     # ATR EXPANSION
