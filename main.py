@@ -2477,12 +2477,12 @@ if __name__ == "__main__":
 
                 sig = build_signal(instId)
 
-               if not sig:
-                   continue
+                if not sig:
+                    continue
 
-               sig = apply_regime_bias(sig, regime)
+                sig = apply_regime_bias(sig, regime)
 
-               alerts.append(sig)
+                alerts.append(sig)
 
             
 
