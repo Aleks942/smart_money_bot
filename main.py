@@ -1071,26 +1071,39 @@ def calc_rsi(closes, period=14):
 
 
 def get_rsi_state(candles):
+
     closes = extract_closes(candles)
-    if not closes:
+
+    if not closes or len(closes) < max(RSI_FAST_LEN, RSI_SLOW_LEN) + 5:
         return {
             "rsi7": None,
             "rsi14": None,
             "state": "UNKNOWN",
         }
 
-    rsi7 = calc_rsi(closes, RSI_FAST_LEN)
-    rsi14 = calc_rsi(closes, RSI_SLOW_LEN)
+    try:
+        rsi7 = calc_rsi(closes, RSI_FAST_LEN)
+        rsi14 = calc_rsi(closes, RSI_SLOW_LEN)
+    except Exception:
+        return {
+            "rsi7": None,
+            "rsi14": None,
+            "state": "UNKNOWN",
+        }
 
     state = "NORMAL"
 
-    if rsi7 is not None:
-        if rsi7 >= RSI_OB_BLOCK:
+    if rsi7 is not None and rsi14 is not None:
+
+        if rsi7 >= RSI_OB_BLOCK and rsi14 >= RSI_OB_WARN:
             state = "EXTREME_OVERBOUGHT"
-        elif rsi7 <= RSI_OS_BLOCK:
+
+        elif rsi7 <= RSI_OS_BLOCK and rsi14 <= RSI_OS_WARN:
             state = "EXTREME_OVERSOLD"
+
         elif rsi7 >= RSI_OB_WARN:
             state = "OVERBOUGHT"
+
         elif rsi7 <= RSI_OS_WARN:
             state = "OVERSOLD"
 
