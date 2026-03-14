@@ -176,7 +176,12 @@ def get_bybit_candles(symbol: str, interval: str, limit: int = 200):
     try:
         res = bybit_get(
             BYBIT_KLINE_URL,
-            {"category": "linear", "symbol": symbol, "interval": interval, "limit": str(limit)}
+            {
+                "category": "linear",
+                "symbol": symbol,
+                "interval": interval,
+                "limit": str(limit)
+            }
         )
 
         result = res.get("result") or {}
@@ -209,8 +214,9 @@ def get_bybit_candles(symbol: str, interval: str, limit: int = 200):
 
         return candles
 
-    except Exception as
-
+    except Exception as e:
+        print(f"❌ get_bybit_candles error {symbol} {interval}: {e}")
+        return []
 
 def get_bybit_books(symbol: str, limit: int = 25):
     res = bybit_get(BYBIT_ORDERBOOK_URL, {"category": "linear", "symbol": symbol, "limit": str(limit)})
