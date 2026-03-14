@@ -347,7 +347,7 @@ def send_telegram(text: str):
         )
 
     except Exception as e:
-    print(f"SCAN ERROR {instId}: {e}")
+        print(f"SCAN ERROR {instId}: {e}")
 
 # =========================
 # STATE
