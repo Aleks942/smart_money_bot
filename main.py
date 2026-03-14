@@ -1488,7 +1488,7 @@ def build_signal(instId: str):
     if ob_meta:
 
         if ob_meta.get("ob_bias") == "BIDS":
-            flags.append("OB_BIDS")
+            flags.add("OB_BIDS")
 
         if ob_meta.get("ob_bias") == "ASKS":
             flags.append("OB_ASKS")
