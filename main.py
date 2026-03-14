@@ -1543,7 +1543,6 @@ def build_signal(instId: str):
         "flags": list(flags),
         "pmeta": pmeta
     }
-
 # ==============================
 # CONTINUATION ENGINE
 # ==============================
