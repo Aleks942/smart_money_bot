@@ -1622,12 +1622,13 @@ def build_signal(instId):
     # =========================
 
     return {
-        "symbol": instId,
-        "price": price,
-        "score": score,
-        "flags": list(flags),
-        "pmeta": pmeta
-    }
+    "instId": instId,
+    "symbol": instId,
+    "price": price,
+    "score": score,
+    "flags": list(flags),
+    "pmeta": pmeta
+}
 
     # ==============================
     # ATR EXPANSION
