@@ -1503,11 +1503,9 @@ def liquidity_target(pmeta, flags, price=None):
         return round(lo, 6)
 
     return None
-
 # =========================
 # BUILD SIGNAL FOR SYMBOL
 # =========================
-
 def build_signal(instId):
 
     if isinstance(instId, tuple):
@@ -1518,58 +1516,46 @@ def build_signal(instId):
 
     ob_meta = None
     pmeta = None
-
     tgt = None
     strong_setup = False
 
     # =========================
     # ORDERBOOK
     # =========================
-
     if ORDERBOOK_ENABLED:
         try:
             ob_meta = orderbook_edge(instId)
         except:
             ob_meta = None
 
-
     # =========================
     # CANDLES
     # =========================
-
     c5 = fetch_candles(instId, "5m", 120)
     c15 = fetch_candles(instId, "15m", 240)
 
     if not c5 or len(c5) < 20:
         return None
-
     if not c15 or len(c15) < 20:
         return None
 
     price = float(c5[-1][4])
 
-
     # =========================
     # PRESSURE
     # =========================
-
     pressure, pmeta = liquidity_pressure(c5)
 
     if pressure == "UP":
         flags.add("PRESSURE_UP")
         score += 1
-
     elif pressure == "DOWN":
         flags.add("PRESSURE_DOWN")
         score += 1
 
-
     # =========================
-    # CONTINUATION ENGINE
+    # CONTINUATION
     # =========================
-
-    cont = None
-
     try:
         cont = continuation_engine(c15)
     except:
@@ -1579,64 +1565,67 @@ def build_signal(instId):
         flags.add(cont)
         score += 2
 
-
     # =========================
     # COMPRESSION
     # =========================
-
     comp5, _ = compression_ok(c5)
-
     if comp5:
-        score += 1
         flags.add("COMP_5M")
+        score += 1
 
     comp15, _ = compression_ok(c15)
-
     if comp15:
-        score += 1
         flags.add("COMP_15M")
-
+        score += 1
 
     # =========================
     # FAKE DUMP
     # =========================
-
     if fake_dump_ok(c5):
-        score += 1
         flags.add("FAKE_DUMP")
-
+        score += 1
 
     # =========================
     # VOLUME SPIKE
     # =========================
-
     if volume_spike_ok(c5):
-        score += 1
         flags.add("VOL_SPIKE")
-
+        score += 1
 
     # =========================
     # LIQUIDITY SWEEP
     # =========================
-
     sweep, _meta = liquidity_sweep(c5)
-
     if sweep:
         flags.add(sweep)
         score += 1
 
+    # =========================
+    # ATR EXPANSION
+    # =========================
+    if atr_expansion_ok(c5):
+        flags.add("ATR_EXPANSION")
+        score += 1
 
     # =========================
-    # ACCUMULATION SCORE
+    # BREAKOUT
     # =========================
+    br = breakout_ok(c5)
+    if br == "UP":
+        flags.add("BREAKOUT_UP")
+        score += 1
+    elif br == "DOWN":
+        flags.add("BREAKOUT_DOWN")
+        score += 1
 
+    # =========================
+    # ACCUMULATION
+    # =========================
     acc_score = accumulation_bias(flags)
-
 
     # =========================
     # MARKET ANALYSIS
     # =========================
-
     strong_setup = score >= PRO_EDGE_MIN_SCORE
 
     rsi_state = get_rsi_state(c5) or {}
@@ -1644,100 +1633,52 @@ def build_signal(instId):
     rsi14 = rsi_state.get("rsi14")
 
     direction_text, reasons, up_w, down_w = direction_hint(flags)
-
     entry, entry_reason = entry_engine(score, flags, direction_text, up_w, down_w)
-
     stage, stage_reason = smart_money_stage(score, flags)
 
-
- 
+    # =========================
+    # EXPECTED MOVE
+    # =========================
+    exp_min, exp_max = expected_move_pct(c5, None)
 
     # =========================
-    # FINAL RESULT
+    # RESULT FILTER
     # =========================
+    if score < MIN_SCORE:
+        return None
 
-  
+    # =========================
+    # SIGNAL OBJECT
+    # =========================
+    signal = {
+        "instId": instId,
+        "price": price,
+        "score": score,
+        "flags": list(flags),
+        "pmeta": pmeta,
+        "acc_score": acc_score,
+        "strong_setup": strong_setup,
+        "direction": direction_text,
+        "dir_reasons": reasons,
+        "up_w": up_w,
+        "down_w": down_w,
+        "entry": entry,
+        "entry_reason": entry_reason,
+        "stage": stage,
+        "stage_reason": stage_reason,
+        "target": tgt,
+        "exp_move_min": exp_min,
+        "exp_move_max": exp_max,
+        "rsi7": rsi7,
+        "rsi14": rsi14,
+        "rsi_state": rsi_state.get("state"),
+        "ts": now_ts(),
+    }
 
-# ==============================
-# ATR EXPANSION
-# ==============================
+    signal["sniper"] = sniper_signal(signal)
 
-if atr_expansion_ok(c5):
-    flags.add("ATR_EXPANSION")
-    score += 1
+    return signal
 
-# ==============================
-# BREAKOUT DETECTOR
-# ==============================
-
-br = breakout_ok(c5)
-
-if br == "UP":
-    flags.add("BREAKOUT_UP")
-    score += 1
-
-elif br == "DOWN":
-    flags.add("BREAKOUT_DOWN")
-    score += 1
-
-# ==============================
-# LIQUIDITY SWEEP
-# ==============================
-
-sweep, _meta = liquidity_sweep(c5)
-
-if sweep:
-    flags.add(sweep)
-    score += 1
-
-acc_score = accumulation_bias(flags)
-
-# ==============================
-# EXPECTED MOVE
-# ==============================
-
-exp_min, exp_max = expected_move_pct(c5, None)
-
-# =========================
-# RESULT FILTER
-# =========================
-
-if score < MIN_SCORE:
-    return None
-
-
-# ==============================
-# SIGNAL OBJECT
-# ==============================
-
-signal = {
-    "instId": instId,
-    "price": price,
-    "score": score,
-    "flags": list(flags),   # ← обязательно преобразуем в list
-    "pmeta": pmeta,
-    "acc_score": acc_score,
-    "strong_setup": strong_setup,
-    "direction": direction_text,
-    "dir_reasons": reasons,
-    "up_w": up_w,
-    "down_w": down_w,
-    "entry": entry,
-    "entry_reason": entry_reason,
-    "stage": stage,
-    "stage_reason": stage_reason,
-    "target": tgt,
-    "exp_move_min": exp_min,
-    "exp_move_max": exp_max,
-    "rsi7": rsi7,
-    "rsi14": rsi14,
-    "rsi_state": rsi_state.get("state"),
-    "ts": now_ts(),
-}
-
-signal["sniper"] = sniper_signal(signal)
-
-return signal
 
 # ==============================
 # 🎯 SNIPER SIGNAL ENGINE
