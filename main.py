@@ -1436,8 +1436,22 @@ def direction_hint(flags):
     return "⚖️ БАЛАНС", reasons, up, down
 
 def entry_engine(score, flags, direction_text, up_w, down_w, rsi7):
+
     if "БАЛАНС" in direction_text:
         return "🔴 WAIT", "Нет явного направления"
+
+    # =========================
+    # RSI SAFETY FILTER
+    # =========================
+    if direction_text == "⬆️ ВВЕРХ" and rsi7 and rsi7 > 75:
+        return "🔴 WAIT", "RSI перегрет — возможен ложный пробой"
+
+    if direction_text == "⬇️ ВНИЗ" and rsi7 and rsi7 < 25:
+        return "🔴 WAIT", "RSI перепродан — возможен ложный пролив"
+
+    # =========================
+    # SAFE ENTRY
+    # =========================
     safe_cond = (
         score >= EDGE_HIGH_SCORE and
         ("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags) and
@@ -1445,10 +1459,19 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7):
         "VOL_SPIKE" in flags and
         (up_w >= 3 or down_w >= 3)
     )
+
     if safe_cond:
         return "🟢 SAFE ENTRY", "Подтверждение + импульс"
-    if score >= EDGE_MID_SCORE and any(f.startswith("BREAKOUT") or f.startswith("PRESSURE") for f in flags):
+
+    # =========================
+    # AGGRESSIVE ENTRY
+    # =========================
+    if score >= EDGE_MID_SCORE and any(
+        f.startswith("BREAKOUT") or f.startswith("PRESSURE")
+        for f in flags
+    ):
         return "🟡 AGGRESSIVE", "Ранний вход по структуре"
+
     return "🔴 WAIT", "Недостаточно факторов"
 
 def smart_money_stage(score, flags):
