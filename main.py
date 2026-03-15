@@ -1650,13 +1650,7 @@ def build_signal(instId):
     stage, stage_reason = smart_money_stage(score, flags)
 
 
-    # =========================
-    # RESULT FILTER
-    # =========================
-
-    if score < MIN_SCORE:
-        return None
-
+ 
 
     # =========================
     # FINAL RESULT
@@ -1664,82 +1658,86 @@ def build_signal(instId):
 
   
 
-    # ==============================
-    # ATR EXPANSION
-    # ==============================
+# ==============================
+# ATR EXPANSION
+# ==============================
 
-    if atr_expansion_ok(c5):
-        flags.append("ATR_EXPANSION")
-        score += 1
+if atr_expansion_ok(c5):
+    flags.add("ATR_EXPANSION")
+    score += 1
 
-    # ==============================
-    # BREAKOUT DETECTOR
-    # ==============================
+# ==============================
+# BREAKOUT DETECTOR
+# ==============================
 
-    br = breakout_ok(c5)
+br = breakout_ok(c5)
 
-    if br == "UP":
-        flags.append("BREAKOUT_UP")
-        score += 1
+if br == "UP":
+    flags.add("BREAKOUT_UP")
+    score += 1
 
-    elif br == "DOWN":
-        flags.append("BREAKOUT_DOWN")
-        score += 1
+elif br == "DOWN":
+    flags.add("BREAKOUT_DOWN")
+    score += 1
 
-    # ==============================
-    # LIQUIDITY SWEEP
-    # ==============================
+# ==============================
+# LIQUIDITY SWEEP
+# ==============================
 
-    sweep, _meta = liquidity_sweep(c5)
+sweep, _meta = liquidity_sweep(c5)
 
-    if sweep:
-        flags.append(sweep)
-        score += 1
+if sweep:
+    flags.add(sweep)
+    score += 1
 
-    acc_score = accumulation_bias(flags)
+acc_score = accumulation_bias(flags)
+
+# ==============================
+# EXPECTED MOVE
+# ==============================
+
+exp_min, exp_max = expected_move_pct(c5, None)
+
+# =========================
+# RESULT FILTER
+# =========================
+
+if score < MIN_SCORE:
+    return None
 
 
-    # ==============================
-    # EXPECTED MOVE
-    # ==============================
+# ==============================
+# SIGNAL OBJECT
+# ==============================
 
-    exp_min, exp_max = expected_move_pct(c5, None)
+signal = {
+    "instId": instId,
+    "price": price,
+    "score": score,
+    "flags": list(flags),   # ← обязательно преобразуем в list
+    "pmeta": pmeta,
+    "acc_score": acc_score,
+    "strong_setup": strong_setup,
+    "direction": direction_text,
+    "dir_reasons": reasons,
+    "up_w": up_w,
+    "down_w": down_w,
+    "entry": entry,
+    "entry_reason": entry_reason,
+    "stage": stage,
+    "stage_reason": stage_reason,
+    "target": tgt,
+    "exp_move_min": exp_min,
+    "exp_move_max": exp_max,
+    "rsi7": rsi7,
+    "rsi14": rsi14,
+    "rsi_state": rsi_state.get("state"),
+    "ts": now_ts(),
+}
 
+signal["sniper"] = sniper_signal(signal)
 
-    # ==============================
-    # SIGNAL OBJECT
-    # ==============================
-
-    
-
-    signal = {
-        "instId": instId,
-        "price": price,
-        "score": score,
-        "flags": flags,
-        "pmeta": pmeta,
-        "acc_score": acc_score,
-        "strong_setup": strong_setup,
-        "direction": direction_text,
-        "dir_reasons": reasons,
-        "up_w": up_w,
-        "down_w": down_w,
-        "entry": entry,
-        "entry_reason": entry_reason,
-        "stage": stage,
-        "stage_reason": stage_reason,
-        "target": tgt,
-        "exp_move_min": exp_min,
-        "exp_move_max": exp_max,
-        "rsi7": rsi7,
-        "rsi14": rsi14,
-        "rsi_state": rsi_state.get("state"),
-        "ts": now_ts(),
-    }
-
-    signal["sniper"] = sniper_signal(signal)
-
-    return signal
+return signal
 
 # ==============================
 # 🎯 SNIPER SIGNAL ENGINE
