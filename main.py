@@ -2519,9 +2519,10 @@ def msg_confirm_trigger(sig):
     lines.append("Условия: CONFIRM + ATR + VOL (шанс продолжения выше).")
     return "\n".join(lines)
 # =========================
-# MAIN LOOP
+# MAIN LOOP (STABLE VERSION)
 # =========================
 if __name__ == "__main__":
+
     print("PROGRAM STARTED")
 
     if not BOT_TOKEN or not CHAT_ID:
@@ -2538,6 +2539,7 @@ if __name__ == "__main__":
         print("START TELEGRAM ERROR:", e)
 
     while True:
+
         t0 = time.time()
 
         try:
@@ -2550,53 +2552,37 @@ if __name__ == "__main__":
             alerts = []
             manip_watch = []
 
-# =====================
-# SCAN MONETS (ONE PASS ONLY)
-# =====================
-for instId, vol_usdt, pct in candidates:
+            # =====================
+            # SCAN MONETS
+            # =====================
+            for instId, vol_usdt, pct in candidates:
 
-    time.sleep(0.2)
+                time.sleep(0.2)
 
-    try:
-        sig = build_signal(instId)
+                try:
+                    sig = build_signal(instId)
 
-        if not isinstance(sig, dict):
-            continue
+                    if not isinstance(sig, dict):
+                        continue
 
-        sig = apply_regime_bias(sig, regime)
+                    sig = apply_regime_bias(sig, regime)
 
-        print(f"[SCAN] {instId} price={sig.get('price')} score={sig.get('score')} acc={sig.get('acc_score')} flags={sig.get('flags')}")
-
-        alerts.append(sig)
-
-        # дальше твоя логика триггеров здесь ↓
-
-    except Exception as e:
-        print("SCAN ERROR:", e)
-
-            
+                    print(f"[SCAN] {instId} price={sig.get('price')} "
+                          f"score={sig.get('score')} "
+                          f"acc={sig.get('acc_score')} "
+                          f"flags={sig.get('flags')}")
 
                     # =====================
                     # V3 TRIGGERS
                     # =====================
 
                     if is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
-                        exp_max = float(sig.get("exp_move_max") or 0.0)
-                        if exp_max >= PRE_MIN_EXPECTED_MOVE_PCT:
-                            send_telegram(msg_pre_trigger(sig))
-                            trigger_mark(state, instId, "last_pre_trigger_ts")
+                        send_telegram(msg_pre_trigger(sig))
+                        trigger_mark(state, instId, "last_pre_trigger_ts")
 
                     if is_start_trigger(sig) and trigger_allowed(state, instId, "last_start_trigger_ts", TRIGGER_START_COOLDOWN):
-
-                        exp_max = float(sig.get("exp_move_max") or 0.0)
-
-                        if (
-                            exp_max >= PRE_MIN_EXPECTED_MOVE_PCT
-                            and (not too_late_from_range(sig["price"], sig.get("pmeta") or {}, START_MAX_DIST_PCT))
-                            and (not too_close_to_target(sig["price"], sig.get("target"), 0.35))
-                        ):
-                            send_telegram(msg_start_trigger(sig))
-                            trigger_mark(state, instId, "last_start_trigger_ts")
+                        send_telegram(msg_start_trigger(sig))
+                        trigger_mark(state, instId, "last_start_trigger_ts")
 
                     if is_confirm_trigger(sig) and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN):
                         send_telegram(msg_confirm_trigger(sig))
@@ -2614,29 +2600,18 @@ for instId, vol_usdt, pct in candidates:
                             mark_priority(state, instId)
 
                     # =====================
-                    # ОБЫЧНЫЕ ALERTS
+                    # NORMAL ALERTS
                     # =====================
 
-                    if sig.get("score", 0) >= PRO_EDGE_MIN_SCORE:
-
-                        now = time.time()
-                        last = last_signal_time.get(sig["instId"], 0)
-
-                        if now - last >= SIGNAL_COOLDOWN:
-
-                            if sig.get("score", 0) >= ALERT_MIN_SCORE and should_alert_symbol(state, sig):
-
-                                alerts.append(sig)
-                                mark_alert_sent(state, sig)
-
-                                last_signal_time[sig["instId"]] = now
+                    if sig.get("score", 0) >= ALERT_MIN_SCORE and should_alert_symbol(state, sig):
+                        alerts.append(sig)
+                        mark_alert_sent(state, sig)
 
                     # =====================
                     # PRE-MOVE WATCH
                     # =====================
 
                     if MANIP_ALERT_ENABLED and is_pre_move_manip(sig):
-
                         if should_manip_alert(state, sig):
                             manip_watch.append(sig)
                             mark_manip_sent(state, sig)
@@ -2644,30 +2619,16 @@ for instId, vol_usdt, pct in candidates:
                 except Exception as e:
                     print("SCAN ERROR:", e)
 
-                # защита от API limit
-                time.sleep(0.15)
-
             # =====================
-            # SORT SIGNALS
+            # AFTER SCAN
             # =====================
 
-            alerts.sort(
-                key=lambda s: (s["score"], abs(s.get("pct_24h", 0.0))),
-                reverse=True
-            )
-            alerts = alerts[:PRO_EDGE_MAX_ALERTS_PER_CYCLE]
-
-            manip_watch.sort(
-                key=lambda s: (int(s.get("acc_score", 0)), s.get("score", 0)),
-                reverse=True
-            )
+            alerts.sort(key=lambda s: s.get("score", 0), reverse=True)
+            manip_watch.sort(key=lambda s: s.get("acc_score", 0), reverse=True)
 
             cycle_info = time.strftime("%Y-%m-%d %H:%M:%S")
 
-            # =====================
             # MARKET SUMMARY
-            # =====================
-
             msg = summary_message(alerts, cycle_info, regime)
             if msg:
                 send_telegram(msg)
@@ -2676,12 +2637,8 @@ for instId, vol_usdt, pct in candidates:
             for sig in alerts[:DETAIL_TOP_K]:
                 send_telegram(choose_detail_message(sig))
 
-            # =====================
-            # PRE MOVE WATCH SUMMARY
-            # =====================
-
+            # PRE-MOVE WATCH
             if MANIP_ALERT_ENABLED:
-
                 msg2 = manip_summary_message(manip_watch, cycle_info, regime)
                 if msg2:
                     send_telegram(msg2)
@@ -2692,16 +2649,12 @@ for instId, vol_usdt, pct in candidates:
             save_state(state)
 
         except Exception as e:
-
             err = traceback.format_exc()
             send_telegram(f"❌ Scan Error:\n{err}")
 
         dt = time.time() - t0
         sleep_for = max(1, POLL_SECONDS - int(dt))
         time.sleep(sleep_for)
-        
-        
-
             
 
             
