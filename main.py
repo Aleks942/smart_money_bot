@@ -2485,7 +2485,6 @@ if __name__ == "__main__":
             regime, _btc = btc_regime()
             candidates = get_market_candidates()
 
-            candidates = candidates[:SCAN_TOP_N]
             print(f"Scanning {len(candidates)} symbols this cycle")
 
             alerts = []
