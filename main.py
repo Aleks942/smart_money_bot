@@ -2590,9 +2590,7 @@ if __name__ == "__main__":
             err = traceback.format_exc()
             send_telegram(f"❌ Scan Error:\n{err}")
 
-        dt = time.time() - t0
-        sleep_for = max(1, POLL_SECONDS - int(dt))
-        time.sleep(sleep_for)
+        time.sleep(POLL_SECONDS)
             
 
             
