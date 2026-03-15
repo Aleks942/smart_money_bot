@@ -1656,7 +1656,9 @@ def build_signal(instId):
     rsi14 = rsi_state.get("rsi14")
 
     direction_text, reasons, up_w, down_w = direction_hint(flags)
-    entry, entry_reason = entry_engine(score, flags, direction_text, up_w, down_w)
+    entry, entry_reason = entry_engine(
+    score, flags, direction_text, up_w, down_w, rsi7
+)
     stage, stage_reason = smart_money_stage(score, flags)
 
     # =========================
