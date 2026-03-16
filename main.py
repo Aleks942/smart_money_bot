@@ -2565,6 +2565,8 @@ if __name__ == "__main__":
                     if not isinstance(sig, dict):
                         continue
 
+                    save_signal(sig)
+
                     sig = apply_regime_bias(sig, regime)
 
                     print(f"[SCAN] {instId} price={sig.get('price')} "
