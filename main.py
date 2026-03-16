@@ -2102,6 +2102,11 @@ def msg_full(sig):
 
     lines.append(f"🚨 {tier} — {fmt_symbol(sig['instId'])}")
     lines.append(f"💵 {sig['price']:.6g}")
+
+    # SNIPER ENTRY
+    if sig.get("sniper"):
+        lines.append("🔥 SNIPER ENTRY — сильный импульс, можно искать точку входа")
+
     lines.append(f"🎯 Expected move: {sig.get('exp_move_min',0)}–{sig.get('exp_move_max',0)}%")
 
     if sig.get("rsi7") is not None and sig.get("rsi14") is not None:
