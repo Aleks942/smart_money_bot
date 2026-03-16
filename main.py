@@ -2605,6 +2605,13 @@ if __name__ == "__main__":
                     if not isinstance(sig, dict):
                         continue
 
+                    # =====================
+                    # AI SCORE
+                    # =====================
+                    setup = sig.get("setup", "UNKNOWN")
+                    mult = get_ai_multiplier(setup)
+                    sig["score"] = round(sig["score"] * mult, 2)
+
                     save_signal(sig)
 
                     sig = apply_regime_bias(sig, regime)
