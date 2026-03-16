@@ -2607,7 +2607,7 @@ if __name__ == "__main__":
                         continue
 
                     # определяем тип сигнала
-                    sig["setup"] = get_signal_tier(sig)
+                    sig["setup"] = get_signal_tier(sig["score"], sig["acc_score"])
 
                      
                     # AI статистика
