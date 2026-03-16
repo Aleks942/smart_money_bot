@@ -2524,6 +2524,8 @@ def msg_confirm_trigger(sig):
 # =========================
 if __name__ == "__main__":
 
+    init_db()
+
     print("PROGRAM STARTED")
 
     if not BOT_TOKEN or not CHAT_ID:
@@ -2540,6 +2542,8 @@ if __name__ == "__main__":
         print("START TELEGRAM ERROR:", e)
 
     while True:
+
+        check_signal_results()
 
         t0 = time.time()
 
