@@ -2604,8 +2604,12 @@ if __name__ == "__main__":
 
                     if not isinstance(sig, dict):
                         continue
-
+                        
+                    # =====================
+                    # DEFINE SETUP TYPE
+                    # =====================
                     sig["setup"] = get_signal_tier(sig)
+                     
 
                     # =====================
                     # AI SCORE
