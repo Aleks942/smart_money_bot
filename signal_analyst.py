@@ -134,3 +134,63 @@ def get_stats():
         "hits": hits,
         "winrate": round(winrate, 2)
     }
+
+# ==============================
+# ПОЛУЧИТЬ ОТКРЫТЫЕ СИГНАЛЫ
+# ==============================
+
+def get_open_signals(older_than_sec=1800):
+
+    now = int(time.time())
+
+    conn = sqlite3.connect(DB_FILE)
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT id, symbol, entry_price, direction, ts
+        FROM signals
+        WHERE result='OPEN'
+    """)
+
+    rows = cur.fetchall()
+    conn.close()
+
+    signals = []
+
+    for r in rows:
+
+        signal_id, symbol, entry, direction, ts = r
+
+        if now - ts >= older_than_sec:
+
+            signals.append({
+                "id": signal_id,
+                "symbol": symbol,
+                "entry": entry,
+                "direction": direction
+            })
+
+    return signals
+
+
+# ==============================
+# ЗАКРЫТЬ СИГНАЛ
+# ==============================
+
+def close_signal(signal_id, move_pct, result):
+
+    conn = sqlite3.connect(DB_FILE)
+    cur = conn.cursor()
+
+    cur.execute("""
+        UPDATE signals
+        SET result=?, move_pct=?
+        WHERE id=?
+    """, (result, move_pct, signal_id))
+
+    conn.commit()
+    conn.close()
+
+
+
+ 
