@@ -2519,6 +2519,41 @@ def msg_confirm_trigger(sig):
     lines.append(f"💵 {sig['price']:.6g} | score={sig['score']}/10 | {sig['direction']}")
     lines.append("Условия: CONFIRM + ATR + VOL (шанс продолжения выше).")
     return "\n".join(lines)
+
+def check_signal_results():
+
+    open_signals = get_open_signals()
+
+    if not open_signals:
+        return
+
+    for s in open_signals:
+
+        symbol = s["symbol"]
+        entry = s["entry"]
+        direction = s["direction"]
+        signal_id = s["id"]
+
+        try:
+            price = get_last_price(symbol)
+        except:
+            continue
+
+        move_pct = (price - entry) / entry * 100
+
+        if direction == "DOWN":
+            move_pct = -move_pct
+
+        if move_pct >= 0.5:
+            result = "HIT"
+        elif move_pct <= -0.5:
+            result = "FAIL"
+        else:
+            result = "NEUTRAL"
+
+        close_signal(signal_id, move_pct, result)
+
+        print(f"[ANALYST] {symbol} result={result} move={round(move_pct,2)}%")
 # =========================
 # MAIN LOOP (STABLE VERSION)
 # =========================
