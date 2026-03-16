@@ -9,6 +9,7 @@ from priority_engine import find_global_priority, should_send_priority
 from wall_detector import WallTracker
 from continuation_engine import continuation_engine
 from signal_tier import get_signal_tier
+from sniper_engine import sniper_signal
 
 # =========================
 # SIGNAL COOLDOWN
