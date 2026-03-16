@@ -1676,6 +1676,7 @@ def build_signal(instId):
     # =========================
     # SIGNAL OBJECT
     # =========================
+    tier = get_signal_tier(score, acc_score)
     signal = {
         "instId": instId,
         "price": price,
