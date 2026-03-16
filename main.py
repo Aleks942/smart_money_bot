@@ -2605,6 +2605,22 @@ if __name__ == "__main__":
 
                     if not isinstance(sig, dict):
                         continue
+
+                    # определяем тип сигнала
+                    sig["setup"] = get_signal_tier(sig)
+
+                     
+                    # AI статистика
+                    setup = sig.get("setup", "UNKNOWN")
+                    mult = get_ai_multiplier(setup)
+                    sig["score"] = round(sig["score"] * mult, 2)
+
+                    # MARKET CONTEXT
+                    sig = apply_market_context(sig)
+
+                    save_signal(sig)
+
+
                         
                     # =====================
                     # DEFINE SETUP TYPE
