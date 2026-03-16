@@ -2091,8 +2091,12 @@ def msg_medium(sig):
     return "\n".join(lines)
 
 def msg_full(sig):
+
     lines = []
-    lines.append(f"🧠 RADAR FULL — {fmt_symbol(sig['instId'])}")
+
+    tier = sig.get("tier", "SIGNAL")
+
+    lines.append(f"🚨 {tier} — {fmt_symbol(sig['instId'])}")
     lines.append(f"💵 {sig['price']:.6g}")
     lines.append(f"🎯 Expected move: {sig.get('exp_move_min',0)}–{sig.get('exp_move_max',0)}%")
 
