@@ -1,6 +1,9 @@
 import requests
 
 
+# =========================
+# BTC TREND
+# =========================
 def get_btc_trend():
 
     try:
@@ -22,3 +25,30 @@ def get_btc_trend():
 
     except:
         return "NEUTRAL"
+
+
+# =========================
+# MARKET CONTEXT
+# =========================
+def apply_market_context(sig):
+
+    btc = get_btc_trend()
+
+    direction = sig.get("direction")
+    score = sig.get("score", 0)
+
+    if btc == "BULL" and direction == "⬆️ ВВЕРХ":
+        score *= 1.15
+
+    elif btc == "BEAR" and direction == "⬇️ ВНИЗ":
+        score *= 1.15
+
+    elif btc == "BULL" and direction == "⬇️ ВНИЗ":
+        score *= 0.85
+
+    elif btc == "BEAR" and direction == "⬆️ ВВЕРХ":
+        score *= 0.85
+
+    sig["score"] = round(score, 2)
+
+    return sig
