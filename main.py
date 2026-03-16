@@ -2602,6 +2602,7 @@ if __name__ == "__main__":
             cycle_info = time.strftime("%Y-%m-%d %H:%M:%S")
 
             # MARKET SUMMARY
+            print("ALERTS FOUND:", len(alerts))
             msg = summary_message(alerts, cycle_info, regime)
             if msg:
                 send_telegram(msg)
