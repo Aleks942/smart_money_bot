@@ -1676,31 +1676,33 @@ def build_signal(instId):
     # =========================
     # SIGNAL OBJECT
     # =========================
-    tier = get_signal_tier(score, acc_score)
-    signal = {
-        "instId": instId,
-        "price": price,
-        "score": score,
-        "flags": list(flags),
-        "pmeta": pmeta,
-        "acc_score": acc_score,
-        "strong_setup": strong_setup,
-        "direction": direction_text,
-        "dir_reasons": reasons,
-        "up_w": up_w,
-        "down_w": down_w,
-        "entry": entry,
-        "entry_reason": entry_reason,
-        "stage": stage,
-        "stage_reason": stage_reason,
-        "target": tgt,
-        "exp_move_min": exp_min,
-        "exp_move_max": exp_max,
-        "rsi7": rsi7,
-        "rsi14": rsi14,
-        "rsi_state": rsi_state.get("state"),
-        "ts": now_ts(),
-    }
+   tier = get_signal_tier(score, acc_score)
+
+signal = {
+    "instId": instId,
+    "price": price,
+    "score": score,
+    "tier": tier,
+    "flags": list(flags),
+    "pmeta": pmeta,
+    "acc_score": acc_score,
+    "strong_setup": strong_setup,
+    "direction": direction_text,
+    "dir_reasons": reasons,
+    "up_w": up_w,
+    "down_w": down_w,
+    "entry": entry,
+    "entry_reason": entry_reason,
+    "stage": stage,
+    "stage_reason": stage_reason,
+    "target": tgt,
+    "exp_move_min": exp_min,
+    "exp_move_max": exp_max,
+    "rsi7": rsi7,
+    "rsi14": rsi14,
+    "rsi_state": rsi_state.get("state"),
+    "ts": now_ts(),
+}
 
     signal["sniper"] = sniper_signal(signal)
 
