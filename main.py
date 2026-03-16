@@ -2014,6 +2014,7 @@ def fmt_symbol(instId: str) -> str:
     return instId.replace("-USDT", "")
 
 def msg_short(sig):
+
     lines = []
 
     inst = sig.get("instId", "?")
@@ -2025,7 +2026,26 @@ def msg_short(sig):
     stage = sig.get("stage", "UNKNOWN")
     target = sig.get("target")
 
-    lines.append(f"🧠 RADAR SHORT — {fmt_symbol(inst)}")
+    # =========================
+    # PRIORITY COLOR
+    # =========================
+
+    if sig.get("sniper"):
+        tier = "🟢🟢 СИЛЬНЫЙ ВХОД"
+
+    elif score >= 7:
+        tier = "🟢 СИЛЬНЫЙ СИГНАЛ"
+
+    elif score >= 5:
+        tier = "🟡 СИГНАЛ"
+
+    elif score >= 4:
+        tier = "🟠 РАННИЙ"
+
+    else:
+        tier = "🔴 СЛАБЫЙ"
+
+    lines.append(f"{tier} — {fmt_symbol(inst)}")
     lines.append(f"💵 {price:.6g}")
     lines.append(f"📊 {score}/10 | {direction} | acc={acc}")
     lines.append(f"🎯 ENTRY: {entry}")
