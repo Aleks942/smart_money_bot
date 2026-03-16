@@ -2038,6 +2038,7 @@ def msg_medium(sig):
     inst = sig.get("instId", "?")
     price = sig.get("price", 0)
     score = sig.get("score", 0)
+    tier = sig.get("tier", "SIGNAL")
     direction = sig.get("direction", "⚖️ БАЛАНС")
     up_w = sig.get("up_w", 0)
     down_w = sig.get("down_w", 0)
