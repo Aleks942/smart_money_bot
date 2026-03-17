@@ -2593,60 +2593,58 @@ if __name__ == "__main__":
             alerts = []
             manip_watch = []
 
-            # =====================
-            # SCAN MONETS
-            # =====================
-            for instId, vol_usdt, pct in candidates:
+# =====================
+# SCAN MONETS
+# =====================
+for instId, vol_usdt, pct in candidates:
 
-                time.sleep(0.2)
+    time.sleep(0.2)
 
-                try:
-                    sig = build_signal(instId)
+    try:
+        sig = build_signal(instId)
 
-                    if not isinstance(sig, dict):
-                        continue
+        if not isinstance(sig, dict):
+            continue
 
-                    # определяем тип сигнала
-                    sig["setup"] = get_signal_tier(sig["score"], sig["acc_score"])
+        # =====================
+        # DEFINE SETUP TYPE
+        # =====================
+        sig["setup"] = get_signal_tier(sig["score"], sig["acc_score"])
 
-                     
-                    # AI статистика
-                    setup = sig.get("setup", "UNKNOWN")
-                    mult = get_ai_multiplier(setup)
-                    sig["score"] = round(sig["score"] * mult, 2)
+        # =====================
+        # AI SCORE MULTIPLIER
+        # =====================
+        setup = sig.get("setup", "UNKNOWN")
+        mult = get_ai_multiplier(setup)
 
-                    # MARKET CONTEXT
-                    sig = apply_market_context(sig)
+        sig["score"] = round(sig["score"] * mult, 2)
 
-                    save_signal(sig)
+        # =====================
+        # MARKET CONTEXT
+        # =====================
+        sig = apply_market_context(sig)
 
+        # =====================
+        # REGIME BIAS
+        # =====================
+        sig = apply_regime_bias(sig, regime)
 
-                        
-                    # =====================
-                    # DEFINE SETUP TYPE
-                    # =====================
-                    sig["setup"] = get_signal_tier(sig)
-                     
+        # =====================
+        # SAVE SIGNAL
+        # =====================
+        save_signal(sig)
 
-                    # =====================
-                    # AI SCORE
-                    # =====================
-                    setup = sig.get("setup", "UNKNOWN")
-                    mult = get_ai_multiplier(setup)
-                    sig["score"] = round(sig["score"] * mult, 2)
+        print(
+            f"[SCAN] {instId} "
+            f"price={sig.get('price')} "
+            f"score={sig.get('score')} "
+            f"acc={sig.get('acc_score')} "
+            f"flags={sig.get('flags')}"
+        )
 
-                    save_signal(sig)
-
-                    sig = apply_regime_bias(sig, regime)
-
-                    print(f"[SCAN] {instId} price={sig.get('price')} "
-                          f"score={sig.get('score')} "
-                          f"acc={sig.get('acc_score')} "
-                          f"flags={sig.get('flags')}")
-
-                    # =====================
-                    # V3 TRIGGERS
-                    # =====================
+        # =====================
+        # V3 TRIGGERS
+        # =====================
 
                     if is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
                         send_telegram(msg_pre_trigger(sig))
