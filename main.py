@@ -2604,6 +2604,11 @@ if __name__ == "__main__":
 
             all_candidates = get_market_candidates()
 
+            if not all_candidates:
+                print("NO CANDIDATES FOUND")
+                time.sleep(10)
+                continue
+
             candidates = all_candidates[scan_index:scan_index + SCAN_BATCH]
 
             scan_index += SCAN_BATCH
