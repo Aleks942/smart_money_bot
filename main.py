@@ -2593,26 +2593,26 @@ if __name__ == "__main__":
             alerts = []
             manip_watch = []
 
-# =====================
-# SCAN MONETS
-# =====================
+            # =====================
+            # SCAN MONETS
+            # =====================
 
-all_candidates = get_market_candidates()
+            all_candidates = get_market_candidates()
 
-# берём следующую порцию монет
-candidates = all_candidates[scan_index:scan_index + SCAN_BATCH]
+            # берём следующую порцию монет
+            candidates = all_candidates[scan_index:scan_index + SCAN_BATCH]
 
-scan_index += SCAN_BATCH
+            scan_index += SCAN_BATCH
 
-# если дошли до конца списка — начинаем заново
-if scan_index >= len(all_candidates):
-    scan_index = 0
+            # если дошли до конца списка — начинаем заново
+            if scan_index >= len(all_candidates):
+            scan_index = 0
 
-print(f"Scanning {len(candidates)} symbols this cycle")
+            print(f"Scanning {len(candidates)} symbols this cycle")
 
-for instId, vol_usdt, pct in candidates:
+            for instId, vol_usdt, pct in candidates:
 
-    time.sleep(0.35)  # защита от rate limit
+                time.sleep(0.35)  # защита от rate limit
 
     try:
         sig = build_signal(instId)
