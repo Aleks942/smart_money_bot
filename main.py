@@ -2574,6 +2574,13 @@ if __name__ == "__main__":
     state = load_state()
     print("STATE LOADED")
 
+    # =====================
+    # SCAN SETTINGS
+    # =====================
+
+    SCAN_BATCH = 20
+    scan_index = 0
+
     try:
         send_telegram(f"🚀 SMART MONEY SCANNER — PRO EDGE v4 started ({EXCHANGE} market scan)")
     except Exception as e:
