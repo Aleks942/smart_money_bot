@@ -2613,7 +2613,7 @@ if __name__ == "__main__":
 
             # защита если индекс вышел за границы
             if scan_index >= total_symbols:
-            s   can_index = 0
+            scan_index = 0
 
             # берём порцию монет
             candidates = all_candidates[scan_index:scan_index + SCAN_BATCH]
