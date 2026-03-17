@@ -10,7 +10,8 @@ DB_FILE = "signals.db"
 # ==============================
 
 def init_db():
-    conn = sqlite3.connect(DB_FILE)
+
+    conn = sqlite3.connect("signals.db")
     cur = conn.cursor()
 
     cur.execute("""
@@ -29,8 +30,13 @@ def init_db():
         expected_move_max REAL,
         result TEXT,
         move_pct REAL
-)
-""")
+    )
+    """)
+
+    try:
+        cur.execute("ALTER TABLE signals ADD COLUMN setup TEXT")
+    except:
+        pass
 
     conn.commit()
     conn.close()
