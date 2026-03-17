@@ -24,12 +24,13 @@ def init_db():
         score INTEGER,
         acc_score INTEGER,
         stage TEXT,
+        setup TEXT,
         expected_move_min REAL,
         expected_move_max REAL,
         result TEXT,
         move_pct REAL
-    )
-    """)
+)
+""")
 
     conn.commit()
     conn.close()
