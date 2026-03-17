@@ -2601,38 +2601,38 @@ if __name__ == "__main__":
             # =====================
             # SCAN MONETS
             # =====================
-            
+
             all_candidates = get_market_candidates()
-            
+
             if not all_candidates:
                 print("NO CANDIDATES FOUND")
                 time.sleep(10)
                 continue
-            
-            total_symbols = len(all_candidates)
-            
-            # защита если индекс вышел за границы
-            if scan_index >= total_symbols:
-                scan_index = 0
-            
-            # берём порцию монет
-            candidates = all_candidates[scan_index:scan_index + SCAN_BATCH]
-            
-            # двигаем индекс
-            scan_index += SCAN_BATCH
-            
-            print(f"Scanning {len(candidates)} symbols this cycle | index={scan_index}/{total_symbols}")
-            
-            for instId, vol_usdt, pct in candidates:
-            
-                time.sleep(0.35)  # защита от rate limit
-            
-                try:
-            
-                    sig = build_signal(instId)
-            
-                    if not isinstance(sig, dict):
-                        continue
+
+total_symbols = len(all_candidates)
+
+# защита если индекс вышел за границы
+if scan_index >= total_symbols:
+    scan_index = 0
+
+# берём порцию монет
+candidates = all_candidates[scan_index:scan_index + SCAN_BATCH]
+
+# двигаем индекс
+scan_index += SCAN_BATCH
+
+print(f"Scanning {len(candidates)} symbols this cycle | index={scan_index}/{total_symbols}")
+
+for instId, vol_usdt, pct in candidates:
+
+    time.sleep(0.35)  # защита от rate limit
+
+    try:
+
+        sig = build_signal(instId)
+
+        if not isinstance(sig, dict):
+            continue
 
         # =====================
         # DEFINE SETUP TYPE
