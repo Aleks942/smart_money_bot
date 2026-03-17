@@ -2601,7 +2601,7 @@ if __name__ == "__main__":
                 time.sleep(0.2)
 
                 try:
-                    print("CHECK:", instId)
+                    
                     sig = build_signal(instId)
 
                     if not isinstance(sig, dict):
