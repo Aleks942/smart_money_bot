@@ -2590,29 +2590,29 @@ if __name__ == "__main__":
 
             print(f"Scanning {len(candidates)} symbols this cycle")
 
-            alerts = []
-            manip_watch = []
+alerts = []
+manip_watch = []
 
-            # =====================
-            # SCAN MONETS
-            # =====================
+# =====================
+# SCAN MONETS
+# =====================
 
-            all_candidates = get_market_candidates()
+all_candidates = get_market_candidates()
 
-            # берём следующую порцию монет
-            candidates = all_candidates[scan_index:scan_index + SCAN_BATCH]
+# берём следующую порцию монет
+candidates = all_candidates[scan_index:scan_index + SCAN_BATCH]
 
-            scan_index += SCAN_BATCH
+scan_index += SCAN_BATCH
 
-            # если дошли до конца списка — начинаем заново
-            if scan_index >= len(all_candidates):
-            scan_index = 0
+# если дошли до конца списка — начинаем заново
+if scan_index >= len(all_candidates):
+    scan_index = 0
 
-            print(f"Scanning {len(candidates)} symbols this cycle")
+print(f"Scanning {len(candidates)} symbols this cycle")
 
-            for instId, vol_usdt, pct in candidates:
+for instId, vol_usdt, pct in candidates:
 
-                time.sleep(0.35)  # защита от rate limit
+    time.sleep(0.35)
 
     try:
         sig = build_signal(instId)
@@ -2702,35 +2702,35 @@ if __name__ == "__main__":
     except Exception as e:
         print("SCAN ERROR:", e)
 
-            # =====================
-            # AFTER SCAN
-            # =====================
-            alerts.sort(key=lambda s: s.get("score", 0), reverse=True)
-            manip_watch.sort(key=lambda s: s.get("acc_score", 0), reverse=True)
 
-            cycle_info = time.strftime("%Y-%m-%d %H:%M:%S")
+# =====================
+# AFTER SCAN
+# =====================
 
-            # MARKET SUMMARY
-            print("ALERTS FOUND:", len(alerts))
-            msg = summary_message(alerts, cycle_info, regime)
-            if msg:
-                send_telegram(msg)
+alerts.sort(key=lambda s: s.get("score", 0), reverse=True)
+manip_watch.sort(key=lambda s: s.get("acc_score", 0), reverse=True)
 
-            # DETAILS
-            for sig in alerts[:DETAIL_TOP_K]:
-                send_telegram(choose_detail_message(sig))
+cycle_info = time.strftime("%Y-%m-%d %H:%M:%S")
 
-            # PRE-MOVE WATCH
-            if MANIP_ALERT_ENABLED:
-                msg2 = manip_summary_message(manip_watch, cycle_info, regime)
-                if msg2:
-                    send_telegram(msg2)
+print("ALERTS FOUND:", len(alerts))
 
-                for sig in manip_watch[:MANIP_DETAIL_TOP_K]:
-                    send_telegram(msg_medium(sig))
+msg = summary_message(alerts, cycle_info, regime)
+if msg:
+    send_telegram(msg)
 
-            save_state(state)
+for sig in alerts[:DETAIL_TOP_K]:
+    send_telegram(choose_detail_message(sig))
 
+if MANIP_ALERT_ENABLED:
+
+    msg2 = manip_summary_message(manip_watch, cycle_info, regime)
+    if msg2:
+        send_telegram(msg2)
+
+    for sig in manip_watch[:MANIP_DETAIL_TOP_K]:
+        send_telegram(msg_medium(sig))
+
+save_state(state)
         except Exception as e:
             err = traceback.format_exc()
             send_telegram(f"❌ Scan Error:\n{err}")
