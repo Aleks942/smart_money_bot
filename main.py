@@ -2597,7 +2597,7 @@ if __name__ == "__main__":
 
             alerts = []
             manip_watch = []
-            
+
             # =====================
             # SCAN MONETS
             # =====================
@@ -2611,234 +2611,115 @@ if __name__ == "__main__":
 
             total_symbols = len(all_candidates)
 
-            # защита если индекс вышел за границы
             if scan_index >= total_symbols:
                 scan_index = 0
 
-            # берём порцию монет
             candidates = all_candidates[scan_index:scan_index + SCAN_BATCH]
-
-            # двигаем индекс
             scan_index += SCAN_BATCH
 
             print(f"Scanning {len(candidates)} symbols this cycle | index={scan_index}/{total_symbols}")
 
+            # =====================
+            # SCAN LOOP
+            # =====================
+
             for instId, vol_usdt, pct in candidates:
 
-            time.sleep(0.35)  # защита от rate limit
+                time.sleep(0.35)
 
-            try:
+                try:
 
-                sig = build_signal(instId)
+                    sig = build_signal(instId)
 
-                if not isinstance(sig, dict):
-                    continue
+                    if not isinstance(sig, dict):
+                        continue
 
-            # =====================
-            # DEFINE SETUP TYPE
-            # =====================
+                    # =====================
+                    # DEFINE SETUP TYPE
+                    # =====================
 
-            sig["setup"] = get_signal_tier(sig["score"], sig["acc_score"])
+                    sig["setup"] = get_signal_tier(sig["score"], sig["acc_score"])
 
-            # =====================
-            # AI SCORE MULTIPLIER
-            # =====================
+                    # =====================
+                    # AI SCORE MULTIPLIER
+                    # =====================
 
-            setup = sig.get("setup", "UNKNOWN")
-            mult = get_ai_multiplier(setup)
-            sig["score"] = round(sig["score"] * mult, 2)
+                    setup = sig.get("setup", "UNKNOWN")
+                    mult = get_ai_multiplier(setup)
+                    sig["score"] = round(sig["score"] * mult, 2)
 
-            # =====================
-            # MARKET CONTEXT
-            # =====================
+                    # =====================
+                    # MARKET CONTEXT
+                    # =====================
 
-            sig = apply_market_context(sig)
+                    sig = apply_market_context(sig)
 
-            # =====================
-            # REGIME BIAS
-            # =====================
+                    # =====================
+                    # REGIME BIAS
+                    # =====================
 
-            sig = apply_regime_bias(sig, regime)
-  
-            # =====================
-            # SAVE SIGNAL
-            # =====================
+                    sig = apply_regime_bias(sig, regime)
 
-            save_signal(sig)
+                    # =====================
+                    # SAVE SIGNAL
+                    # =====================
 
-            print(
-                f"[SCAN] {instId} "
-                f"price={sig.get('price')} "
-                f"score={sig.get('score')} "
-                f"acc={sig.get('acc_score')} "
-                f"flags={sig.get('flags')}"
-            )
+                    save_signal(sig)
 
-            # =====================
-            # V3 TRIGGERS
-            # =====================
+                    print(
+                        f"[SCAN] {instId} "
+                        f"price={sig.get('price')} "
+                        f"score={sig.get('score')} "
+                        f"acc={sig.get('acc_score')} "
+                        f"flags={sig.get('flags')}"
+                    )
 
-           if is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
-               send_telegram(msg_pre_trigger(sig))
-               trigger_mark(state, instId, "last_pre_trigger_ts")
+                    # =====================
+                    # V3 TRIGGERS
+                    # =====================
 
-           if is_start_trigger(sig) and trigger_allowed(state, instId, "last_start_trigger_ts", TRIGGER_START_COOLDOWN):
-               send_telegram(msg_start_trigger(sig))
-               trigger_mark(state, instId, "last_start_trigger_ts")
+                    if is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
+                        send_telegram(msg_pre_trigger(sig))
+                        trigger_mark(state, instId, "last_pre_trigger_ts")
 
-           if is_confirm_trigger(sig) and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN):
-               send_telegram(msg_confirm_trigger(sig))
-               trigger_mark(state, instId, "last_confirm_trigger_ts")
+                    if is_start_trigger(sig) and trigger_allowed(state, instId, "last_start_trigger_ts", TRIGGER_START_COOLDOWN):
+                        send_telegram(msg_start_trigger(sig))
+                        trigger_mark(state, instId, "last_start_trigger_ts")
 
-            update_symbol_state(state, sig)
-   
-            # =====================
-            # PRIORITY ALERT
-            # =====================
+                    if is_confirm_trigger(sig) and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN):
+                        send_telegram(msg_confirm_trigger(sig))
+                        trigger_mark(state, instId, "last_confirm_trigger_ts")
 
-            if is_priority_signal(sig) and priority_allowed(state, instId):
-                if pro_edge_filter(sig, regime):
-                   send_telegram(msg_priority(sig))
-                   mark_priority(state, instId)
+                    update_symbol_state(state, sig)
 
-            # =====================
-            # NORMAL ALERTS
-            # =====================
+                    # =====================
+                    # PRIORITY ALERT
+                    # =====================
 
-             # =====================
-# SCAN MONETS
-# =====================
+                    if is_priority_signal(sig) and priority_allowed(state, instId):
+                        if pro_edge_filter(sig, regime):
+                            send_telegram(msg_priority(sig))
+                            mark_priority(state, instId)
 
-all_candidates = get_market_candidates()
+                    # =====================
+                    # NORMAL ALERTS
+                    # =====================
 
-if not all_candidates:
-    print("NO CANDIDATES FOUND")
-    time.sleep(10)
-    continue
+                    if sig.get("score", 0) >= ALERT_MIN_SCORE and should_alert_symbol(state, sig):
+                        alerts.append(sig)
+                        mark_alert_sent(state, sig)
 
-total_symbols = len(all_candidates)
+                    # =====================
+                    # PRE-MOVE WATCH
+                    # =====================
 
-# защита если индекс вышел за границы
-if scan_index >= total_symbols:
-    scan_index = 0
+                    if MANIP_ALERT_ENABLED and is_pre_move_manip(sig):
+                        if should_manip_alert(state, sig):
+                            manip_watch.append(sig)
+                            mark_manip_sent(state, sig)
 
-# берём порцию монет
-candidates = all_candidates[scan_index:scan_index + SCAN_BATCH]
-
-# двигаем индекс
-scan_index += SCAN_BATCH
-
-print(f"Scanning {len(candidates)} symbols this cycle | index={scan_index}/{total_symbols}")
-
-for instId, vol_usdt, pct in candidates:
-
-    time.sleep(0.35)  # защита от rate limit
-
-    try:
-
-        sig = build_signal(instId)
-
-        if not isinstance(sig, dict):
-            continue
-
-        # =====================
-        # DEFINE SETUP TYPE
-        # =====================
-
-        sig["setup"] = get_signal_tier(sig["score"], sig["acc_score"])
-
-        # =====================
-        # AI SCORE MULTIPLIER
-        # =====================
-
-        setup = sig.get("setup", "UNKNOWN")
-        mult = get_ai_multiplier(setup)
-        sig["score"] = round(sig["score"] * mult, 2)
-
-        # =====================
-        # MARKET CONTEXT
-        # =====================
-
-        sig = apply_market_context(sig)
-
-        # =====================
-        # REGIME BIAS
-        # =====================
-
-        sig = apply_regime_bias(sig, regime)
-
-        # =====================
-        # SAVE SIGNAL
-        # =====================
-
-        save_signal(sig)
-
-        print(
-            f"[SCAN] {instId} "
-            f"price={sig.get('price')} "
-            f"score={sig.get('score')} "
-            f"acc={sig.get('acc_score')} "
-            f"flags={sig.get('flags')}"
-        )
-
-        # =====================
-        # V3 TRIGGERS
-        # =====================
-
-        if is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
-            send_telegram(msg_pre_trigger(sig))
-            trigger_mark(state, instId, "last_pre_trigger_ts")
-
-        if is_start_trigger(sig) and trigger_allowed(state, instId, "last_start_trigger_ts", TRIGGER_START_COOLDOWN):
-            send_telegram(msg_start_trigger(sig))
-            trigger_mark(state, instId, "last_start_trigger_ts")
-
-        if is_confirm_trigger(sig) and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN):
-            send_telegram(msg_confirm_trigger(sig))
-            trigger_mark(state, instId, "last_confirm_trigger_ts")
-
-        update_symbol_state(state, sig)
-
-        # =====================
-        # PRIORITY ALERT
-        # =====================
-
-        if is_priority_signal(sig) and priority_allowed(state, instId):
-            if pro_edge_filter(sig, regime):
-                send_telegram(msg_priority(sig))
-                mark_priority(state, instId)
-
-        # =====================
-        # NORMAL ALERTS
-        # =====================
-
-        if sig.get("score", 0) >= ALERT_MIN_SCORE and should_alert_symbol(state, sig):
-            alerts.append(sig)
-            mark_alert_sent(state, sig)
-
-        # =====================
-        # PRE-MOVE WATCH
-        # =====================
-
-        if MANIP_ALERT_ENABLED and is_pre_move_manip(sig):
-            if should_manip_alert(state, sig):
-                manip_watch.append(sig)
-                mark_manip_sent(state, sig)
-
-    except Exception as e:
-        print("SCAN ERROR:", e)  
-
-            # =====================
-            # PRE-MOVE WATCH
-            # =====================
-
-        if MANIP_ALERT_ENABLED and is_pre_move_manip(sig):
-            if should_manip_alert(state, sig):
-                manip_watch.append(sig)
-                mark_manip_sent(state, sig)
-         
-    except Exception as e:
-            print("SCAN ERROR:", e)
+                except Exception as e:
+                    print("SCAN ERROR:", e)
 
             # =====================
             # AFTER SCAN
@@ -2876,6 +2757,5 @@ for instId, vol_usdt, pct in candidates:
             send_telegram(f"❌ Scan Error:\n{err}")
 
         time.sleep(POLL_SECONDS)
-            
 
 
