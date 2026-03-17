@@ -2556,6 +2556,7 @@ def check_signal_results():
         close_signal(signal_id, move_pct, result)
 
         print(f"[ANALYST] {symbol} result={result} move={round(move_pct,2)}%")
+
 # =========================
 # MAIN LOOP (STABLE VERSION)
 # =========================
@@ -2581,10 +2582,9 @@ if __name__ == "__main__":
     while True:
 
         check_signal_results()
-
         t0 = time.time()
 
-                try:
+        try:
 
             regime, _btc = btc_regime()
 
@@ -2620,13 +2620,11 @@ if __name__ == "__main__":
                     # =====================
                     # DEFINE SETUP TYPE
                     # =====================
-
                     sig["setup"] = get_signal_tier(sig["score"], sig["acc_score"])
 
                     # =====================
                     # AI SCORE MULTIPLIER
                     # =====================
-
                     setup = sig.get("setup", "UNKNOWN")
                     mult = get_ai_multiplier(setup)
 
@@ -2635,19 +2633,16 @@ if __name__ == "__main__":
                     # =====================
                     # MARKET CONTEXT
                     # =====================
-
                     sig = apply_market_context(sig)
 
                     # =====================
                     # REGIME BIAS
                     # =====================
-
                     sig = apply_regime_bias(sig, regime)
 
                     # =====================
                     # SAVE SIGNAL
                     # =====================
-
                     save_signal(sig)
 
                     print(
@@ -2738,7 +2733,6 @@ if __name__ == "__main__":
         except Exception as e:
 
             err = traceback.format_exc()
-
             send_telegram(f"❌ Scan Error:\n{err}")
 
         time.sleep(POLL_SECONDS)
