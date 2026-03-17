@@ -2578,7 +2578,7 @@ if __name__ == "__main__":
     except Exception as e:
         print("START TELEGRAM ERROR:", e)
 
-   while True:
+    while True:
 
     check_signal_results()
 
