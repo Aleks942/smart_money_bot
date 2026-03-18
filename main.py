@@ -2029,24 +2029,28 @@ def msg_short(sig):
     stage = sig.get("stage", "UNKNOWN")
     target = sig.get("target")
 
-    # =========================
-    # PRIORITY COLOR
-    # =========================
-
+    # =====================
+    # DEFINE TIER
+    # =====================
+    
+    score = sig.get("score", 0)
+    
     if sig.get("sniper"):
         tier = "🟢🟢 СИЛЬНЫЙ ВХОД"
-
+    
     elif score >= 7:
         tier = "🟢 СИЛЬНЫЙ СИГНАЛ"
-
+    
     elif score >= 5:
         tier = "🟡 СИГНАЛ"
-
+    
     elif score >= 4:
         tier = "🟠 РАННИЙ"
-
+    
     else:
         tier = "🔴 СЛАБЫЙ"
+    
+    sig["tier"] = tier
 
     lines.append(f"{tier} — {fmt_symbol(inst)}")
     lines.append(f"💵 {price:.6g}")
