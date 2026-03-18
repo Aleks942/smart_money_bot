@@ -1710,8 +1710,8 @@ def build_signal(instId):
     # =========================
     # RESULT FILTER
     # =========================
-    if score < MIN_SCORE:
-        return None
+    # if score < MIN_SCORE:
+    # return None
 
     # =========================
     # SIGNAL OBJECT
