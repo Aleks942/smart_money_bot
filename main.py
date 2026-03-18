@@ -38,7 +38,7 @@ POLL_SECONDS = int(os.getenv("POLL_SECONDS") or "60")
 TIMEOUT = int(os.getenv("TIMEOUT") or "12")
 STATE_FILE = os.getenv("STATE_FILE") or "state.json"
 
-SCAN_TOP_N = int(os.getenv("SCAN_TOP_N") or "25")
+SCAN_TOP_N = int(os.getenv("SCAN_TOP_N") or "300")
 SCAN_MIN_VOL_USDT = float(os.getenv("SCAN_MIN_VOL_USDT") or "800000")
 SCAN_MIN_PCT_24H = float(os.getenv("SCAN_MIN_PCT_24H") or "2")
 
