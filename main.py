@@ -2639,6 +2639,8 @@ def check_signal_results():
 
             all_candidates = get_market_candidates()
 
+            print(f"CANDIDATES: {len(all_candidates)}")
+
             if not all_candidates:
                 print("NO CANDIDATES FOUND")
                 time.sleep(10)
