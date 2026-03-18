@@ -2621,6 +2621,8 @@ def check_signal_results():
 
     while True:
 
+        print("LOOP WORKING")
+
         check_signal_results()
         t0 = time.time()
 
