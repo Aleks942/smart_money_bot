@@ -1623,8 +1623,7 @@ def build_signal(instId):
     # =========================
     # 🐋 WHALE + OI EDGE (NEW)
     # =========================
-
-try:
+    try:
     # OI данные
     oi_data = fetch_bybit_open_interest(instId)
 
