@@ -2009,12 +2009,13 @@ def interpret_combo(sig):
         notes.append("⏳ WAIT: пока наблюдаем — ждём подтверждение/объём/ATR/свип.")
 
     return notes
-
 # =========================
 # MESSAGE FORMATS
 # =========================
+
 def fmt_symbol(instId: str) -> str:
     return instId.replace("-USDT", "")
+
 
 def msg_short(sig):
 
@@ -2029,28 +2030,8 @@ def msg_short(sig):
     stage = sig.get("stage", "UNKNOWN")
     target = sig.get("target")
 
-    # =====================
-    # DEFINE TIER
-    # =====================
-    
-    score = sig.get("score", 0)
-    
-    if sig.get("sniper"):
-        tier = "🟢🟢 СИЛЬНЫЙ ВХОД"
-    
-    elif score >= 7:
-        tier = "🟢 СИЛЬНЫЙ СИГНАЛ"
-    
-    elif score >= 5:
-        tier = "🟡 СИГНАЛ"
-    
-    elif score >= 4:
-        tier = "🟠 РАННИЙ"
-    
-    else:
-        tier = "🔴 СЛАБЫЙ"
-    
-    sig["tier"] = tier
+    # ✅ БЕРЁМ ГОТОВЫЙ tier
+    tier = sig.get("tier", "SIGNAL")
 
     lines.append(f"{tier} — {fmt_symbol(inst)}")
     lines.append(f"💵 {price:.6g}")
@@ -2063,7 +2044,9 @@ def msg_short(sig):
 
     return "\n".join(lines)
 
+
 def msg_medium(sig):
+
     lines = []
 
     inst = sig.get("instId", "?")
@@ -2081,6 +2064,8 @@ def msg_medium(sig):
     target = sig.get("target")
     flags = sig.get("flags", [])
 
+    # ✅ добавили tier в начало
+    lines.append(f"{tier}")
     lines.append(f"🧠 RADAR MEDIUM — {fmt_symbol(inst)}")
     lines.append(f"💵 {price:.6g}")
     lines.append(f"🎯 Expected move: {sig.get('exp_move_min',0)}–{sig.get('exp_move_max',0)}%")
@@ -2121,6 +2106,7 @@ def msg_medium(sig):
 
     return "\n".join(lines)
 
+
 def msg_full(sig):
 
     lines = []
@@ -2130,7 +2116,6 @@ def msg_full(sig):
     lines.append(f"🚨 {tier} — {fmt_symbol(sig['instId'])}")
     lines.append(f"💵 {sig['price']:.6g}")
 
-    # SNIPER ENTRY
     if sig.get("sniper"):
         lines.append("🔥 SNIPER ENTRY — сильный импульс, можно искать точку входа")
 
@@ -2138,13 +2123,16 @@ def msg_full(sig):
 
     if sig.get("rsi7") is not None and sig.get("rsi14") is not None:
         lines.append(f"📍 RSI7={sig['rsi7']:.1f} | RSI14={sig['rsi14']:.1f} | {sig.get('rsi_state', 'UNKNOWN')}")
+
     lines.append(f"📊 Score: {sig['score']}/10 | acc={sig.get('acc_score', 0)}")
     lines.append(f"🎯 Direction: {sig['direction']} (up={sig['up_w']}, down={sig['down_w']})")
     lines.append(f"🎯 ENTRY: {sig['entry']} — {sig['entry_reason']}")
     lines.append(f"🧬 STAGE: {sig['stage']} — {sig['stage_reason']}")
+
     pm = sig.get("pmeta") or {}
     if pm.get("range_lo") is not None and pm.get("range_hi") is not None and pm.get("range_pct") is not None:
         lines.append(f"🧲 Range(lookback): {pm['range_lo']:.6g} → {pm['range_hi']:.6g} | width≈{pm['range_pct']:.2f}%")
+
     if sig["target"] is not None:
         lines.append(f"🎯 Liquidity target: {sig['target']:.6g}")
 
@@ -2169,6 +2157,7 @@ def msg_full(sig):
 
     return "\n".join(lines)
 
+
 def choose_detail_message(sig):
     if MESSAGE_MODE == "SHORT":
         return msg_short(sig)
@@ -2182,13 +2171,15 @@ def choose_detail_message(sig):
         return msg_medium(sig)
     return msg_short(sig)
 
+
 def summary_message(alerts, cycle_info, regime):
+
     lines = []
+
     lines.append("🚨 SMART MONEY SCAN — MARKET SUMMARY")
     lines.append(f"⏱ Cycle: {cycle_info}")
     lines.append(f"🧭 BTC regime: {regime}")
 
-    # ✅ если пусто — НИЧЕГО не отправляем
     if not alerts:
         return None
 
@@ -2196,6 +2187,7 @@ def summary_message(alerts, cycle_info, regime):
     lines.append(f"Top {top_n}:")
 
     for sig in alerts[:top_n]:
+
         sym = sig.get("instId") or sig.get("symbol") or sig.get("sym") or "?"
         score = sig.get("score", 0)
         acc = sig.get("acc_score", 0)
