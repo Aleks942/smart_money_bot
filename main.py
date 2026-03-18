@@ -1621,6 +1621,38 @@ def build_signal(instId):
         score += 1
 
     # =========================
+    # 🐋 WHALE + OI EDGE (NEW)
+    # =========================
+
+try:
+    # OI данные
+    oi_data = fetch_bybit_open_interest(instId)
+
+    oi_series = []
+    for x in oi_data:
+        try:
+            oi_series.append(float(x.get("openInterest")))
+        except:
+            continue
+
+    closes = [c[4] for c in c5]
+
+    oi_build = open_interest_buildup(oi_series, closes)
+    whale_acc = whale_accumulation_ok(c5)
+    whale_flow = whale_flow_radar(c5)
+
+    if oi_build and whale_acc:
+        flags.add("WHALE_BUILDUP")
+        score += 2
+
+    elif whale_flow:
+        flags.add("WHALE_FLOW")
+        score += 1
+
+except:
+    pass
+
+    # =========================
     # LIQUIDITY SWEEP
     # =========================
     sweep, _meta = liquidity_sweep(c5)
@@ -1677,9 +1709,9 @@ def build_signal(instId):
     if score < MIN_SCORE:
         return None
 
-   # =========================
-# SIGNAL OBJECT
-# =========================
+    # =========================
+    # SIGNAL OBJECT
+    # =========================
 
     tier = get_signal_tier(score, acc_score)
 
