@@ -2671,6 +2671,52 @@ if __name__ == "__main__":
                     )
 
                     # =====================
+                    # TIER + SEND LOGIC
+                    # =====================
+                    
+                    score = sig.get("score", 0)
+                    
+                    # DEFINE TIER
+                    if sig.get("sniper"):
+                        sig["tier"] = "🟢🟢 СИЛЬНЫЙ ВХОД"
+                    
+                    elif score >= 7:
+                        sig["tier"] = "🟢 СИЛЬНЫЙ СИГНАЛ"
+                    
+                    elif score >= 5:
+                        sig["tier"] = "🟡 СИГНАЛ"
+                    
+                    elif score >= 4:
+                        sig["tier"] = "🟠 РАННИЙ"
+                    
+                    else:
+                        sig["tier"] = "🔴 СЛАБЫЙ"
+                    
+                    
+                    tier = sig.get("tier")
+                    
+                    # SEND
+                    
+                    # 🟢🟢 SNIPER
+                    if tier == "🟢🟢 СИЛЬНЫЙ ВХОД":
+                        send_telegram(msg_full(sig))
+                    
+                    # 🟢 СИЛЬНЫЙ
+                    elif tier == "🟢 СИЛЬНЫЙ СИГНАЛ":
+                        send_telegram(msg_full(sig))
+                    
+                    # 🟡 СРЕДНИЙ
+                    elif tier == "🟡 СИГНАЛ":
+                        if should_alert_symbol(state, sig):
+                            send_telegram(msg_medium(sig))
+                    
+                    # 🟠 РАННИЙ
+                    elif tier == "🟠 РАННИЙ":
+                        print(f"[EARLY] {instId} score={score}")
+                    
+                    # 🔴 СЛАБЫЙ — ничего
+
+                    # =====================
                     # V3 TRIGGERS
                     # =====================
 
