@@ -2664,6 +2664,7 @@ def check_signal_results():
             # =====================
 
             for instId, vol_usdt, pct in candidates:
+                print(f"CHECKING {instId}")
 
                 time.sleep(0.35)
 
