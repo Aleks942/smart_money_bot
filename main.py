@@ -2590,17 +2590,17 @@ def check_signal_results():
 
     if __name__ == "__main__":
 
-    init_db()
-
-    print("PROGRAM STARTED")
-
-    if not BOT_TOKEN or not CHAT_ID:
-        raise RuntimeError("Missing BOT_TOKEN / CHAT_ID")
-
-    print("TOKENS OK")
-
-    state = load_state()
-    print("STATE LOADED")
+        init_db()
+    
+        print("PROGRAM STARTED")
+    
+        if not BOT_TOKEN or not CHAT_ID:
+            raise RuntimeError("Missing BOT_TOKEN / CHAT_ID")
+    
+        print("TOKENS OK")
+    
+        state = load_state()
+        print("STATE LOADED")
 
     # =====================
     # SCAN SETTINGS
