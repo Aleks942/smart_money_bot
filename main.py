@@ -2621,6 +2621,7 @@ def check_signal_results():
         print("START TELEGRAM ERROR:", e)
 
     while True:
+        print("LOOP START")
 
         print("LOOP WORKING")
 
