@@ -2594,6 +2594,7 @@ def check_signal_results():
     # =========================
 
     if __name__ == "__main__":
+        print("MAIN BLOCK STARTED")
 
         init_db()
     
