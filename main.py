@@ -2584,10 +2584,11 @@ def check_signal_results():
 
         print(f"[ANALYST] {symbol} result={result} move={round(move_pct,2)}%")
 
-# =========================
-# MAIN LOOP (STABLE VERSION)
-# =========================
-if __name__ == "__main__":
+    # =========================
+    # MAIN LOOP (STABLE VERSION)
+    # =========================
+
+    if __name__ == "__main__":
 
     init_db()
 
@@ -2646,6 +2647,9 @@ if __name__ == "__main__":
 
             print(f"Scanning {len(candidates)} symbols this cycle | index={scan_index}/{total_symbols}")
 
+            # дальше твой код...
+        
+    
             # =====================
             # SCAN LOOP
             # =====================
