@@ -2589,7 +2589,24 @@ def check_signal_results():
 
         print(f"[ANALYST] {symbol} result={result} move={round(move_pct,2)}%")
 
-   
+    # =========================
+    # MAIN LOOP (STABLE VERSION)
+    # =========================
+
+    if __name__ == "__main__":
+        print("MAIN BLOCK STARTED")
+
+        init_db()
+    
+        print("PROGRAM STARTED")
+    
+        if not BOT_TOKEN or not CHAT_ID:
+            raise RuntimeError("Missing BOT_TOKEN / CHAT_ID")
+    
+        print("TOKENS OK")
+    
+        state = load_state()
+        print("STATE LOADED")
 
     # =====================
     # SCAN SETTINGS
@@ -2617,8 +2634,6 @@ def check_signal_results():
 
             alerts = []
             manip_watch = []
-
-        if False:
 
             # =====================
             # SCAN MONETS
@@ -2838,111 +2853,4 @@ def check_signal_results():
             send_telegram(f"❌ Scan Error:\n{err}")
 
         time.sleep(POLL_SECONDS)
-
-if __name__ == "__main__":
-    print("MAIN BLOCK STARTED")
-
-    init_db()
-
-    print("PROGRAM STARTED")
-
-    if not BOT_TOKEN or not CHAT_ID:
-        raise RuntimeError("Missing BOT_TOKEN / CHAT_ID")
-
-    print("TOKENS OK")
-
-    state = load_state()
-    print("STATE LOADED")
-
-    SCAN_BATCH = 20
-    scan_index = 0
-
-    try:
-        send_telegram(f"🚀 SMART MONEY SCANNER — PRO EDGE v4 started ({EXCHANGE} market scan)")
-    except Exception as e:
-        print("START TELEGRAM ERROR:", e)
-
-    while True:
-        print("LOOP START")
-        print("LOOP WORKING")
-
-        check_signal_results()
-        t0 = time.time()
-
-        try:
-            regime, _btc = btc_regime()
-
-            alerts = []
-            manip_watch = []
-
-            all_candidates = get_market_candidates()
-            print(f"CANDIDATES: {len(all_candidates)}")
-
-            if not all_candidates:
-                print("NO CANDIDATES FOUND")
-                time.sleep(10)
-                continue
-
-            total_symbols = len(all_candidates)
-
-            if scan_index >= total_symbols:
-                scan_index = 0
-
-            candidates = all_candidates[scan_index:scan_index + SCAN_BATCH]
-            scan_index += SCAN_BATCH
-
-            print(f"Scanning {len(candidates)} symbols | index={scan_index}/{total_symbols}")
-
-            for instId, vol_usdt, pct in candidates:
-                print(f"CHECKING {instId}")
-
-                time.sleep(0.35)
-
-                try:
-                    sig = build_signal(instId)
-
-                    if not isinstance(sig, dict):
-                        continue
-
-                    sig["setup"] = get_signal_tier(sig["score"], sig["acc_score"])
-
-                    mult = get_ai_multiplier(sig["setup"])
-                    sig["score"] = round(sig["score"] * mult, 2)
-
-                    sig = apply_market_context(sig)
-                    sig = apply_regime_bias(sig, regime)
-
-                    save_signal(sig)
-
-                    print(f"[SCAN] {instId} score={sig['score']} acc={sig['acc_score']}")
-
-                    score = sig.get("score", 0)
-
-                    if score >= 5:
-                        alerts.append(sig)
-
-                except Exception as e:
-                    print("SCAN ERROR:", e)
-
-            alerts.sort(key=lambda s: s.get("score", 0), reverse=True)
-
-            cycle_info = time.strftime("%Y-%m-%d %H:%M:%S")
-
-            print("ALERTS FOUND:", len(alerts))
-
-            msg = summary_message(alerts, cycle_info, regime)
-            if msg:
-                send_telegram(msg)
-
-            for sig in alerts[:DETAIL_TOP_K]:
-                send_telegram(choose_detail_message(sig))
-
-            save_state(state)
-
-        except Exception as e:
-            err = traceback.format_exc()
-            print("MAIN LOOP ERROR:", err)
-
-        time.sleep(POLL_SECONDS)
-
 
