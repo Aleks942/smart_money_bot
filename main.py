@@ -2533,7 +2533,10 @@ def check_signal_results():
         entry = s["entry"]
         direction = s["direction"]
         signal_id = s["id"]
-        created_at = s["created_at"]
+        created_at = s.get("created_at")
+
+        if not created_at:
+            continue
 
         # ⏱ ждём минимум 5 минут
         if time.time() - created_at < 300:
