@@ -1685,6 +1685,7 @@ def build_signal(instId):
 
     signal = {
         "instId": instId,
+        "symbol": instId,
         "price": price,
         "score": score,
         "tier": tier,
