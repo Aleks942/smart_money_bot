@@ -1621,37 +1621,6 @@ def build_signal(instId):
         score += 1
 
     # =========================
-    # 🐋 WHALE + OI EDGE (NEW)
-    # =========================
-    try:
-        # OI данные
-        oi_data = fetch_bybit_open_interest(instId)
-
-        oi_series = []
-        for x in oi_data:
-            try:
-                oi_series.append(float(x.get("openInterest")))
-            except:
-                continue
-
-        closes = [c[4] for c in c5]
-
-        oi_build = open_interest_buildup(oi_series, closes)
-        whale_acc = whale_accumulation_ok(c5)
-        whale_flow = whale_flow_radar(c5)
-
-        if oi_build and whale_acc:
-            flags.add("WHALE_BUILDUP")
-            score += 2
-
-        elif whale_flow:
-            flags.add("WHALE_FLOW")
-            score += 1
-
-    except Exception as e:
-        print(f"WHALE ERROR {instId}: {e}")
-
-    # =========================
     # LIQUIDITY SWEEP
     # =========================
     sweep, _meta = liquidity_sweep(c5)
@@ -1708,9 +1677,9 @@ def build_signal(instId):
     if score < MIN_SCORE:
         return None
 
-    # =========================
-    # SIGNAL OBJECT
-    # =========================
+   # =========================
+# SIGNAL OBJECT
+# =========================
 
     tier = get_signal_tier(score, acc_score)
 
@@ -2584,23 +2553,22 @@ def check_signal_results():
 
         print(f"[ANALYST] {symbol} result={result} move={round(move_pct,2)}%")
 
-    # =========================
-    # MAIN LOOP (STABLE VERSION)
-    # =========================
+# =========================
+# MAIN LOOP (STABLE VERSION)
+# =========================
+if __name__ == "__main__":
 
-    if __name__ == "__main__":
+    init_db()
 
-        init_db()
-    
-        print("PROGRAM STARTED")
-    
-        if not BOT_TOKEN or not CHAT_ID:
-            raise RuntimeError("Missing BOT_TOKEN / CHAT_ID")
-    
-        print("TOKENS OK")
-    
-        state = load_state()
-        print("STATE LOADED")
+    print("PROGRAM STARTED")
+
+    if not BOT_TOKEN or not CHAT_ID:
+        raise RuntimeError("Missing BOT_TOKEN / CHAT_ID")
+
+    print("TOKENS OK")
+
+    state = load_state()
+    print("STATE LOADED")
 
     # =====================
     # SCAN SETTINGS
@@ -2647,9 +2615,6 @@ def check_signal_results():
 
             print(f"Scanning {len(candidates)} symbols this cycle | index={scan_index}/{total_symbols}")
 
-            # дальше твой код...
-        
-    
             # =====================
             # SCAN LOOP
             # =====================
