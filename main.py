@@ -1621,38 +1621,33 @@ def build_signal(instId):
         score += 1
 
     # =========================
-    # 🐋 WHALE + OI EDGE (SAFE)
+    # 🐋 WHALE + OI EDGE (NEW)
     # =========================
     try:
+        # OI данные
         oi_data = fetch_bybit_open_interest(instId)
-    
-        if not oi_data:
-            raise Exception("NO OI DATA")
-    
+
         oi_series = []
         for x in oi_data:
             try:
                 oi_series.append(float(x.get("openInterest")))
             except:
                 continue
-    
-        if len(oi_series) < 5:
-            raise Exception("SHORT OI")
-    
+
         closes = [c[4] for c in c5]
-    
+
         oi_build = open_interest_buildup(oi_series, closes)
         whale_acc = whale_accumulation_ok(c5)
         whale_flow = whale_flow_radar(c5)
-    
+
         if oi_build and whale_acc:
             flags.add("WHALE_BUILDUP")
             score += 2
-    
+
         elif whale_flow:
             flags.add("WHALE_FLOW")
             score += 1
-    
+
     except Exception as e:
         print(f"WHALE ERROR {instId}: {e}")
 
@@ -2846,4 +2841,3 @@ def check_signal_results():
             send_telegram(f"❌ Scan Error:\n{err}")
 
         time.sleep(POLL_SECONDS)
-
