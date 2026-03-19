@@ -2531,6 +2531,11 @@ def check_signal_results():
         entry = s["entry"]
         direction = s["direction"]
         signal_id = s["id"]
+        created_at = s["created_at"]
+
+        # ⏱ ждём минимум 5 минут
+        if time.time() - created_at < 300:
+            continue
 
         try:
             price = get_last_price(symbol)
@@ -2542,9 +2547,9 @@ def check_signal_results():
         if direction == "DOWN":
             move_pct = -move_pct
 
-        if move_pct >= 0.5:
+        if move_pct >= 1.0:
             result = "HIT"
-        elif move_pct <= -0.5:
+        elif move_pct <= -1.0:
             result = "FAIL"
         else:
             result = "NEUTRAL"
@@ -2553,6 +2558,10 @@ def check_signal_results():
 
         print(f"[ANALYST] {symbol} result={result} move={round(move_pct,2)}%")
 
+        send_telegram(
+            f"📊 RESULT {symbol}\n"
+            f"{result} | {round(move_pct,2)}%"
+        )
 # =========================
 # MAIN LOOP (STABLE VERSION)
 # =========================
