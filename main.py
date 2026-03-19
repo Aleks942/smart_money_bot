@@ -1707,6 +1707,7 @@ def build_signal(instId):
         "rsi14": rsi14,
         "rsi_state": rsi_state.get("state"),
         "ts": now_ts(),
+        "created_at": time.time(),
     }
 
     signal["sniper"] = sniper_signal(signal)
