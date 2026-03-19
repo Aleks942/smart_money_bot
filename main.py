@@ -1710,8 +1710,8 @@ def build_signal(instId):
     # =========================
     # RESULT FILTER
     # =========================
-    # if score < MIN_SCORE:
-    # return None
+    if score < MIN_SCORE:
+        return None
 
     # =========================
     # SIGNAL OBJECT
@@ -2594,7 +2594,6 @@ def check_signal_results():
     # =========================
 
     if __name__ == "__main__":
-        print("MAIN BLOCK STARTED")
 
         init_db()
     
@@ -2621,9 +2620,6 @@ def check_signal_results():
         print("START TELEGRAM ERROR:", e)
 
     while True:
-        print("LOOP START")
-
-        print("LOOP WORKING")
 
         check_signal_results()
         t0 = time.time()
@@ -2640,8 +2636,6 @@ def check_signal_results():
             # =====================
 
             all_candidates = get_market_candidates()
-
-            print(f"CANDIDATES: {len(all_candidates)}")
 
             if not all_candidates:
                 print("NO CANDIDATES FOUND")
@@ -2666,7 +2660,6 @@ def check_signal_results():
             # =====================
 
             for instId, vol_usdt, pct in candidates:
-                print(f"CHECKING {instId}")
 
                 time.sleep(0.35)
 
