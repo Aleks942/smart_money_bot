@@ -1818,7 +1818,7 @@ def build_signal(instId):
     # =========================
     # EXPECTED MOVE
     # =========================
-    exp_min, exp_max = expected_move_pct(c5, None)
+    exp_min, exp_max = expected_move_pct(c5, pmeta)
 
     # =========================
     # RESULT FILTER
