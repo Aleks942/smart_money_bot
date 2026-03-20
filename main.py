@@ -991,6 +991,39 @@ def update_stats(result, move_pct, signal):
     with open("stats.json", "w") as f:
         json.dump(stats, f)
 
+def show_stats():
+
+    try:
+        with open("stats.json", "r") as f:
+            stats = json.load(f)
+    except:
+        return "Нет данных"
+
+    total = stats["total"]
+    hit = stats["hit"]
+    fail = stats["fail"]
+
+    winrate = (hit / total * 100) if total > 0 else 0
+    avg_move = stats["sum_move"] / total if total > 0 else 0
+
+    text = f"📊 STATS\n"
+    text += f"Всего: {total}\n"
+    text += f"HIT: {hit} | FAIL: {fail}\n"
+    text += f"Winrate: {round(winrate,1)}%\n"
+    text += f"Avg move: {round(avg_move,2)}%\n\n"
+
+    text += "📊 ENTRY:\n"
+    for k,v in stats["by_entry"].items():
+        wr = (v["hit"]/v["total"]*100) if v["total"] else 0
+        text += f"{k}: {v['total']} | {round(wr,1)}%\n"
+
+    text += "\n📊 STAGE:\n"
+    for k,v in stats["by_stage"].items():
+        wr = (v["hit"]/v["total"]*100) if v["total"] else 0
+        text += f"{k}: {v['total']} | {round(wr,1)}%\n"
+
+    return text
+
 # ==============================
 # NEAR BREAKOUT DETECTOR
 # ==============================
