@@ -997,7 +997,7 @@ def update_stats(result, move_pct, signal):
         stats["by_stage"][stage]["hit"] += 1
 
     with open("stats.json", "w") as f:
-        json.dump(stats, f)
+        json.dump(stats, f, indent=2)
 
 def show_stats():
 
