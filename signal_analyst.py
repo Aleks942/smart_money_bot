@@ -66,12 +66,12 @@ def save_signal(signal):
         move_pct
     )
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
+        """, (
         signal["instId"],
         ts,
         time_str,
-        signal["price"],
-        signal["direction"],
+        signal.get("entry_price", signal["price"]),
+        signal.get("direction_code", signal["direction"]),
         signal["score"],
         signal["acc_score"],
         signal["stage"],
