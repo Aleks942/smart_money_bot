@@ -933,6 +933,22 @@ def liquidity_pressure(candles, lookback=PRESSURE_LOOKBACK, zone=PRESSURE_ZONE, 
         return "DOWN", {"range_hi": hi, "range_lo": lo, "range_pct": range_pct, "pos": pos}
     return None, {"range_hi": hi, "range_lo": lo, "range_pct": range_pct, "pos": pos}
 
+def is_entry_signal(s):
+
+    if s["score"] < 6:
+        return False
+
+    if s["entry"] == "WAIT":
+        return False
+
+    if s["stage"] in ["ACCUMULATION"]:
+        return False
+
+    if abs(s.get("up_w", 0) - s.get("down_w", 0)) < 2:
+        return False
+
+    return True
+
 # ==============================
 # NEAR BREAKOUT DETECTOR
 # ==============================
