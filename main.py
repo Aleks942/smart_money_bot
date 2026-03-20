@@ -2658,7 +2658,7 @@ def check_signal_results():
                 stats = json.load(f)
 
             if stats["total"] % 5 == 0:
-        send_telegram(show_stats())
+                send_telegram(show_stats())
 
         except:
             pass
