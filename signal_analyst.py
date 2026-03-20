@@ -146,7 +146,7 @@ def get_stats():
 # ПОЛУЧИТЬ ОТКРЫТЫЕ СИГНАЛЫ
 # ==============================
 
-def get_open_signals(older_than_sec=1800):
+def get_open_signals(older_than_sec=300):
 
     now = int(time.time())
 
