@@ -950,6 +950,11 @@ def is_entry_signal(s):
     if s.get("exp_move_max", 0) < 0.8:
         return False
 
+    # 👇 добавь это
+    rsi_state = s.get("rsi_state")
+    if rsi_state in ["EXTREME_OVERBOUGHT", "EXTREME_OVERSOLD"]:
+        return False
+
     return True
 
 def update_stats(result, move_pct, signal):
