@@ -1702,6 +1702,23 @@ def build_signal(instId):
         except:
             ob_meta = None
 
+    if ob_meta:
+    if ob_meta.get("ob_bias") == "BIDS":
+        flags.add("OB_BIDS")
+        score += 1
+    elif ob_meta.get("ob_bias") == "ASKS":
+        flags.add("OB_ASKS")
+        score += 1
+
+    if ob_meta.get("bid_wall"):
+        flags.add("OB_WALL_BID")
+
+    if ob_meta.get("ask_wall"):
+        flags.add("OB_WALL_ASK")
+
+    if ob_meta.get("wall_removed"):
+        flags.add("WALL_REMOVED")
+
     # =========================
     # CANDLES
     # =========================
