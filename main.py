@@ -2684,6 +2684,7 @@ def check_signal_results():
         symbol = s["symbol"]
         entry = s["entry"]
         direction = s["direction"]
+        direction_code = direction_code_from_text(direction)
         signal_id = s["id"]
         created_at = s.get("created_at")
 
@@ -2701,7 +2702,7 @@ def check_signal_results():
 
         move_pct = (price - entry) / entry * 100
 
-        if direction == "DOWN":
+        if direction_code == "DOWN":
             move_pct = -move_pct
 
         if move_pct >= 1.0:
