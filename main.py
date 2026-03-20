@@ -1048,7 +1048,7 @@ def is_profitable(signal):
         data = stats["by_entry"][entry]
         if data["total"] >= 5:
             wr = data["hit"] / data["total"]
-            if wr < 0.4:
+            if wr < 0.7:
                 return False
 
     # проверка STAGE
