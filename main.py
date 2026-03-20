@@ -2653,6 +2653,16 @@ def check_signal_results():
         close_signal(signal_id, move_pct, result)
         update_stats(result, move_pct, s)
 
+        try:
+            with open("stats.json", "r") as f:
+                stats = json.load(f)
+
+            if stats["total"] % 5 == 0:
+        send_telegram(show_stats())
+
+        except:
+            pass
+
         if s["id"] % 10 == 0:
             send_telegram(show_stats())
 
