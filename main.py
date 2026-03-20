@@ -413,6 +413,12 @@ def save_state(state):
 def now_ts():
     return int(time.time())
 
+def get_last_price(symbol: str) -> float:
+    candles = fetch_candles(symbol, "5m", 2)
+    if not candles:
+        raise RuntimeError(f"Нет свечей для {symbol}")
+    return float(candles[-1][4])
+
 # =========================
 # OKX HELPERS
 # =========================
