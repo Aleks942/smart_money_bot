@@ -2618,6 +2618,7 @@ def check_signal_results():
             result = "NEUTRAL"
 
         close_signal(signal_id, move_pct, result)
+        update_stats(result, move_pct, s)
 
         print(f"[ANALYST] {symbol} result={result} move={round(move_pct,2)}%")
 
