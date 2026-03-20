@@ -955,10 +955,10 @@ def is_entry_signal(s):
     if s["score"] < 6:
         return False
 
-    if s["entry"] == "WAIT":
+    if "WAIT" in str(s.get("entry", "")):
         return False
 
-    if s["stage"] in ["ACCUMULATION"]:
+    if "ACCUMULATION" in str(s.get("stage", "")):
         return False
 
     if abs(s.get("up_w", 0) - s.get("down_w", 0)) < 2:
