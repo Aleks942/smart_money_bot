@@ -1813,6 +1813,8 @@ def build_signal(instId):
     )
     stage, stage_reason = smart_money_stage(score, flags)
 
+    tgt = liquidity_target(pmeta, flags, price)
+
     # =========================
     # EXPECTED MOVE
     # =========================
