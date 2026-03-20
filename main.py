@@ -2734,7 +2734,7 @@ if __name__ == "__main__":
                     # ADD TO ALERTS (для summary)
                     # =====================
 
-                    if score >= 5:
+                    if is_entry_signal(sig):
                         alerts.append(sig)
 
                     # =====================
