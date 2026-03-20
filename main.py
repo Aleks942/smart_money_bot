@@ -225,8 +225,9 @@ def get_bybit_candles(symbol: str, interval: str, limit: int = 200):
 
 def get_bybit_books(symbol: str, limit: int = 25):
     res = bybit_get(BYBIT_ORDERBOOK_URL, {"category": "linear", "symbol": symbol, "limit": str(limit)})
-    bids = (res.get("b") or [])
-    asks = (res.get("a") or [])
+    result = res.get("result") or {}
+    bids = result.get("b") or []
+    asks = result.get("a") or []
     try:
         bids_pq = [(float(x[0]), float(x[1])) for x in bids]
         asks_pq = [(float(x[0]), float(x[1])) for x in asks]
