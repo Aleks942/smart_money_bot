@@ -1791,6 +1791,14 @@ def build_signal(instId):
         flags.add("BREAKOUT_DOWN")
         score += 1
 
+    br_confirm = breakout_confirm_ok(c5)
+    if br_confirm == "UP":
+        flags.add("BREAKOUT_CONFIRM_UP")
+        score += 2
+    elif br_confirm == "DOWN":
+        flags.add("BREAKOUT_CONFIRM_DOWN")
+        score += 2
+
     # =========================
     # ACCUMULATION
     # =========================
