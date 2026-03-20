@@ -1841,6 +1841,7 @@ def build_signal(instId):
         "acc_score": acc_score,
         "strong_setup": strong_setup,
         "direction": direction_text,
+        "direction_code": direction_code,
         "dir_reasons": reasons,
         "up_w": up_w,
         "down_w": down_w,
