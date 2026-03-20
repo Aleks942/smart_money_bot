@@ -949,6 +949,48 @@ def is_entry_signal(s):
 
     return True
 
+def update_stats(result, move_pct, signal):
+
+    try:
+        with open("stats.json", "r") as f:
+            stats = json.load(f)
+    except:
+        stats = {
+            "total": 0,
+            "hit": 0,
+            "fail": 0,
+            "sum_move": 0,
+            "by_entry": {},
+            "by_stage": {}
+        }
+
+    stats["total"] += 1
+    stats["sum_move"] += move_pct
+
+    if result == "HIT":
+        stats["hit"] += 1
+    elif result == "FAIL":
+        stats["fail"] += 1
+
+    # 📊 по ENTRY
+    entry = signal.get("entry", "UNKNOWN")
+    stats["by_entry"].setdefault(entry, {"total":0, "hit":0})
+
+    stats["by_entry"][entry]["total"] += 1
+    if result == "HIT":
+        stats["by_entry"][entry]["hit"] += 1
+
+    # 📊 по STAGE
+    stage = signal.get("stage", "UNKNOWN")
+    stats["by_stage"].setdefault(stage, {"total":0, "hit":0})
+
+    stats["by_stage"][stage]["total"] += 1
+    if result == "HIT":
+        stats["by_stage"][stage]["hit"] += 1
+
+    with open("stats.json", "w") as f:
+        json.dump(stats, f)
+
 # ==============================
 # NEAR BREAKOUT DETECTOR
 # ==============================
