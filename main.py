@@ -419,6 +419,17 @@ def get_last_price(symbol: str) -> float:
         raise RuntimeError(f"Нет свечей для {symbol}")
     return float(candles[-1][4])
 
+def direction_code_from_text(direction_text: str) -> str:
+    txt = str(direction_text)
+
+    if "ВВЕРХ" in txt:
+        return "UP"
+
+    if "ВНИЗ" in txt:
+        return "DOWN"
+
+    return "FLAT"
+
 # =========================
 # OKX HELPERS
 # =========================
