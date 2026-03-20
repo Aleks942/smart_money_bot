@@ -1032,6 +1032,35 @@ def show_stats():
 
     return text
 
+def is_profitable(signal):
+
+    try:
+        with open("stats.json", "r") as f:
+            stats = json.load(f)
+    except:
+        return True  # если нет данных — не блокируем
+
+    entry = signal.get("entry", "UNKNOWN")
+    stage = signal.get("stage", "UNKNOWN")
+
+    # проверка ENTRY
+    if entry in stats["by_entry"]:
+        data = stats["by_entry"][entry]
+        if data["total"] >= 5:
+            wr = data["hit"] / data["total"]
+            if wr < 0.4:
+                return False
+
+    # проверка STAGE
+    if stage in stats["by_stage"]:
+        data = stats["by_stage"][stage]
+        if data["total"] >= 5:
+            wr = data["hit"] / data["total"]
+            if wr < 0.4:
+                return False
+
+    return True
+
 # ==============================
 # NEAR BREAKOUT DETECTOR
 # ==============================
