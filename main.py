@@ -2653,6 +2653,9 @@ def check_signal_results():
         close_signal(signal_id, move_pct, result)
         update_stats(result, move_pct, s)
 
+        if s["id"] % 10 == 0:
+            send_telegram(show_stats())
+
         print(f"[ANALYST] {symbol} result={result} move={round(move_pct,2)}%")
 
         send_telegram(
