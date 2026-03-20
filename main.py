@@ -2876,7 +2876,7 @@ if __name__ == "__main__":
                     # ADD TO ALERTS (для summary)
                     # =====================
 
-                    if is_entry_signal(sig):
+                    if is_entry_signal(sig) and is_profitable(sig):
                         alerts.append(sig)
 
                     # =====================
