@@ -174,7 +174,8 @@ def get_open_signals(older_than_sec=1800):
                 "id": signal_id,
                 "symbol": symbol,
                 "entry": entry,
-                "direction": direction
+                "direction": direction,
+                "created_at": ts
             })
 
     return signals
