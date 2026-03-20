@@ -947,6 +947,9 @@ def is_entry_signal(s):
     if abs(s.get("up_w", 0) - s.get("down_w", 0)) < 2:
         return False
 
+    if s.get("exp_move_max", 0) < 0.8:
+        return False
+
     return True
 
 def update_stats(result, move_pct, signal):
