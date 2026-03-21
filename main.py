@@ -2357,6 +2357,51 @@ def msg_medium(sig):
 
     return "\n".join(lines)
 
+def msg_watch(sig):
+
+    lines = []
+
+    inst = sig.get("instId", "?")
+    price = sig.get("price", 0)
+    score = sig.get("score", 0)
+    direction = sig.get("direction", "⚖️ БАЛАНС")
+    acc = sig.get("acc_score", 0)
+    stage = sig.get("stage", "UNKNOWN")
+    target = sig.get("target")
+    flags = sig.get("flags", [])
+
+    lines.append(f"🟡 WATCH — {fmt_symbol(inst)}")
+    lines.append(f"💵 {price:.6g}")
+    lines.append(f"📊 {score}/10 | {direction} | acc={acc}")
+    lines.append(f"🧬 STAGE: {stage}")
+    lines.append("Смысл: это ранняя зона наблюдения, а не готовый вход.")
+
+    pm = sig.get("pmeta") or {}
+    if (
+        pm.get("range_lo") is not None
+        and pm.get("range_hi") is not None
+        and pm.get("range_pct") is not None
+    ):
+        lines.append(
+            f"🧲 Range: {pm['range_lo']:.6g} → {pm['range_hi']:.6g} | {pm['range_pct']:.2f}%"
+        )
+
+    if target is not None:
+        lines.append(f"🎯 Target: {target:.6g}")
+
+    ez = sig.get("entry_zone")
+    if ez:
+        lines.append(
+            f"📍 Entry zone: {ez.get('zone_type')} | {ez.get('low'):.6g} → {ez.get('high'):.6g} | stop {ez.get('stop'):.6g}"
+        )
+
+    if flags:
+        lines.append("Flags:")
+        for f in flags[:10]:
+            lines.append(f"• {f}")
+
+    return "\n".join(lines)
+
 
 def msg_full(sig):
 
