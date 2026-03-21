@@ -2907,22 +2907,22 @@ if __name__ == "__main__":
                     
                     # 🟢🟢 SNIPER
                     if tier == "🟢🟢 СИЛЬНЫЙ ВХОД":
-                        send_telegram(msg_full(sig))
+                        if is_entry_signal(sig):
+                            send_telegram(msg_full(sig))
                     
                     # 🟢 СИЛЬНЫЙ
                     elif tier == "🟢 СИЛЬНЫЙ СИГНАЛ":
-                        send_telegram(msg_full(sig))
+                        if is_entry_signal(sig):
+                            send_telegram(msg_full(sig))
                     
                     # 🟡 СРЕДНИЙ
                     elif tier == "🟡 СИГНАЛ":
-                        if should_alert_symbol(state, sig):
+                        if is_entry_signal(sig) and should_alert_symbol(state, sig):
                             send_telegram(msg_medium(sig))
                     
                     # 🟠 РАННИЙ
                     elif tier == "🟠 РАННИЙ":
                         print(f"[EARLY] {instId} score={score}")
-                    
-                    # 🔴 СЛАБЫЙ — ничего
                     
 
                     # =====================
