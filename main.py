@@ -2335,8 +2335,14 @@ def msg_medium(sig):
         )
 
     if target is not None:
-        lines.append(f"🎯 Target: {target:.6g}")
+    lines.append(f"🎯 Target: {target:.6g}")
 
+    ez = sig.get("entry_zone")
+    if ez:
+        lines.append(
+            f"📍 Entry zone: {ez.get('zone_type')} | {ez.get('low'):.6g} → {ez.get('high'):.6g} | stop {ez.get('stop'):.6g}"
+        )
+    
     if flags:
         lines.append("Flags:")
         for f in flags[:14]:
