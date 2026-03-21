@@ -1680,6 +1680,65 @@ def liquidity_target(pmeta, flags, price=None):
         return round(lo, 6)
 
     return None
+
+def calc_entry_zone(price, pmeta, flags, direction_code):
+    if not pmeta:
+        return None
+
+    hi = pmeta.get("range_hi")
+    lo = pmeta.get("range_lo")
+
+    if hi is None or lo is None:
+        return None
+
+    try:
+        hi = float(hi)
+        lo = float(lo)
+        price = float(price)
+    except Exception:
+        return None
+
+    rng = hi - lo
+    if rng <= 0:
+        return None
+
+    flags = set(flags)
+
+    if direction_code == "UP":
+        if "BREAKOUT_CONFIRM_UP" in flags:
+            return {
+                "zone_type": "RETEST_LONG",
+                "low": round(hi - rng * 0.05, 6),
+                "high": round(hi + rng * 0.10, 6),
+                "stop": round(hi - rng * 0.20, 6),
+            }
+
+        if "SWEEP_DOWN" in flags or "FAKE_DUMP" in flags:
+            return {
+                "zone_type": "RECLAIM_LONG",
+                "low": round(lo + rng * 0.10, 6),
+                "high": round(lo + rng * 0.30, 6),
+                "stop": round(lo - rng * 0.12, 6),
+            }
+
+    if direction_code == "DOWN":
+        if "BREAKOUT_CONFIRM_DOWN" in flags:
+            return {
+                "zone_type": "RETEST_SHORT",
+                "low": round(lo - rng * 0.10, 6),
+                "high": round(lo + rng * 0.05, 6),
+                "stop": round(lo + rng * 0.20, 6),
+            }
+
+        if "SWEEP_UP" in flags:
+            return {
+                "zone_type": "RECLAIM_SHORT",
+                "low": round(hi - rng * 0.30, 6),
+                "high": round(hi - rng * 0.10, 6),
+                "stop": round(hi + rng * 0.12, 6),
+            }
+
+    return None
 # =========================
 # BUILD SIGNAL FOR SYMBOL
 # =========================
