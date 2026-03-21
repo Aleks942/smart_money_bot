@@ -2867,15 +2867,16 @@ if __name__ == "__main__":
                     # SAVE SIGNAL
                     # =====================
 
-                    save_signal(sig)
-
                     print(
                         f"[SCAN] {instId} "
                         f"price={sig.get('price')} "
                         f"score={sig.get('score')} "
                         f"acc={sig.get('acc_score')} "
                         f"flags={sig.get('flags')}"
-                    )
+                   )
+
+                   if is_entry_signal(sig):
+                       save_signal(sig)
 
                     # =====================
                     # TIER + SEND LOGIC
