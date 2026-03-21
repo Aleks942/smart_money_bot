@@ -2970,7 +2970,7 @@ if __name__ == "__main__":
                     # =====================
 
                     if is_priority_signal(sig) and priority_allowed(state, instId):
-                        if pro_edge_filter(sig, regime):
+                        if pro_edge_filter(sig, regime) and is_entry_signal(sig):
                             send_telegram(msg_priority(sig))
                             mark_priority(state, instId)
 
