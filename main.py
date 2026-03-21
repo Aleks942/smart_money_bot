@@ -1595,6 +1595,15 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7):
         return "🔴 WAIT", "Нет явного направления"
 
     # =========================
+    # RSI SAFETY FILTER
+    # =========================
+    if direction_text == "⬆️ ВВЕРХ" and rsi7 is not None and rsi7 >= RSI_OB_BLOCK:
+        return "🔴 WAIT", "RSI перегрет — возможен ложный пробой"
+
+    if direction_text == "⬇️ ВНИЗ" and rsi7 is not None and rsi7 <= RSI_OS_BLOCK:
+        return "🔴 WAIT", "RSI перепродан — возможен ложный пролив"
+
+    # =========================
     # SAFE ENTRY
     # =========================
     confirmed = (
