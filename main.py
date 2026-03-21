@@ -1627,7 +1627,7 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7):
             flow_ok = True
     
     safe_cond = (
-        score >= EDGE_HIGH_SCORE and
+        score >= 6 and
         confirmed and
         impulse_ok and
         flow_ok and
