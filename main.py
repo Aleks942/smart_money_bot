@@ -1595,13 +1595,38 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7):
         return "🔴 WAIT", "Нет явного направления"
 
     # =========================
-    # RSI SAFETY FILTER
+    # SAFE ENTRY
     # =========================
-    if direction_text == "⬆️ ВВЕРХ" and rsi7 and rsi7 > 75:
-        return "🔴 WAIT", "RSI перегрет — возможен ложный пробой"
-
-    if direction_text == "⬇️ ВНИЗ" and rsi7 and rsi7 < 25:
-        return "🔴 WAIT", "RSI перепродан — возможен ложный пролив"
+    confirmed = (
+        "BREAKOUT_CONFIRM_UP" in flags or
+        "BREAKOUT_CONFIRM_DOWN" in flags
+    )
+    
+    impulse_ok = (
+        "VOL_SPIKE" in flags or
+        "ATR_EXPANSION" in flags
+    )
+    
+    flow_ok = False
+    
+    if direction_text == "⬆️ ВВЕРХ":
+        if "PRESSURE_UP" in flags or "CONTINUATION_UP" in flags:
+            flow_ok = True
+    
+    if direction_text == "⬇️ ВНИЗ":
+        if "PRESSURE_DOWN" in flags or "CONTINUATION_DOWN" in flags:
+            flow_ok = True
+    
+    safe_cond = (
+        score >= EDGE_HIGH_SCORE and
+        confirmed and
+        impulse_ok and
+        flow_ok and
+        (up_w >= 3 or down_w >= 3)
+    )
+    
+    if safe_cond:
+        return "🟢 SAFE ENTRY", "Подтверждение + импульс по направлению"
 
     # =========================
     # SAFE ENTRY
