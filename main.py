@@ -2932,7 +2932,7 @@ if __name__ == "__main__":
                     entry_ok = is_entry_signal(sig)
                     profit_ok = is_profitable(sig)
                     
-                    if sig.get("score", 0) >= 5:
+                    if sig.get("score", 0) >= 4:
                         print(
                             f"[CHECK] {instId} "
                             f"score={sig.get('score')} "
