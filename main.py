@@ -2978,7 +2978,11 @@ if __name__ == "__main__":
                     # NORMAL ALERTS
                     # =====================
 
-                    if sig.get("score", 0) >= ALERT_MIN_SCORE and should_alert_symbol(state, sig):
+                    if (
+                        sig.get("score", 0) >= ALERT_MIN_SCORE
+                        and is_entry_signal(sig)
+                        and should_alert_symbol(state, sig)
+                    ):
                         alerts.append(sig)
                         mark_alert_sent(state, sig)
 
