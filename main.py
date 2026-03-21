@@ -2386,6 +2386,12 @@ def msg_full(sig):
 
     if sig["target"] is not None:
         lines.append(f"🎯 Liquidity target: {sig['target']:.6g}")
+    
+    ez = sig.get("entry_zone")
+    if ez:
+        lines.append(
+            f"📍 Entry zone: {ez.get('zone_type')} | {ez.get('low'):.6g} → {ez.get('high'):.6g} | stop {ez.get('stop'):.6g}"
+        )
 
     if sig["flags"]:
         lines.append("")
