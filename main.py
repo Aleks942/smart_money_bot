@@ -1940,6 +1940,7 @@ def build_signal(instId):
         "entry": entry,
         "entry_type": entry,
         "entry_price": price,
+        "entry_zone": entry_zone,
         "entry_reason": entry_reason,
         "stage": stage,
         "stage_reason": stage_reason,
