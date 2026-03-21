@@ -2923,12 +2923,28 @@ if __name__ == "__main__":
                         print(f"[EARLY] {instId} score={score}")
                     
                     # 🔴 СЛАБЫЙ — ничего
+                    
 
                     # =====================
                     # ADD TO ALERTS (для summary)
                     # =====================
-
-                    if is_entry_signal(sig) and is_profitable(sig):
+                    
+                    entry_ok = is_entry_signal(sig)
+                    profit_ok = is_profitable(sig)
+                    
+                    if sig.get("score", 0) >= 6:
+                        print(
+                            f"[CHECK] {instId} "
+                            f"score={sig.get('score')} "
+                            f"entry={sig.get('entry')} "
+                            f"stage={sig.get('stage')} "
+                            f"dir={sig.get('direction')} "
+                            f"rsi={sig.get('rsi_state')} "
+                            f"entry_ok={entry_ok} "
+                            f"profit_ok={profit_ok}"
+                        )
+                    
+                    if entry_ok and profit_ok:
                         alerts.append(sig)
 
                     # =====================
