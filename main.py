@@ -2873,10 +2873,10 @@ if __name__ == "__main__":
                         f"score={sig.get('score')} "
                         f"acc={sig.get('acc_score')} "
                         f"flags={sig.get('flags')}"
-                   )
+                    )
 
-                   if is_entry_signal(sig):
-                       save_signal(sig)
+                    if is_entry_signal(sig):
+                        save_signal(sig)
 
                     # =====================
                     # TIER + SEND LOGIC
