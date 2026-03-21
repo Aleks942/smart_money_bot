@@ -959,6 +959,9 @@ def is_entry_signal(s):
     if "WAIT" in str(s.get("entry", "")):
         return False
 
+    if "SAFE ENTRY" not in str(s.get("entry", "")):
+        return False
+
     if "ACCUMULATION" in str(s.get("stage", "")):
         return False
 
