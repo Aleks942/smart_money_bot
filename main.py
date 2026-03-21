@@ -2335,7 +2335,7 @@ def msg_medium(sig):
         )
 
     if target is not None:
-    lines.append(f"🎯 Target: {target:.6g}")
+        lines.append(f"🎯 Target: {target:.6g}")
 
     ez = sig.get("entry_zone")
     if ez:
