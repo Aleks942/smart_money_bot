@@ -3150,7 +3150,7 @@ if __name__ == "__main__":
                     send_telegram(msg2)
 
                 for sig in manip_watch[:MANIP_DETAIL_TOP_K]:
-                    send_telegram(msg_medium(sig))
+                    send_telegram(msg_watch(sig))
 
             save_state(state)
 
