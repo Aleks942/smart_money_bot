@@ -2546,6 +2546,9 @@ def is_pre_move_manip(sig):
     flags = set(sig.get("flags", []))
     stage = sig.get("stage", "")
     acc = int(sig.get("acc_score", 0))
+    score = float(sig.get("score", 0))
+    if score < 5:
+        return False
 
     already_moving = ("ATR_EXPANSION" in flags) and ("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags)
     if already_moving:
