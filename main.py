@@ -1002,7 +1002,7 @@ def update_stats(result, move_pct, signal):
         stats["fail"] += 1
 
     # 📊 по ENTRY
-    entry = signal.get("entry", "UNKNOWN")
+    entry = signal.get("entry_type", signal.get("entry", "UNKNOWN"))
     stats["by_entry"].setdefault(entry, {"total":0, "hit":0})
 
     stats["by_entry"][entry]["total"] += 1
