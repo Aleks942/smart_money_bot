@@ -77,6 +77,7 @@ def save_signal(signal):
         ts,
         time_str,
         signal.get("entry_price", signal["price"]),
+        signal.get("entry_type", signal.get("entry", "UNKNOWN")),
         signal.get("direction_code", signal["direction"]),
         signal["score"],
         signal["acc_score"],
