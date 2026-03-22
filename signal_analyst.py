@@ -173,7 +173,7 @@ def get_open_signals(older_than_sec=300):
 
     for r in rows:
 
-        signal_id, symbol, entry, direction, ts = r
+        signal_id, symbol, entry, entry_type, direction, stage, ts = r
 
         if now - ts >= older_than_sec:
 
@@ -181,7 +181,9 @@ def get_open_signals(older_than_sec=300):
                 "id": signal_id,
                 "symbol": symbol,
                 "entry": entry,
+                "entry_type": entry_type,
                 "direction": direction,
+                "stage": stage,
                 "created_at": ts
             })
 
