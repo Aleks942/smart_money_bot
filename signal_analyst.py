@@ -161,7 +161,7 @@ def get_open_signals(older_than_sec=300):
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT id, symbol, entry_price, direction, ts
+        SELECT id, symbol, entry_price, entry_type, direction, stage, ts
         FROM signals
         WHERE result='OPEN'
     """)
