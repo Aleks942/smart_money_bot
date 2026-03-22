@@ -1606,11 +1606,17 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7):
     # =========================
     # SAFE ENTRY
     # =========================
+    
     confirmed = (
-        "BREAKOUT_CONFIRM_UP" in flags or
-        "BREAKOUT_CONFIRM_DOWN" in flags
+    "BREAKOUT_CONFIRM_UP" in flags or
+    "BREAKOUT_CONFIRM_DOWN" in flags
     )
     
+    early_breakout = (
+        "BREAKOUT_UP" in flags or
+        "BREAKOUT_DOWN" in flags
+    )
+        
     impulse_ok = (
         "VOL_SPIKE" in flags or
         "ATR_EXPANSION" in flags
