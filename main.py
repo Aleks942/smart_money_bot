@@ -2758,6 +2758,10 @@ def is_pre_trigger(sig):
 
     flags = set(sig.get("flags", []))
     acc = int(sig.get("acc_score", 0))
+    score = float(sig.get("score", 0))
+    if score < 5:
+        return False
+    
 
     if acc < TRIGGER_PRE_ACC:
         return False
