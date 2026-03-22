@@ -63,7 +63,7 @@ def save_signal(signal):
     cur.execute("""
     INSERT INTO signals (
         symbol, ts, time_str,
-        entry_price, direction,
+        entry_price,entry_type, direction,
         score, acc_score,
         stage,
         expected_move_min,
