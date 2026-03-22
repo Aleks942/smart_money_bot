@@ -21,6 +21,7 @@ def init_db():
         ts INTEGER,
         time_str TEXT,
         entry_price REAL,
+        entry_type TEXT,
         direction TEXT,
         score INTEGER,
         acc_score INTEGER,
