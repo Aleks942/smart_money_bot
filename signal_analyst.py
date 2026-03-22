@@ -39,6 +39,11 @@ def init_db():
     except:
         pass
 
+    try:
+        cur.execute("ALTER TABLE signals ADD COLUMN entry_type TEXT")
+    except:
+        pass
+
     conn.commit()
     conn.close()
 
