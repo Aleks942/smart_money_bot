@@ -1634,10 +1634,13 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7):
     
     safe_cond = (
         score >= 5.75 and
-        confirmed and
         impulse_ok and
         flow_ok and
-        (up_w >= 3 or down_w >= 3)
+        (up_w >= 3 or down_w >= 3) and
+        (
+            confirmed or
+            (early_breakout and (up_w >= 4 or down_w >= 4))
+        )
     )
     
     if safe_cond:
