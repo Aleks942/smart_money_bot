@@ -3163,8 +3163,9 @@ if __name__ == "__main__":
                         trigger_mark(state, instId, "last_start_trigger_ts")
                     
                     if (
-                        is_confirm_trigger(sig)
-                        and is_entry_signal(sig)
+                        (not sent_main_now)
+                        and is_confirm_trigger(sig)
+                        and entry_ok
                         and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN)
                     ):
                         send_telegram(msg_confirm_trigger(sig))
