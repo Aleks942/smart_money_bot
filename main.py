@@ -2654,6 +2654,16 @@ def update_symbol_state(state, sig):
     state["symbols"][sym]["prev_score"] = sig["score"]
     state["symbols"][sym]["prev_flags"] = sig["flags"]
     state["symbols"][sym]["last_ts"] = sig["ts"]
+    
+def safe_entry_recent(state, instId):
+    ss = state["symbols"].get(instId, {})
+    last = int(ss.get("last_safe_entry_ts", 0) or 0)
+    return (now_ts() - last) < SAFE_ENTRY_SUPPRESS_SEC
+
+
+def mark_safe_entry(state, instId):
+    state["symbols"].setdefault(instId, {})
+    state["symbols"][instId]["last_safe_entry_ts"] = now_ts()
 
 # =========================
 # PRIORITY ALERT SYSTEM (ADDON — слой сверху)
