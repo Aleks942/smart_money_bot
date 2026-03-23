@@ -3180,18 +3180,6 @@ if __name__ == "__main__":
                             send_telegram(msg_priority(sig))
                             mark_priority(state, instId)
                     
-                    # =====================
-                    # NORMAL ALERTS
-                    # =====================
-                    
-                    if (
-                        sig.get("score", 0) >= ALERT_MIN_SCORE
-                        and is_entry_signal(sig)
-                        and should_alert_symbol(state, sig)
-                    ):
-                        if not any(a.get("instId") == sig.get("instId") for a in alerts):
-                            alerts.append(sig)
-                        mark_alert_sent(state, sig)
                     
                     # =====================
                     # PRE-MOVE WATCH
