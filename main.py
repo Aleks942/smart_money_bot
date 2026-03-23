@@ -3150,7 +3150,7 @@ if __name__ == "__main__":
                         send_telegram(msg_confirm_trigger(sig))
                         trigger_mark(state, instId, "last_confirm_trigger_ts") 
     
-                    update_symbol_state(state, sig)
+                    
 
                     # =====================
                     # PRIORITY ALERT
@@ -3182,6 +3182,7 @@ if __name__ == "__main__":
                         if should_manip_alert(state, sig):
                             manip_watch.append(sig)
                             mark_manip_sent(state, sig)
+                        update_symbol_state(state, sig)  
 
                 except Exception as e:
                     print("SCAN ERROR:", e)
