@@ -3134,21 +3134,21 @@ if __name__ == "__main__":
                     # V3 TRIGGERS
                     # =====================
 
-                    if is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
-                        send_telegram(msg_pre_trigger(sig))
-                        trigger_mark(state, instId, "last_pre_trigger_ts")
-
-                    if is_start_trigger(sig) and trigger_allowed(state, instId, "last_start_trigger_ts", TRIGGER_START_COOLDOWN):
-                        send_telegram(msg_start_trigger(sig))
-                        trigger_mark(state, instId, "last_start_trigger_ts")
-
-                    if (
-                        is_confirm_trigger(sig)
-                        and is_entry_signal(sig)
-                        and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN)
+                   if (not safe_entry_now) and is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
+                       send_telegram(msg_pre_trigger(sig))
+                       trigger_mark(state, instId, "last_pre_trigger_ts")
+                    
+                   if (not safe_entry_now) and is_start_trigger(sig) and trigger_allowed(state, instId, "last_start_trigger_ts", TRIGGER_START_COOLDOWN):
+                       send_telegram(msg_start_trigger(sig))
+                       trigger_mark(state, instId, "last_start_trigger_ts")
+                    
+                   if (
+                       is_confirm_trigger(sig)
+                       and is_entry_signal(sig)
+                       and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN)
                     ):
-                        send_telegram(msg_confirm_trigger(sig))
-                        trigger_mark(state, instId, "last_confirm_trigger_ts")
+                       send_telegram(msg_confirm_trigger(sig))
+                       trigger_mark(state, instId, "last_confirm_trigger_ts") 
     
                         update_symbol_state(state, sig)
 
