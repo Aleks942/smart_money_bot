@@ -3099,7 +3099,7 @@ if __name__ == "__main__":
                         recent_safe_lock = True
 
                     
-               tier = sig.get("tier")
+                    tier = sig.get("tier")
 
                     entry_ok = is_entry_signal(sig)
                     profit_ok = is_profitable(sig)
