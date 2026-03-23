@@ -3146,59 +3146,58 @@ if __name__ == "__main__":
                         if not any(a.get("instId") == sig.get("instId") for a in alerts):
                             alerts.append(sig)
 
-                    # =====================
-                    # V3 TRIGGERS
-                    # =====================
+                   # =====================
+# V3 TRIGGERS
+# =====================
 
-                    if (not recent_safe_lock) and is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
-                    send_telegram(msg_pre_trigger(sig))
-                    trigger_mark(state, instId, "last_pre_trigger_ts")
-                
-                    if (not recent_safe_lock) and is_start_trigger(sig) and trigger_allowed(state, instId, "last_start_trigger_ts", TRIGGER_START_COOLDOWN):
-                    send_telegram(msg_start_trigger(sig))
-                    trigger_mark(state, instId, "last_start_trigger_ts")
-                                    
-                    if (
-                        is_confirm_trigger(sig)
-                        and is_entry_signal(sig)
-                        and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN)
-                    ):
-                        send_telegram(msg_confirm_trigger(sig))
-                        trigger_mark(state, instId, "last_confirm_trigger_ts") 
-    
-                    
+if (not recent_safe_lock) and is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
+    send_telegram(msg_pre_trigger(sig))
+    trigger_mark(state, instId, "last_pre_trigger_ts")
 
-                    # =====================
-                    # PRIORITY ALERT
-                    # =====================
+if (not recent_safe_lock) and is_start_trigger(sig) and trigger_allowed(state, instId, "last_start_trigger_ts", TRIGGER_START_COOLDOWN):
+    send_telegram(msg_start_trigger(sig))
+    trigger_mark(state, instId, "last_start_trigger_ts")
 
-                    if is_priority_signal(sig) and priority_allowed(state, instId):
-                        if pro_edge_filter(sig, regime) and is_entry_signal(sig):
-                            send_telegram(msg_priority(sig))
-                            mark_priority(state, instId)
+if (
+    is_confirm_trigger(sig)
+    and is_entry_signal(sig)
+    and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN)
+):
+    send_telegram(msg_confirm_trigger(sig))
+    trigger_mark(state, instId, "last_confirm_trigger_ts")
 
-                    # =====================
-                    # NORMAL ALERTS
-                    # =====================
+# =====================
+# PRIORITY ALERT
+# =====================
 
-                    if (
-                        sig.get("score", 0) >= ALERT_MIN_SCORE
-                        and is_entry_signal(sig)
-                        and should_alert_symbol(state, sig)
-                    ):
-                        if not any(a.get("instId") == sig.get("instId") for a in alerts):
-                            alerts.append(sig)
-                        mark_alert_sent(state, sig)
+if is_priority_signal(sig) and priority_allowed(state, instId):
+    if pro_edge_filter(sig, regime) and is_entry_signal(sig):
+        send_telegram(msg_priority(sig))
+        mark_priority(state, instId)
 
-                    # =====================
-                    # PRE-MOVE WATCH
-                    # =====================
+# =====================
+# NORMAL ALERTS
+# =====================
 
-                    if MANIP_ALERT_ENABLED and (not recent_safe_lock) and is_pre_move_manip(sig):
-                        if should_manip_alert(state, sig):
-                            manip_watch.append(sig)
-                            mark_manip_sent(state, sig)
-                    update_symbol_state(state, sig)  
+if (
+    sig.get("score", 0) >= ALERT_MIN_SCORE
+    and is_entry_signal(sig)
+    and should_alert_symbol(state, sig)
+):
+    if not any(a.get("instId") == sig.get("instId") for a in alerts):
+        alerts.append(sig)
+    mark_alert_sent(state, sig)
+
+# =====================
+# PRE-MOVE WATCH
+# =====================
+
+if MANIP_ALERT_ENABLED and (not recent_safe_lock) and is_pre_move_manip(sig):
+    if should_manip_alert(state, sig):
+        manip_watch.append(sig)
+        mark_manip_sent(state, sig)
+
+update_symbol_state(state, sig) 
 
                 except Exception as e:
                     print("SCAN ERROR:", e)
