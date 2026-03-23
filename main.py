@@ -3175,8 +3175,8 @@ if __name__ == "__main__":
                     # PRIORITY ALERT
                     # =====================
                     
-                    if is_priority_signal(sig) and priority_allowed(state, instId):
-                        if pro_edge_filter(sig, regime) and is_entry_signal(sig):
+                    if (not sent_main_now) and is_priority_signal(sig) and priority_allowed(state, instId):
+                        if pro_edge_filter(sig, regime) and entry_ok:
                             send_telegram(msg_priority(sig))
                             mark_priority(state, instId)
                     
