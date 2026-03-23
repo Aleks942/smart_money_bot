@@ -3092,7 +3092,12 @@ if __name__ == "__main__":
                         and is_entry_signal(sig)
                     )
 
-                    
+                    recent_safe_lock = safe_entry_recent(state, instId)
+
+                    if safe_entry_now:
+                        mark_safe_entry(state, instId)
+                        recent_safe_lock = True
+
                     
                     tier = sig.get("tier")
                     
