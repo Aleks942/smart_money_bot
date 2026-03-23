@@ -3075,6 +3075,12 @@ if __name__ == "__main__":
                     
                     else:
                         sig["tier"] = "🔴 СЛАБЫЙ"
+
+                    safe_entry_now = (
+                        "SAFE ENTRY" in str(sig.get("entry", ""))
+                        and is_entry_signal(sig)
+                    )
+
                     
                     
                     tier = sig.get("tier")
