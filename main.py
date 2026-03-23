@@ -2815,16 +2815,12 @@ def is_start_trigger(sig):
     flags = set(sig.get("flags", []))
     acc = int(sig.get("acc_score", 0))
     score = float(sig.get("score", 0))
-    
+
     if score < 5:
         return False
 
     if acc < TRIGGER_PRE_ACC:
         return False
-
-    # CONFIRM — всегда сильный импульс (оставляем)
-    if ("BREAKOUT_CONFIRM_UP" in flags) or ("BREAKOUT_CONFIRM_DOWN" in flags):
-        return True
 
     # Контекст накопления
     context_ok = (
@@ -2854,7 +2850,6 @@ def is_start_trigger(sig):
     classic_start = context_ok and impulse_ok and breakout_ok
 
     return early_start or classic_start
-
 def is_confirm_trigger(sig):
     flags = set(sig.get("flags", []))
     return (("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags) and ("ATR_EXPANSION" in flags) and ("VOL_SPIKE" in flags))
