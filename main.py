@@ -3121,7 +3121,8 @@ if __name__ == "__main__":
                         )
                     
                     if entry_ok and profit_ok:
-                        alerts.append(sig)
+                        if not any(a.get("instId") == sig.get("instId") for a in alerts):
+                            alerts.append(sig)
 
                     # =====================
                     # V3 TRIGGERS
