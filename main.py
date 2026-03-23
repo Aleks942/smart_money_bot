@@ -3099,36 +3099,39 @@ if __name__ == "__main__":
                         recent_safe_lock = True
 
                     
-                    tier = sig.get("tier")
+               tier = sig.get("tier")
+
+                    entry_ok = is_entry_signal(sig)
+                    profit_ok = is_profitable(sig)
+                    can_alert_now = should_alert_symbol(state, sig)
+                    sent_main_now = False
                     
                     # SEND
                     
-                    # 🟢🟢 SNIPER
                     if tier == "🟢🟢 СИЛЬНЫЙ ВХОД":
-                        if is_entry_signal(sig):
+                        if entry_ok and can_alert_now:
                             send_telegram(msg_full(sig))
+                            sent_main_now = True
+                            mark_alert_sent(state, sig)
                     
-                    # 🟢 СИЛЬНЫЙ
                     elif tier == "🟢 СИЛЬНЫЙ СИГНАЛ":
-                        if is_entry_signal(sig):
+                        if entry_ok and can_alert_now:
                             send_telegram(msg_full(sig))
+                            sent_main_now = True
+                            mark_alert_sent(state, sig)
                     
-                    # 🟡 СРЕДНИЙ
                     elif tier == "🟡 СИГНАЛ":
-                        if is_entry_signal(sig) and should_alert_symbol(state, sig):
+                        if entry_ok and can_alert_now:
                             send_telegram(msg_medium(sig))
+                            sent_main_now = True
+                            mark_alert_sent(state, sig)
                     
-                    # 🟠 РАННИЙ
                     elif tier == "🟠 РАННИЙ":
                         print(f"[EARLY] {instId} score={score}")
                     
-
                     # =====================
                     # ADD TO ALERTS (для summary)
                     # =====================
-                    
-                    entry_ok = is_entry_signal(sig)
-                    profit_ok = is_profitable(sig)
                     
                     if sig.get("score", 0) >= 7:
                         print(
@@ -3139,16 +3142,17 @@ if __name__ == "__main__":
                             f"dir={sig.get('direction')} "
                             f"rsi={sig.get('rsi_state')} "
                             f"entry_ok={entry_ok} "
-                            f"profit_ok={profit_ok}"
+                            f"profit_ok={profit_ok} "
+                            f"can_alert_now={can_alert_now} "
+                            f"sent_main_now={sent_main_now}"
                         )
                     
-                    if entry_ok and profit_ok:
+                    if entry_ok and profit_ok and can_alert_now and (not sent_main_now):
                         if not any(a.get("instId") == sig.get("instId") for a in alerts):
                             alerts.append(sig)
-
-                    # =====================
-                    # V3 TRIGGERS
-                    # =====================
+                # =====================
+                # V3 TRIGGERS
+                # =====================
                     
                     if (not recent_safe_lock) and is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
                         send_telegram(msg_pre_trigger(sig))
