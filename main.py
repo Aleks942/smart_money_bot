@@ -3164,7 +3164,8 @@ if __name__ == "__main__":
                         and is_entry_signal(sig)
                         and should_alert_symbol(state, sig)
                     ):
-                        alerts.append(sig)
+                        if not any(a.get("instId") == sig.get("instId") for a in alerts):
+                            alerts.append(sig)
                         mark_alert_sent(state, sig)
 
                     # =====================
