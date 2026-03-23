@@ -3178,7 +3178,7 @@ if __name__ == "__main__":
                     # PRE-MOVE WATCH
                     # =====================
 
-                    if MANIP_ALERT_ENABLED and is_pre_move_manip(sig):
+                    if MANIP_ALERT_ENABLED and (not safe_entry_now) and is_pre_move_manip(sig):
                         if should_manip_alert(state, sig):
                             manip_watch.append(sig)
                             mark_manip_sent(state, sig)
