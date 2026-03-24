@@ -3184,11 +3184,17 @@ if __name__ == "__main__":
                     # PRE-MOVE WATCH
                     # =====================
                     
-                    if MANIP_ALERT_ENABLED and (not recent_safe_lock) and is_pre_move_manip(sig):
+                    if (
+                        MANIP_ALERT_ENABLED
+                        and (not recent_safe_lock)
+                        and (not sent_pre_now)
+                        and (not sent_start_now)
+                        and is_pre_move_manip(sig)
+                    ):
                         if should_manip_alert(state, sig):
                             manip_watch.append(sig)
                             mark_manip_sent(state, sig)
-                    
+                                        
                     update_symbol_state(state, sig) 
 
                 except Exception as e:
