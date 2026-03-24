@@ -3100,6 +3100,8 @@ if __name__ == "__main__":
                     profit_ok = is_profitable(sig)
                     can_alert_now = should_alert_symbol(state, sig)
                     sent_main_now = False
+                    sent_pre_now = False
+                    sent_start_now = False
                     
                     # SEND
                     
