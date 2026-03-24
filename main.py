@@ -3142,10 +3142,11 @@ if __name__ == "__main__":
                             f"profit_ok={profit_ok} "
                             f"can_alert_now={can_alert_now} "
                             f"sent_main_now={sent_main_now}"
-                        )
+                    )
                     
                     if entry_ok and profit_ok and can_alert_now and (not sent_main_now):
                         if not any(a.get("instId") == sig.get("instId") for a in alerts):
+                            
                     # =====================
                     # V3 TRIGGERS
                     # =====================
