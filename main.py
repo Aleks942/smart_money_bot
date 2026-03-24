@@ -2939,7 +2939,7 @@ def check_signal_results():
             continue
 
         # ⏱ ждём минимум RESULT_CHECK_SEC секунд
-        f time.time() - created_at < RESULT_CHECK_SEC:
+        if time.time() - created_at < RESULT_CHECK_SEC:
            continue
 
         try:
