@@ -2966,7 +2966,9 @@ def check_signal_results():
             with open("stats.json", "r") as f:
                 stats = json.load(f)
 
-            if stats["total"] % 5 == 0:
+            resolved = stats.get("resolved", stats.get("hit", 0) + stats.get("fail", 0))
+
+            if resolved > 0 and resolved % 5 == 0:
                 send_telegram(show_stats())
 
         except:
