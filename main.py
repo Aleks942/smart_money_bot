@@ -2938,9 +2938,9 @@ def check_signal_results():
         if not created_at:
             continue
 
-        # ⏱ ждём минимум 5 минут
-        if time.time() - created_at < 300:
-            continue
+        # ⏱ ждём минимум RESULT_CHECK_SEC секунд
+        f time.time() - created_at < RESULT_CHECK_SEC:
+           continue
 
         try:
             price = get_last_price(symbol)
