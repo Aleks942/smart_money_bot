@@ -1096,22 +1096,26 @@ def is_profitable(signal):
     except:
         return True  # если нет данных — не блокируем
 
-    entry = signal.get("entry", "UNKNOWN")
+    entry = signal.get("entry_type", signal.get("entry", "UNKNOWN"))
     stage = signal.get("stage", "UNKNOWN")
 
     # проверка ENTRY
-    if entry in stats["by_entry"]:
+    if entry in stats.get("by_entry", {}):
         data = stats["by_entry"][entry]
-        if data["total"] >= 5:
-            wr = data["hit"] / data["total"]
+        resolved = data.get("resolved", data.get("hit", 0) + data.get("fail", 0))
+
+        if resolved >= 5:
+            wr = data.get("hit", 0) / resolved
             if wr < 0.7:
                 return False
 
     # проверка STAGE
-    if stage in stats["by_stage"]:
+    if stage in stats.get("by_stage", {}):
         data = stats["by_stage"][stage]
-        if data["total"] >= 5:
-            wr = data["hit"] / data["total"]
+        resolved = data.get("resolved", data.get("hit", 0) + data.get("fail", 0))
+
+        if resolved >= 5:
+            wr = data.get("hit", 0) / resolved
             if wr < 0.4:
                 return False
 
