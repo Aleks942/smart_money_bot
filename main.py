@@ -1058,28 +1058,33 @@ def show_stats():
     except:
         return "Нет данных"
 
-    total = stats["total"]
-    hit = stats["hit"]
-    fail = stats["fail"]
+    total = stats.get("total", 0)
+    hit = stats.get("hit", 0)
+    fail = stats.get("fail", 0)
+    neutral = stats.get("neutral", max(total - hit - fail, 0))
+    resolved = stats.get("resolved", hit + fail)
+    avg_move = stats.get("sum_move", 0) / total if total > 0 else 0
 
-    winrate = (hit / total * 100) if total > 0 else 0
-    avg_move = stats["sum_move"] / total if total > 0 else 0
+    winrate = (hit / resolved * 100) if resolved > 0 else 0
 
     text = f"📊 STATS\n"
-    text += f"Всего: {total}\n"
+    text += f"Всего проверено: {total}\n"
+    text += f"Resolved: {resolved} | Neutral: {neutral}\n"
     text += f"HIT: {hit} | FAIL: {fail}\n"
     text += f"Winrate: {round(winrate,1)}%\n"
     text += f"Avg move: {round(avg_move,2)}%\n\n"
 
     text += "📊 ENTRY:\n"
-    for k,v in stats["by_entry"].items():
-        wr = (v["hit"]/v["total"]*100) if v["total"] else 0
-        text += f"{k}: {v['total']} | {round(wr,1)}%\n"
+    for k, v in stats.get("by_entry", {}).items():
+        resolved_e = v.get("resolved", v.get("hit", 0) + v.get("fail", 0))
+        wr = (v.get("hit", 0) / resolved_e * 100) if resolved_e > 0 else 0
+        text += f"{k}: total={v.get('total',0)} | resolved={resolved_e} | neutral={v.get('neutral',0)} | WR={round(wr,1)}%\n"
 
     text += "\n📊 STAGE:\n"
-    for k,v in stats["by_stage"].items():
-        wr = (v["hit"]/v["total"]*100) if v["total"] else 0
-        text += f"{k}: {v['total']} | {round(wr,1)}%\n"
+    for k, v in stats.get("by_stage", {}).items():
+        resolved_s = v.get("resolved", v.get("hit", 0) + v.get("fail", 0))
+        wr = (v.get("hit", 0) / resolved_s * 100) if resolved_s > 0 else 0
+        text += f"{k}: total={v.get('total',0)} | resolved={resolved_s} | neutral={v.get('neutral',0)} | WR={round(wr,1)}%\n"
 
     return text
 
