@@ -987,40 +987,69 @@ def update_stats(result, move_pct, signal):
     except:
         stats = {
             "total": 0,
+            "resolved": 0,
             "hit": 0,
             "fail": 0,
+            "neutral": 0,
             "sum_move": 0,
             "by_entry": {},
             "by_stage": {}
         }
+
+    # защита для старого stats.json
+    stats.setdefault("total", 0)
+    stats.setdefault("resolved", 0)
+    stats.setdefault("hit", 0)
+    stats.setdefault("fail", 0)
+    stats.setdefault("neutral", 0)
+    stats.setdefault("sum_move", 0)
+    stats.setdefault("by_entry", {})
+    stats.setdefault("by_stage", {})
 
     stats["total"] += 1
     stats["sum_move"] += move_pct
 
     if result == "HIT":
         stats["hit"] += 1
+        stats["resolved"] += 1
     elif result == "FAIL":
         stats["fail"] += 1
+        stats["resolved"] += 1
+    else:
+        stats["neutral"] += 1
 
     # 📊 по ENTRY
     entry = signal.get("entry_type", signal.get("entry", "UNKNOWN"))
-    stats["by_entry"].setdefault(entry, {"total":0, "hit":0})
+    stats["by_entry"].setdefault(entry, {"total": 0, "resolved": 0, "hit": 0, "fail": 0, "neutral": 0})
 
     stats["by_entry"][entry]["total"] += 1
+
     if result == "HIT":
         stats["by_entry"][entry]["hit"] += 1
+        stats["by_entry"][entry]["resolved"] += 1
+    elif result == "FAIL":
+        stats["by_entry"][entry]["fail"] += 1
+        stats["by_entry"][entry]["resolved"] += 1
+    else:
+        stats["by_entry"][entry]["neutral"] += 1
 
     # 📊 по STAGE
     stage = signal.get("stage", "UNKNOWN")
-    stats["by_stage"].setdefault(stage, {"total":0, "hit":0})
+    stats["by_stage"].setdefault(stage, {"total": 0, "resolved": 0, "hit": 0, "fail": 0, "neutral": 0})
 
     stats["by_stage"][stage]["total"] += 1
+
     if result == "HIT":
         stats["by_stage"][stage]["hit"] += 1
+        stats["by_stage"][stage]["resolved"] += 1
+    elif result == "FAIL":
+        stats["by_stage"][stage]["fail"] += 1
+        stats["by_stage"][stage]["resolved"] += 1
+    else:
+        stats["by_stage"][stage]["neutral"] += 1
 
     with open("stats.json", "w") as f:
         json.dump(stats, f, indent=2)
-
 def show_stats():
 
     try:
