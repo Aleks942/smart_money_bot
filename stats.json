@@ -1,7 +1,9 @@
 {
   "total": 0,
+  "resolved": 0,
   "hit": 0,
   "fail": 0,
+  "neutral": 0,
   "sum_move": 0,
   "by_entry": {},
   "by_stage": {}
