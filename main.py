@@ -3146,18 +3146,19 @@ if __name__ == "__main__":
                     
                     if entry_ok and profit_ok and can_alert_now and (not sent_main_now):
                         if not any(a.get("instId") == sig.get("instId") for a in alerts):
-                            alerts.append(sig)
-                # =====================
-                # V3 TRIGGERS
-                # =====================
-                    
-                    if (not recent_safe_lock) and is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
-                        send_telegram(msg_pre_trigger(sig))
-                        trigger_mark(state, instId, "last_pre_trigger_ts")
+                    # =====================
+                    # V3 TRIGGERS
+                    # =====================
                     
                     if (not recent_safe_lock) and is_start_trigger(sig) and trigger_allowed(state, instId, "last_start_trigger_ts", TRIGGER_START_COOLDOWN):
                         send_telegram(msg_start_trigger(sig))
                         trigger_mark(state, instId, "last_start_trigger_ts")
+                        sent_start_now = True
+                    
+                    elif (not recent_safe_lock) and is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
+                        send_telegram(msg_pre_trigger(sig))
+                        trigger_mark(state, instId, "last_pre_trigger_ts")
+                        sent_pre_now = True
                     
                     if (
                         (not sent_main_now)
@@ -3166,7 +3167,8 @@ if __name__ == "__main__":
                         and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN)
                     ):
                         send_telegram(msg_confirm_trigger(sig))
-                        trigger_mark(state, instId, "last_confirm_trigger_ts")
+                        trigger_mark(state, instId, "last_confirm_trigger_ts")               alerts.append(sig)
+              
                     
                     # =====================
                     # PRIORITY ALERT
