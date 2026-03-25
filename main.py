@@ -2079,7 +2079,7 @@ def build_signal(instId):
     # =========================
     # CANDLES
     # =========================
-        c5 = fetch_candles(instId, "5m", 120)
+    c5 = fetch_candles(instId, "5m", 120)
     c15 = fetch_candles(instId, "15m", 240)
 
     if not c5 or len(c5) < 20:
