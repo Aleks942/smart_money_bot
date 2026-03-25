@@ -1634,20 +1634,20 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7):
    if "БАЛАНС" in direction_text:
     return "🔴 WAIT", "Нет явного направления"
 
-strong_confirmed_impulse = (
-    ("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags)
-    and ("ATR_EXPANSION" in flags or "VOL_SPIKE" in flags)
-)
-
-# =========================
-# RSI SAFETY FILTER
-# =========================
-
-if direction_text == "⬆️ ВВЕРХ" and rsi7 is not None and rsi7 >= RSI_OB_BLOCK and not strong_confirmed_impulse:
-    return "🔴 WAIT", "RSI перегрет — возможен ложный пробой"
-
-if direction_text == "⬇️ ВНИЗ" and rsi7 is not None and rsi7 <= RSI_OS_BLOCK and not strong_confirmed_impulse:
-    return "🔴 WAIT", "RSI перепродан — возможен ложный пролив"
+   strong_confirmed_impulse = (
+        ("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags)
+        and ("ATR_EXPANSION" in flags or "VOL_SPIKE" in flags)
+    )
+    
+    # =========================
+    # RSI SAFETY FILTER
+    # =========================
+    
+    if direction_text == "⬆️ ВВЕРХ" and rsi7 is not None and rsi7 >= RSI_OB_BLOCK and not strong_confirmed_impulse:
+        return "🔴 WAIT", "RSI перегрет — возможен ложный пробой"
+    
+    if direction_text == "⬇️ ВНИЗ" and rsi7 is not None and rsi7 <= RSI_OS_BLOCK and not strong_confirmed_impulse:
+        return "🔴 WAIT", "RSI перепродан — возможен ложный пролив"
 
     # =========================
     # SAFE ENTRY
