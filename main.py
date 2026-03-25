@@ -1087,6 +1087,26 @@ def liquidity_pressure(candles, lookback=PRESSURE_LOOKBACK, zone=PRESSURE_ZONE, 
 
 def is_entry_signal(s):
 
+    def has_open_similar_signal(sig):
+    try:
+        open_signals = get_open_signals()
+    except Exception:
+        return False
+
+    symbol = sig.get("symbol") or sig.get("instId")
+    direction_code = sig.get("direction_code") or direction_code_from_text(sig.get("direction", ""))
+    entry_type = sig.get("entry_type", sig.get("entry", "UNKNOWN"))
+
+    for s in open_signals:
+        s_symbol = s.get("symbol")
+        s_direction = s.get("direction_code") or direction_code_from_text(s.get("direction", ""))
+        s_entry = s.get("entry_type", s.get("entry", "UNKNOWN"))
+
+        if s_symbol == symbol and s_direction == direction_code and s_entry == entry_type:
+            return True
+
+    return False
+
     if s["score"] < 6:
         return False
 
