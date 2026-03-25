@@ -2276,7 +2276,7 @@ def get_market_candidates_bybit():
     raw_candidates.sort(key=lambda x: (x[1], abs(x[2])), reverse=True)
     
     MARKET_CAP_PREFETCH_MULT = int(os.getenv("MARKET_CAP_PREFETCH_MULT") or "3")
-    prefetch_limit = max(SCAN_TOP_N, SCAN_BATCH * MARKET_CAP_PREFETCH_MULT)
+    prefetch_limit = SCAN_BATCH * MARKET_CAP_PREFETCH_MULT
     
     raw_candidates = raw_candidates[:prefetch_limit]
     
