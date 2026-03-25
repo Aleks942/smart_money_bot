@@ -2859,7 +2859,7 @@ def msg_full(sig):
             f"200={sig.get('ema200'):.6g}"
         )
 
-if sig.get("rsi7") is not None and sig.get("rsi14") is not None:
+    if sig.get("rsi7") is not None and sig.get("rsi14") is not None:
     lines.append(f"📍 RSI7={sig['rsi7']:.1f} | RSI14={sig['rsi14']:.1f} | {sig.get('rsi_state', 'UNKNOWN')}")
 
     lines.append(f"📊 Score: {sig['score']}/10 | acc={sig.get('acc_score', 0)}")
