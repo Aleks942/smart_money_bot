@@ -2008,17 +2008,72 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state):
     return "🔴 WAIT", "Недостаточно факторов"
 
 def smart_money_stage(score, flags):
+    flags = set(flags)
+
     if score < 2:
         return "⚪ NEUTRAL", "Структуры почти нет"
-    if (("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags) and
-        "ATR_EXPANSION" in flags and "VOL_SPIKE" in flags):
-        return "🟢 EXPANSION", "Реальное движение"
-    if ("FAKE_DUMP" in flags or "SWEEP_UP" in flags or "SWEEP_DOWN" in flags or
-        ("PRESSURE_DOWN" in flags and "BREAKOUT_DOWN" in flags) or
-        ("PRESSURE_UP" in flags and "BREAKOUT_UP" in flags)):
+
+    confirmed_up = "BREAKOUT_CONFIRM_UP" in flags
+    confirmed_down = "BREAKOUT_CONFIRM_DOWN" in flags
+    breakout_up = "BREAKOUT_UP" in flags
+    breakout_down = "BREAKOUT_DOWN" in flags
+
+    pressure_up = "PRESSURE_UP" in flags
+    pressure_down = "PRESSURE_DOWN" in flags
+
+    continuation_up = "CONTINUATION_UP" in flags
+    continuation_down = "CONTINUATION_DOWN" in flags
+
+    vol = "VOL_SPIKE" in flags
+    atr = "ATR_EXPANSION" in flags
+
+    comp = ("COMP_5M" in flags) or ("COMP_15M" in flags)
+
+    fake_dump = "FAKE_DUMP" in flags
+    sweep_up = "SWEEP_UP" in flags
+    sweep_down = "SWEEP_DOWN" in flags
+    bull_trap = "BULL_TRAP" in flags
+    bear_trap = "BEAR_TRAP" in flags
+    stop_hunt_up = "STOP_HUNT_UP" in flags
+    stop_hunt_down = "STOP_HUNT_DOWN" in flags
+
+    # 1. Реальное движение / подтверждённый импульс
+    if (
+        (confirmed_up or confirmed_down)
+        and (
+            atr
+            or vol
+            or (pressure_up and continuation_up)
+            or (pressure_down and continuation_down)
+        )
+    ):
+        return "🟢 EXPANSION", "Подтверждённый импульс по направлению"
+
+    # 2. Манипуляция / сбор ликвидности
+    if (
+        fake_dump
+        or sweep_up
+        or sweep_down
+        or bull_trap
+        or bear_trap
+        or stop_hunt_up
+        or stop_hunt_down
+    ):
         return "🟡 MANIPULATION", "Вероятен сбор ликвидности"
-    if any(f.startswith("COMP_") for f in flags):
-        return "🟣 ACCUMULATION", "Накопление/сжатие"
+
+    # 3. Накопление / сжатие
+    if comp:
+        return "🟣 ACCUMULATION", "Накопление/сжатие перед движением"
+
+    # 4. Ранний направленный разгон, но ещё без полного подтверждения
+    if (
+        (breakout_up and pressure_up)
+        or (breakout_down and pressure_down)
+        or (continuation_up and pressure_up)
+        or (continuation_down and pressure_down)
+    ):
+        return "🟠 TRANSITION", "Движение начинается, но ещё не полностью подтверждено"
+
     return "⚪ NEUTRAL", "Смешанные признаки"
 
 def liquidity_target(pmeta, flags, price=None):
