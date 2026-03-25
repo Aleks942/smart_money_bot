@@ -1920,7 +1920,7 @@ def direction_hint(flags):
         return "⬇️ ВНИЗ", reasons, up, down
     return "⚖️ БАЛАНС", reasons, up, down
 
-def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state):
+def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, price, target):
 
     if "БАЛАНС" in direction_text:
         return "🔴 WAIT", "Нет явного направления"
