@@ -2005,15 +2005,25 @@ def build_signal(instId):
     # =========================
     # CANDLES
     # =========================
-    c5 = fetch_candles(instId, "5m", 120)
+        c5 = fetch_candles(instId, "5m", 120)
     c15 = fetch_candles(instId, "15m", 240)
 
     if not c5 or len(c5) < 20:
         return None
-    if not c15 or len(c15) < 20:
+    if not c15 or len(c15) < 200:
         return None
 
     price = float(c5[-1][4])
+
+    ema_meta = get_ema_trend(c15)
+    ema_state = ema_meta.get("state", "EMA_UNKNOWN")
+
+    if ema_state == "EMA_BULL":
+        flags.add("EMA_BULL")
+    elif ema_state == "EMA_BEAR":
+        flags.add("EMA_BEAR")
+    elif ema_state == "EMA_MIXED":
+        flags.add("EMA_MIXED")
 
     # =========================
     # PRESSURE
