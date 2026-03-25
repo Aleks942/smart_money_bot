@@ -143,6 +143,116 @@ BYBIT_TICKERS_URL = "https://api.bybit.com/v5/market/tickers"
 BYBIT_KLINE_URL = "https://api.bybit.com/v5/market/kline"
 BYBIT_ORDERBOOK_URL = "https://api.bybit.com/v5/market/orderbook"
 
+# =========================
+# MARKET CAP FILTER
+# =========================
+MARKET_CAP_MIN_USD = int(os.getenv("MARKET_CAP_MIN_USD", "150000000"))
+MARKET_CAP_CACHE_TTL_SEC = int(os.getenv("MARKET_CAP_CACHE_TTL_SEC", "3600"))
+COINGECKO_API_KEY = (os.getenv("COINGECKO_API_KEY") or "").strip()
+
+_market_cap_cache = {
+    "ts": 0,
+    "data": {}
+}
+
+def _chunked(items, size):
+    for i in range(0, len(items), size):
+        yield items[i:i + size]
+
+def get_base_coin(symbol: str) -> str:
+    symbol = str(symbol).upper().strip()
+
+    if symbol.endswith("USDT"):
+        return symbol[:-4]
+
+    if symbol.endswith("-USDT"):
+        return symbol[:-5]
+
+    return symbol
+
+def _get_coingecko_headers():
+    headers = {"accept": "application/json"}
+
+    if COINGECKO_API_KEY:
+        headers["x-cg-demo-api-key"] = COINGECKO_API_KEY
+
+    return headers
+
+def fetch_market_caps_usd(base_coins):
+    """
+    Возвращает словарь:
+    {
+        "BTC": 1800000000000,
+        "ETH": 420000000000,
+        ...
+    }
+    """
+
+    base_coins = sorted({str(x).upper().strip() for x in base_coins if x})
+    now = time.time()
+
+    # если кэш свежий и там уже есть все нужные монеты — используем его
+    if _market_cap_cache["data"] and (now - _market_cap_cache["ts"] < MARKET_CAP_CACHE_TTL_SEC):
+        cached = _market_cap_cache["data"]
+        if all(c in cached for c in base_coins):
+            return cached
+
+    fresh = {}
+
+    for chunk in _chunked(base_coins, 50):
+        try:
+            r = requests.get(
+                "https://api.coingecko.com/api/v3/coins/markets",
+                params={
+                    "vs_currency": "usd",
+                    "symbols": ",".join(x.lower() for x in chunk),
+                    "include_tokens": "top",
+                    "order": "market_cap_desc",
+                    "per_page": 250,
+                    "page": 1,
+                },
+                headers=_get_coingecko_headers(),
+                timeout=20,
+            )
+            r.raise_for_status()
+            rows = r.json()
+
+            for row in rows:
+                sym = str(row.get("symbol", "")).upper().strip()
+                mcap = row.get("market_cap")
+
+                if sym and mcap is not None:
+                    try:
+                        fresh[sym] = float(mcap)
+                    except:
+                        pass
+
+        except Exception as e:
+            print(f"[MARKET_CAP] CoinGecko request error: {e}")
+
+    # обновляем кэш только если реально что-то получили
+    if fresh:
+        _market_cap_cache["data"] = fresh
+        _market_cap_cache["ts"] = now
+
+    return _market_cap_cache["data"]
+
+def is_market_cap_ok(symbol: str, market_caps: dict) -> bool:
+    base = get_base_coin(symbol)
+    mcap = market_caps.get(base)
+
+    # если капитализацию не нашли — монету не берём
+    if mcap is None:
+        return False
+
+    return mcap >= MARKET_CAP_MIN_USD
+
+
+import time
+import requests
+
+def bybit_get(url, params, retries=3):
+
 
 import time
 import requests
