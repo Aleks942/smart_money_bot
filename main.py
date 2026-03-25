@@ -252,12 +252,6 @@ import time
 import requests
 
 def bybit_get(url, params, retries=3):
-
-
-import time
-import requests
-
-def bybit_get(url, params, retries=3):
     for attempt in range(retries):
         try:
             r = requests.get(url, params=params, timeout=10)
