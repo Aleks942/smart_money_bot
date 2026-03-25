@@ -2736,7 +2736,6 @@ def msg_medium(sig):
     target = sig.get("target")
     flags = sig.get("flags", [])
 
-    # ✅ добавили tier в начало
     lines.append(f"{tier}")
     lines.append(f"🧠 RADAR MEDIUM — {fmt_symbol(inst)}")
     lines.append(f"💵 {price:.6g}")
@@ -2748,12 +2747,12 @@ def msg_medium(sig):
             f"20={sig.get('ema20'):.6g} | "
             f"50={sig.get('ema50'):.6g} | "
             f"200={sig.get('ema200'):.6g}"
-    )
+        )
 
- if sig.get("rsi7") is not None and sig.get("rsi14") is not None:
-     lines.append(
-         f"📍 RSI7={sig['rsi7']:.1f} | RSI14={sig['rsi14']:.1f} | {sig.get('rsi_state', 'UNKNOWN')}"
-     )
+    if sig.get("rsi7") is not None and sig.get("rsi14") is not None:
+        lines.append(
+            f"📍 RSI7={sig['rsi7']:.1f} | RSI14={sig['rsi14']:.1f} | {sig.get('rsi_state', 'UNKNOWN')}"
+        )
 
     lines.append(f"📊 {score}/10 | {direction} (up={up_w}, down={down_w}) | acc={acc}")
     lines.append(f"🎯 ENTRY: {entry} — {entry_reason}")
@@ -2777,7 +2776,7 @@ def msg_medium(sig):
         lines.append(
             f"📍 Entry zone: {ez.get('zone_type')} | {ez.get('low'):.6g} → {ez.get('high'):.6g} | stop {ez.get('stop'):.6g}"
         )
-    
+
     if flags:
         lines.append("Flags:")
         for f in flags[:14]:
