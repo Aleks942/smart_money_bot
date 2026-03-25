@@ -1990,6 +1990,9 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
     )
     
     if safe_cond:
+        if too_close_to_target(price, target, min_room_pct=0.35):
+            return "🔴 WAIT", "Слишком близко к цели — SAFE ENTRY поздний"
+
         return "🟢 SAFE ENTRY", "Подтверждение + импульс по направлению"
 
     # =========================
