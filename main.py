@@ -2860,14 +2860,14 @@ def msg_full(sig):
         )
 
     if sig.get("rsi7") is not None and sig.get("rsi14") is not None:
-    lines.append(f"📍 RSI7={sig['rsi7']:.1f} | RSI14={sig['rsi14']:.1f} | {sig.get('rsi_state', 'UNKNOWN')}")
+        lines.append(f"📍 RSI7={sig['rsi7']:.1f} | RSI14={sig['rsi14']:.1f} | {sig.get('rsi_state', 'UNKNOWN')}")
 
-    lines.append(f"📊 Score: {sig['score']}/10 | acc={sig.get('acc_score', 0)}")
-    lines.append(f"🎯 Direction: {sig['direction']} (up={sig['up_w']}, down={sig['down_w']})")
-    lines.append(f"🎯 ENTRY: {sig['entry']} — {sig['entry_reason']}")
-    lines.append(f"🧬 STAGE: {sig['stage']} — {sig['stage_reason']}")
-
-    pm = sig.get("pmeta") or {}
+        lines.append(f"📊 Score: {sig['score']}/10 | acc={sig.get('acc_score', 0)}")
+        lines.append(f"🎯 Direction: {sig['direction']} (up={sig['up_w']}, down={sig['down_w']})")
+        lines.append(f"🎯 ENTRY: {sig['entry']} — {sig['entry_reason']}")
+        lines.append(f"🧬 STAGE: {sig['stage']} — {sig['stage_reason']}")
+    
+        pm = sig.get("pmeta") or {}
     if pm.get("range_lo") is not None and pm.get("range_hi") is not None and pm.get("range_pct") is not None:
         lines.append(f"🧲 Range(lookback): {pm['range_lo']:.6g} → {pm['range_hi']:.6g} | width≈{pm['range_pct']:.2f}%")
 
