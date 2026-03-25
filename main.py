@@ -1631,10 +1631,10 @@ def direction_hint(flags):
 
 def entry_engine(score, flags, direction_text, up_w, down_w, rsi7):
 
-   if "БАЛАНС" in direction_text:
-    return "🔴 WAIT", "Нет явного направления"
-
-   strong_confirmed_impulse = (
+    if "БАЛАНС" in direction_text:
+        return "🔴 WAIT", "Нет явного направления"
+    
+    strong_confirmed_impulse = (
         ("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags)
         and ("ATR_EXPANSION" in flags or "VOL_SPIKE" in flags)
     )
