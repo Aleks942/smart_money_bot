@@ -3565,7 +3565,7 @@ if __name__ == "__main__":
                         f"flags={sig.get('flags')}"
                     )
 
-                    if is_entry_signal(sig):
+                    if is_entry_signal(sig) and not has_open_similar_signal(sig):
                         save_signal(sig)
 
                     # =====================
