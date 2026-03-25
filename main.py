@@ -2587,15 +2587,6 @@ def pro_edge_filter(sig, regime):
         if float(range_pct) < float(PRO_EDGE_MIN_RANGE_PCT) and score < EDGE_MID_SCORE:
             return False
 
-    if PRO_EDGE_REQUIRE_IMPULSE:
-        strong_impulse = (
-            ("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags) or
-            ("ATR_EXPANSION" in flags and "VOL_SPIKE" in flags) or
-            ("VOL_SPIKE" in flags and ("BREAKOUT_UP" in flags or "BREAKOUT_DOWN" in flags))
-        )
-        if not strong_impulse:
-            return False
-
         if PRO_EDGE_REQUIRE_IMPULSE:
         strong_impulse = (
             ("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags) or
