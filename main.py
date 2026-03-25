@@ -1508,12 +1508,7 @@ def calc_rsi(closes, period=14):
 
     rs = avg_gain / avg_loss
     return 100.0 - (100.0 / (1.0 + rs))
-
-
-def get_rsi_state(candles):
-
-
-
+    
 def get_rsi_state(candles):
 
     closes = extract_closes(candles)
