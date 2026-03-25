@@ -3282,11 +3282,24 @@ def is_pre_trigger(sig):
     flags = set(sig.get("flags", []))
     acc = int(sig.get("acc_score", 0))
     score = float(sig.get("score", 0))
+    direction = str(sig.get("direction", ""))
+    ema_state = sig.get("ema_state", "EMA_UNKNOWN")
+
     if score < 5:
         return False
-    
 
     if acc < TRIGGER_PRE_ACC:
+        return False
+
+    # не даём PRE в полном балансе
+    if "БАЛАНС" in direction:
+        return False
+
+    # не даём PRE против явного EMA-тренда
+    if "ВВЕРХ" in direction and ema_state == "EMA_BEAR":
+        return False
+
+    if "ВНИЗ" in direction and ema_state == "EMA_BULL":
         return False
 
     # если уже есть импульс — это уже не PRE
@@ -3310,6 +3323,7 @@ def is_pre_trigger(sig):
     )
 
     near = ("NEAR_BREAKOUT_UP" in flags) or ("NEAR_BREAKOUT_DOWN" in flags)
+
     return (accumulation and liquidity) or (near and liquidity)
 def is_start_trigger(sig):
     flags = set(sig.get("flags", []))
