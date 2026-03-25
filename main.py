@@ -2276,7 +2276,8 @@ def build_signal(instId):
     direction_code = direction_code_from_text(direction_text)
 
     entry, entry_reason = entry_engine(
-        score, flags, direction_text, up_w, down_w, rsi7
+        score, flags, direction_text, up_w, down_w, rsi7, ema_state
+    )
     )
     entry_zone = calc_entry_zone(price, pmeta, flags, direction_code)
 
