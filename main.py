@@ -37,7 +37,7 @@ EDGE_HIGH_SCORE = int(os.getenv("EDGE_HIGH_SCORE") or "7")
 POLL_SECONDS = int(os.getenv("POLL_SECONDS") or "60")
 TIMEOUT = int(os.getenv("TIMEOUT") or "12")
 STATE_FILE = os.getenv("STATE_FILE") or "state.json"
-RESULT_CHECK_SEC = int(os.getenv("RESULT_CHECK_SEC") or "900")
+RESULT_CHECK_SEC = int(os.getenv("RESULT_CHECK_SEC") or "1200")
 
 SCAN_TOP_N = int(os.getenv("SCAN_TOP_N") or "300")
 SCAN_MIN_VOL_USDT = float(os.getenv("SCAN_MIN_VOL_USDT") or "800000")
