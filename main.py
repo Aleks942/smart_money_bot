@@ -2739,7 +2739,7 @@ def msg_medium(sig):
     lines.append(f"{tier}")
     lines.append(f"🧠 RADAR MEDIUM — {fmt_symbol(inst)}")
     lines.append(f"💵 {price:.6g}")
-    lines.append(f"🎯 Expected move: {sig.get('exp_move_min',0)}–{sig.get('exp_move_max',0)}%")
+    lines.append(f"🎯 Expected move: {sig.get('exp_move_min', 0)}–{sig.get('exp_move_max', 0)}%")
 
     if sig.get("ema_state") and sig.get("ema20") is not None and sig.get("ema50") is not None and sig.get("ema200") is not None:
         lines.append(
