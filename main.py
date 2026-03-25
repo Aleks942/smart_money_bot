@@ -2193,18 +2193,6 @@ def build_signal(instId):
 
     return signal
 
-        "rsi7": rsi7,
-        "rsi14": rsi14,
-        "rsi_state": rsi_state.get("state"),
-        "ts": now_ts(),
-        "created_at": time.time(),
-    }
-
-    signal["sniper"] = sniper_signal(signal)
-
-    return signal
-
-
 # ==============================
 # 🎯 SNIPER SIGNAL ENGINE
 # ==============================
