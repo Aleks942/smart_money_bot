@@ -2147,9 +2147,9 @@ def build_signal(instId):
     if score < MIN_SCORE:
         return None
 
-   # =========================
-# SIGNAL OBJECT
-# =========================
+    # =========================
+    # SIGNAL OBJECT
+    # =========================
 
     tier = get_signal_tier(score, acc_score)
 
