@@ -2270,8 +2270,8 @@ def get_market_candidates_bybit():
         raw_candidates.append((instId, vol_usdt, pct))
 
     if not raw_candidates:
-    print("[MARKET_CAP] no raw candidates before market cap filter")
-    return []
+        print("[MARKET_CAP] no raw candidates before market cap filter")
+        return []
 
     raw_candidates.sort(key=lambda x: (x[1], abs(x[2])), reverse=True)
     
