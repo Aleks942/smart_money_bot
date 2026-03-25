@@ -1508,9 +1508,78 @@ def calc_rsi(closes, period=14):
 
     rs = avg_gain / avg_loss
     return 100.0 - (100.0 / (1.0 + rs))
-    
-def get_rsi_state(candles):
 
+
+def calc_ema(values, period):
+    if not values or len(values) < period:
+        return None
+
+    try:
+        values = [float(x) for x in values]
+    except Exception:
+        return None
+
+    k = 2.0 / (period + 1.0)
+    ema = sum(values[:period]) / period
+
+    for v in values[period:]:
+        ema = (v * k) + (ema * (1.0 - k))
+
+    return ema
+
+
+def get_ema_trend(candles):
+    closes = extract_closes(candles)
+
+    if not closes or len(closes) < 200:
+        return {
+            "ema20": None,
+            "ema50": None,
+            "ema200": None,
+            "price": None,
+            "state": "EMA_UNKNOWN",
+        }
+
+    try:
+        price = float(closes[-1])
+        ema20 = calc_ema(closes, 20)
+        ema50 = calc_ema(closes, 50)
+        ema200 = calc_ema(closes, 200)
+    except Exception:
+        return {
+            "ema20": None,
+            "ema50": None,
+            "ema200": None,
+            "price": None,
+            "state": "EMA_UNKNOWN",
+        }
+
+    if ema20 is None or ema50 is None or ema200 is None:
+        return {
+            "ema20": ema20,
+            "ema50": ema50,
+            "ema200": ema200,
+            "price": price,
+            "state": "EMA_UNKNOWN",
+        }
+
+    if price > ema20 > ema50 > ema200:
+        state = "EMA_BULL"
+    elif price < ema20 < ema50 < ema200:
+        state = "EMA_BEAR"
+    else:
+        state = "EMA_MIXED"
+
+    return {
+        "ema20": ema20,
+        "ema50": ema50,
+        "ema200": ema200,
+        "price": price,
+        "state": state,
+    }
+
+
+def get_rsi_state(candles):
     closes = extract_closes(candles)
 
     if not closes or len(closes) < max(RSI_FAST_LEN, RSI_SLOW_LEN) + 5:
@@ -1533,16 +1602,12 @@ def get_rsi_state(candles):
     state = "NORMAL"
 
     if rsi7 is not None and rsi14 is not None:
-
         if rsi7 >= RSI_OB_BLOCK and rsi14 >= RSI_OB_WARN:
             state = "EXTREME_OVERBOUGHT"
-
         elif rsi7 <= RSI_OS_BLOCK and rsi14 <= RSI_OS_WARN:
             state = "EXTREME_OVERSOLD"
-
         elif rsi7 >= RSI_OB_WARN:
             state = "OVERBOUGHT"
-
         elif rsi7 <= RSI_OS_WARN:
             state = "OVERSOLD"
 
