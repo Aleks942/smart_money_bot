@@ -2363,15 +2363,15 @@ def build_signal(instId):
     direction_text, reasons, up_w, down_w = direction_hint(flags)
     direction_code = direction_code_from_text(direction_text)
 
+    tgt = liquidity_target(pmeta, flags, price)
+
     entry, entry_reason = entry_engine(
-    score, flags, direction_text, up_w, down_w, rsi7, ema_state, price, tgt
+        score, flags, direction_text, up_w, down_w, rsi7, ema_state, price, tgt
     )
-    
+
     entry_zone = calc_entry_zone(price, pmeta, flags, direction_code)
 
     stage, stage_reason = smart_money_stage(score, flags)
-
-    tgt = liquidity_target(pmeta, flags, price)
 
     # =========================
     # EXPECTED MOVE
