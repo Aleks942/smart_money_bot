@@ -3010,7 +3010,7 @@ if __name__ == "__main__":
     # SCAN SETTINGS
     # =====================
 
-    SCAN_BATCH = int(os.getenv("SCAN_BATCH") or "20")
+    SCAN_BATCH = int(os.getenv("SCAN_BATCH") or "25")
     scan_index = 0
 
     try:
