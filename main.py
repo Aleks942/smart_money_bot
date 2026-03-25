@@ -1989,10 +1989,20 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state):
     # =========================
     # AGGRESSIVE ENTRY
     # =========================
-    if score >= EDGE_MID_SCORE and any(
-        f.startswith("BREAKOUT") or f.startswith("PRESSURE")
-        for f in flags
-    ):
+    aggressive_setup = (
+        score >= EDGE_MID_SCORE and any(
+            f.startswith("BREAKOUT") or f.startswith("PRESSURE")
+            for f in flags
+        )
+    )
+
+    if aggressive_setup:
+        if direction_text == "⬆️ ВВЕРХ" and ema_state == "EMA_BEAR":
+            return "🔴 WAIT", "Ранний вход против EMA-тренда вниз"
+
+        if direction_text == "⬇️ ВНИЗ" and ema_state == "EMA_BULL":
+            return "🔴 WAIT", "Ранний вход против EMA-тренда вверх"
+
         return "🟡 AGGRESSIVE", "Ранний вход по структуре"
 
     return "🔴 WAIT", "Недостаточно факторов"
