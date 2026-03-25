@@ -1921,6 +1921,15 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state):
         return "🔴 WAIT", "RSI перепродан — возможен ложный пролив"
 
     # =========================
+    # EMA TREND FILTER
+    # =========================
+    if direction_text == "⬆️ ВВЕРХ" and ema_state == "EMA_BEAR":
+        return "🔴 WAIT", "Сигнал против EMA-тренда вниз"
+
+    if direction_text == "⬇️ ВНИЗ" and ema_state == "EMA_BULL":
+        return "🔴 WAIT", "Сигнал против EMA-тренда вверх"
+
+    # =========================
     # SAFE ENTRY
     # =========================
     
