@@ -2596,7 +2596,7 @@ def pro_edge_filter(sig, regime):
         if not strong_impulse:
             return False
 
-      if PRO_EDGE_REQUIRE_IMPULSE:
+        if PRO_EDGE_REQUIRE_IMPULSE:
         strong_impulse = (
             ("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags) or
             ("ATR_EXPANSION" in flags and "VOL_SPIKE" in flags) or
@@ -2605,6 +2605,13 @@ def pro_edge_filter(sig, regime):
         if not strong_impulse:
             return False
 
+    # EMA trend filter
+    if "ВВЕРХ" in direction and ema_state == "EMA_BEAR" and score < EDGE_HIGH_SCORE:
+        return False
+
+    if "ВНИЗ" in direction and ema_state == "EMA_BULL" and score < EDGE_HIGH_SCORE:
+        return False
+
     # BTC bias (чуть сильнее)
     if regime == "RISK_OFF" and "ВВЕРХ" in direction:
         return False
@@ -2612,6 +2619,8 @@ def pro_edge_filter(sig, regime):
         return False
 
     return True
+
+      
 
 # =========================
 # TRADER INTERPRETATION
