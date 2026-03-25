@@ -2555,6 +2555,7 @@ def pro_edge_filter(sig, regime):
     score = int(sig.get("score", 0))
     direction = sig.get("direction", "")
     acc = int(sig.get("acc_score", 0))
+    ema_state = sig.get("ema_state", "EMA_UNKNOWN")
 
     # 🔥 фильтр реального импульса
     real_impulse = (
