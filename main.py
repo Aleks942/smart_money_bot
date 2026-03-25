@@ -2267,6 +2267,46 @@ def get_market_candidates_bybit():
     filtered_candidates.sort(key=lambda x: (x[1], abs(x[2])), reverse=True)
     return filtered_candidates[:SCAN_TOP_N]
 
+def get_market_candidates():
+    if is_bybit():
+        return get_market_candidates_bybit()
+
+    tickers = get_okx_spot_usdt_tickers()
+    cands = []
+
+    for t in tickers:
+        instId = t.get("instId", "")
+
+        if not instId.endswith(f"-{QUOTE}"):
+            continue
+
+        if is_bad_symbol(instId):
+            continue
+
+        try:
+            vol_usdt = float(t.get("volCcy24h") or 0.0)
+        except:
+            vol_usdt = 0.0
+
+        try:
+            last = float(t.get("last") or 0.0)
+            open24 = float(t.get("open24h") or 0.0)
+            pct = (last - open24) / open24 * 100.0 if open24 > 0 else 0.0
+        except:
+            pct = 0.0
+
+        if vol_usdt < SCAN_MIN_VOL_USDT:
+            continue
+
+        if not ACCUMULATION_MODE:
+            if abs(pct) < SCAN_MIN_PCT_24H:
+                continue
+
+        cands.append((instId, vol_usdt, pct))
+
+    cands.sort(key=lambda x: (x[1], abs(x[2])), reverse=True)
+    return cands[:SCAN_TOP_N]
+
 # =========================
 # BTC MARKET REGIME (V2)
 # =========================
