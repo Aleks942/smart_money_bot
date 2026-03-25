@@ -2207,11 +2207,16 @@ def is_bad_symbol(instId: str) -> bool:
 def get_market_candidates_bybit():
     tickers = get_bybit_tickers_linear()
     print("BYBIT TICKERS COUNT:", len(tickers))
-    cands = []
+
+    raw_candidates = []
 
     for t in tickers:
         sym = t.get("symbol", "")
+
         if not sym.endswith("USDT"):
+            continue
+
+        if is_bad_symbol(sym):
             continue
 
         try:
@@ -2234,51 +2239,33 @@ def get_market_candidates_bybit():
                 continue
 
         instId = sym  # BYBIT symbol format, e.g. BTCUSDT
-        cands.append((instId, vol_usdt, pct))
+        raw_candidates.append((instId, vol_usdt, pct))
 
-    cands.sort(key=lambda x: (x[1], abs(x[2])), reverse=True)
-    return cands[:SCAN_TOP_N]
+    if not raw_candidates:
+        print("[MARKET_CAP] no raw candidates before market cap filter")
+        return []
 
-def get_market_candidates():
-    if is_bybit():
-        return get_market_candidates_bybit()
+    base_coins = [get_base_coin(instId) for instId, _, _ in raw_candidates]
+    market_caps = fetch_market_caps_usd(base_coins)
 
+    if not market_caps:
+        print("[MARKET_CAP] CoinGecko returned no market cap data")
+        return []
 
-    tickers = get_okx_spot_usdt_tickers()
-    cands = []
-    for t in tickers:
-        instId = t.get("instId", "")
-        if not instId.endswith(f"-{QUOTE}"):
-            continue
-        if is_bad_symbol(instId):
-            continue
+    filtered_candidates = []
 
-        try:
-            vol_usdt = float(t.get("volCcy24h") or 0.0)
-        except:
-            vol_usdt = 0.0
+    for instId, vol_usdt, pct in raw_candidates:
+        if is_market_cap_ok(instId, market_caps):
+            filtered_candidates.append((instId, vol_usdt, pct))
 
-        try:
-            last = float(t.get("last") or 0.0)
-            open24 = float(t.get("open24h") or 0.0)
-            if open24 > 0:
-                pct = (last - open24) / open24 * 100.0
-            else:
-                pct = 0.0
-        except:
-            pct = 0.0
+    print(
+        f"[MARKET_CAP] raw={len(raw_candidates)} "
+        f"passed={len(filtered_candidates)} "
+        f"threshold={MARKET_CAP_MIN_USD}"
+    )
 
-        if vol_usdt < SCAN_MIN_VOL_USDT:
-            continue
-
-        if not ACCUMULATION_MODE:
-            if abs(pct) < SCAN_MIN_PCT_24H:
-                continue
-
-        cands.append((instId, vol_usdt, pct))
-
-    cands.sort(key=lambda x: (x[1], abs(x[2])), reverse=True)
-    return cands[:SCAN_TOP_N]
+    filtered_candidates.sort(key=lambda x: (x[1], abs(x[2])), reverse=True)
+    return filtered_candidates[:SCAN_TOP_N]
 
 # =========================
 # BTC MARKET REGIME (V2)
