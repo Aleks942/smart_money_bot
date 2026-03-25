@@ -2568,9 +2568,8 @@ def pro_edge_filter(sig, regime):
     if not real_impulse and score < EDGE_HIGH_SCORE:
         return False
 
-    # Expected move filter (NEW)
+    # Expected move filter
     exp_max = float(sig.get("exp_move_max") or 0.0)
-    
     if exp_max < PRE_MIN_EXPECTED_MOVE_PCT and score < EDGE_MID_SCORE:
         return False
 
@@ -2587,7 +2586,7 @@ def pro_edge_filter(sig, regime):
         if float(range_pct) < float(PRO_EDGE_MIN_RANGE_PCT) and score < EDGE_MID_SCORE:
             return False
 
-        if PRO_EDGE_REQUIRE_IMPULSE:
+    if PRO_EDGE_REQUIRE_IMPULSE:
         strong_impulse = (
             ("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags) or
             ("ATR_EXPANSION" in flags and "VOL_SPIKE" in flags) or
@@ -2603,11 +2602,14 @@ def pro_edge_filter(sig, regime):
     if "ВНИЗ" in direction and ema_state == "EMA_BULL" and score < EDGE_HIGH_SCORE:
         return False
 
-    # BTC bias (чуть сильнее)
+    # BTC bias
     if regime == "RISK_OFF" and "ВВЕРХ" in direction:
         return False
+
     if regime == "RISK_ON" and "ВНИЗ" in direction:
         return False
+
+    return True
 
     return True
 
@@ -2615,6 +2617,7 @@ def pro_edge_filter(sig, regime):
 
 # =========================
 # TRADER INTERPRETATION
+# =========================
 
     # BTC bias (чуть сильнее)
     if regime == "RISK_OFF" and "ВВЕРХ" in direction:
