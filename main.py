@@ -2742,10 +2742,20 @@ def msg_medium(sig):
     lines.append(f"💵 {price:.6g}")
     lines.append(f"🎯 Expected move: {sig.get('exp_move_min',0)}–{sig.get('exp_move_max',0)}%")
 
-    if sig.get("rsi7") is not None and sig.get("rsi14") is not None:
+    lines.append(f"🎯 Expected move: {sig.get('exp_move_min',0)}–{sig.get('exp_move_max',0)}%")
+
+    if sig.get("ema_state") and sig.get("ema20") is not None and sig.get("ema50") is not None and sig.get("ema200") is not None:
         lines.append(
-            f"📍 RSI7={sig['rsi7']:.1f} | RSI14={sig['rsi14']:.1f} | {sig.get('rsi_state', 'UNKNOWN')}"
+            f"📈 EMA: {sig.get('ema_state')} | "
+            f"20={sig.get('ema20'):.6g} | "
+            f"50={sig.get('ema50'):.6g} | "
+            f"200={sig.get('ema200'):.6g}"
         )
+
+if sig.get("rsi7") is not None and sig.get("rsi14") is not None:
+    lines.append(
+        f"📍 RSI7={sig['rsi7']:.1f} | RSI14={sig['rsi14']:.1f} | {sig.get('rsi_state', 'UNKNOWN')}"
+    )
 
     lines.append(f"📊 {score}/10 | {direction} (up={up_w}, down={down_w}) | acc={acc}")
     lines.append(f"🎯 ENTRY: {entry} — {entry_reason}")
@@ -2844,8 +2854,16 @@ def msg_full(sig):
 
     lines.append(f"🎯 Expected move: {sig.get('exp_move_min',0)}–{sig.get('exp_move_max',0)}%")
 
-    if sig.get("rsi7") is not None and sig.get("rsi14") is not None:
-        lines.append(f"📍 RSI7={sig['rsi7']:.1f} | RSI14={sig['rsi14']:.1f} | {sig.get('rsi_state', 'UNKNOWN')}")
+    if sig.get("ema_state") and sig.get("ema20") is not None and sig.get("ema50") is not None and sig.get("ema200") is not None:
+        lines.append(
+            f"📈 EMA: {sig.get('ema_state')} | "
+            f"20={sig.get('ema20'):.6g} | "
+            f"50={sig.get('ema50'):.6g} | "
+            f"200={sig.get('ema200'):.6g}"
+        )
+
+if sig.get("rsi7") is not None and sig.get("rsi14") is not None:
+    lines.append(f"📍 RSI7={sig['rsi7']:.1f} | RSI14={sig['rsi14']:.1f} | {sig.get('rsi_state', 'UNKNOWN')}")
 
     lines.append(f"📊 Score: {sig['score']}/10 | acc={sig.get('acc_score', 0)}")
     lines.append(f"🎯 Direction: {sig['direction']} (up={sig['up_w']}, down={sig['down_w']})")
