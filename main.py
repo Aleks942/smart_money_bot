@@ -2596,6 +2596,26 @@ def pro_edge_filter(sig, regime):
         if not strong_impulse:
             return False
 
+      if PRO_EDGE_REQUIRE_IMPULSE:
+        strong_impulse = (
+            ("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags) or
+            ("ATR_EXPANSION" in flags and "VOL_SPIKE" in flags) or
+            ("VOL_SPIKE" in flags and ("BREAKOUT_UP" in flags or "BREAKOUT_DOWN" in flags))
+        )
+        if not strong_impulse:
+            return False
+
+    # BTC bias (чуть сильнее)
+    if regime == "RISK_OFF" and "ВВЕРХ" in direction:
+        return False
+    if regime == "RISK_ON" and "ВНИЗ" in direction:
+        return False
+
+    return True
+
+# =========================
+# TRADER INTERPRETATION
+
     # BTC bias (чуть сильнее)
     if regime == "RISK_OFF" and "ВВЕРХ" in direction:
         return False
