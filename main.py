@@ -178,6 +178,7 @@ def _get_coingecko_headers():
 
     return headers
 
+
 def fetch_market_caps_usd(base_coins):
     """
     Возвращает словарь:
@@ -191,6 +192,9 @@ def fetch_market_caps_usd(base_coins):
     base_coins = sorted({str(x).upper().strip() for x in base_coins if x})
     now = time.time()
 
+    if not base_coins:
+        return {}
+
     # если кэш свежий и там уже есть все нужные монеты — используем его
     if _market_cap_cache["data"] and (now - _market_cap_cache["ts"] < MARKET_CAP_CACHE_TTL_SEC):
         cached = _market_cap_cache["data"]
@@ -198,41 +202,65 @@ def fetch_market_caps_usd(base_coins):
             return cached
 
     fresh = {}
+    chunk_size = 50
+    request_sleep_sec = float(os.getenv("MARKET_CAP_REQUEST_SLEEP_SEC", "1.5"))
+    retry_sleep_sec = float(os.getenv("MARKET_CAP_RETRY_SLEEP_SEC", "4"))
+    max_retries = int(os.getenv("MARKET_CAP_MAX_RETRIES", "3"))
 
-    for chunk in _chunked(base_coins, 50):
-        try:
-            r = requests.get(
-                "https://api.coingecko.com/api/v3/coins/markets",
-                params={
-                    "vs_currency": "usd",
-                    "symbols": ",".join(x.lower() for x in chunk),
-                    "include_tokens": "top",
-                    "order": "market_cap_desc",
-                    "per_page": 250,
-                    "page": 1,
-                },
-                headers=_get_coingecko_headers(),
-                timeout=20,
-            )
-            r.raise_for_status()
-            rows = r.json()
+    for chunk in _chunked(base_coins, chunk_size):
+        success = False
 
-            for row in rows:
-                sym = str(row.get("symbol", "")).upper().strip()
-                mcap = row.get("market_cap")
+        for attempt in range(max_retries):
+            try:
+                r = requests.get(
+                    "https://api.coingecko.com/api/v3/coins/markets",
+                    params={
+                        "vs_currency": "usd",
+                        "symbols": ",".join(x.lower() for x in chunk),
+                        "include_tokens": "top",
+                        "order": "market_cap_desc",
+                        "per_page": 250,
+                        "page": 1,
+                    },
+                    headers=_get_coingecko_headers(),
+                    timeout=20,
+                )
 
-                if sym and mcap is not None:
-                    try:
-                        fresh[sym] = float(mcap)
-                    except:
-                        pass
+                if r.status_code == 429:
+                    print(f"[MARKET_CAP] 429 rate limit on chunk, retry {attempt + 1}/{max_retries}")
+                    time.sleep(retry_sleep_sec * (attempt + 1))
+                    continue
 
-        except Exception as e:
-            print(f"[MARKET_CAP] CoinGecko request error: {e}")
+                r.raise_for_status()
+                rows = r.json()
+
+                for row in rows:
+                    sym = str(row.get("symbol", "")).upper().strip()
+                    mcap = row.get("market_cap")
+
+                    if sym and mcap is not None:
+                        try:
+                            fresh[sym] = float(mcap)
+                        except:
+                            pass
+
+                success = True
+                break
+
+            except Exception as e:
+                print(f"[MARKET_CAP] CoinGecko request error: {e}")
+                time.sleep(retry_sleep_sec * (attempt + 1))
+
+        if not success:
+            print(f"[MARKET_CAP] failed chunk: {chunk}")
+
+        time.sleep(request_sleep_sec)
 
     # обновляем кэш только если реально что-то получили
     if fresh:
-        _market_cap_cache["data"] = fresh
+        merged = dict(_market_cap_cache["data"])
+        merged.update(fresh)
+        _market_cap_cache["data"] = merged
         _market_cap_cache["ts"] = now
 
     return _market_cap_cache["data"]
