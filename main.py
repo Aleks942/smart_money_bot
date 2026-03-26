@@ -3927,7 +3927,7 @@ if __name__ == "__main__":
                         and (not recent_safe_lock)
                         and (not recent_start_lock)
                         and (not start_ready)
-                        and is_early_pressure_alert(sig)
+                        and early_ready
                         and can_alert_now
                     ):
                         send_telegram(msg_early_pressure(sig))
