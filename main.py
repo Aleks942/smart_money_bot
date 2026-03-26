@@ -1885,6 +1885,11 @@ def direction_hint(flags):
 
     if "PRESSURE_UP" in flags:
         up += 1; reasons.append("Давление к верху (+1)")
+
+    if "CONTINUATION_UP" in flags:
+        up += 2; reasons.append("Продолжение ВВЕРХ (+2)")
+    if "CONTINUATION_DOWN" in flags:
+        down += 2; reasons.append("Продолжение ВНИЗ (+2)")
     if "PRESSURE_DOWN" in flags:
         down += 1; reasons.append("Давление к низу (+1)")
 
@@ -1907,13 +1912,13 @@ def direction_hint(flags):
         down += 1; reasons.append("ATR ускорил ВНИЗ (+1)")
 
     if "OB_BIDS" in flags:
-        up += 1; reasons.append("Стакан: перевес BID (+1)")
+        up += 0.5; reasons.append("Стакан: перевес BID (+0.5)")
     if "OB_ASKS" in flags:
-        down += 1; reasons.append("Стакан: перевес ASK (+1)")
+        down += 0.5; reasons.append("Стакан: перевес ASK (+0.5)")
     if "OB_WALL_BID" in flags:
-        up += 1; reasons.append("Стена BID (+1)")
+        up += 0.5; reasons.append("Стена BID (+0.5)")
     if "OB_WALL_ASK" in flags:
-        down += 1; reasons.append("Стена ASK (+1)")
+        down += 0.5; reasons.append("Стена ASK (+0.5)")
 
     if up >= down + 2:
         return "⬆️ ВВЕРХ", reasons, up, down
