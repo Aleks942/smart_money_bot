@@ -3860,7 +3860,14 @@ if __name__ == "__main__":
                     start_ready = is_start_trigger(sig)
                     pre_ready = is_pre_trigger(sig)
                     confirm_ready = is_confirm_trigger(sig)
+                    early_ready = is_early_pressure_alert(sig)
                     recent_start_lock = start_trigger_recent(state, instId)
+                    
+                    if early_ready:
+                        if sig.get("early_pressure_side") == "BUY":
+                            early_buy_symbols.append(fmt_symbol(instId))
+                        elif sig.get("early_pressure_side") == "SELL":
+                            early_sell_symbols.append(fmt_symbol(instId))
                     
                     sent_main_now = False
                     sent_pre_now = False
