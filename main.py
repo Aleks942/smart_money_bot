@@ -3585,6 +3585,37 @@ def msg_confirm_trigger(sig):
     lines.append("Условия: CONFIRM + ATR + VOL (шанс продолжения выше).")
     return "\n".join(lines)
 
+# =========================
+# EARLY PRESSURE MESSAGE
+# =========================
+def msg_early_pressure(sig):
+    sym = fmt_symbol(sig["instId"])
+    side = sig.get("early_pressure_side", "?")
+    ep_score = sig.get("early_pressure_score", 0)
+    label = sig.get("early_pressure_label", "EARLY_PRESSURE")
+    reasons = sig.get("early_pressure_reasons", [])
+
+    arrow = "⬆️ BUY PRESSURE" if side == "BUY" else "⬇️ SELL PRESSURE"
+
+    lines = []
+    lines.append(f"🟠 {label} — {sym}")
+    lines.append(f"💵 {sig['price']:.6g} | pressure_score={ep_score}")
+    lines.append(f"🧭 {arrow} | {sig.get('direction', '')}")
+    lines.append(f"🧬 STAGE: {sig.get('stage', '')}")
+    lines.append(f"🎯 ENTRY: {sig.get('entry', '')}")
+
+    if sig.get("target") is not None:
+        lines.append(f"🎯 ликвидность/цель: {sig['target']:.6g}")
+
+    if reasons:
+        lines.append("Причины:")
+        for r in reasons[:6]:
+            lines.append(f"• {r}")
+
+    lines.append("Действие: открыть график и смотреть вход по малому риску. Это раннее давление, не confirm.")
+
+    return "\n".join(lines)
+
 def check_signal_results():
 
     open_signals = get_open_signals()
