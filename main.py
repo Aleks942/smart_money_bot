@@ -3851,6 +3851,7 @@ if __name__ == "__main__":
                     sent_main_now = False
                     sent_pre_now = False
                     sent_start_now = False
+                    sent_early_now = False
                     
                     # SEND
                     
