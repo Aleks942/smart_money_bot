@@ -3908,6 +3908,8 @@ if __name__ == "__main__":
                     if (
                         (not sent_main_now)
                         and (not recent_safe_lock)
+                        and (not recent_start_lock)
+                        and (not start_ready)
                         and is_early_pressure_alert(sig)
                         and can_alert_now
                     ):
