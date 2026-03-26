@@ -2099,6 +2099,127 @@ def smart_money_stage(score, flags):
 
     return "⚪ NEUTRAL", "Смешанные признаки"
 
+    # =========================
+    # EARLY PRESSURE DETECTOR
+    # =========================
+def detect_early_pressure(sig):
+    flags = set(sig.get("flags", []))
+    stage = str(sig.get("stage", ""))
+    ema_state = sig.get("ema_state", "EMA_MIXED")
+
+    up_score = 0
+    down_score = 0
+    up_reasons = []
+    down_reasons = []
+
+    def add_up(points, reason):
+        nonlocal up_score
+        up_score += points
+        up_reasons.append(reason)
+
+    def add_down(points, reason):
+        nonlocal down_score
+        down_score += points
+        down_reasons.append(reason)
+
+    # -------------------------
+    # CORE DIRECTIONAL SIGNALS
+    # -------------------------
+    if "PRESSURE_UP" in flags:
+        add_up(3, "PRESSURE_UP")
+    if "PRESSURE_DOWN" in flags:
+        add_down(3, "PRESSURE_DOWN")
+
+    if "CONTINUATION_UP" in flags:
+        add_up(2, "CONTINUATION_UP")
+    if "CONTINUATION_DOWN" in flags:
+        add_down(2, "CONTINUATION_DOWN")
+
+    if "BREAKOUT_UP" in flags:
+        add_up(2, "BREAKOUT_UP")
+    if "BREAKOUT_DOWN" in flags:
+        add_down(2, "BREAKOUT_DOWN")
+
+    if "BREAKOUT_CONFIRM_UP" in flags:
+        add_up(2, "BREAKOUT_CONFIRM_UP")
+    if "BREAKOUT_CONFIRM_DOWN" in flags:
+        add_down(2, "BREAKOUT_CONFIRM_DOWN")
+
+    # -------------------------
+    # EMA CONTEXT
+    # -------------------------
+    if ema_state == "EMA_BULL":
+        add_up(2, "EMA_BULL")
+    elif ema_state == "EMA_BEAR":
+        add_down(2, "EMA_BEAR")
+
+    # -------------------------
+    # STAGE BOOST
+    # -------------------------
+    if "ACCUMULATION" in stage:
+        if up_score > 0:
+            add_up(1, "ACCUMULATION_CONTEXT")
+        if down_score > 0:
+            add_down(1, "ACCUMULATION_CONTEXT")
+
+    if "TRANSITION" in stage:
+        if up_score > 0:
+            add_up(1, "TRANSITION_CONTEXT")
+        if down_score > 0:
+            add_down(1, "TRANSITION_CONTEXT")
+
+    if "EXPANSION" in stage:
+        if up_score > 0:
+            add_up(1, "EXPANSION_CONTEXT")
+        if down_score > 0:
+            add_down(1, "EXPANSION_CONTEXT")
+
+    # -------------------------
+    # VOL / ATR BOOST
+    # -------------------------
+    if "VOL_SPIKE" in flags:
+        if up_score >= 3:
+            add_up(1, "VOL_SPIKE")
+        if down_score >= 3:
+            add_down(1, "VOL_SPIKE")
+
+    if "ATR_EXPANSION" in flags:
+        if up_score >= 3:
+            add_up(1, "ATR_EXPANSION")
+        if down_score >= 3:
+            add_down(1, "ATR_EXPANSION")
+
+    result = {
+        "early_pressure_side": None,
+        "early_pressure_score": 0,
+        "early_pressure_label": None,
+        "early_pressure_reasons": [],
+        "early_pressure_up_score": up_score,
+        "early_pressure_down_score": down_score,
+    }
+
+    if up_score >= 6 and up_score >= down_score + 2:
+        result["early_pressure_side"] = "BUY"
+        result["early_pressure_score"] = up_score
+        result["early_pressure_label"] = (
+            "STRONG_EARLY_BUY_PRESSURE" if up_score >= 8 else "EARLY_BUY_PRESSURE"
+        )
+        result["early_pressure_reasons"] = up_reasons
+
+    elif down_score >= 6 and down_score >= up_score + 2:
+        result["early_pressure_side"] = "SELL"
+        result["early_pressure_score"] = down_score
+        result["early_pressure_label"] = (
+            "STRONG_EARLY_SELL_PRESSURE" if down_score >= 8 else "EARLY_SELL_PRESSURE"
+        )
+        result["early_pressure_reasons"] = down_reasons
+
+    return result
+
+
+def liquidity_target(pmeta, flags, price=None):
+    ...
+
 def liquidity_target(pmeta, flags, price=None):
 
     if not pmeta:
