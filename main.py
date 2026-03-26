@@ -3899,6 +3899,19 @@ if __name__ == "__main__":
                             alerts.append(sig)
 
                     # =====================
+                    # EARLY PRESSURE ALERT
+                    # =====================
+                    if (
+                        (not sent_main_now)
+                        and (not recent_safe_lock)
+                        and is_early_pressure_alert(sig)
+                        and can_alert_now
+                    ):
+                        send_telegram(msg_early_pressure(sig))
+                        sent_early_now = True
+                        mark_alert_sent(state, sig)
+
+                    # =====================
                     # V3 TRIGGERS
                     # =====================
 
