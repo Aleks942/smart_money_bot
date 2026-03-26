@@ -2215,10 +2215,7 @@ def detect_early_pressure(sig):
         result["early_pressure_reasons"] = down_reasons
 
     return result
-
-
-def liquidity_target(pmeta, flags, price=None):
-    ...
+    
 
 def liquidity_target(pmeta, flags, price=None):
 
