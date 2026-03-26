@@ -3707,6 +3707,17 @@ if __name__ == "__main__":
                         f"flags={sig.get('flags')}"
                     )
 
+                    if sig.get("early_pressure_label"):
+                    print(
+                        f"[EARLY_PRESSURE] {instId} "
+                        f"side={sig.get('early_pressure_side')} "
+                        f"score={sig.get('early_pressure_score')} "
+                        f"label={sig.get('early_pressure_label')} "
+                        f"up={sig.get('early_pressure_up_score')} "
+                        f"down={sig.get('early_pressure_down_score')} "
+                        f"reasons={sig.get('early_pressure_reasons')}"
+                    )
+
                     if is_entry_signal(sig) and not has_open_similar_signal(sig):
                         save_signal(sig)
 
