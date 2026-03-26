@@ -2543,9 +2543,11 @@ def build_signal(instId):
         "ts": now_ts(),
         "created_at": time.time(),
     }
-
+    
+    signal.update(detect_early_pressure(signal))
+    
     signal["sniper"] = sniper_signal(signal)
-
+    
     return signal
 
 # ==============================
