@@ -3846,6 +3846,12 @@ if __name__ == "__main__":
                     entry_ok = is_entry_signal(sig)
                     profit_ok = is_profitable(sig)
                     can_alert_now = should_alert_symbol(state, sig)
+                    
+                    start_ready = is_start_trigger(sig)
+                    pre_ready = is_pre_trigger(sig)
+                    confirm_ready = is_confirm_trigger(sig)
+                    recent_start_lock = start_trigger_recent(state, instId)
+                    
                     sent_main_now = False
                     sent_pre_now = False
                     sent_start_now = False
