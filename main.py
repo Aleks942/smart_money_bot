@@ -3726,6 +3726,8 @@ if __name__ == "__main__":
             early_count = 0
             start_count = 0
             pre_count = 0
+            early_buy_symbols = []
+            early_sell_symbols = []
 
             # =====================
             # SCAN MONETS
