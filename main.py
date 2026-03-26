@@ -2142,16 +2142,6 @@ def detect_early_pressure(sig):
         add_down(2, "BREAKOUT_DOWN")
 
     # -------------------------
-    # EARLY BREAKOUT HINT
-    # confirm сюда НЕ включаем,
-    # иначе detector становится поздним
-    # -------------------------
-    if "BREAKOUT_UP" in flags:
-        add_up(2, "BREAKOUT_UP")
-    if "BREAKOUT_DOWN" in flags:
-        add_down(2, "BREAKOUT_DOWN")
-
-    # -------------------------
     # EMA CONTEXT
     # -------------------------
     if ema_state == "EMA_BULL":
