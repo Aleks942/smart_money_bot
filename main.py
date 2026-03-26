@@ -3921,19 +3921,19 @@ if __name__ == "__main__":
                     # V3 TRIGGERS
                     # =====================
 
-                    if (not recent_safe_lock) and is_start_trigger(sig) and trigger_allowed(state, instId, "last_start_trigger_ts", TRIGGER_START_COOLDOWN):
+                    if (not recent_safe_lock) and start_ready and trigger_allowed(state, instId, "last_start_trigger_ts", TRIGGER_START_COOLDOWN):
                         send_telegram(msg_start_trigger(sig))
                         trigger_mark(state, instId, "last_start_trigger_ts")
                         sent_start_now = True
-
-                    elif (not recent_safe_lock) and is_pre_trigger(sig) and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
+                    
+                    elif (not recent_safe_lock) and pre_ready and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
                         send_telegram(msg_pre_trigger(sig))
                         trigger_mark(state, instId, "last_pre_trigger_ts")
                         sent_pre_now = True
-
+                    
                     if (
                         (not sent_main_now)
-                        and is_confirm_trigger(sig)
+                        and confirm_ready
                         and entry_ok
                         and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN)
                     ):
