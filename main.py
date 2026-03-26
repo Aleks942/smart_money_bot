@@ -4024,6 +4024,13 @@ if __name__ == "__main__":
 
             print("ALERTS FOUND:", len(alerts))
             print(f"EARLY FOUND: {early_count} | START FOUND: {start_count} | PRE FOUND: {pre_count}")
+            print(f"EARLY BUY SYMBOLS: {early_buy_symbols}")
+            print(f"EARLY SELL SYMBOLS: {early_sell_symbols}")
+            
+            market_msg = msg_market_pressure(early_buy_symbols, early_sell_symbols)
+            if market_msg:
+                send_telegram(market_msg)
+
 
 
             msg = summary_message(alerts, cycle_info, regime)
