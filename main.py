@@ -1877,10 +1877,6 @@ def direction_hint(flags):
     down = 0
     reasons = []
 
-    if "BREAKOUT_CONFIRM_UP" in flags:
-        up += 3; reasons.append("Закрепление ВВЕРХ (+3)")
-    if "BREAKOUT_CONFIRM_DOWN" in flags:
-        down += 3; reasons.append("Закрепление ВНИЗ (+3)")
 
     if "BREAKOUT_UP" in flags:
         up += 2; reasons.append("Пробой ВВЕРХ (+2)")
