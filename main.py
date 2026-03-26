@@ -3746,7 +3746,7 @@ if __name__ == "__main__":
 
             for instId, vol_usdt, pct in candidates:
 
-                time.sleep(0.35)
+                time.sleep(0.55)
 
                 try:
 
