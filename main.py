@@ -3718,6 +3718,9 @@ if __name__ == "__main__":
 
             alerts = []
             manip_watch = []
+            early_count = 0
+            start_count = 0
+            pre_count = 0
 
             # =====================
             # SCAN MONETS
