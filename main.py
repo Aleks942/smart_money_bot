@@ -3619,6 +3619,28 @@ def msg_early_pressure(sig):
 
     return "\n".join(lines)
 
+def msg_market_pressure(buy_symbols, sell_symbols):
+    buy_count = len(buy_symbols)
+    sell_count = len(sell_symbols)
+
+    if sell_count >= 4 and sell_count >= buy_count + 2:
+        lines = []
+        lines.append("🚨 MARKET SELL-OFF / RISK-OFF")
+        lines.append(f"SELL pressure: {sell_count} | BUY pressure: {buy_count}")
+        lines.append(f"Монеты: {', '.join(sell_symbols[:8])}")
+        lines.append("Смысл: рынок широко давят вниз. Ищем слабые альты, шорт-сетапы и не лезем в случайные лонги.")
+        return "\n".join(lines)
+
+    if buy_count >= 4 and buy_count >= sell_count + 2:
+        lines = []
+        lines.append("🚀 MARKET BUY PRESSURE / RISK-ON")
+        lines.append(f"BUY pressure: {buy_count} | SELL pressure: {sell_count}")
+        lines.append(f"Монеты: {', '.join(buy_symbols[:8])}")
+        lines.append("Смысл: рынок широко тащат вверх. Ищем сильные альты и продолжение движения.")
+        return "\n".join(lines)
+
+    return None
+
 def check_signal_results():
 
     open_signals = get_open_signals()
