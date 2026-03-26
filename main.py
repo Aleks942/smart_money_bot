@@ -3503,6 +3503,62 @@ def is_confirm_trigger(sig):
     flags = set(sig.get("flags", []))
     return (("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags) and ("ATR_EXPANSION" in flags) and ("VOL_SPIKE" in flags))
 
+# =========================
+# EARLY PRESSURE ALERT FILTER
+# =========================
+def is_early_pressure_alert(sig):
+    side = sig.get("early_pressure_side")
+    ep_score = float(sig.get("early_pressure_score") or 0)
+    label = sig.get("early_pressure_label")
+    direction = str(sig.get("direction", ""))
+    ema_state = sig.get("ema_state", "EMA_UNKNOWN")
+    flags = set(sig.get("flags", []))
+
+    if not side or not label:
+        return False
+
+    if ep_score < 7:
+        return False
+
+    # не шлём, если уже есть SAFE ENTRY
+    if "SAFE ENTRY" in str(sig.get("entry", "")):
+        return False
+
+    # не шлём в полном балансе
+    if "БАЛАНС" in direction:
+        return False
+
+    # направление должно совпадать
+    if side == "BUY" and "ВВЕРХ" not in direction:
+        return False
+
+    if side == "SELL" and "ВНИЗ" not in direction:
+        return False
+
+    # против явного EMA не шлём
+    if side == "BUY" and ema_state == "EMA_BEAR":
+        return False
+
+    if side == "SELL" and ema_state == "EMA_BULL":
+        return False
+
+    # нужен хотя бы один реальный directional-фактор кроме EMA
+    directional_ok = (
+        "PRESSURE_UP" in flags or
+        "PRESSURE_DOWN" in flags or
+        "CONTINUATION_UP" in flags or
+        "CONTINUATION_DOWN" in flags or
+        "BREAKOUT_UP" in flags or
+        "BREAKOUT_DOWN" in flags
+    )
+
+    if not directional_ok:
+        return False
+
+    return True
+
+
+
 def msg_pre_trigger(sig):
     sym = fmt_symbol(sig["instId"])
     lines = []
