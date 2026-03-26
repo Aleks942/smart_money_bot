@@ -1085,28 +1085,34 @@ def liquidity_pressure(candles, lookback=PRESSURE_LOOKBACK, zone=PRESSURE_ZONE, 
         return "DOWN", {"range_hi": hi, "range_lo": lo, "range_pct": range_pct, "pos": pos}
     return None, {"range_hi": hi, "range_lo": lo, "range_pct": range_pct, "pos": pos}
 
-def is_entry_signal(s):
-
-    def has_open_similar_signal(sig):
-        try:
-            open_signals = get_open_signals()
-        except Exception:
-            return False
-    
-        symbol = sig.get("symbol") or sig.get("instId")
-        direction_code = sig.get("direction_code") or direction_code_from_text(sig.get("direction", ""))
-        entry_type = sig.get("entry_type", sig.get("entry", "UNKNOWN"))
-    
-        for s in open_signals:
-            s_symbol = s.get("symbol")
-            s_direction = s.get("direction_code") or direction_code_from_text(s.get("direction", ""))
-            s_entry = s.get("entry_type", s.get("entry", "UNKNOWN"))
-    
-            if s_symbol == symbol and s_direction == direction_code and s_entry == entry_type:
-                return True
-
+# =========================
+# OPEN SIGNAL DUPLICATE CHECK
+# =========================
+def has_open_similar_signal(sig):
+    try:
+        open_signals = get_open_signals()
+    except Exception:
         return False
 
+    symbol = sig.get("symbol") or sig.get("instId")
+    direction_code = sig.get("direction_code") or direction_code_from_text(sig.get("direction", ""))
+    entry_type = sig.get("entry_type", sig.get("entry", "UNKNOWN"))
+
+    for s in open_signals:
+        s_symbol = s.get("symbol")
+        s_direction = s.get("direction_code") or direction_code_from_text(s.get("direction", ""))
+        s_entry = s.get("entry_type", s.get("entry", "UNKNOWN"))
+
+        if s_symbol == symbol and s_direction == direction_code and s_entry == entry_type:
+            return True
+
+    return False
+
+
+# =========================
+# ENTRY SIGNAL FILTER
+# =========================
+def is_entry_signal(s):
     if s["score"] < 6:
         return False
 
@@ -1125,7 +1131,6 @@ def is_entry_signal(s):
     if s.get("exp_move_max", 0) < 0.8:
         return False
 
-    # 👇 добавь это
     rsi_state = s.get("rsi_state")
     if rsi_state in ["EXTREME_OVERBOUGHT", "EXTREME_OVERSOLD"]:
         return False
