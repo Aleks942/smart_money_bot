@@ -2724,11 +2724,20 @@ def sniper_signal(sig):
 # SCANNER (LEVEL 1 FAST FILTER)
 # =========================
 def is_bad_symbol(instId: str) -> bool:
-    base = instId.replace(f"-{QUOTE}", "")
+    base = str(instId).upper().strip()
+
+    if base.endswith("-USDT"):
+        base = base[:-5]
+    elif base.endswith("USDT"):
+        base = base[:-4]
+
     for s in EXCLUDE_TOKENS_CONTAINS:
         if s in base:
             return True
+
     return False
+
+
 def get_market_candidates_bybit():
     tickers = get_bybit_tickers_linear()
     print("BYBIT TICKERS COUNT:", len(tickers))
@@ -2746,18 +2755,27 @@ def get_market_candidates_bybit():
 
         try:
             vol_usdt = float(t.get("turnover24h") or 0.0)
-        except:
+        except Exception:
             vol_usdt = 0.0
 
         try:
             last = float(t.get("lastPrice") or 0.0)
             prev = float(t.get("prevPrice24h") or 0.0)
             pct = ((last - prev) / prev * 100.0) if prev > 0 else 0.0
-        except:
+        except Exception:
             pct = 0.0
 
-       if vol_usdt < SCAN_MIN_VOL_USDT:
-  
+        if vol_usdt < SCAN_MIN_VOL_USDT:
+            continue
+
+        abs_pct = abs(pct)
+
+        normal_move_ok = abs_pct >= SCAN_MIN_PCT_24H
+        prebreak_move_ok = PREBREAK_SCAN_MIN_PCT_24H <= abs_pct <= PREBREAK_SCAN_MAX_PCT_24H
+
+        if not ACCUMULATION_MODE:
+            if not (normal_move_ok or prebreak_move_ok):
+                continue
 
         instId = sym  # BYBIT symbol format, e.g. BTCUSDT
         raw_candidates.append((instId, vol_usdt, pct))
@@ -2767,12 +2785,12 @@ def get_market_candidates_bybit():
         return []
 
     raw_candidates.sort(key=lambda x: (x[1], abs(x[2])), reverse=True)
-    
+
     MARKET_CAP_PREFETCH_MULT = int(os.getenv("MARKET_CAP_PREFETCH_MULT") or "3")
     prefetch_limit = SCAN_BATCH * MARKET_CAP_PREFETCH_MULT
-    
+
     raw_candidates = raw_candidates[:prefetch_limit]
-    
+
     base_coins = [get_base_coin(instId) for instId, _, _ in raw_candidates]
     market_caps = fetch_market_caps_usd(base_coins)
 
@@ -2795,6 +2813,7 @@ def get_market_candidates_bybit():
     filtered_candidates.sort(key=lambda x: (x[1], abs(x[2])), reverse=True)
     return filtered_candidates[:SCAN_TOP_N]
 
+
 def get_market_candidates():
     if is_bybit():
         return get_market_candidates_bybit()
@@ -2813,24 +2832,24 @@ def get_market_candidates():
 
         try:
             vol_usdt = float(t.get("volCcy24h") or 0.0)
-        except:
+        except Exception:
             vol_usdt = 0.0
 
         try:
             last = float(t.get("last") or 0.0)
             open24 = float(t.get("open24h") or 0.0)
             pct = (last - open24) / open24 * 100.0 if open24 > 0 else 0.0
-        except:
+        except Exception:
             pct = 0.0
 
         if vol_usdt < SCAN_MIN_VOL_USDT:
             continue
-        
+
         abs_pct = abs(pct)
-        
+
         normal_move_ok = abs_pct >= SCAN_MIN_PCT_24H
         prebreak_move_ok = PREBREAK_SCAN_MIN_PCT_24H <= abs_pct <= PREBREAK_SCAN_MAX_PCT_24H
-        
+
         if not ACCUMULATION_MODE:
             if not (normal_move_ok or prebreak_move_ok):
                 continue
@@ -2840,9 +2859,6 @@ def get_market_candidates():
     cands.sort(key=lambda x: (x[1], abs(x[2])), reverse=True)
     return cands[:SCAN_TOP_N]
 
-# =========================
-# BTC MARKET REGIME (V2)
-# =========================
 
 # =========================
 # BTC MARKET REGIME (V2)
