@@ -1117,6 +1117,113 @@ def has_open_similar_signal(sig):
 
     return False
 
+# =========================
+# PRE-BREAKOUT BUILD-UP
+# =========================
+def volume_build_inside_range(
+    candles,
+    lookback=PREBREAK_LOOKBACK,
+    recent=PREBREAK_RECENT_BARS,
+    vol_mult=PREBREAK_VOL_MULT,
+    range_mult=PREBREAK_RANGE_BUILD_MULT,
+):
+    if not candles or len(candles) < lookback + recent + 2:
+        return False
+
+    segment = candles[-(lookback + recent):-recent]
+    recent_segment = candles[-recent:]
+
+    try:
+        prev_vols = [float(c[5]) for c in segment]
+        last_vols = [float(c[5]) for c in recent_segment]
+
+        prev_ranges = [float(c[2]) - float(c[3]) for c in segment]
+        last_ranges = [float(c[2]) - float(c[3]) for c in recent_segment]
+    except Exception:
+        return False
+
+    if not prev_vols or not last_vols or not prev_ranges or not last_ranges:
+        return False
+
+    avg_prev_vol = sum(prev_vols) / len(prev_vols)
+    avg_last_vol = sum(last_vols) / len(last_vols)
+
+    avg_prev_range = sum(prev_ranges) / len(prev_ranges)
+    avg_last_range = sum(last_ranges) / len(last_ranges)
+
+    if avg_prev_vol <= 0 or avg_prev_range <= 0:
+        return False
+
+    vol_build = avg_last_vol >= avg_prev_vol * vol_mult
+    range_not_expanded = avg_last_range <= avg_prev_range * range_mult
+
+    return vol_build and range_not_expanded
+
+
+# =========================
+# PRE-BREAKOUT PRESSURE FLAG
+# =========================
+def detect_pre_breakout_pressure(candles, flags, pmeta, ema_state):
+    flags = set(flags)
+
+    if not candles or not pmeta:
+        return None
+
+    pos = pmeta.get("pos")
+    range_pct = pmeta.get("range_pct")
+
+    if pos is None or range_pct is None:
+        return None
+
+    try:
+        pos = float(pos)
+        range_pct = float(range_pct)
+    except Exception:
+        return None
+
+    # диапазон уже слишком широкий — это уже не тот флет
+    if range_pct > PREBREAK_RANGE_MAX_PCT:
+        return None
+
+    # если уже есть подтверждённый пробой/расширение — это поздно
+    if "BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags:
+        return None
+
+    if "ATR_EXPANSION" in flags:
+        return None
+
+    build_ok = volume_build_inside_range(candles)
+
+    if not build_ok:
+        return None
+
+    comp_ok = ("COMP_5M" in flags) or ("COMP_15M" in flags)
+
+    # PRE-BREAKOUT SELL
+    if (
+        pos <= PREBREAK_EDGE_POS
+        and comp_ok
+        and "PRESSURE_DOWN" in flags
+        and "CONTINUATION_DOWN" in flags
+        and ema_state == "EMA_BEAR"
+        and "SWEEP_DOWN" not in flags
+        and "FAKE_DUMP" not in flags
+    ):
+        return "PRE_BREAKOUT_SELL"
+
+    # PRE-BREAKOUT BUY
+    if (
+        pos >= (1.0 - PREBREAK_EDGE_POS)
+        and comp_ok
+        and "PRESSURE_UP" in flags
+        and "CONTINUATION_UP" in flags
+        and ema_state == "EMA_BULL"
+        and "SWEEP_UP" not in flags
+    ):
+        return "PRE_BREAKOUT_BUY"
+
+    return None
+
 
 # =========================
 # ENTRY SIGNAL FILTER
