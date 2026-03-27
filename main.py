@@ -2756,12 +2756,8 @@ def get_market_candidates_bybit():
         except:
             pct = 0.0
 
-        if vol_usdt < SCAN_MIN_VOL_USDT:
-            continue
-
-        if not ACCUMULATION_MODE:
-            if abs(pct) < SCAN_MIN_PCT_24H:
-                continue
+       if vol_usdt < SCAN_MIN_VOL_USDT:
+  
 
         instId = sym  # BYBIT symbol format, e.g. BTCUSDT
         raw_candidates.append((instId, vol_usdt, pct))
