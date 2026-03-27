@@ -2825,9 +2825,14 @@ def get_market_candidates():
 
         if vol_usdt < SCAN_MIN_VOL_USDT:
             continue
-
+        
+        abs_pct = abs(pct)
+        
+        normal_move_ok = abs_pct >= SCAN_MIN_PCT_24H
+        prebreak_move_ok = PREBREAK_SCAN_MIN_PCT_24H <= abs_pct <= PREBREAK_SCAN_MAX_PCT_24H
+        
         if not ACCUMULATION_MODE:
-            if abs(pct) < SCAN_MIN_PCT_24H:
+            if not (normal_move_ok or prebreak_move_ok):
                 continue
 
         cands.append((instId, vol_usdt, pct))
