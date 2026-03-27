@@ -2843,6 +2843,10 @@ def get_market_candidates():
 # =========================
 # BTC MARKET REGIME (V2)
 # =========================
+
+# =========================
+# BTC MARKET REGIME (V2)
+# =========================
 def btc_regime():
     try:
         sig = build_signal(btc_symbol())
