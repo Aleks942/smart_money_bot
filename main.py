@@ -2582,6 +2582,14 @@ def build_signal(instId):
         score += 2
 
     # =========================
+    # PRE-BREAKOUT PRESSURE
+    # =========================
+    pre_breakout = detect_pre_breakout_pressure(c5, flags, pmeta, ema_state)
+    if pre_breakout:
+        flags.add(pre_breakout)
+        score += 1
+
+    # =========================
     # ACCUMULATION
     # =========================
     acc_score = accumulation_bias(flags)
