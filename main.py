@@ -90,6 +90,15 @@ USE_RSI_FILTER = int(os.getenv("USE_RSI_FILTER", "1"))
 VAC_LOOKBACK = 12
 VAC_VOL_MULT = 2.2
 VAC_RANGE_COMPRESSION = 0.9
+# ==============================
+# PRE-BREAKOUT SETTINGS
+# ==============================
+PREBREAK_LOOKBACK = int(os.getenv("PREBREAK_LOOKBACK", "15"))
+PREBREAK_RECENT_BARS = int(os.getenv("PREBREAK_RECENT_BARS", "3"))
+PREBREAK_VOL_MULT = float(os.getenv("PREBREAK_VOL_MULT", "1.25"))
+PREBREAK_RANGE_BUILD_MULT = float(os.getenv("PREBREAK_RANGE_BUILD_MULT", "1.15"))
+PREBREAK_RANGE_MAX_PCT = float(os.getenv("PREBREAK_RANGE_MAX_PCT", "1.80"))
+PREBREAK_EDGE_POS = float(os.getenv("PREBREAK_EDGE_POS", "0.25"))
 
 RSI_FAST_LEN = int(os.getenv("RSI_FAST_LEN", "7"))
 RSI_SLOW_LEN = int(os.getenv("RSI_SLOW_LEN", "14"))
