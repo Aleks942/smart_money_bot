@@ -4021,17 +4021,17 @@ if __name__ == "__main__":
                         f"flags={sig.get('flags')}"
                     )
 
-                     if sig.get("early_pressure_label"):
+                    if sig.get("early_pressure_label"):
                         flags_set = set(sig.get("flags", []))
                         stage_txt = str(sig.get("stage", ""))
-                    
+
                         is_late_candidate = (
                             ("BREAKOUT_CONFIRM_UP" in flags_set)
                             or ("BREAKOUT_CONFIRM_DOWN" in flags_set)
                             or ("ATR_EXPANSION" in flags_set)
                             or ("EXPANSION" in stage_txt)
                         )
-                    
+
                         if not is_late_candidate:
                             print(
                                 f"[EARLY_CANDIDATE] {instId} "
@@ -4042,9 +4042,9 @@ if __name__ == "__main__":
                                 f"down={sig.get('early_pressure_down_score')} "
                                 f"reasons={sig.get('early_pressure_reasons')}"
                             )
-    
+
                     if is_entry_signal(sig) and not has_open_similar_signal(sig):
-                            save_signal(sig)
+                        save_signal(sig)
 
                     # =====================
                     # TIER + SEND LOGIC
