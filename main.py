@@ -278,12 +278,12 @@ def fetch_market_caps_usd(base_coins):
         time.sleep(request_sleep_sec)
 
     # обновляем кэш только если реально что-то получили
-   if fresh:
-    merged = dict(_market_cap_cache["data"])
-    merged.update(fresh)
-    _market_cap_cache["data"] = merged
-    _market_cap_cache["ts"] = now
-    _market_cap_cache["last_fail_ts"] = 0
+    if fresh:
+        merged = dict(_market_cap_cache["data"])
+        merged.update(fresh)
+        _market_cap_cache["data"] = merged
+        _market_cap_cache["ts"] = now
+        _market_cap_cache["last_fail_ts"] = 0
     else:
         _market_cap_cache["last_fail_ts"] = now
     
