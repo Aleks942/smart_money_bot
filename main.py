@@ -214,7 +214,7 @@ def fetch_market_caps_usd(base_coins):
             return cached
 
     fresh = {}
-    chunk_size = 50
+    chunk_size = 20
     request_sleep_sec = float(os.getenv("MARKET_CAP_REQUEST_SLEEP_SEC", "1.5"))
     retry_sleep_sec = float(os.getenv("MARKET_CAP_RETRY_SLEEP_SEC", "4"))
     max_retries = int(os.getenv("MARKET_CAP_MAX_RETRIES", "3"))
