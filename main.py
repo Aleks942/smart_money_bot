@@ -164,7 +164,8 @@ COINGECKO_API_KEY = (os.getenv("COINGECKO_API_KEY") or "").strip()
 
 _market_cap_cache = {
     "ts": 0,
-    "data": {}
+    "data": {},
+    "last_fail_ts": 0,
 }
 
 def _chunked(items, size):
