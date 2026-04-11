@@ -4209,6 +4209,7 @@ if __name__ == "__main__":
                     if (
                         MANIP_ALERT_ENABLED
                         and (not recent_safe_lock)
+                        and (not recent_start_lock)
                         and (not sent_pre_now)
                         and (not sent_start_now)
                         and is_pre_move_manip(sig)
