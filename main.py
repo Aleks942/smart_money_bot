@@ -278,21 +278,24 @@ def fetch_market_caps_usd(base_coins):
         time.sleep(request_sleep_sec)
 
     # обновляем кэш только если реально что-то получили
-    if fresh:
-        merged = dict(_market_cap_cache["data"])
-        merged.update(fresh)
-        _market_cap_cache["data"] = merged
-        _market_cap_cache["ts"] = now
-
+   if fresh:
+    merged = dict(_market_cap_cache["data"])
+    merged.update(fresh)
+    _market_cap_cache["data"] = merged
+    _market_cap_cache["ts"] = now
+    _market_cap_cache["last_fail_ts"] = 0
+    else:
+        _market_cap_cache["last_fail_ts"] = now
+    
     return _market_cap_cache["data"]
-
-def is_market_cap_ok(symbol: str, market_caps: dict) -> bool:
-    base = get_base_coin(symbol)
-    mcap = market_caps.get(base)
-
-    # если капитализацию не нашли — монету не берём
-    if mcap is None:
-        return False
+    
+    def is_market_cap_ok(symbol: str, market_caps: dict) -> bool:
+        base = get_base_coin(symbol)
+        mcap = market_caps.get(base)
+    
+        # если капитализацию не нашли — монету не берём
+        if mcap is None:
+            return False
 
     return mcap >= MARKET_CAP_MIN_USD
 
