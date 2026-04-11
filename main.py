@@ -3658,7 +3658,10 @@ def is_early_pressure_alert(sig):
     label = sig.get("early_pressure_label")
     direction = str(sig.get("direction", ""))
     ema_state = sig.get("ema_state", "EMA_UNKNOWN")
+    stage = str(sig.get("stage", ""))
     flags = set(sig.get("flags", []))
+    price = sig.get("price")
+    target = sig.get("target")
 
     if not side or not label:
         return False
@@ -3688,14 +3691,37 @@ def is_early_pressure_alert(sig):
     if side == "SELL" and ema_state == "EMA_BULL":
         return False
 
-    # нужен хотя бы один реальный directional-фактор кроме EMA
+    # слишком близко к цели — поздно
+    if too_close_to_target(price, target, min_room_pct=0.35):
+        return False
+
+    # если уже confirm / expansion — это не early
+    if "BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags:
+        return False
+
+    if "ATR_EXPANSION" in flags:
+        return False
+
+    if "EXPANSION" in stage:
+        return False
+
+    # stage должен быть ранний
+    if ("ACCUMULATION" not in stage) and ("TRANSITION" not in stage) and ("NEUTRAL" not in stage):
+        return False
+
+    # NEUTRAL пускаем только если есть явный PRE_BREAKOUT
+    if "NEUTRAL" in stage:
+        if "PRE_BREAKOUT_BUY" not in flags and "PRE_BREAKOUT_SELL" not in flags:
+            return False
+
+    # нужен реальный directional stack
     directional_ok = (
+        "PRE_BREAKOUT_BUY" in flags or
+        "PRE_BREAKOUT_SELL" in flags or
         "PRESSURE_UP" in flags or
         "PRESSURE_DOWN" in flags or
         "CONTINUATION_UP" in flags or
-        "CONTINUATION_DOWN" in flags or
-        "BREAKOUT_UP" in flags or
-        "BREAKOUT_DOWN" in flags
+        "CONTINUATION_DOWN" in flags
     )
 
     if not directional_ok:
