@@ -3431,6 +3431,19 @@ def mark_safe_entry(state, instId):
     state["symbols"][instId]["last_safe_entry_ts"] = now_ts()
 
 # =========================
+# EARLY ALERT COOLDOWN
+# =========================
+def early_alert_recent(state, instId):
+    ss = state["symbols"].get(instId, {})
+    last = int(ss.get("last_early_alert_ts", 0) or 0)
+    return (now_ts() - last) < EARLY_ALERT_COOLDOWN_SEC
+
+
+def mark_early_alert(state, instId):
+    state["symbols"].setdefault(instId, {})
+    state["symbols"][instId]["last_early_alert_ts"] = now_ts()
+
+# =========================
 # START TRIGGER RECENCY LOCK
 # =========================
 def start_trigger_recent(state, instId):
