@@ -4175,8 +4175,8 @@ if __name__ == "__main__":
                         start_count += 1
                         trigger_mark(state, instId, "last_start_trigger_ts")
                         sent_start_now = True
-                    
-                    elif (not recent_safe_lock) and pre_ready and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
+                
+                    elif (not recent_safe_lock) and (not recent_start_lock) and pre_ready and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
                         send_telegram(msg_pre_trigger(sig))
                         pre_count += 1
                         trigger_mark(state, instId, "last_pre_trigger_ts")
