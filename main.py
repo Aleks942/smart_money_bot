@@ -4141,6 +4141,9 @@ if __name__ == "__main__":
                     # =====================
                     # EARLY PRESSURE ALERT
                     # =====================
+                    # =====================
+                    # EARLY PRESSURE ALERT
+                    # =====================
                     if (
                         (not sent_main_now)
                         and (not recent_safe_lock)
@@ -4151,6 +4154,13 @@ if __name__ == "__main__":
                         and can_alert_now
                     ):
                         send_telegram(msg_early_pressure(sig))
+                        print(
+                            f"[EARLY_SENT] {instId} "
+                            f"side={sig.get('early_pressure_side')} "
+                            f"score={sig.get('early_pressure_score')} "
+                            f"stage={sig.get('stage')} "
+                            f"entry={sig.get('entry')}"
+                        )
                         early_count += 1
                         sent_early_now = True
                         mark_alert_sent(state, sig)
