@@ -2791,10 +2791,10 @@ def get_market_candidates_bybit():
     base_coins = [get_base_coin(instId) for instId, _, _ in raw_candidates]
     market_caps = fetch_market_caps_usd(base_coins)
 
-   if not market_caps:
-       print("[MARKET_CAP] CoinGecko returned no market cap data -> fallback to raw candidates")
-       raw_candidates.sort(key=lambda x: (x[1], abs(x[2])), reverse=True)
-       return raw_candidates[:SCAN_TOP_N]
+    if not market_caps:
+        print("[MARKET_CAP] CoinGecko returned no market cap data -> fallback to raw candidates")
+        raw_candidates.sort(key=lambda x: (x[1], abs(x[2])), reverse=True)
+        return raw_candidates[:SCAN_TOP_N]
 
     filtered_candidates = []
 
