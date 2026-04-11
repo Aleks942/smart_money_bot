@@ -2287,11 +2287,7 @@ def detect_early_pressure(sig):
         if down_score > 0:
             add_down(1, "TRANSITION_CONTEXT")
 
-    if "EXPANSION" in stage:
-        if up_score > 0:
-            add_up(1, "EXPANSION_CONTEXT")
-        if down_score > 0:
-            add_down(1, "EXPANSION_CONTEXT")
+    
 
     # -------------------------
     # VOL / ATR BOOST
