@@ -4023,7 +4023,7 @@ if __name__ == "__main__":
 
                     if sig.get("early_pressure_label"):
                         print(
-                            f"[EARLY_PRESSURE] {instId} "
+                            f"[EARLY_CANDIDATE] {instId} "
                             f"side={sig.get('early_pressure_side')} "
                             f"score={sig.get('early_pressure_score')} "
                             f"label={sig.get('early_pressure_label')} "
