@@ -4067,6 +4067,7 @@ if __name__ == "__main__":
                     confirm_ready = is_confirm_trigger(sig)
                     early_ready = is_early_pressure_alert(sig)
                     recent_start_lock = start_trigger_recent(state, instId)
+                    recent_early_lock = early_alert_recent(state, instId)
                     
                     if early_ready:
                         if sig.get("early_pressure_side") == "BUY":
