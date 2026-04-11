@@ -205,6 +205,14 @@ def fetch_market_caps_usd(base_coins):
     base_coins = sorted({str(x).upper().strip() for x in base_coins if x})
     now = time.time()
 
+    market_cap_fail_cooldown_sec = int(os.getenv("MARKET_CAP_FAIL_COOLDOWN_SEC", "1800"))
+
+    # если CoinGecko недавно уже падал, не долбим его снова
+    last_fail_ts = float(_market_cap_cache.get("last_fail_ts", 0) or 0)
+    if last_fail_ts and (now - last_fail_ts < market_cap_fail_cooldown_sec):
+        print("[MARKET_CAP] recent fail cooldown active -> using cache/fallback path")
+        return _market_cap_cache["data"]
+
     if not base_coins:
         return {}
 
