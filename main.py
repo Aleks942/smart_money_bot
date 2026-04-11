@@ -54,6 +54,7 @@ MIN_SCORE = int(os.getenv("MIN_SCORE") or "4")
 # V2 ENV
 # =========================
 ALERT_COOLDOWN_SEC = int(os.getenv("ALERT_COOLDOWN_SEC") or "1800")
+EARLY_ALERT_COOLDOWN_SEC = int(os.getenv("EARLY_ALERT_COOLDOWN_SEC") or "2700")
 ANTI_PUMP_PCT_5M = float(os.getenv("ANTI_PUMP_PCT_5M") or "9.0")
 
 MANIP_ALERT_ENABLED = (os.getenv("MANIP_ALERT_ENABLED") or "1").strip() != "0"
