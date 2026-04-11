@@ -215,9 +215,9 @@ def fetch_market_caps_usd(base_coins):
 
     fresh = {}
     chunk_size = 20
-    request_sleep_sec = float(os.getenv("MARKET_CAP_REQUEST_SLEEP_SEC", "1.5"))
-    retry_sleep_sec = float(os.getenv("MARKET_CAP_RETRY_SLEEP_SEC", "4"))
-    max_retries = int(os.getenv("MARKET_CAP_MAX_RETRIES", "3"))
+    request_sleep_sec = float(os.getenv("MARKET_CAP_REQUEST_SLEEP_SEC", "3.0"))
+    retry_sleep_sec = float(os.getenv("MARKET_CAP_RETRY_SLEEP_SEC", "8.0"))
+    max_retries = int(os.getenv("MARKET_CAP_MAX_RETRIES", "2"))
 
     for chunk in _chunked(base_coins, chunk_size):
         success = False
