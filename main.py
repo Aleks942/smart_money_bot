@@ -4132,6 +4132,7 @@ if __name__ == "__main__":
                         (not sent_main_now)
                         and (not recent_safe_lock)
                         and (not recent_start_lock)
+                        and (not recent_early_lock)
                         and (not start_ready)
                         and early_ready
                         and can_alert_now
@@ -4140,6 +4141,7 @@ if __name__ == "__main__":
                         early_count += 1
                         sent_early_now = True
                         mark_alert_sent(state, sig)
+                        mark_early_alert(state, instId)
 
                     # =====================
                     # V3 TRIGGERS
