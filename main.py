@@ -4158,9 +4158,7 @@ if __name__ == "__main__":
                         if not any(a.get("instId") == sig.get("instId") for a in alerts):
                             alerts.append(sig)
 
-                    # =====================
-                    # EARLY PRESSURE ALERT
-                    # =====================
+                    
                     # =====================
                     # EARLY PRESSURE ALERT
                     # =====================
