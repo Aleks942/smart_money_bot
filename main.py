@@ -3445,6 +3445,14 @@ def mark_safe_entry(state, instId):
     state["symbols"][instId]["last_safe_entry_ts"] = now_ts()
 
 # =========================
+# START AFTERGLOW
+# =========================
+def start_afterglow_recent(state, instId):
+    ss = state["symbols"].get(instId, {})
+    last = int(ss.get("last_start_trigger_ts", 0) or 0)
+    return (now_ts() - last) < START_AFTERGLOW_SEC
+
+# =========================
 # EARLY ALERT COOLDOWN
 # =========================
 def early_alert_recent(state, instId):
