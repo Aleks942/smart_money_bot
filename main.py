@@ -49,6 +49,7 @@ ALERT_MIN_SCORE = int(os.getenv("ALERT_MIN_SCORE") or "4")
 ALERT_TOP_M = int(os.getenv("ALERT_TOP_M") or "8")
 DETAIL_TOP_K = int(os.getenv("DETAIL_TOP_K") or "1")
 MIN_SCORE = int(os.getenv("MIN_SCORE") or "4")
+ONE_OPEN_SIGNAL_PER_SYMBOL = (os.getenv("ONE_OPEN_SIGNAL_PER_SYMBOL") or "1").strip() != "0"
 
 # =========================
 # V2 ENV
