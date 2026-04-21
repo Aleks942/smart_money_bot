@@ -4066,8 +4066,23 @@ if __name__ == "__main__":
                                 f"reasons={sig.get('early_pressure_reasons')}"
                             )
 
-                    if is_entry_signal(sig) and not has_open_similar_signal(sig):
-                        save_signal(sig)
+
+                    entry_ok_for_save = is_entry_signal(sig)
+                    same_side_open = has_open_similar_signal(sig)
+                    any_open_same_symbol = has_any_open_signal_for_symbol(instId)
+                    
+                    if entry_ok_for_save:
+                        if same_side_open:
+                            print(f"[SAVE_SKIP] {instId} same-side open signal already exists")
+                    
+                        elif ONE_OPEN_SIGNAL_PER_SYMBOL and any_open_same_symbol:
+                            print(f"[SAVE_SKIP] {instId} open signal already exists for this symbol")
+                    
+                        else:
+                            save_signal(sig)
+                            print(f"[SAVE_OK] {instId} saved")
+
+            
 
                     # =====================
                     # TIER + SEND LOGIC
