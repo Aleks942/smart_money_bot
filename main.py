@@ -1134,6 +1134,19 @@ def has_open_similar_signal(sig):
 
     return False
 
+def has_any_open_signal_for_symbol(symbol: str) -> bool:
+    try:
+        open_signals = get_open_signals()
+    except Exception:
+        return False
+
+    for s in open_signals:
+        s_symbol = s.get("symbol") or s.get("instId")
+        if s_symbol == symbol:
+            return True
+
+    return False
+
 # =========================
 # PRE-BREAKOUT BUILD-UP
 # =========================
