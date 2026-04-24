@@ -641,6 +641,10 @@ def analyze_h1_setup(df_h1: pd.DataFrame, h4_ctx: dict) -> dict:
                 if last_close >= sz_low and last_close <= sz_high * 1.03:
                     long_score += 1
 
+            if entry_zone is not None and invalidation is not None:
+                zone_low, zone_high = entry_zone
+                invalidation = min(float(invalidation), float(zone_low) - zone_buf)
+
             return {
                 "ok": True,
                 "side": "LONG",
