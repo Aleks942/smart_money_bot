@@ -52,6 +52,33 @@ MIN_SCORE = int(os.getenv("MIN_SCORE") or "4")
 ONE_OPEN_SIGNAL_PER_SYMBOL = (os.getenv("ONE_OPEN_SIGNAL_PER_SYMBOL") or "1").strip() != "0"
 
 # =========================
+# SWING MODE (H4 / H1 / M15)
+# =========================
+SWING_MODE = (os.getenv("SWING_MODE") or "1").strip() != "0"
+
+SWING_USE_H4 = (os.getenv("SWING_USE_H4") or "1").strip() != "0"
+SWING_USE_H1 = (os.getenv("SWING_USE_H1") or "1").strip() != "0"
+SWING_USE_M15 = (os.getenv("SWING_USE_M15") or "1").strip() != "0"
+
+SWING_ALERT_COOLDOWN_SEC = int(os.getenv("SWING_ALERT_COOLDOWN_SEC") or "14400")
+SWING_ONE_IDEA_PER_SYMBOL = (os.getenv("SWING_ONE_IDEA_PER_SYMBOL") or "1").strip() != "0"
+
+H4_EMA_FAST = int(os.getenv("H4_EMA_FAST") or "20")
+H4_EMA_SLOW = int(os.getenv("H4_EMA_SLOW") or "50")
+H4_EMA_TREND = int(os.getenv("H4_EMA_TREND") or "200")
+
+H1_EMA_FAST = int(os.getenv("H1_EMA_FAST") or "20")
+H1_EMA_SLOW = int(os.getenv("H1_EMA_SLOW") or "50")
+
+SWING_MIN_H4_SCORE = int(os.getenv("SWING_MIN_H4_SCORE") or "3")
+SWING_MIN_H1_SCORE = int(os.getenv("SWING_MIN_H1_SCORE") or "3")
+SWING_MIN_TRIGGER_SCORE = int(os.getenv("SWING_MIN_TRIGGER_SCORE") or "2")
+
+SWING_MIN_ROOM_TO_TARGET_PCT = float(os.getenv("SWING_MIN_ROOM_TO_TARGET_PCT") or "4.0")
+SWING_MAX_STOP_PCT = float(os.getenv("SWING_MAX_STOP_PCT") or "8.0")
+SWING_MIN_RR = float(os.getenv("SWING_MIN_RR") or "1.8")
+
+# =========================
 # V2 ENV
 # =========================
 ALERT_COOLDOWN_SEC = int(os.getenv("ALERT_COOLDOWN_SEC") or "1800")
