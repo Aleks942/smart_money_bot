@@ -3933,6 +3933,8 @@ def build_signal(instId):
         "symbol": instId,
         "price": price,
         "score": score,
+        "swing_only_candidate": swing_only_candidate,
+        "below_main_min_score": score < MIN_SCORE,
         "tier": tier,
         "flags": list(flags),
         "pmeta": pmeta,
