@@ -3935,7 +3935,7 @@ def build_signal(instId):
     # =========================
     swing_only_candidate = False
     
-   if score < MIN_SCORE:
+    if score < MIN_SCORE:
 
     has_breakout = (
         "BREAKOUT_CONFIRM_UP" in flags
