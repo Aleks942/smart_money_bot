@@ -5231,8 +5231,9 @@ if __name__ == "__main__":
             # =====================
 
             for instId, vol_usdt, pct in candidates:
-                print(f"[STEP1] {instId} before_fetch")
                 print(f"[LOOP] {instId} start")
+                print(f"[STEP1] {instId} before_fetch")
+                
 
                 time.sleep(0.55)
 
@@ -5257,10 +5258,14 @@ if __name__ == "__main__":
                     mult = get_ai_multiplier(setup)
                     sig["score"] = round(sig["score"] * mult, 2)
 
+                    print(f"[STEP2] {instId} after_fetch_before_signal")
+
+
                     # =====================
                     # MARKET CONTEXT
                     # =====================
 
+                    print(f"[STEP3] {instId} before_market_context")
                     sig = apply_market_context(sig)
                     print(f"[SIG_RAW] {instId} sig_exists={bool(sig)}")
                     
