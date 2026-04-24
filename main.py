@@ -558,8 +558,8 @@ def analyze_h1_setup(df_h1: pd.DataFrame, h4_ctx: dict) -> dict:
 
         # Для оценки "поздно/не поздно"
         dist_from_ema20_pct = _pct(last_close, last_ema20)
-        late_long = dist_from_ema20_pct > 4.5
-        late_short = dist_from_ema20_pct < -4.5
+        late_long = dist_from_ema20_pct > SWING_LATE_FROM_EMA_PCT
+        late_short = dist_from_ema20_pct < -SWING_LATE_FROM_EMA_PCT
 
         # -------------------------
         # LONG setup
