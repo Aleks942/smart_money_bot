@@ -897,6 +897,183 @@ def analyze_m15_trigger(df_m15: pd.DataFrame, h1_setup: dict, h4_ctx: dict) -> d
     except Exception:
         return empty
 
+# =========================
+# SWING M15 TRIGGER
+# =========================
+def analyze_m15_trigger(df_m15: pd.DataFrame, h1_setup: dict, h4_ctx: dict) -> dict:
+    """
+    Возвращает:
+    - trigger_ok
+    - trigger_type
+    - trigger_score
+    - entry_now
+    - micro_stop
+    """
+    empty = {
+        "ok": False,
+        "trigger_ok": False,
+        "entry_now": False,
+        "trigger_type": "none",
+        "trigger_score": 0,
+        "micro_stop": None,
+        "close": None,
+        "ema20": None,
+        "vwap": None,
+        "atr": 0.0,
+        "reason": "no_trigger",
+    }
+
+    try:
+        if df_m15 is None or df_m15.empty or len(df_m15) < 30:
+            return empty
+
+        if not h1_setup or not h1_setup.get("ok"):
+            return empty
+
+        if h1_setup.get("setup_type") in ("none", "late"):
+            return empty
+
+        side = h1_setup.get("side", "NEUTRAL")
+        entry_zone = h1_setup.get("entry_zone")
+        invalidation = h1_setup.get("invalidation_level")
+
+        if not entry_zone or invalidation is None or side not in ("LONG", "SHORT"):
+            return empty
+
+        df = df_m15.copy().reset_index(drop=True)
+
+        close = df["close"]
+        high = df["high"]
+        low = df["low"]
+        volume = df["volume"]
+
+        ema20 = _swing_ema(close, 20)
+        atr_s = _swing_atr(df, 14)
+        vwap_s = _swing_vwap(df)
+
+        last_close = float(close.iloc[-1])
+        last_high = float(high.iloc[-1])
+        last_low = float(low.iloc[-1])
+        last_ema20 = float(ema20.iloc[-1])
+        last_vwap = float(vwap_s.iloc[-1]) if not vwap_s.empty and pd.notna(vwap_s.iloc[-1]) else last_close
+        last_atr = float(atr_s.iloc[-1]) if not atr_s.empty and pd.notna(atr_s.iloc[-1]) else 0.0
+
+        prev6 = df.iloc[-7:-1] if len(df) >= 7 else df.iloc[:-1]
+        recent3 = df.tail(3)
+
+        vol_avg = float(volume.iloc[-21:-1].mean()) if len(df) >= 21 else float(volume.mean())
+        vol_now = float(volume.iloc[-1])
+        vol_mult = (vol_now / vol_avg) if vol_avg > 0 else 0.0
+
+        zone_low, zone_high = entry_zone
+        zone_buf = last_atr * 0.20 if last_atr > 0 else last_close * 0.003
+
+        trigger_score = 0
+        trigger_type = "none"
+        trigger_ok = False
+        entry_now = False
+        micro_stop = None
+        reason = "no_trigger"
+
+        # -------------------------
+        # LONG trigger
+        # -------------------------
+        if side == "LONG":
+            in_zone = (last_close >= zone_low - zone_buf) and (last_close <= zone_high + zone_buf)
+            above_ema = last_close >= last_ema20
+            above_vwap = last_close >= last_vwap
+
+            local_break = False
+            if not prev6.empty:
+                local_break = last_close > float(prev6["high"].max())
+
+            retest_hold = (
+                in_zone
+                and above_ema
+                and above_vwap
+                and float(recent3["low"].min()) > float(invalidation)
+            )
+
+            if above_ema:
+                trigger_score += 1
+            if above_vwap:
+                trigger_score += 1
+            if vol_mult >= 1.10:
+                trigger_score += 1
+            if retest_hold:
+                trigger_score += 1
+                trigger_type = "retest_hold"
+                reason = "m15_retest_hold_long"
+
+            if local_break:
+                trigger_score += 1
+                if trigger_type == "none":
+                    trigger_type = "breakout_push"
+                    reason = "m15_breakout_long"
+
+            if trigger_score >= SWING_MIN_TRIGGER_SCORE and (retest_hold or local_break):
+                trigger_ok = True
+                entry_now = True
+                micro_stop = round(max(invalidation, last_low - zone_buf), 6)
+
+        # -------------------------
+        # SHORT trigger
+        # -------------------------
+        if side == "SHORT":
+            in_zone = (last_close >= zone_low - zone_buf) and (last_close <= zone_high + zone_buf)
+            below_ema = last_close <= last_ema20
+            below_vwap = last_close <= last_vwap
+
+            local_break = False
+            if not prev6.empty:
+                local_break = last_close < float(prev6["low"].min())
+
+            retest_hold = (
+                in_zone
+                and below_ema
+                and below_vwap
+                and float(recent3["high"].max()) < float(invalidation)
+            )
+
+            if below_ema:
+                trigger_score += 1
+            if below_vwap:
+                trigger_score += 1
+            if vol_mult >= 1.10:
+                trigger_score += 1
+            if retest_hold:
+                trigger_score += 1
+                trigger_type = "retest_hold"
+                reason = "m15_retest_hold_short"
+
+            if local_break:
+                trigger_score += 1
+                if trigger_type == "none":
+                    trigger_type = "breakout_push"
+                    reason = "m15_breakout_short"
+
+            if trigger_score >= SWING_MIN_TRIGGER_SCORE and (retest_hold or local_break):
+                trigger_ok = True
+                entry_now = True
+                micro_stop = round(min(invalidation, last_high + zone_buf), 6)
+
+        return {
+            "ok": True,
+            "trigger_ok": bool(trigger_ok),
+            "entry_now": bool(entry_now),
+            "trigger_type": trigger_type,
+            "trigger_score": int(trigger_score),
+            "micro_stop": micro_stop,
+            "close": round(last_close, 6),
+            "ema20": round(last_ema20, 6),
+            "vwap": round(last_vwap, 6),
+            "atr": round(last_atr, 6),
+            "reason": reason,
+        }
+
+    except Exception:
+        return empty
+
 def _chunked(items, size):
     for i in range(0, len(items), size):
         yield items[i:i + size]
