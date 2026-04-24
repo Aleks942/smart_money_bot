@@ -5259,8 +5259,7 @@ if __name__ == "__main__":
                     mult = get_ai_multiplier(setup)
                     sig["score"] = round(sig["score"] * mult, 2)
 
-                    print(f"[STEP2] {instId} after_fetch_before_signal")
-
+                    print(f"[STEP2] {instId} after_build_signal")
 
                     # =====================
                     # MARKET CONTEXT
