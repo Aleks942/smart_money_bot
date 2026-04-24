@@ -5231,6 +5231,7 @@ if __name__ == "__main__":
             # =====================
 
             for instId, vol_usdt, pct in candidates:
+                print(f"[STEP1] {instId} before_fetch")
                 print(f"[LOOP] {instId} start")
 
                 time.sleep(0.55)
