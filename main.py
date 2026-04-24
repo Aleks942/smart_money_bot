@@ -303,6 +303,177 @@ def get_tf_candles(instId: str, tf: str = "1h", limit: int = 200) -> pd.DataFram
         return df
     return get_tf_candles_okx(instId, tf=tf, limit=limit)
 
+# =========================
+# SWING H4 ANALYSIS
+# =========================
+def _swing_ema(series: pd.Series, length: int) -> pd.Series:
+    return series.ewm(span=length, adjust=False).mean()
+
+
+def _swing_atr(df: pd.DataFrame, length: int = 14) -> pd.Series:
+    if df.empty or len(df) < length + 2:
+        return pd.Series(dtype="float64")
+
+    high = df["high"]
+    low = df["low"]
+    close = df["close"]
+    prev_close = close.shift(1)
+
+    tr1 = high - low
+    tr2 = (high - prev_close).abs()
+    tr3 = (low - prev_close).abs()
+
+    tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
+    return tr.rolling(length).mean()
+
+
+def _pct(a, b) -> float:
+    try:
+        a = float(a)
+        b = float(b)
+        if b == 0:
+            return 0.0
+        return (a - b) / b * 100.0
+    except Exception:
+        return 0.0
+
+
+def analyze_h4_context(df_h4: pd.DataFrame) -> dict:
+    """
+    Возвращает контекст старшего ТФ:
+    - bias: LONG / SHORT / NEUTRAL
+    - support_zone
+    - resistance_zone
+    - room_to_target_pct
+    - atr
+    - bias_score
+    """
+    empty = {
+        "ok": False,
+        "bias": "NEUTRAL",
+        "bias_score": 0,
+        "support_zone": None,
+        "resistance_zone": None,
+        "room_to_target_pct": 0.0,
+        "atr": 0.0,
+        "ema20": None,
+        "ema50": None,
+        "ema200": None,
+        "higher_low": False,
+        "lower_high": False,
+        "close": None,
+    }
+
+    try:
+        if df_h4 is None or df_h4.empty or len(df_h4) < 60:
+            return empty
+
+        df = df_h4.copy().reset_index(drop=True)
+
+        close = df["close"]
+        high = df["high"]
+        low = df["low"]
+
+        ema20 = _swing_ema(close, H4_EMA_FAST)
+        ema50 = _swing_ema(close, H4_EMA_SLOW)
+        ema200 = _swing_ema(close, H4_EMA_TREND)
+        atr_s = _swing_atr(df, 14)
+
+        last_close = float(close.iloc[-1])
+        last_ema20 = float(ema20.iloc[-1])
+        last_ema50 = float(ema50.iloc[-1])
+        last_ema200 = float(ema200.iloc[-1])
+        last_atr = float(atr_s.iloc[-1]) if not atr_s.empty and pd.notna(atr_s.iloc[-1]) else 0.0
+
+        # Структура последних двух блоков
+        recent8 = df.tail(8)
+        prev8 = df.tail(16).head(8) if len(df) >= 16 else df.head(0)
+
+        higher_low = False
+        lower_high = False
+        if not prev8.empty and not recent8.empty:
+            higher_low = float(recent8["low"].min()) > float(prev8["low"].min())
+            lower_high = float(recent8["high"].max()) < float(prev8["high"].max())
+
+        # Берём рабочие зоны не по последней свече, а по предыдущему участку
+        base = df.iloc[:-2] if len(df) > 10 else df.copy()
+        tail_zone = base.tail(20) if len(base) >= 20 else base
+
+        support_raw = float(tail_zone["low"].min())
+        resistance_raw = float(tail_zone["high"].max())
+
+        zone_buf = last_atr * 0.35 if last_atr > 0 else last_close * 0.005
+
+        support_zone = (
+            round(support_raw, 6),
+            round(support_raw + zone_buf, 6),
+        )
+        resistance_zone = (
+            round(max(resistance_raw - zone_buf, 0), 6),
+            round(resistance_raw, 6),
+        )
+
+        room_to_target_pct = _pct(resistance_raw, last_close) if resistance_raw > last_close else 0.0
+
+        long_score = 0
+        short_score = 0
+
+        if last_close > last_ema50:
+            long_score += 1
+        else:
+            short_score += 1
+
+        if last_ema20 >= last_ema50:
+            long_score += 1
+        else:
+            short_score += 1
+
+        if last_ema50 >= last_ema200:
+            long_score += 1
+        else:
+            short_score += 1
+
+        if higher_low:
+            long_score += 1
+
+        if lower_high:
+            short_score += 1
+
+        if room_to_target_pct >= SWING_MIN_ROOM_TO_TARGET_PCT:
+            long_score += 1
+
+        bias = "NEUTRAL"
+        bias_score = 0
+
+        if long_score >= SWING_MIN_H4_SCORE and long_score >= short_score + 1:
+            bias = "LONG"
+            bias_score = long_score
+        elif short_score >= SWING_MIN_H4_SCORE and short_score >= long_score + 1:
+            bias = "SHORT"
+            bias_score = short_score
+        else:
+            bias = "NEUTRAL"
+            bias_score = max(long_score, short_score)
+
+        return {
+            "ok": True,
+            "bias": bias,
+            "bias_score": int(bias_score),
+            "support_zone": support_zone,
+            "resistance_zone": resistance_zone,
+            "room_to_target_pct": round(room_to_target_pct, 2),
+            "atr": round(last_atr, 6),
+            "ema20": round(last_ema20, 6),
+            "ema50": round(last_ema50, 6),
+            "ema200": round(last_ema200, 6),
+            "higher_low": higher_low,
+            "lower_high": lower_high,
+            "close": round(last_close, 6),
+        }
+
+    except Exception:
+        return empty
+
 def _chunked(items, size):
     for i in range(0, len(items), size):
         yield items[i:i + size]
