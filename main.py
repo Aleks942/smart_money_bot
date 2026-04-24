@@ -1208,7 +1208,7 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         stop_ok = stop_pct <= SWING_MAX_STOP_PCT if stop_pct > 0 else False
         rr_ok = rr1 >= SWING_MIN_RR if rr1 > 0 else False
 
-        if status in ("SWING SETUP", "SWING TRIGGER"):
+        if status in ("SWING SETUP", "SWING TRIGGER") and not late:
             if not room_ok:
                 verdict = "слишком близко к H4 сопротивлению/поддержке"
                 sendable = False
