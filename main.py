@@ -3937,42 +3937,42 @@ def build_signal(instId):
     
     if score < MIN_SCORE:
 
-    has_breakout = (
-        "BREAKOUT_CONFIRM_UP" in flags
-        or "BREAKOUT_CONFIRM_DOWN" in flags
-    )
-
-    has_pressure = (
-        "PRESSURE_UP" in flags
-        or "PRESSURE_DOWN" in flags
-    )
-
-    has_continuation = (
-        "CONTINUATION_UP" in flags
-        or "CONTINUATION_DOWN" in flags
-    )
-
-    normal_swing_pass = (
-        score >= SWING_BUILD_MIN_SCORE and (
-            acc_score >= 2
-            or has_breakout
-            or has_pressure
-            or has_continuation
+        has_breakout = (
+            "BREAKOUT_CONFIRM_UP" in flags
+            or "BREAKOUT_CONFIRM_DOWN" in flags
         )
-    )
-
-    early_exception_pass = (
-        score == 1 and (
-            acc_score >= 3
-            or (has_breakout and has_pressure)
-            or (acc_score >= 2 and has_pressure)
-            or (acc_score >= 2 and has_breakout)
+    
+        has_pressure = (
+            "PRESSURE_UP" in flags
+            or "PRESSURE_DOWN" in flags
         )
-    )
-
-    can_survive_for_swing = (
-        normal_swing_pass or early_exception_pass
-    )
+    
+        has_continuation = (
+            "CONTINUATION_UP" in flags
+            or "CONTINUATION_DOWN" in flags
+        )
+    
+        normal_swing_pass = (
+            score >= SWING_BUILD_MIN_SCORE and (
+                acc_score >= 2
+                or has_breakout
+                or has_pressure
+                or has_continuation
+            )
+        )
+    
+        early_exception_pass = (
+            score == 1 and (
+                acc_score >= 3
+                or (has_breakout and has_pressure)
+                or (acc_score >= 2 and has_pressure)
+                or (acc_score >= 2 and has_breakout)
+            )
+        )
+    
+        can_survive_for_swing = (
+            normal_swing_pass or early_exception_pass
+        )
 
     if not can_survive_for_swing:
         return _bs_skip(
