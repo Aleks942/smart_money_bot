@@ -78,6 +78,7 @@ SWING_MIN_TRIGGER_SCORE = int(os.getenv("SWING_MIN_TRIGGER_SCORE") or "2")
 SWING_MIN_ROOM_TO_TARGET_PCT = float(os.getenv("SWING_MIN_ROOM_TO_TARGET_PCT") or "4.0")
 SWING_MAX_STOP_PCT = float(os.getenv("SWING_MAX_STOP_PCT") or "8.0")
 SWING_MIN_RR = float(os.getenv("SWING_MIN_RR") or "1.8")
+SWING_LATE_FROM_EMA_PCT = float(os.getenv("SWING_LATE_FROM_EMA_PCT") or "6.5")
 
 
 # =========================
