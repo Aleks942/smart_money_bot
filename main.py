@@ -3961,12 +3961,14 @@ def build_signal(instId):
             )
         )
     
-        early_exception_pass = (
-            score == 1 and (
-                acc_score >= 3
-                or (has_breakout and has_pressure)
-            )
-        )
+early_exception_pass = (
+    score == 1 and (
+        acc_score >= 3
+        or (has_breakout and has_pressure)
+        or (acc_score >= 2 and has_pressure)
+        or (acc_score >= 2 and has_breakout)
+    )
+)
     
         can_survive_for_swing = (
             normal_swing_pass or early_exception_pass
