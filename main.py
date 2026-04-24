@@ -5242,6 +5242,7 @@ if __name__ == "__main__":
                     sig = build_signal(instId)
 
                     if not isinstance(sig, dict):
+                        print(f"[RAW_SKIP] {instId} build_signal_returned_non_dict")
                         continue
 
                     # =====================
