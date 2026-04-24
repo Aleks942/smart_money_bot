@@ -706,7 +706,7 @@ def analyze_h1_setup(df_h1: pd.DataFrame, h4_ctx: dict) -> dict:
                 invalidation = round(zone_high + zone_buf, 6)
                 reason = "breakout_retest"
 
-                        continuation_pullback = (
+                continuation_pullback = (
                 last_close < last_ema50
                 and last_ema20 <= last_ema50
                 and last_close <= last_vwap * 1.003
