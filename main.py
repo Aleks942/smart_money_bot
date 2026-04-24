@@ -1045,48 +1045,49 @@ def analyze_m15_trigger(df_m15: pd.DataFrame, h1_setup: dict, h4_ctx: dict) -> d
             in_zone = (last_close >= zone_low - zone_buf) and (last_close <= zone_high + zone_buf)
             above_ema = last_close >= last_ema20
             above_vwap = last_close >= last_vwap
-
+        
             local_break = False
             if not prev6.empty:
                 local_break = last_close > float(prev6["high"].max())
-
+        
             retest_hold = (
                 in_zone
                 and above_ema
                 and above_vwap
                 and float(recent3["low"].min()) > float(invalidation)
             )
-
+        
             if above_ema:
                 trigger_score += 1
-            
+        
             if above_vwap:
                 trigger_score += 1
-            
+        
             if vol_mult >= 1.10:
                 trigger_score += 1
-            
+        
             if strong_candle:
                 trigger_score += 1
-            
+        
             if compression_ready:
                 trigger_score += 1
+        
             if retest_hold:
                 trigger_score += 1
                 trigger_type = "retest_hold"
                 reason = "m15_retest_hold_long"
-
+        
             if local_break:
                 trigger_score += 1
-            
+        
                 if compression_ready and strong_candle:
                     trigger_type = "compression_break"
                     reason = "m15_compression_break_long"
-            
+        
                 elif trigger_type == "none":
                     trigger_type = "breakout_push"
                     reason = "m15_breakout_long"
-
+        
             if trigger_score >= SWING_MIN_TRIGGER_SCORE:
                 trigger_ok = True
                 entry_now = True
@@ -1099,53 +1100,73 @@ def analyze_m15_trigger(df_m15: pd.DataFrame, h1_setup: dict, h4_ctx: dict) -> d
             in_zone = (last_close >= zone_low - zone_buf) and (last_close <= zone_high + zone_buf)
             below_ema = last_close <= last_ema20
             below_vwap = last_close <= last_vwap
-
+        
             local_break = False
             if not prev6.empty:
                 local_break = last_close < float(prev6["low"].min())
-
+        
             retest_hold = (
                 in_zone
                 and below_ema
                 and below_vwap
                 and float(recent3["high"].max()) < float(invalidation)
             )
-
+        
             if below_ema:
                 trigger_score += 1
             if below_vwap:
                 trigger_score += 1
             if vol_mult >= 1.10:
                 trigger_score += 1
+            if strong_candle:
+                trigger_score += 1
+            if compression_ready:
+                trigger_score += 1
+        
             if retest_hold:
                 trigger_score += 1
                 trigger_type = "retest_hold"
                 reason = "m15_retest_hold_short"
-
+        
             if local_break:
                 trigger_score += 1
                 if trigger_type == "none":
                     trigger_type = "breakout_push"
                     reason = "m15_breakout_short"
-
+        
             if trigger_score >= SWING_MIN_TRIGGER_SCORE:
                 trigger_ok = True
                 entry_now = True
                 micro_stop = round(min(invalidation, last_high + zone_buf), 6)
 
-        return {
-            "ok": True,
-            "trigger_ok": bool(trigger_ok),
-            "entry_now": bool(entry_now),
-            "trigger_type": trigger_type,
-            "trigger_score": int(trigger_score),
-            "micro_stop": micro_stop,
-            "close": round(last_close, 6),
-            "ema20": round(last_ema20, 6),
-            "vwap": round(last_vwap, 6),
-            "atr": round(last_atr, 6),
-            "reason": reason,
-        }
+# -------------------------
+# FALLBACK MOMENTUM TRIGGER
+# -------------------------
+if trigger_score >= SWING_MIN_TRIGGER_SCORE and trigger_type == "none":
+    trigger_type = "momentum_ready"
+    trigger_ok = True
+    entry_now = True
+
+    if side == "LONG":
+        micro_stop = round(max(invalidation, last_low - zone_buf), 6)
+    else:
+        micro_stop = round(min(invalidation, last_high + zone_buf), 6)
+
+    reason = "m15_momentum_ready"
+
+return {
+    "ok": True,
+    "trigger_ok": bool(trigger_ok),
+    "entry_now": bool(entry_now),
+    "trigger_type": trigger_type,
+    "trigger_score": int(trigger_score),
+    "micro_stop": micro_stop,
+    "close": round(last_close, 6),
+    "ema20": round(last_ema20, 6),
+    "vwap": round(last_vwap, 6),
+    "atr": round(last_atr, 6),
+    "reason": reason,
+}
 
     except Exception:
         return empty
