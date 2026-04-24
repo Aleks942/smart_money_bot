@@ -5398,6 +5398,15 @@ if __name__ == "__main__":
                         except Exception as e:
                             print(f"[SWING_ERROR] {instId}: {e}")
 
+                    if sig.get("swing_only_candidate"):
+                        print(
+                            f"[SWING_ONLY_SKIP_MAIN] {instId} "
+                            f"score={sig.get('score')} "
+                            f"acc={sig.get('acc_score')} "
+                            f"flags={sig.get('flags')}"
+                        )
+                        continue
+
                     if sig.get("early_pressure_label"):
                         flags_set = set(sig.get("flags", []))
                         stage_txt = str(sig.get("stage", ""))
