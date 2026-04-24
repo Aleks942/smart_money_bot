@@ -474,6 +474,250 @@ def analyze_h4_context(df_h4: pd.DataFrame) -> dict:
     except Exception:
         return empty
 
+# =========================
+# SWING H1 SETUP ANALYSIS
+# =========================
+def _swing_vwap(df: pd.DataFrame) -> pd.Series:
+    if df is None or df.empty:
+        return pd.Series(dtype="float64")
+
+    try:
+        tp = (df["high"] + df["low"] + df["close"]) / 3.0
+        vol = df["volume"].fillna(0.0)
+        cum_vol = vol.cumsum()
+        cum_tpv = (tp * vol).cumsum()
+        out = cum_tpv / cum_vol.replace(0, pd.NA)
+        return out.astype("float64")
+    except Exception:
+        return pd.Series(dtype="float64")
+
+
+def analyze_h1_setup(df_h1: pd.DataFrame, h4_ctx: dict) -> dict:
+    """
+    Возвращает:
+    - setup_type: pullback_hold / breakout_retest / late / none
+    - side: LONG / SHORT / NEUTRAL
+    - entry_zone
+    - invalidation_level
+    - setup_score
+    """
+    empty = {
+        "ok": False,
+        "side": "NEUTRAL",
+        "setup_type": "none",
+        "setup_score": 0,
+        "entry_zone": None,
+        "invalidation_level": None,
+        "late": False,
+        "close": None,
+        "ema20": None,
+        "ema50": None,
+        "vwap": None,
+        "atr": 0.0,
+        "reason": "no_setup",
+    }
+
+    try:
+        if df_h1 is None or df_h1.empty or len(df_h1) < 40:
+            return empty
+
+        if not h4_ctx or not h4_ctx.get("ok"):
+            return empty
+
+        df = df_h1.copy().reset_index(drop=True)
+
+        close = df["close"]
+        high = df["high"]
+        low = df["low"]
+
+        ema20 = _swing_ema(close, H1_EMA_FAST)
+        ema50 = _swing_ema(close, H1_EMA_SLOW)
+        atr_s = _swing_atr(df, 14)
+        vwap_s = _swing_vwap(df)
+
+        last_close = float(close.iloc[-1])
+        last_ema20 = float(ema20.iloc[-1])
+        last_ema50 = float(ema50.iloc[-1])
+        last_atr = float(atr_s.iloc[-1]) if not atr_s.empty and pd.notna(atr_s.iloc[-1]) else 0.0
+        last_vwap = float(vwap_s.iloc[-1]) if not vwap_s.empty and pd.notna(vwap_s.iloc[-1]) else last_close
+
+        prev20 = df.iloc[-21:-1] if len(df) >= 21 else df.iloc[:-1]
+        recent6 = df.tail(6)
+        recent3 = df.tail(3)
+
+        local_hi = float(prev20["high"].max()) if not prev20.empty else float(high.iloc[-2])
+        local_lo = float(prev20["low"].min()) if not prev20.empty else float(low.iloc[-2])
+
+        h4_bias = h4_ctx.get("bias", "NEUTRAL")
+        support_zone = h4_ctx.get("support_zone")
+        resistance_zone = h4_ctx.get("resistance_zone")
+
+        # Буфер
+        zone_buf = last_atr * 0.25 if last_atr > 0 else last_close * 0.004
+
+        # Для оценки "поздно/не поздно"
+        dist_from_ema20_pct = _pct(last_close, last_ema20)
+        late_long = dist_from_ema20_pct > 4.5
+        late_short = dist_from_ema20_pct < -4.5
+
+        # -------------------------
+        # LONG setup
+        # -------------------------
+        if h4_bias == "LONG":
+            long_score = 0
+            setup_type = "none"
+            entry_zone = None
+            invalidation = None
+            reason = "h4_long_but_no_h1_setup"
+
+            # Pullback hold:
+            # цена выше EMA50, рядом с EMA20/VWAP, структура не сломана
+            pullback_hold = (
+                last_close > last_ema50
+                and last_close >= last_vwap * 0.995
+                and float(recent6["low"].min()) >= float(low.iloc[-12:-6].min()) if len(df) >= 12 else True
+            )
+
+            # Breakout retest:
+            # цена уже выше локального хая, но не улетела слишком далеко
+            breakout_up = last_close > local_hi
+            breakout_retest = (
+                breakout_up
+                and last_close > last_ema20
+                and last_close > last_vwap
+            )
+
+            if last_close > last_ema50:
+                long_score += 1
+            if last_ema20 >= last_ema50:
+                long_score += 1
+            if last_close >= last_vwap:
+                long_score += 1
+
+            if pullback_hold:
+                long_score += 1
+                setup_type = "pullback_hold"
+                base_low = float(recent6["low"].min())
+                zone_low = max(min(last_ema20, last_vwap) - zone_buf, 0)
+                zone_high = max(last_ema20, last_vwap) + zone_buf
+                entry_zone = (round(zone_low, 6), round(zone_high, 6))
+                invalidation = round(base_low - zone_buf, 6)
+                reason = "pullback_hold"
+
+            if breakout_retest and last_close <= local_hi * 1.03:
+                long_score += 1
+                setup_type = "breakout_retest"
+                zone_low = max(local_hi - zone_buf, 0)
+                zone_high = local_hi + zone_buf
+                entry_zone = (round(zone_low, 6), round(zone_high, 6))
+                invalidation = round(zone_low - zone_buf, 6)
+                reason = "breakout_retest"
+
+            if late_long:
+                setup_type = "late"
+                reason = "late_long"
+
+            if support_zone and setup_type == "pullback_hold":
+                # дополнительно усиливаем, если зона рядом с H4 support
+                sz_low, sz_high = support_zone
+                if last_close >= sz_low and last_close <= sz_high * 1.03:
+                    long_score += 1
+
+            return {
+                "ok": True,
+                "side": "LONG",
+                "setup_type": setup_type if long_score >= SWING_MIN_H1_SCORE else "none",
+                "setup_score": int(long_score),
+                "entry_zone": entry_zone if long_score >= SWING_MIN_H1_SCORE and setup_type != "late" else None,
+                "invalidation_level": invalidation if long_score >= SWING_MIN_H1_SCORE and setup_type != "late" else None,
+                "late": bool(late_long),
+                "close": round(last_close, 6),
+                "ema20": round(last_ema20, 6),
+                "ema50": round(last_ema50, 6),
+                "vwap": round(last_vwap, 6),
+                "atr": round(last_atr, 6),
+                "reason": reason,
+            }
+
+        # -------------------------
+        # SHORT setup
+        # -------------------------
+        if h4_bias == "SHORT":
+            short_score = 0
+            setup_type = "none"
+            entry_zone = None
+            invalidation = None
+            reason = "h4_short_but_no_h1_setup"
+
+            pullback_hold = (
+                last_close < last_ema50
+                and last_close <= last_vwap * 1.005
+                and float(recent6["high"].max()) <= float(high.iloc[-12:-6].max()) if len(df) >= 12 else True
+            )
+
+            breakout_down = last_close < local_lo
+            breakout_retest = (
+                breakout_down
+                and last_close < last_ema20
+                and last_close < last_vwap
+            )
+
+            if last_close < last_ema50:
+                short_score += 1
+            if last_ema20 <= last_ema50:
+                short_score += 1
+            if last_close <= last_vwap:
+                short_score += 1
+
+            if pullback_hold:
+                short_score += 1
+                setup_type = "pullback_hold"
+                base_high = float(recent6["high"].max())
+                zone_low = min(last_ema20, last_vwap) - zone_buf
+                zone_high = max(last_ema20, last_vwap) + zone_buf
+                entry_zone = (round(max(zone_low, 0), 6), round(zone_high, 6))
+                invalidation = round(base_high + zone_buf, 6)
+                reason = "pullback_hold"
+
+            if breakout_retest and last_close >= local_lo * 0.97:
+                short_score += 1
+                setup_type = "breakout_retest"
+                zone_low = max(local_lo - zone_buf, 0)
+                zone_high = local_lo + zone_buf
+                entry_zone = (round(zone_low, 6), round(zone_high, 6))
+                invalidation = round(zone_high + zone_buf, 6)
+                reason = "breakout_retest"
+
+            if late_short:
+                setup_type = "late"
+                reason = "late_short"
+
+            if resistance_zone and setup_type == "pullback_hold":
+                rz_low, rz_high = resistance_zone
+                if last_close <= rz_high and last_close >= rz_low * 0.97:
+                    short_score += 1
+
+            return {
+                "ok": True,
+                "side": "SHORT",
+                "setup_type": setup_type if short_score >= SWING_MIN_H1_SCORE else "none",
+                "setup_score": int(short_score),
+                "entry_zone": entry_zone if short_score >= SWING_MIN_H1_SCORE and setup_type != "late" else None,
+                "invalidation_level": invalidation if short_score >= SWING_MIN_H1_SCORE and setup_type != "late" else None,
+                "late": bool(late_short),
+                "close": round(last_close, 6),
+                "ema20": round(last_ema20, 6),
+                "ema50": round(last_ema50, 6),
+                "vwap": round(last_vwap, 6),
+                "atr": round(last_atr, 6),
+                "reason": reason,
+            }
+
+        return empty
+
+    except Exception:
+        return empty
+
 def _chunked(items, size):
     for i in range(0, len(items), size):
         yield items[i:i + size]
