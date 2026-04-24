@@ -3948,20 +3948,25 @@ def build_signal(instId):
             or "PRESSURE_DOWN" in flags
         )
     
-        has_continuation = (
+         has_continuation = (
             "CONTINUATION_UP" in flags
             or "CONTINUATION_DOWN" in flags
         )
-    
+
         normal_swing_pass = (
-            score >= SWING_BUILD_MIN_SCORE and (
-                acc_score >= 2
-                or has_breakout
-                or has_pressure
-                or has_continuation
+            (
+                score >= SWING_BUILD_MIN_SCORE and (
+                    acc_score >= 2
+                    or has_breakout
+                    or has_pressure
+                    or has_continuation
+                )
+            )
+            or (
+                score >= 3
             )
         )
-    
+
         early_exception_pass = (
             score == 1 and (
                 acc_score >= 3
@@ -3970,17 +3975,17 @@ def build_signal(instId):
                 or (acc_score >= 2 and has_breakout)
             )
         )
-    
+
         can_survive_for_swing = (
             normal_swing_pass or early_exception_pass
         )
 
-    if not can_survive_for_swing:
-        return _bs_skip(
-            f"score_below_min score={score} min={MIN_SCORE}"
-        )
+        if not can_survive_for_swing:
+            return _bs_skip(
+                f"score_below_min score={score} min={MIN_SCORE}"
+            )
 
-    swing_only_candidate = True
+        swing_only_candidate = True
 
     # =========================
     # SIGNAL OBJECT
