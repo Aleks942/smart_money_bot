@@ -1290,8 +1290,38 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
                 entry_zone_ok = False
             elif entry_price:
                 zone_width_pct = abs((zone_high - zone_low) / float(entry_price) * 100.0)
+
+                # если зона слишком широкая — пытаемся автоматически сузить её
                 if zone_width_pct > SWING_MAX_ENTRY_ZONE_PCT:
-                    entry_zone_ok = False
+                    h1_ema20 = float(h1_setup.get("ema20") or 0.0) if h1_setup else 0.0
+                    h1_vwap = float(h1_setup.get("vwap") or 0.0) if h1_setup else 0.0
+                    h1_atr = float(h1_setup.get("atr") or 0.0) if h1_setup else 0.0
+
+                    anchor = float(entry_price)
+                    if h1_ema20 > 0 and h1_vwap > 0:
+                        anchor = (h1_ema20 + h1_vwap) / 2.0
+                    elif h1_ema20 > 0:
+                        anchor = h1_ema20
+                    elif h1_vwap > 0:
+                        anchor = h1_vwap
+
+                    tight_buf = max(
+                        h1_atr * 0.35,
+                        float(entry_price) * 0.003
+                    )
+
+                    zone_low = max(anchor - tight_buf, 0.0)
+                    zone_high = max(anchor + tight_buf, 0.0)
+                    entry_zone = (round(zone_low, 6), round(zone_high, 6))
+
+                    if status == "SWING SETUP":
+                        entry_price = _swing_mid(entry_zone)
+
+                    zone_width_pct = abs((zone_high - zone_low) / float(entry_price) * 100.0)
+
+                    if zone_width_pct > SWING_MAX_ENTRY_ZONE_PCT:
+                        entry_zone_ok = False
+        
 
             # авто-исправление стопа: если он попал внутрь зоны, выносим его за пределы
             if stop is not None:
@@ -1315,6 +1345,7 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
 
         room_ok = float(h4_ctx.get("room_to_target_pct", 0.0)) >= SWING_MIN_ROOM_TO_TARGET_PCT
         stop_ok = stop_pct <= SWING_MAX_STOP_PCT if stop_pct > 0 else False
+        
         rr_ok = rr1 >= SWING_MIN_RR if rr1 > 0 else False
 
         strong_trigger_override = (
