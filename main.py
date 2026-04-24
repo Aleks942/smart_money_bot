@@ -5252,6 +5252,10 @@ if __name__ == "__main__":
                     # =====================
 
                     sig = apply_market_context(sig)
+                    
+                    if not sig:
+                        print(f"[RAW_SKIP] {instId} no_signal_from_analyzer")
+                        continue
 
                     # =====================
                     # REGIME BIAS
