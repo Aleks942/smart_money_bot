@@ -1354,29 +1354,34 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             and rr1 >= 2.2
         )
 
-        elif not room_ok and not strong_trigger_override:
+        if status in ("SWING SETUP", "SWING TRIGGER") and not late:
 
-            soft_room_pass = (
-                status in ("SWING SETUP", "SWING TRIGGER")
-                and rr1 >= 2.0
-            )
-        
-            if not soft_room_pass:
-                verdict = "слишком близко к H4 сопротивлению/поддержке"
+            if not entry_zone_ok:
+                verdict = "слишком широкая или некорректная зона входа"
                 sendable = False
-        
-        elif not stop_ok:
-            verdict = "стоп слишком широкий для swing"
-            sendable = False
-        
-        elif not rr_ok:
-            verdict = "RR слабый, сделка некрасивая"
-            sendable = False
+
+            elif not stop_outside_zone_ok:
+                verdict = "стоп стоит внутри зоны входа"
+                sendable = False
+
+            elif not room_ok and not strong_trigger_override:
 
                 soft_room_pass = (
-                    status == "SWING SETUP"
+                    status in ("SWING SETUP", "SWING TRIGGER")
                     and rr1 >= 2.0
                 )
+
+                if not soft_room_pass:
+                    verdict = "слишком близко к H4 сопротивлению/поддержке"
+                    sendable = False
+
+            elif not stop_ok:
+                verdict = "стоп слишком широкий для swing"
+                sendable = False
+
+            elif not rr_ok:
+                verdict = "RR слабый, сделка некрасивая"
+                sendable = False
 
         return {
             "ok": True,
