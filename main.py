@@ -1074,6 +1074,228 @@ def analyze_m15_trigger(df_m15: pd.DataFrame, h1_setup: dict, h4_ctx: dict) -> d
     except Exception:
         return empty
 
+# =========================
+# SWING SIGNAL BUILDER + TELEGRAM FORMAT
+# =========================
+def _swing_mid(zone):
+    try:
+        if not zone:
+            return None
+        a, b = zone
+        return (float(a) + float(b)) / 2.0
+    except Exception:
+        return None
+
+
+def _swing_rr(entry: float, stop: float, target: float, side: str) -> float:
+    try:
+        entry = float(entry)
+        stop = float(stop)
+        target = float(target)
+
+        if side == "LONG":
+            risk = entry - stop
+            reward = target - entry
+        else:
+            risk = stop - entry
+            reward = entry - target
+
+        if risk <= 0:
+            return 0.0
+        return reward / risk
+    except Exception:
+        return 0.0
+
+
+def _fmt_px(x):
+    try:
+        x = float(x)
+        if x >= 1000:
+            return f"{x:.2f}"
+        if x >= 100:
+            return f"{x:.3f}"
+        if x >= 1:
+            return f"{x:.4f}"
+        return f"{x:.6f}"
+    except Exception:
+        return str(x)
+
+
+def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: dict) -> dict:
+    empty = {
+        "ok": False,
+        "symbol": instId,
+        "status": "NONE",
+        "side": "NEUTRAL",
+        "entry_zone": None,
+        "entry_price": None,
+        "stop": None,
+        "tp1": None,
+        "tp2": None,
+        "rr1": 0.0,
+        "late": False,
+        "sendable": False,
+        "verdict": "no_signal",
+    }
+
+    try:
+        if not h4_ctx or not h4_ctx.get("ok"):
+            return empty
+
+        side = h1_setup.get("side", "NEUTRAL") if h1_setup else "NEUTRAL"
+        if side not in ("LONG", "SHORT"):
+            side = "LONG" if h4_ctx.get("bias") == "LONG" else ("SHORT" if h4_ctx.get("bias") == "SHORT" else "NEUTRAL")
+
+        if side == "NEUTRAL":
+            return empty
+
+        status = "SWING CONTEXT"
+        verdict = "только контекст, входа пока нет"
+        sendable = False
+
+        entry_zone = h1_setup.get("entry_zone") if h1_setup else None
+        entry_price = _swing_mid(entry_zone)
+        stop = h1_setup.get("invalidation_level") if h1_setup else None
+
+        if m15_trigger and m15_trigger.get("trigger_ok"):
+            status = "SWING TRIGGER"
+            verdict = "можно работать по M15 trigger"
+            sendable = True
+            if m15_trigger.get("micro_stop") is not None:
+                stop = m15_trigger.get("micro_stop")
+        elif h1_setup and h1_setup.get("setup_type") not in ("none", None):
+            status = "SWING SETUP"
+            verdict = "сетап есть, но лучше ждать M15 trigger"
+            sendable = True
+        else:
+            status = "SWING CONTEXT"
+            verdict = "есть контекст H4, но H1 сетап ещё не готов"
+
+        late = bool(h1_setup.get("late")) if h1_setup else False
+        if late:
+            verdict = "поздний вход, не догонять"
+            sendable = False
+
+        support_zone = h4_ctx.get("support_zone")
+        resistance_zone = h4_ctx.get("resistance_zone")
+
+        tp1 = None
+        tp2 = None
+
+        if side == "LONG":
+            if resistance_zone:
+                tp1 = float(resistance_zone[1])
+                if support_zone:
+                    h4_range = float(resistance_zone[1]) - float(support_zone[0])
+                    tp2 = tp1 + h4_range * 0.5
+        else:
+            if support_zone:
+                tp1 = float(support_zone[0])
+                if resistance_zone:
+                    h4_range = float(resistance_zone[1]) - float(support_zone[0])
+                    tp2 = tp1 - h4_range * 0.5
+
+        rr1 = 0.0
+        if entry_price is not None and stop is not None and tp1 is not None:
+            rr1 = _swing_rr(entry_price, stop, tp1, side)
+
+        stop_pct = 0.0
+        if entry_price and stop:
+            stop_pct = abs((float(entry_price) - float(stop)) / float(entry_price) * 100.0)
+
+        room_ok = float(h4_ctx.get("room_to_target_pct", 0.0)) >= SWING_MIN_ROOM_TO_TARGET_PCT
+        stop_ok = stop_pct <= SWING_MAX_STOP_PCT if stop_pct > 0 else False
+        rr_ok = rr1 >= SWING_MIN_RR if rr1 > 0 else False
+
+        if status in ("SWING SETUP", "SWING TRIGGER"):
+            if not room_ok:
+                verdict = "слишком близко к H4 сопротивлению/поддержке"
+                sendable = False
+            elif not stop_ok:
+                verdict = "стоп слишком широкий для swing"
+                sendable = False
+            elif not rr_ok:
+                verdict = "RR слабый, сделка некрасивая"
+                sendable = False
+
+        return {
+            "ok": True,
+            "symbol": instId,
+            "status": status,
+            "side": side,
+            "h4_bias": h4_ctx.get("bias"),
+            "h4_bias_score": h4_ctx.get("bias_score"),
+            "h4_support_zone": support_zone,
+            "h4_resistance_zone": resistance_zone,
+            "h4_room_to_target_pct": h4_ctx.get("room_to_target_pct"),
+            "h1_setup_type": h1_setup.get("setup_type") if h1_setup else "none",
+            "h1_setup_score": h1_setup.get("setup_score") if h1_setup else 0,
+            "m15_trigger_type": m15_trigger.get("trigger_type") if m15_trigger else "none",
+            "m15_trigger_score": m15_trigger.get("trigger_score") if m15_trigger else 0,
+            "entry_zone": entry_zone,
+            "entry_price": round(entry_price, 6) if entry_price is not None else None,
+            "stop": round(float(stop), 6) if stop is not None else None,
+            "tp1": round(float(tp1), 6) if tp1 is not None else None,
+            "tp2": round(float(tp2), 6) if tp2 is not None else None,
+            "rr1": round(rr1, 2),
+            "late": late,
+            "sendable": bool(sendable),
+            "verdict": verdict,
+        }
+
+    except Exception:
+        return empty
+
+
+def format_swing_telegram(sig: dict) -> str:
+    if not sig or not sig.get("ok"):
+        return ""
+
+    icon = "🧭"
+    if sig.get("status") == "SWING TRIGGER":
+        icon = "🚀"
+    elif sig.get("status") == "SWING SETUP":
+        icon = "📍"
+
+    side_txt = "LONG" if sig.get("side") == "LONG" else "SHORT"
+
+    support_zone = sig.get("h4_support_zone")
+    resistance_zone = sig.get("h4_resistance_zone")
+    entry_zone = sig.get("entry_zone")
+
+    support_txt = "-"
+    if support_zone:
+        support_txt = f"{_fmt_px(support_zone[0])} → {_fmt_px(support_zone[1])}"
+
+    resistance_txt = "-"
+    if resistance_zone:
+        resistance_txt = f"{_fmt_px(resistance_zone[0])} → {_fmt_px(resistance_zone[1])}"
+
+    entry_txt = "-"
+    if entry_zone:
+        entry_txt = f"{_fmt_px(entry_zone[0])} → {_fmt_px(entry_zone[1])}"
+
+    stop_txt = _fmt_px(sig["stop"]) if sig.get("stop") is not None else "-"
+    tp1_txt = _fmt_px(sig["tp1"]) if sig.get("tp1") is not None else "-"
+    tp2_txt = _fmt_px(sig["tp2"]) if sig.get("tp2") is not None else "-"
+
+    return (
+        f"{icon} <b>{sig.get('status')}</b> — {sig.get('symbol')}\n\n"
+        f"Направление: <b>{side_txt}</b>\n"
+        f"H4 Bias: <b>{sig.get('h4_bias')}</b> | score={sig.get('h4_bias_score')}\n"
+        f"H1 Setup: <b>{sig.get('h1_setup_type')}</b> | score={sig.get('h1_setup_score')}\n"
+        f"M15 Trigger: <b>{sig.get('m15_trigger_type')}</b> | score={sig.get('m15_trigger_score')}\n\n"
+        f"H4 support: {support_txt}\n"
+        f"H4 resistance: {resistance_txt}\n"
+        f"Room to target: {sig.get('h4_room_to_target_pct')}%\n\n"
+        f"Entry zone: {entry_txt}\n"
+        f"Stop: {stop_txt}\n"
+        f"TP1: {tp1_txt}\n"
+        f"TP2: {tp2_txt}\n"
+        f"RR1: {sig.get('rr1')}\n\n"
+        f"🧠 <b>Вердикт</b>:\n{sig.get('verdict')}"
+    )
+
 def _chunked(items, size):
     for i in range(0, len(items), size):
         yield items[i:i + size]
