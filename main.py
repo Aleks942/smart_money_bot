@@ -633,7 +633,7 @@ def analyze_h1_setup(df_h1: pd.DataFrame, h4_ctx: dict) -> dict:
                 invalidation = round(swing_low - zone_buf, 6)
                 reason = "continuation_pullback"
 
-            if late_long:
+            if late_long and setup_type == "none":
                 setup_type = "late"
                 reason = "late_long"
 
