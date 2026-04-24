@@ -1012,6 +1012,18 @@ def analyze_m15_trigger(df_m15: pd.DataFrame, h1_setup: dict, h4_ctx: dict) -> d
         zone_buf = last_atr * 0.20 if last_atr > 0 else last_close * 0.003
 
         trigger_score = 0
+
+        # PRO metrics
+        rng = max(last_high - last_low, 0.0000001)
+        last_open = float(df["open"].iloc[-1])
+        body = abs(last_close - last_open)
+        body_ratio = body / rng
+        
+        micro_range = float(high.tail(5).max()) - float(low.tail(5).min())
+        compression_ready = (micro_range / last_close) <= 0.012 if last_close > 0 else False
+        
+        strong_candle = body_ratio >= 0.55
+        
         trigger_type = "none"
         trigger_ok = False
         entry_now = False
