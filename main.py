@@ -3935,20 +3935,20 @@ def build_signal(instId):
     # =========================
     swing_only_candidate = False
     can_survive_for_swing = True
-    
+
     if score < MIN_SCORE:
 
         has_breakout = (
             "BREAKOUT_CONFIRM_UP" in flags
             or "BREAKOUT_CONFIRM_DOWN" in flags
         )
-    
+
         has_pressure = (
             "PRESSURE_UP" in flags
             or "PRESSURE_DOWN" in flags
         )
-    
-         has_continuation = (
+
+        has_continuation = (
             "CONTINUATION_UP" in flags
             or "CONTINUATION_DOWN" in flags
         )
