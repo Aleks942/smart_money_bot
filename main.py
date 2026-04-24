@@ -74,7 +74,7 @@ H1_EMA_SLOW = int(os.getenv("H1_EMA_SLOW") or "50")
 
 SWING_MIN_H4_SCORE = int(os.getenv("SWING_MIN_H4_SCORE") or "3")
 SWING_MIN_H1_SCORE = int(os.getenv("SWING_MIN_H1_SCORE") or "3")
-SWING_MIN_TRIGGER_SCORE = int(os.getenv("SWING_MIN_TRIGGER_SCORE") or "4")
+SWING_MIN_TRIGGER_SCORE = int(os.getenv("SWING_MIN_TRIGGER_SCORE") or "3")
 
 SWING_MIN_ROOM_TO_TARGET_PCT = float(os.getenv("SWING_MIN_ROOM_TO_TARGET_PCT") or "2.8")
 SWING_MAX_STOP_PCT = float(os.getenv("SWING_MAX_STOP_PCT") or "10.0")
