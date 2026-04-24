@@ -1269,7 +1269,7 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             and rr1 >= 2.2
         )
 
-         if status in ("SWING SETUP", "SWING TRIGGER") and not late:
+        if status in ("SWING SETUP", "SWING TRIGGER") and not late:
             if not entry_zone_ok:
                 verdict = "слишком широкая или некорректная зона входа"
                 sendable = False
