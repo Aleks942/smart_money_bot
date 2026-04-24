@@ -57,6 +57,7 @@ ONE_OPEN_SIGNAL_PER_SYMBOL = (os.getenv("ONE_OPEN_SIGNAL_PER_SYMBOL") or "1").st
 # =========================
 SWING_MODE = (os.getenv("SWING_MODE") or "1").strip() != "0"
 
+
 SWING_USE_H4 = (os.getenv("SWING_USE_H4") or "1").strip() != "0"
 SWING_USE_H1 = (os.getenv("SWING_USE_H1") or "1").strip() != "0"
 SWING_USE_M15 = (os.getenv("SWING_USE_M15") or "1").strip() != "0"
@@ -81,6 +82,7 @@ SWING_MIN_RR = float(os.getenv("SWING_MIN_RR") or "1.35")
 SWING_LATE_FROM_EMA_PCT = float(os.getenv("SWING_LATE_FROM_EMA_PCT") or "6.5")
 SWING_MAX_ENTRY_ZONE_PCT = float(os.getenv("SWING_MAX_ENTRY_ZONE_PCT") or "12.0")
 SWING_REQUIRE_STOP_OUTSIDE_ZONE = (os.getenv("SWING_REQUIRE_STOP_OUTSIDE_ZONE") or "1").strip() != "0"
+SWING_BUILD_MIN_SCORE = int(os.getenv("SWING_BUILD_MIN_SCORE") or "2")
 
 
 # =========================
