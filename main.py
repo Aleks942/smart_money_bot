@@ -1291,6 +1291,20 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
                 if zone_width_pct > SWING_MAX_ENTRY_ZONE_PCT:
                     entry_zone_ok = False
 
+            # авто-исправление стопа: если он попал внутрь зоны, выносим его за пределы
+            if stop is not None:
+                stop = float(stop)
+                stop_buf = max(
+                    h4_atr * 0.15,
+                    (zone_high - zone_low) * 0.10,
+                    float(entry_price) * 0.002 if entry_price else 0.0
+                )
+
+                if side == "LONG" and stop >= zone_low:
+                    stop = zone_low - stop_buf
+                elif side == "SHORT" and stop <= zone_high:
+                    stop = zone_high + stop_buf
+
             if SWING_REQUIRE_STOP_OUTSIDE_ZONE and stop is not None:
                 if side == "LONG":
                     stop_outside_zone_ok = float(stop) < zone_low
