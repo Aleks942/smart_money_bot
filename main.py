@@ -1187,21 +1187,36 @@ else:
         support_zone = h4_ctx.get("support_zone")
         resistance_zone = h4_ctx.get("resistance_zone")
 
-        tp1 = None
-        tp2 = None
+tp1 = None
+tp2 = None
 
-        if side == "LONG":
-            if resistance_zone:
-                tp1 = float(resistance_zone[1])
-                if support_zone:
-                    h4_range = float(resistance_zone[1]) - float(support_zone[0])
-                    tp2 = tp1 + h4_range * 0.5
-        else:
-            if support_zone:
-                tp1 = float(support_zone[0])
-                if resistance_zone:
-                    h4_range = float(resistance_zone[1]) - float(support_zone[0])
-                    tp2 = tp1 - h4_range * 0.5
+h4_atr = float(h4_ctx.get("atr") or 0.0)
+
+if side == "LONG":
+    if resistance_zone:
+        tp1 = float(resistance_zone[1])
+
+    # если уже почти у сопротивления или выше него — строим расширенную цель
+    if entry_price is not None and (tp1 is None or tp1 <= float(entry_price) * 1.003):
+        ext_move = max(h4_atr * 1.8, float(entry_price) * 0.02)
+        tp1 = float(entry_price) + ext_move
+
+    if tp1 is not None:
+        ext2 = max(h4_atr * 2.8, abs(tp1 - float(entry_price)) if entry_price is not None else h4_atr * 2.0)
+        tp2 = tp1 + ext2 * 0.5
+
+else:
+    if support_zone:
+        tp1 = float(support_zone[0])
+
+    # если уже почти у поддержки или ниже неё — строим расширенную цель
+    if entry_price is not None and (tp1 is None or tp1 >= float(entry_price) * 0.997):
+        ext_move = max(h4_atr * 1.8, float(entry_price) * 0.02)
+        tp1 = float(entry_price) - ext_move
+
+    if tp1 is not None:
+        ext2 = max(h4_atr * 2.8, abs(float(entry_price) - tp1) if entry_price is not None else h4_atr * 2.0)
+        tp2 = tp1 - ext2 * 0.5
 
         rr1 = 0.0
         if entry_price is not None and stop is not None and tp1 is not None:
