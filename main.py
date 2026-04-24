@@ -3902,8 +3902,25 @@ def build_signal(instId):
     # =========================
     # RESULT FILTER
     # =========================
+    swing_only_candidate = False
+
     if score < MIN_SCORE:
-        return _bs_skip(f"score_below_min score={score} min={MIN_SCORE}")
+        can_survive_for_swing = (
+            score >= SWING_BUILD_MIN_SCORE and (
+                acc_score >= 2
+                or "BREAKOUT_CONFIRM_UP" in flags
+                or "BREAKOUT_CONFIRM_DOWN" in flags
+                or "PRESSURE_UP" in flags
+                or "PRESSURE_DOWN" in flags
+                or "CONTINUATION_UP" in flags
+                or "CONTINUATION_DOWN" in flags
+            )
+        )
+
+        if not can_survive_for_swing:
+            return _bs_skip(f"score_below_min score={score} min={MIN_SCORE}")
+
+        swing_only_candidate = True
 
     # =========================
     # SIGNAL OBJECT
