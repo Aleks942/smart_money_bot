@@ -903,9 +903,17 @@ def analyze_m15_trigger(df_m15: pd.DataFrame, h1_setup: dict, h4_ctx: dict) -> d
 
             if below_ema:
                 trigger_score += 1
+            
             if below_vwap:
                 trigger_score += 1
+            
             if vol_mult >= 1.10:
+                trigger_score += 1
+            
+            if strong_candle:
+                trigger_score += 1
+            
+            if compression_ready:
                 trigger_score += 1
             if retest_hold:
                 trigger_score += 1
