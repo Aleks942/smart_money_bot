@@ -79,6 +79,8 @@ SWING_MIN_ROOM_TO_TARGET_PCT = float(os.getenv("SWING_MIN_ROOM_TO_TARGET_PCT") o
 SWING_MAX_STOP_PCT = float(os.getenv("SWING_MAX_STOP_PCT") or "10.0")
 SWING_MIN_RR = float(os.getenv("SWING_MIN_RR") or "1.35")
 SWING_LATE_FROM_EMA_PCT = float(os.getenv("SWING_LATE_FROM_EMA_PCT") or "6.5")
+SWING_MAX_ENTRY_ZONE_PCT = float(os.getenv("SWING_MAX_ENTRY_ZONE_PCT") or "12.0")
+SWING_REQUIRE_STOP_OUTSIDE_ZONE = (os.getenv("SWING_REQUIRE_STOP_OUTSIDE_ZONE") or "1").strip() != "0"
 
 
 # =========================
