@@ -1154,23 +1154,30 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         verdict = "только контекст, входа пока нет"
         sendable = False
 
-        entry_zone = h1_setup.get("entry_zone") if h1_setup else None
-        entry_price = _swing_mid(entry_zone)
-        stop = h1_setup.get("invalidation_level") if h1_setup else None
+entry_zone = h1_setup.get("entry_zone") if h1_setup else None
+entry_price = _swing_mid(entry_zone)
+stop = h1_setup.get("invalidation_level") if h1_setup else None
 
-        if m15_trigger and m15_trigger.get("trigger_ok"):
-            status = "SWING TRIGGER"
-            verdict = "можно работать по M15 trigger"
-            sendable = True
-            if m15_trigger.get("micro_stop") is not None:
-                stop = m15_trigger.get("micro_stop")
-        elif h1_setup and h1_setup.get("setup_type") not in ("none", None):
-            status = "SWING SETUP"
-            verdict = "сетап есть, но лучше ждать M15 trigger"
-            sendable = True
-        else:
-            status = "SWING CONTEXT"
-            verdict = "есть контекст H4, но H1 сетап ещё не готов"
+if m15_trigger and m15_trigger.get("trigger_ok"):
+    status = "SWING TRIGGER"
+    verdict = "можно работать по M15 trigger"
+    sendable = True
+
+    # для trigger берём более реальную текущую цену, а не середину старой H1-зоны
+    if m15_trigger.get("close") is not None:
+        entry_price = float(m15_trigger.get("close"))
+
+    if m15_trigger.get("micro_stop") is not None:
+        stop = m15_trigger.get("micro_stop")
+
+elif h1_setup and h1_setup.get("setup_type") not in ("none", None):
+    status = "SWING SETUP"
+    verdict = "сетап есть, но лучше ждать M15 trigger"
+    sendable = True
+
+else:
+    status = "SWING CONTEXT"
+    verdict = "есть контекст H4, но H1 сетап ещё не готов"
 
         late = bool(h1_setup.get("late")) if h1_setup else False
         if late:
