@@ -3756,9 +3756,9 @@ def build_signal(instId):
     c15 = fetch_candles(instId, "15m", 240)
 
     if not c5 or len(c5) < 20:
-        return None
+        return _bs_skip("c5_empty_or_lt_20")
     if not c15 or len(c15) < 200:
-        return None
+        return _bs_skip("c15_empty_or_lt_200")
 
     price = float(c5[-1][4])
 
