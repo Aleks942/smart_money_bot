@@ -616,6 +616,21 @@ def analyze_h1_setup(df_h1: pd.DataFrame, h4_ctx: dict) -> dict:
                 invalidation = round(zone_low - zone_buf, 6)
                 reason = "breakout_retest"
 
+                        continuation_pullback = (
+                last_close > last_ema50
+                and last_ema20 >= last_ema50
+                and last_close >= last_vwap * 0.997
+            )
+
+            if setup_type == "none" and continuation_pullback and long_score >= 3:
+                setup_type = "pullback_hold"
+                swing_low = float(recent6["low"].min())
+                zone_low = max(min(last_ema20, last_vwap) - zone_buf, 0)
+                zone_high = max(last_ema20, last_vwap) + zone_buf
+                entry_zone = (round(zone_low, 6), round(zone_high, 6))
+                invalidation = round(swing_low - zone_buf, 6)
+                reason = "continuation_pullback"
+
             if late_long:
                 setup_type = "late"
                 reason = "late_long"
