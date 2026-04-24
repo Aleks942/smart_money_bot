@@ -3708,6 +3708,10 @@ def calc_entry_zone(price, pmeta, flags, direction_code):
 # =========================
 def build_signal(instId):
 
+    def _bs_skip(reason: str):
+        print(f"[BUILD_SIGNAL_SKIP] {instId} {reason}")
+        return None
+
     if isinstance(instId, tuple):
         instId = instId[0]
 
