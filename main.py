@@ -1139,7 +1139,7 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         "verdict": "no_signal",
     }
 
-       try:
+    try:
         if not h4_ctx or not h4_ctx.get("ok"):
             return empty
 
@@ -1223,19 +1223,6 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
                     abs(float(entry_price) - tp1) if entry_price is not None else h4_atr * 2.0
                 )
                 tp2 = tp1 - ext2 * 0.5
-
-else:
-    if support_zone:
-        tp1 = float(support_zone[0])
-
-    # если уже почти у поддержки или ниже неё — строим расширенную цель
-    if entry_price is not None and (tp1 is None or tp1 >= float(entry_price) * 0.997):
-        ext_move = max(h4_atr * 1.8, float(entry_price) * 0.02)
-        tp1 = float(entry_price) - ext_move
-
-    if tp1 is not None:
-        ext2 = max(h4_atr * 2.8, abs(float(entry_price) - tp1) if entry_price is not None else h4_atr * 2.0)
-        tp2 = tp1 - ext2 * 0.5
 
         rr1 = 0.0
         if entry_price is not None and stop is not None and tp1 is not None:
