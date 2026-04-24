@@ -1077,10 +1077,15 @@ def analyze_m15_trigger(df_m15: pd.DataFrame, h1_setup: dict, h4_ctx: dict) -> d
                 reason = "m15_retest_hold_long"
 
             if local_break:
-                trigger_score += 1
-                if trigger_type == "none":
-                    trigger_type = "breakout_push"
-                    reason = "m15_breakout_long"
+            trigger_score += 1
+        
+            if compression_ready and strong_candle:
+                trigger_type = "compression_break"
+                reason = "m15_compression_break_long"
+        
+            elif trigger_type == "none":
+                trigger_type = "breakout_push"
+                reason = "m15_breakout_long"
 
             if trigger_score >= SWING_MIN_TRIGGER_SCORE and (retest_hold or local_break):
                 trigger_ok = True
