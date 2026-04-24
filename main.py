@@ -5261,6 +5261,7 @@ if __name__ == "__main__":
                     # =====================
 
                     sig = apply_market_context(sig)
+                    print(f"[SIG_RAW] {instId} sig_exists={bool(sig)}")
                     
                     if not sig:
                         print(f"[RAW_SKIP] {instId} no_signal_from_analyzer")
