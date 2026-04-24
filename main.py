@@ -1145,7 +1145,9 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
 
         side = h1_setup.get("side", "NEUTRAL") if h1_setup else "NEUTRAL"
         if side not in ("LONG", "SHORT"):
-            side = "LONG" if h4_ctx.get("bias") == "LONG" else ("SHORT" if h4_ctx.get("bias") == "SHORT" else "NEUTRAL")
+            side = "LONG" if h4_ctx.get("bias") == "LONG" else (
+                "SHORT" if h4_ctx.get("bias") == "SHORT" else "NEUTRAL"
+            )
 
         if side == "NEUTRAL":
             return empty
@@ -1236,22 +1238,22 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         stop_ok = stop_pct <= SWING_MAX_STOP_PCT if stop_pct > 0 else False
         rr_ok = rr1 >= SWING_MIN_RR if rr1 > 0 else False
 
-    strong_trigger_override = (
-    status == "SWING TRIGGER"
-    and (m15_trigger.get("trigger_score", 0) >= 4 if m15_trigger else False)
-    and rr1 >= 2.2
-    )
-    
-    if status in ("SWING SETUP", "SWING TRIGGER") and not late:
-        if not room_ok and not strong_trigger_override:
-            verdict = "слишком близко к H4 сопротивлению/поддержке"
-            sendable = False
-        elif not stop_ok:
-            verdict = "стоп слишком широкий для swing"
-            sendable = False
-        elif not rr_ok:
-            verdict = "RR слабый, сделка некрасивая"
-            sendable = False
+        strong_trigger_override = (
+            status == "SWING TRIGGER"
+            and (m15_trigger.get("trigger_score", 0) >= 4 if m15_trigger else False)
+            and rr1 >= 2.2
+        )
+
+        if status in ("SWING SETUP", "SWING TRIGGER") and not late:
+            if not room_ok and not strong_trigger_override:
+                verdict = "слишком близко к H4 сопротивлению/поддержке"
+                sendable = False
+            elif not stop_ok:
+                verdict = "стоп слишком широкий для swing"
+                sendable = False
+            elif not rr_ok:
+                verdict = "RR слабый, сделка некрасивая"
+                sendable = False
 
         return {
             "ok": True,
