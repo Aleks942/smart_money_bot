@@ -3911,6 +3911,35 @@ def build_signal(instId):
         score += 1
 
     # =========================
+    # CONFLUENCE BONUS
+    # =========================
+    long_confluence = (
+        "PRESSURE_UP" in flags
+        and "EMA_BULL" in flags
+        and (
+            "OB_WALL_BID" in flags
+            or "OB_BIDS" in flags
+        )
+    )
+
+    short_confluence = (
+        "PRESSURE_DOWN" in flags
+        and "EMA_BEAR" in flags
+        and (
+            "OB_WALL_ASK" in flags
+            or "OB_ASKS" in flags
+        )
+    )
+
+    if long_confluence:
+        flags.add("CONFLUENCE_LONG")
+        score += 1
+
+    elif short_confluence:
+        flags.add("CONFLUENCE_SHORT")
+        score += 1
+
+    # =========================
     # ACCUMULATION
     # =========================
     acc_score = accumulation_bias(flags)
