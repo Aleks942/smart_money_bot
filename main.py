@@ -3901,7 +3901,7 @@ def build_signal(instId):
     # RESULT FILTER
     # =========================
     if score < MIN_SCORE:
-        return None
+        return _bs_skip(f"score_below_min score={score} min={MIN_SCORE}")
 
     # =========================
     # SIGNAL OBJECT
