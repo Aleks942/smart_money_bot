@@ -5170,6 +5170,56 @@ if __name__ == "__main__":
                         f"flags={sig.get('flags')}"
                     )
 
+                    # =====================
+                    # SWING LAYER (H4 / H1 / M15) — ADDON, НЕ ЛОМАЕТ СКАЛЬП
+                    # =====================
+                    if SWING_MODE:
+                        try:
+                            swing_sent = state.get("swing_sent", {})
+                            if not isinstance(swing_sent, dict):
+                                swing_sent = {}
+
+                            last_sw_ts = float(swing_sent.get(instId, 0) or 0)
+                            now_sw_ts = time.time()
+
+                            can_send_swing = (now_sw_ts - last_sw_ts) >= SWING_ALERT_COOLDOWN_SEC
+
+                            # чтобы не дёргать H4/H1/M15 на совсем мусорных монетах
+                            swing_candidate = (
+                                float(sig.get("score", 0) or 0) >= max(4, MIN_SCORE)
+                                or int(sig.get("acc_score", 0) or 0) >= 2
+                                or bool(sig.get("early_pressure_label"))
+                            )
+
+                            if can_send_swing and swing_candidate:
+                                df_h4 = get_tf_candles(instId, tf="4h", limit=200) if SWING_USE_H4 else pd.DataFrame()
+                                df_h1 = get_tf_candles(instId, tf="1h", limit=200) if SWING_USE_H1 else pd.DataFrame()
+                                df_m15 = get_tf_candles(instId, tf="15m", limit=200) if SWING_USE_M15 else pd.DataFrame()
+
+                                h4_ctx = analyze_h4_context(df_h4) if not df_h4.empty else {"ok": False}
+                                h1_setup = analyze_h1_setup(df_h1, h4_ctx) if not df_h1.empty else {"ok": False}
+                                m15_trigger = analyze_m15_trigger(df_m15, h1_setup, h4_ctx) if not df_m15.empty else {"ok": False}
+
+                                swing_sig = build_swing_signal(instId, h4_ctx, h1_setup, m15_trigger)
+
+                                if swing_sig.get("sendable"):
+                                    send_telegram(format_swing_telegram(swing_sig))
+                                    swing_sent[instId] = now_sw_ts
+                                    state["swing_sent"] = swing_sent
+
+                                    print(
+                                        f"[SWING] {instId} "
+                                        f"status={swing_sig.get('status')} "
+                                        f"side={swing_sig.get('side')} "
+                                        f"h4={swing_sig.get('h4_bias')} "
+                                        f"h1={swing_sig.get('h1_setup_type')} "
+                                        f"m15={swing_sig.get('m15_trigger_type')} "
+                                        f"rr1={swing_sig.get('rr1')}"
+                                    )
+
+                        except Exception as e:
+                            print(f"[SWING_ERROR] {instId}: {e}")
+
                     if sig.get("early_pressure_label"):
                         flags_set = set(sig.get("flags", []))
                         stage_txt = str(sig.get("stage", ""))
