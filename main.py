@@ -3934,6 +3934,7 @@ def build_signal(instId):
     # RESULT FILTER
     # =========================
     swing_only_candidate = False
+    can_survive_for_swing = True
     
     if score < MIN_SCORE:
 
