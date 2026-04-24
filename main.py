@@ -5205,6 +5205,24 @@ if __name__ == "__main__":
 
                                 swing_sig = build_swing_signal(instId, h4_ctx, h1_setup, m15_trigger)
 
+                                print(
+                                    f"[SWING_DEBUG] {instId} "
+                                    f"h4_ok={h4_ctx.get('ok')} "
+                                    f"h4_bias={h4_ctx.get('bias')} "
+                                    f"h4_score={h4_ctx.get('bias_score')} "
+                                    f"h1_ok={h1_setup.get('ok')} "
+                                    f"h1_type={h1_setup.get('setup_type')} "
+                                    f"h1_score={h1_setup.get('setup_score')} "
+                                    f"m15_ok={m15_trigger.get('ok')} "
+                                    f"m15_trigger={m15_trigger.get('trigger_type')} "
+                                    f"m15_score={m15_trigger.get('trigger_score')} "
+                                    f"status={swing_sig.get('status')} "
+                                    f"sendable={swing_sig.get('sendable')} "
+                                    f"late={swing_sig.get('late')} "
+                                    f"rr1={swing_sig.get('rr1')} "
+                                    f"verdict={swing_sig.get('verdict')}"
+                                )
+
                                 if swing_sig.get("sendable"):
                                     send_telegram(format_swing_telegram(swing_sig))
                                     swing_sent[instId] = now_sw_ts
