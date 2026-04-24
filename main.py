@@ -1139,38 +1139,39 @@ def analyze_m15_trigger(df_m15: pd.DataFrame, h1_setup: dict, h4_ctx: dict) -> d
                 entry_now = True
                 micro_stop = round(min(invalidation, last_high + zone_buf), 6)
 
-# -------------------------
-# FALLBACK MOMENTUM TRIGGER
-# -------------------------
-if trigger_score >= SWING_MIN_TRIGGER_SCORE and trigger_type == "none":
-    trigger_type = "momentum_ready"
-    trigger_ok = True
-    entry_now = True
+        # -------------------------
+        # FALLBACK MOMENTUM TRIGGER
+        # -------------------------
+        if trigger_score >= SWING_MIN_TRIGGER_SCORE and trigger_type == "none":
+            trigger_type = "momentum_ready"
+            trigger_ok = True
+            entry_now = True
 
-    if side == "LONG":
-        micro_stop = round(max(invalidation, last_low - zone_buf), 6)
-    else:
-        micro_stop = round(min(invalidation, last_high + zone_buf), 6)
+            if side == "LONG":
+                micro_stop = round(max(invalidation, last_low - zone_buf), 6)
+            else:
+                micro_stop = round(min(invalidation, last_high + zone_buf), 6)
 
-    reason = "m15_momentum_ready"
+            reason = "m15_momentum_ready"
 
-return {
-    "ok": True,
-    "trigger_ok": bool(trigger_ok),
-    "entry_now": bool(entry_now),
-    "trigger_type": trigger_type,
-    "trigger_score": int(trigger_score),
-    "micro_stop": micro_stop,
-    "close": round(last_close, 6),
-    "ema20": round(last_ema20, 6),
-    "vwap": round(last_vwap, 6),
-    "atr": round(last_atr, 6),
-    "reason": reason,
-}
+        return {
+            "ok": True,
+            "trigger_ok": bool(trigger_ok),
+            "entry_now": bool(entry_now),
+            "trigger_type": trigger_type,
+            "trigger_score": int(trigger_score),
+            "micro_stop": micro_stop,
+            "close": round(last_close, 6),
+            "ema20": round(last_ema20, 6),
+            "vwap": round(last_vwap, 6),
+            "atr": round(last_atr, 6),
+            "reason": reason,
+        }
 
     except Exception:
         return empty
-
+     
+        
 # =========================
 # SWING SIGNAL BUILDER + TELEGRAM FORMAT
 # =========================
