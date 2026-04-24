@@ -1087,7 +1087,7 @@ def analyze_m15_trigger(df_m15: pd.DataFrame, h1_setup: dict, h4_ctx: dict) -> d
                     trigger_type = "breakout_push"
                     reason = "m15_breakout_long"
 
-            if trigger_score >= SWING_MIN_TRIGGER_SCORE and (retest_hold or local_break):
+            if trigger_score >= SWING_MIN_TRIGGER_SCORE:
                 trigger_ok = True
                 entry_now = True
                 micro_stop = round(max(invalidation, last_low - zone_buf), 6)
@@ -1128,7 +1128,7 @@ def analyze_m15_trigger(df_m15: pd.DataFrame, h1_setup: dict, h4_ctx: dict) -> d
                     trigger_type = "breakout_push"
                     reason = "m15_breakout_short"
 
-            if trigger_score >= SWING_MIN_TRIGGER_SCORE and (retest_hold or local_break):
+            if trigger_score >= SWING_MIN_TRIGGER_SCORE:
                 trigger_ok = True
                 entry_now = True
                 micro_stop = round(min(invalidation, last_high + zone_buf), 6)
