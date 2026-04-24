@@ -1368,15 +1368,15 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
                     and rr1 >= 2.0
                 )
 
-    if not soft_room_pass:
-        verdict = "слишком близко к H4 сопротивлению/поддержке"
-        sendable = False
-            elif not stop_ok:
-                verdict = "стоп слишком широкий для swing"
-                sendable = False
-            elif not rr_ok:
-                verdict = "RR слабый, сделка некрасивая"
-                sendable = False
+                if not soft_room_pass:
+                    verdict = "слишком близко к H4 сопротивлению/поддержке"
+                    sendable = False
+                elif not stop_ok:
+                    verdict = "стоп слишком широкий для swing"
+                    sendable = False
+                elif not rr_ok:
+                    verdict = "RR слабый, сделка некрасивая"
+                    sendable = False
 
         return {
             "ok": True,
