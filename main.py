@@ -1236,7 +1236,7 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         stop_ok = stop_pct <= SWING_MAX_STOP_PCT if stop_pct > 0 else False
         rr_ok = rr1 >= SWING_MIN_RR if rr1 > 0 else False
 
-        strong_trigger_override = (
+    strong_trigger_override = (
     status == "SWING TRIGGER"
     and (m15_trigger.get("trigger_score", 0) >= 4 if m15_trigger else False)
     and rr1 >= 2.2
