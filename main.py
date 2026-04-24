@@ -5067,6 +5067,9 @@ if __name__ == "__main__":
     state = load_state()
     print("STATE LOADED")
 
+    if not isinstance(state.get("swing_sent"), dict):
+        state["swing_sent"] = {}
+
     # =====================
     # SCAN SETTINGS
     # =====================
