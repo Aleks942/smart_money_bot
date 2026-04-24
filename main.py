@@ -78,6 +78,7 @@ SWING_MIN_ROOM_TO_TARGET_PCT = float(os.getenv("SWING_MIN_ROOM_TO_TARGET_PCT") o
 SWING_MAX_STOP_PCT = float(os.getenv("SWING_MAX_STOP_PCT") or "8.0")
 SWING_MIN_RR = float(os.getenv("SWING_MIN_RR") or "1.8")
 
+
 # =========================
 # V2 ENV
 # =========================
@@ -196,6 +197,110 @@ _market_cap_cache = {
     "data": {},
     "last_fail_ts": 0,
 }
+
+# =========================
+# SWING TF CANDLES (H4 / H1 / M15)
+# =========================
+def _swing_tf_to_bybit(tf: str) -> str:
+    mp = {
+        "15m": "15",
+        "1h": "60",
+        "4h": "240",
+    }
+    return mp.get(tf, "60")
+
+
+def _swing_tf_to_okx(tf: str) -> str:
+    mp = {
+        "15m": "15m",
+        "1h": "1H",
+        "4h": "4H",
+    }
+    return mp.get(tf, "1H")
+
+
+def _okx_swap_symbol(instId: str) -> str:
+    # BTCUSDT -> BTC-USDT-SWAP
+    s = str(instId).replace("-", "").upper()
+    if s.endswith("USDT"):
+        base = s[:-4]
+        return f"{base}-USDT-SWAP"
+    return instId
+
+
+def _df_from_ohlcv_rows(rows, source="bybit"):
+    if not rows:
+        return pd.DataFrame()
+
+    try:
+        if source == "bybit":
+            # Bybit v5 kline:
+            # [startTime, open, high, low, close, volume, turnover]
+            cols = ["ts", "open", "high", "low", "close", "volume", "turnover"]
+            out = pd.DataFrame(rows, columns=cols[:len(rows[0])]).copy()
+            out["ts"] = pd.to_datetime(out["ts"].astype("int64"), unit="ms", utc=True)
+        else:
+            # OKX candles:
+            # [ts, o, h, l, c, vol, volCcy, volCcyQuote, confirm]
+            cols = ["ts", "open", "high", "low", "close", "volume", "volCcy", "volCcyQuote", "confirm"]
+            out = pd.DataFrame(rows, columns=cols[:len(rows[0])]).copy()
+            out["ts"] = pd.to_datetime(out["ts"].astype("int64"), unit="ms", utc=True)
+
+        for c in ["open", "high", "low", "close", "volume"]:
+            if c in out.columns:
+                out[c] = pd.to_numeric(out[c], errors="coerce")
+
+        out = out.sort_values("ts").reset_index(drop=True)
+        return out[["ts", "open", "high", "low", "close", "volume"]].dropna()
+    except Exception:
+        return pd.DataFrame()
+
+
+def get_tf_candles_bybit(instId: str, tf: str = "1h", limit: int = 200) -> pd.DataFrame:
+    try:
+        interval = _swing_tf_to_bybit(tf)
+        url = "https://api.bybit.com/v5/market/kline"
+        params = {
+            "category": "linear",
+            "symbol": str(instId).upper(),
+            "interval": interval,
+            "limit": int(limit),
+        }
+        r = requests.get(url, params=params, timeout=TIMEOUT)
+        data = r.json()
+        rows = (((data or {}).get("result") or {}).get("list")) or []
+        return _df_from_ohlcv_rows(rows, source="bybit")
+    except Exception:
+        return pd.DataFrame()
+
+
+def get_tf_candles_okx(instId: str, tf: str = "1h", limit: int = 200) -> pd.DataFrame:
+    try:
+        bar = _swing_tf_to_okx(tf)
+        symbol = _okx_swap_symbol(instId)
+        url = "https://www.okx.com/api/v5/market/candles"
+        params = {
+            "instId": symbol,
+            "bar": bar,
+            "limit": str(int(limit)),
+        }
+        r = requests.get(url, params=params, timeout=TIMEOUT)
+        data = r.json()
+        rows = (data or {}).get("data") or []
+        return _df_from_ohlcv_rows(rows, source="okx")
+    except Exception:
+        return pd.DataFrame()
+
+
+def get_tf_candles(instId: str, tf: str = "1h", limit: int = 200) -> pd.DataFrame:
+    """
+    Универсальный слой для swing-анализа.
+    Сначала Bybit linear, если пусто — fallback на OKX swap.
+    """
+    df = get_tf_candles_bybit(instId, tf=tf, limit=limit)
+    if not df.empty:
+        return df
+    return get_tf_candles_okx(instId, tf=tf, limit=limit)
 
 def _chunked(items, size):
     for i in range(0, len(items), size):
