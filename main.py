@@ -1399,6 +1399,18 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
                 else:
                     stop_outside_zone_ok = float(stop) > zone_high
 
+        # -------------------------
+        # MIN STOP FILTER
+        # -------------------------
+        if entry_price is not None and stop is not None:
+            risk_pct = abs(float(entry_price) - float(stop)) / float(entry_price) * 100.0
+        
+            if risk_pct < MIN_STOP_PCT:
+                if side == "LONG":
+                    stop = float(entry_price) * (1 - MIN_STOP_PCT / 100.0)
+                else:
+                    stop = float(entry_price) * (1 + MIN_STOP_PCT / 100.0)
+
         room_ok = float(h4_ctx.get("room_to_target_pct", 0.0)) >= SWING_MIN_ROOM_TO_TARGET_PCT
         stop_ok = stop_pct <= SWING_MAX_STOP_PCT if stop_pct > 0 else False
         
