@@ -1434,6 +1434,7 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             elif not stop_outside_zone_ok:
                 verdict = "стоп стоит внутри зоны входа"
                 sendable = False
+                reject_reason = "inside_zone_stop"
 
             elif not room_ok and not strong_trigger_override:
 
