@@ -1429,6 +1429,7 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
                verdict = "слишком широкая или некорректная зона входа"
                sendable = False
                reject_reason = "bad_zone"
+               
             elif not stop_outside_zone_ok:
                 verdict = "стоп стоит внутри зоны входа"
                 sendable = False
