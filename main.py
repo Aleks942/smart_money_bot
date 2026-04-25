@@ -1253,6 +1253,7 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         status = "SWING CONTEXT"
         verdict = "только контекст, входа пока нет"
         sendable = False
+        reject_reason = "no_setup"
 
         entry_zone = h1_setup.get("entry_zone") if h1_setup else None
         entry_price = _swing_mid(entry_zone)
