@@ -1488,6 +1488,7 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             "late": late,
             "sendable": bool(sendable),
             "verdict": verdict,
+            "reject_reason": reject_reason,
         }
 
     except Exception:
