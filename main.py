@@ -1284,6 +1284,7 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         if late:
             verdict = "поздний вход, не догонять"
             sendable = False
+            reject_reason = "late"
 
         support_zone = h4_ctx.get("support_zone")
         resistance_zone = h4_ctx.get("resistance_zone")
