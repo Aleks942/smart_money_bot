@@ -1458,6 +1458,7 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
                 if not soft_stop_pass:
                     verdict = "стоп слишком широкий для swing"
                     sendable = False
+                    reject_reason = "wide_stop"
             
             elif not rr_ok:
                 verdict = "RR слабый, сделка некрасивая"
