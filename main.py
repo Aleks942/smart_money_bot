@@ -4811,29 +4811,41 @@ def msg_full(sig):
 
     return "\n".join(lines)
 
-def msg_swing(sig):
+ def msg_swing(sig):
     side = sig.get("side", "")
     icon = "📈" if side == "LONG" else "📉"
 
+    score = round(float(sig.get("rank", 0)), 1)
+
     lines = []
-    lines.append(f"{icon} SWING {side} — {sig['symbol']}")
-    lines.append(f"Статус: {sig.get('status','')}")
+    lines.append(f"🚀 <b>{sig.get('status','SWING')}</b> — {sig['symbol']}")
+    lines.append("")
+    lines.append(f"📊 <b>Сила сигнала:</b> {score}/10")
+    lines.append(f"{icon} <b>Направление:</b> {side}")
+
+    lines.append("")
+    lines.append(f"🧭 H4: {sig.get('h4_bias','?')}")
+    lines.append(f"🧱 H1: {sig.get('h1_setup_type','none')}")
+    lines.append(f"⚡ M15: {sig.get('m15_trigger_type','none')}")
 
     if sig.get("entry_price") is not None:
-        lines.append(f"🎯 Entry: {sig['entry_price']}")
+        lines.append("")
+        lines.append(f"🎯 <b>Вход:</b> {sig['entry_price']}")
 
     if sig.get("stop") is not None:
-        lines.append(f"🛑 Stop: {sig['stop']}")
+        lines.append(f"🛑 <b>Стоп:</b> {sig['stop']}")
 
     if sig.get("tp1") is not None:
         lines.append(f"💰 TP1: {sig['tp1']}")
 
+    if sig.get("tp2") is not None:
+        lines.append(f"💰 TP2: {sig['tp2']}")
+
     if sig.get("rr1") is not None:
         lines.append(f"⚖️ RR: {sig['rr1']}")
 
+    lines.append("")
     lines.append(oi_status_text(sig))
-
-    lines.append(f"🧠 {sig.get('verdict','')}")
 
     ctx = smart_context(sig)
     if ctx:
@@ -4843,8 +4855,9 @@ def msg_swing(sig):
     if oi_ctx:
         lines.append(oi_ctx)
 
-    lines.append(f"DEBUG FLAGS: {sig.get('flags')}")
-    lines.append(f"DEBUG OI: {sig.get('oi_change')}")
+    lines.append("")
+    lines.append("🧠 <b>Что делать:</b>")
+    lines.append(sig.get("verdict", "наблюдать"))
 
     return "\n".join(lines)
 
