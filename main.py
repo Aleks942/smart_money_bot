@@ -5743,6 +5743,7 @@ if __name__ == "__main__":
                         f"price={sig.get('price')} "
                         f"score={sig.get('score')} "
                         f"acc={sig.get('acc_score')} "
+                        f"oi={sig.get('oi_change')} "
                         f"flags={sig.get('flags')}"
                     )
 
