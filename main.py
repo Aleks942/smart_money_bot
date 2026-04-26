@@ -5537,15 +5537,13 @@ def rank_signal(sig):
 
         # ===== OPEN INTEREST BONUS =====
         oi = sig.get("oi_change")
-        direction = str(sig.get("direction", ""))
-        
+
         if oi is not None:
-        
-            if oi >= 0.30:
+            if oi >= OI_STRONG:
                 rank += 2.0
-            elif oi >= 0.15:
+            elif oi >= OI_GOOD:
                 rank += 1.0
-            elif oi <= -0.10:
+            elif oi <= OI_BAD:
                 rank -= 1.0
 
         return round(rank, 2)
