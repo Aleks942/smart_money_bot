@@ -4868,12 +4868,7 @@ def oi_status_text(sig):
 
     except:
         return "⚪ OI: ошибка чтения"
-        if "⬆️" in direction and oi >= OI_STRONG:
-            return "✅ OI CONFIRM: рост поддержан новыми деньгами"
-
-        if "⬇️" in direction and oi >= OI_STRONG:
-            return "✅ OI CONFIRM: падение поддержано новыми шортами"
-
+        
         # =====================
         # WEAK MOVE
         # =====================
