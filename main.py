@@ -5648,6 +5648,7 @@ if __name__ == "__main__":
                 try:
 
                     sig = build_signal(instId)
+                    sig["oi_change"] = get_open_interest_change(instId)
                 
                     oi_change = get_open_interest(instId)
                     if isinstance(sig, dict):
