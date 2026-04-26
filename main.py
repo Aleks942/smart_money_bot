@@ -5536,6 +5536,34 @@ def confirm_grade(sig):
 
     except:
         return "SKIP"
+
+def get_open_interest_change(symbol):
+    try:
+        url = "https://api.bybit.com/v5/market/open-interest"
+        params = {
+            "category": "linear",
+            "symbol": symbol,
+            "intervalTime": "5min"
+        }
+
+        r = requests.get(url, params=params, timeout=8)
+        data = r.json()
+
+        rows = data["result"]["list"]
+        if len(rows) < 2:
+            return None
+
+        now_oi = float(rows[0]["openInterest"])
+        prev_oi = float(rows[1]["openInterest"])
+
+        if prev_oi <= 0:
+            return None
+
+        change = (now_oi - prev_oi) / prev_oi * 100
+        return round(change, 2)
+
+    except:
+        return None
 # =========================
 # MAIN LOOP (STABLE VERSION)
 # =========================
