@@ -52,7 +52,7 @@ DETAIL_TOP_K = int(os.getenv("DETAIL_TOP_K") or "1")
 MIN_SCORE = int(os.getenv("MIN_SCORE") or "3")
 ONE_OPEN_SIGNAL_PER_SYMBOL = (os.getenv("ONE_OPEN_SIGNAL_PER_SYMBOL") or "1").strip() != "0"
 MIN_STOP_PCT = float(os.getenv("MIN_STOP_PCT") or "0.25")
-SWING_MODE = (os.getenv("SWING_MODE") or "SAFE").upper()
+SWING_MODE = (os.getenv("SWING_MODE") or "AUTO").upper()
 
 # =========================
 # SWING MODE (H4 / H1 / M15)
