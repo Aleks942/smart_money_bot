@@ -4846,7 +4846,7 @@ def msg_swing(sig):
         icon = "🔴"
         side_ru = "ШОРТ / вниз"
 
-    score = round(float(sig.get("rank", 0)), 1)
+    score = round(float(sig.get("rank", sig.get("score", 0))), 1)
 
     # --- переводы внутренних кодов ---
     h1_map = {
