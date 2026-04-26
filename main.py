@@ -5891,9 +5891,20 @@ if __name__ == "__main__":
 
 
 
-            msg = summary_message(alerts, cycle_info, regime)
-            if msg:
-                send_telegram(msg)
+msg = summary_message(alerts, cycle_info, regime)
+if msg:
+    send_telegram(msg)
+
+if alerts:
+    top_lines = []
+    top_lines.append("🧠 AI RANKING TOP SIGNALS")
+
+    for i, s in enumerate(alerts[:3], start=1):
+        top_lines.append(
+            f"{i}) {s['instId']} | rank={round(s.get('rank',0),2)} | score={s.get('score',0)}"
+        )
+
+    send_telegram("\n".join(top_lines))
 
             for sig in alerts[:DETAIL_TOP_K]:
                 send_telegram(choose_detail_message(sig))
