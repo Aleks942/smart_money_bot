@@ -4843,6 +4843,28 @@ def msg_swing(sig):
 
     return "\n".join(lines)
 
+def smart_context(sig):
+    try:
+        flags = sig.get("flags", [])
+        oi = sig.get("oi_change", 0)
+
+        if "BREAKOUT_UP" in flags and oi < 0:
+            return "🪤 Ложный пробой вверх"
+
+        if "BREAKOUT_DOWN" in flags and oi < 0:
+            return "🪤 Ложный пробой вниз"
+
+        if "COMP_5M" in flags and oi > 0:
+            return "🐋 Идёт набор позиции"
+
+        if "VOL_SPIKE" in flags and oi > 2:
+            return "💥 Возможен вынос и продолжение"
+
+        return None
+
+    except:
+        return None
+
 
 def choose_detail_message(sig):
     if MESSAGE_MODE == "SHORT":
