@@ -4835,6 +4835,7 @@ def msg_full(sig):
             lines.append(f"• {n}")
 
     return "\n".join(lines)
+    
 def msg_swing(sig):
     side = str(sig.get("side", "")).upper()
 
