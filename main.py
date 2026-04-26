@@ -5872,7 +5872,10 @@ if __name__ == "__main__":
             # AFTER SCAN
             # =====================
 
-            alerts.sort(key=lambda s: s.get("score", 0), reverse=True)
+            for s in alerts:
+                s["rank"] = rank_signal(s)
+            
+            alerts.sort(key=lambda s: s.get("rank", 0), reverse=True)
             manip_watch.sort(key=lambda s: s.get("acc_score", 0), reverse=True)
 
             cycle_info = time.strftime("%Y-%m-%d %H:%M:%S")
