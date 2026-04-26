@@ -4866,7 +4866,7 @@ def oi_status_text(sig):
 
         return f"⚪ OI: {oi}% — нейтрально"
 
- except:
+   except:
         return "⚪ OI: ошибка чтения"
         if "⬆️" in direction and oi >= OI_STRONG:
             return "✅ OI CONFIRM: рост поддержан новыми деньгами"
