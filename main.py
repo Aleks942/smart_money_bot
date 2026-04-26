@@ -4773,6 +4773,30 @@ def msg_full(sig):
 
     return "\n".join(lines)
 
+def msg_swing(sig):
+    side = sig.get("side", "")
+    icon = "📈" if side == "LONG" else "📉"
+
+    lines = []
+    lines.append(f"{icon} SWING {side} — {sig['symbol']}")
+    lines.append(f"Статус: {sig.get('status','')}")
+    
+    if sig.get("entry_price") is not None:
+        lines.append(f"🎯 Entry: {sig['entry_price']}")
+
+    if sig.get("stop") is not None:
+        lines.append(f"🛑 Stop: {sig['stop']}")
+
+    if sig.get("tp1") is not None:
+        lines.append(f"💰 TP1: {sig['tp1']}")
+
+    if sig.get("rr1") is not None:
+        lines.append(f"⚖️ RR: {sig['rr1']}")
+
+    lines.append(f"🧠 {sig.get('verdict','')}")
+
+    return "\n".join(lines)
+
 
 def choose_detail_message(sig):
     if MESSAGE_MODE == "SHORT":
