@@ -4850,35 +4850,26 @@ def msg_swing(sig):
 
     return "\n".join(lines)
 
-def smart_context(sig):
+def oi_status_text(sig):
     try:
-        flags = sig.get("flags", [])
-        oi = sig.get("oi_change", 0)
-
-        if "COMP_5M" in flags and oi > 0:
-            return "🐋 Идёт набор позиции"
-
-        if "VOL_SPIKE" in flags and oi > 2:
-            return "💥 Возможен вынос и продолжение"
-
-        return None
-
-    except:
-        return None
-
-def oi_trap_detector(sig):
-    try:
-        flags = sig.get("flags", [])
         oi = sig.get("oi_change", None)
-        direction = str(sig.get("direction", ""))
-        score = float(sig.get("score", 0) or 0)
 
         if oi is None:
-            return None
+            return "⚪ OI: нет данных"
 
-        # =====================
-        # REAL MONEY MOVE
-        # =====================
+        if oi >= OI_STRONG:
+            return f"🟢 OI: +{oi}% — сильный приток денег"
+
+        if oi >= OI_GOOD:
+            return f"🟡 OI: +{oi}% — умеренный приток"
+
+        if oi <= OI_BAD:
+            return f"🔴 OI: {oi}% — интерес падает"
+
+        return f"⚪ OI: {oi}% — нейтрально"
+
+    except:
+        return "⚪ OI: ошибка чтения"
         if "⬆️" in direction and oi >= OI_STRONG:
             return "✅ OI CONFIRM: рост поддержан новыми деньгами"
 
