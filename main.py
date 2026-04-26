@@ -4759,9 +4759,16 @@ def msg_full(sig):
     if sig.get("sniper"):
         lines.append("🔥 SNIPER ENTRY — сильный импульс, можно искать точку входа")
 
-    lines.append(f"🎯 Expected move: {sig.get('exp_move_min',0)}–{sig.get('exp_move_max',0)}%")
+    lines.append(
+        f"🎯 Expected move: {sig.get('exp_move_min',0)}–{sig.get('exp_move_max',0)}%"
+    )
 
-    if sig.get("ema_state") and sig.get("ema20") is not None and sig.get("ema50") is not None and sig.get("ema200") is not None:
+    if (
+        sig.get("ema_state")
+        and sig.get("ema20") is not None
+        and sig.get("ema50") is not None
+        and sig.get("ema200") is not None
+    ):
         lines.append(
             f"📈 EMA: {sig.get('ema_state')} | "
             f"20={sig.get('ema20'):.6g} | "
@@ -4770,27 +4777,45 @@ def msg_full(sig):
         )
 
     if sig.get("rsi7") is not None and sig.get("rsi14") is not None:
-        lines.append(f"📍 RSI7={sig['rsi7']:.1f} | RSI14={sig['rsi14']:.1f} | {sig.get('rsi_state', 'UNKNOWN')}")
+        lines.append(
+            f"📍 RSI7={sig['rsi7']:.1f} | "
+            f"RSI14={sig['rsi14']:.1f} | "
+            f"{sig.get('rsi_state', 'UNKNOWN')}"
+        )
 
-        lines.append(f"📊 Score: {sig['score']}/10 | acc={sig.get('acc_score', 0)}")
-        lines.append(f"🎯 Direction: {sig['direction']} (up={sig['up_w']}, down={sig['down_w']})")
-        lines.append(f"🎯 ENTRY: {sig['entry']} — {sig['entry_reason']}")
-        lines.append(f"🧬 STAGE: {sig['stage']} — {sig['stage_reason']}")
-    
-        pm = sig.get("pmeta") or {}
-    if pm.get("range_lo") is not None and pm.get("range_hi") is not None and pm.get("range_pct") is not None:
-        lines.append(f"🧲 Range(lookback): {pm['range_lo']:.6g} → {pm['range_hi']:.6g} | width≈{pm['range_pct']:.2f}%")
+    lines.append(f"📊 Score: {sig['score']}/10 | acc={sig.get('acc_score', 0)}")
+    lines.append(
+        f"🎯 Direction: {sig['direction']} "
+        f"(up={sig['up_w']}, down={sig['down_w']})"
+    )
+    lines.append(f"🎯 ENTRY: {sig['entry']} — {sig['entry_reason']}")
+    lines.append(f"🧬 STAGE: {sig['stage']} — {sig['stage_reason']}")
 
-    if sig["target"] is not None:
+    pm = sig.get("pmeta") or {}
+
+    if (
+        pm.get("range_lo") is not None
+        and pm.get("range_hi") is not None
+        and pm.get("range_pct") is not None
+    ):
+        lines.append(
+            f"🧲 Range(lookback): "
+            f"{pm['range_lo']:.6g} → {pm['range_hi']:.6g} | "
+            f"width≈{pm['range_pct']:.2f}%"
+        )
+
+    if sig.get("target") is not None:
         lines.append(f"🎯 Liquidity target: {sig['target']:.6g}")
-    
+
     ez = sig.get("entry_zone")
     if ez:
         lines.append(
-            f"📍 Entry zone: {ez.get('zone_type')} | {ez.get('low'):.6g} → {ez.get('high'):.6g} | stop {ez.get('stop'):.6g}"
+            f"📍 Entry zone: {ez.get('zone_type')} | "
+            f"{ez.get('low'):.6g} → {ez.get('high'):.6g} | "
+            f"stop {ez.get('stop'):.6g}"
         )
 
-    if sig["flags"]:
+    if sig.get("flags"):
         lines.append("")
         lines.append("Флаги (что увидел бот):")
         for f in sig["flags"]:
@@ -4810,7 +4835,6 @@ def msg_full(sig):
             lines.append(f"• {n}")
 
     return "\n".join(lines)
-
 def msg_swing(sig):
     side = str(sig.get("side", "")).upper()
 
