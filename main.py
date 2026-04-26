@@ -2663,22 +2663,22 @@ def is_entry_signal(s):
     if s.get("exp_move_max", 0) < 0.8:
         return False
 
-rsi_state = s.get("rsi_state")
-direction = str(s.get("direction") or "")
-
-if rsi_state == "EXTREME_OVERBOUGHT" and "⬆️" in direction:
-    return False
-
-if rsi_state == "EXTREME_OVERSOLD" and "⬇️" in direction:
-    return False
-
-    return True
-
-def update_stats(result, move_pct, signal):
-
-    try:
-        with open("stats.json", "r") as f:
-            stats = json.load(f)
+    rsi_state = s.get("rsi_state")
+    direction = str(s.get("direction") or "")
+    
+    if rsi_state == "EXTREME_OVERBOUGHT" and "⬆️" in direction:
+        return False
+    
+    if rsi_state == "EXTREME_OVERSOLD" and "⬇️" in direction:
+        return False
+    
+        return True
+    
+    def update_stats(result, move_pct, signal):
+    
+        try:
+            with open("stats.json", "r") as f:
+                stats = json.load(f)
     except:
         stats = {
             "total": 0,
