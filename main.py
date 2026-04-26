@@ -1966,6 +1966,34 @@ def get_last_price(symbol: str) -> float:
         raise RuntimeError(f"Нет свечей для {symbol}")
     return float(candles[-1][4])
 
+def get_open_interest(symbol):
+    try:
+        url = "https://api.bybit.com/v5/market/open-interest"
+        params = {
+            "category": "linear",
+            "symbol": symbol,
+            "intervalTime": "5min"
+        }
+
+        r = requests.get(url, params=params, timeout=10)
+        data = r.json()
+
+        rows = (((data or {}).get("result") or {}).get("list") or [])
+        if len(rows) < 2:
+            return None
+
+        oi_now = float(rows[0]["openInterest"])
+        oi_prev = float(rows[1]["openInterest"])
+
+        if oi_prev <= 0:
+            return None
+
+        oi_change_pct = (oi_now - oi_prev) / oi_prev * 100.0
+        return round(oi_change_pct, 2)
+
+    except:
+        return None
+
 def direction_code_from_text(direction_text: str) -> str:
     txt = str(direction_text)
 
