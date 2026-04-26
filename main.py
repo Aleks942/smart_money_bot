@@ -5932,10 +5932,10 @@ if alerts:
     top_lines = []
     top_lines.append("🧠 AI RANKING TOP SIGNALS")
 
-    for i, s in enumerate(alerts[:3], start=1):
-        top_lines.append(
-            f"{i}) {s['instId']} | rank={round(s.get('rank',0),2)} | score={s.get('score',0)}"
-        )
+for i, s in enumerate(alerts[:3], start=1):
+    top_lines.append(
+        f"{i}) {s['instId']} | {s.get('grade')} | rank={round(s.get('rank',0),2)}"
+    )
 
     send_telegram("\n".join(top_lines))
 
