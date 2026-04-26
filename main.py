@@ -4848,6 +4848,8 @@ def msg_swing(sig):
 
     return "\n".join(lines)
 
+
+
 def oi_status_text(sig):
     try:
         oi = sig.get("oi_change", None)
@@ -4866,36 +4868,48 @@ def oi_status_text(sig):
 
         return f"⚪ OI: {oi}% — нейтрально"
 
-    except:
+    except Exception:
         return "⚪ OI: ошибка чтения"
-        
-        # =====================
+
+
+def oi_trap_detector(sig):
+    try:
+        flags = sig.get("flags", [])
+        oi = sig.get("oi_change", None)
+        direction = str(sig.get("direction", ""))
+        score = float(sig.get("score", 0) or 0)
+
+        if oi is None:
+            return None
+
+        # REAL MONEY MOVE
+        if "⬆️" in direction and oi >= OI_STRONG:
+            return "✅ OI CONFIRM: рост поддержан новыми деньгами"
+
+        if "⬇️" in direction and oi >= OI_STRONG:
+            return "✅ OI CONFIRM: падение поддержано новыми шортами"
+
         # WEAK MOVE
-        # =====================
         if "⬆️" in direction and oi <= OI_BAD:
-            return "⚠️ OI WARNING: цена растёт, но интерес падает — возможен ложный рост"
+            return "⚠️ OI WARNING: цена растёт, но интерес падает"
 
         if "⬇️" in direction and oi <= OI_BAD:
-            return "⚠️ OI WARNING: цена падает, но интерес падает — возможно закрытие позиций"
+            return "⚠️ OI WARNING: цена падает, возможна фиксация"
 
-        # =====================
         # TRAP RISK
-        # =====================
         if "BREAKOUT_UP" in flags and oi < OI_GOOD:
             return "🪤 TRAP RISK: пробой вверх без сильного OI"
 
         if "BREAKOUT_DOWN" in flags and oi < OI_GOOD:
             return "🪤 TRAP RISK: пробой вниз без сильного OI"
 
-        # =====================
-        # SQUEEZE / IMPULSE
-        # =====================
+        # IMPULSE
         if "VOL_SPIKE" in flags and oi >= OI_STRONG and score >= 6:
-            return "💥 SQUEEZE/IMPULSE: объём + OI подтверждают сильное движение"
+            return "💥 IMPULSE: объём + OI подтверждают движение"
 
         return None
 
-    except:
+    except Exception:
         return None
 
 
