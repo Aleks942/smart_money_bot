@@ -4831,20 +4831,18 @@ def msg_swing(sig):
     if sig.get("rr1") is not None:
         lines.append(f"⚖️ RR: {sig['rr1']}")
 
-    oi = sig.get("oi_change", None)
-    if oi is not None:
-        if oi > 0:
-            lines.append(f"💰 OI: +{oi}% (деньги заходят)")
-        elif oi < 0:
-            lines.append(f"💨 OI: {oi}% (интерес падает)")
-        else:
-            lines.append("⚖️ OI: 0%")
+    lines.append(oi_status_text(sig))
 
     lines.append(f"🧠 {sig.get('verdict','')}")
+
     ctx = smart_context(sig)
     if ctx:
         lines.append(ctx)
-    
+
+    oi_ctx = oi_trap_detector(sig)
+    if oi_ctx:
+        lines.append(oi_ctx)
+
     lines.append(f"DEBUG FLAGS: {sig.get('flags')}")
     lines.append(f"DEBUG OI: {sig.get('oi_change')}")
 
