@@ -2693,14 +2693,23 @@ def is_entry_signal(s):
 
     rsi_state = s.get("rsi_state")
     direction = str(s.get("direction") or "")
-    
+
     if rsi_state == "EXTREME_OVERBOUGHT" and "⬆️" in direction:
         return False
-    
+
     if rsi_state == "EXTREME_OVERSOLD" and "⬇️" in direction:
         return False
-    
-        return True
+
+    oi = s.get("oi_change", None)
+
+    if oi is not None:
+        if "⬆️" in direction and oi < -1:
+            return False
+
+        if "⬇️" in direction and oi < -1.5:
+            return False
+
+    return True
     
 def update_stats(result, move_pct, signal):
 
