@@ -4812,55 +4812,93 @@ def msg_full(sig):
     return "\n".join(lines)
 
  def msg_swing(sig):
-    side = sig.get("side", "")
-    icon = "📈" if side == "LONG" else "📉"
+    side = str(sig.get("side", "")).upper()
+
+    if side == "LONG":
+        icon = "🟢"
+        side_ru = "ЛОНГ / вверх"
+    else:
+        icon = "🔴"
+        side_ru = "ШОРТ / вниз"
 
     score = round(float(sig.get("rank", 0)), 1)
 
-    lines = []
-    lines.append(f"🚀 <b>{sig.get('status','SWING')}</b> — {sig['symbol']}")
-    lines.append("")
-    lines.append(f"📊 <b>Сила сигнала:</b> {score}/10")
-    lines.append(f"{icon} <b>Направление:</b> {side}")
+    # --- переводы внутренних кодов ---
+    h1_map = {
+        "pullback_hold": "откат удержан",
+        "breakout_retest": "пробой + ретест",
+        "range_break": "выход из диапазона",
+        "trend_hold": "тренд удерживается",
+        "none": "нет структуры"
+    }
 
+    m15_map = {
+        "momentum_ready": "импульс готов",
+        "compression_break": "выход из сжатия",
+        "breakout_push": "пробой с ускорением",
+        "retest_hold": "ретест удержан",
+        "none": "нет триггера"
+    }
+
+    h1_raw = str(sig.get("h1_setup_type", "none"))
+    m15_raw = str(sig.get("m15_trigger_type", "none"))
+
+    h1_text = h1_map.get(h1_raw, h1_raw)
+    m15_text = m15_map.get(m15_raw, m15_raw)
+
+    lines = []
+    lines.append(f"{icon} <b>СРЕДНЕСРОК — {sig['symbol']}</b>")
     lines.append("")
-    lines.append(f"🧭 H4: {sig.get('h4_bias','?')}")
-    lines.append(f"🧱 H1: {sig.get('h1_setup_type','none')}")
-    lines.append(f"⚡ M15: {sig.get('m15_trigger_type','none')}")
+    lines.append(f"📊 Сила сигнала: <b>{score}/10</b>")
+    lines.append(f"🧭 Направление: <b>{side_ru}</b>")
+    lines.append("")
+
+    lines.append("📈 Контекст:")
+    lines.append(f"• H4: <b>{sig.get('h4_bias','?')}</b>")
+    lines.append(f"• H1: <b>{h1_text}</b>")
+    lines.append(f"• M15: <b>{m15_text}</b>")
 
     if sig.get("entry_price") is not None:
         lines.append("")
-        lines.append(f"🎯 <b>Вход:</b> {sig['entry_price']}")
+        lines.append("🎯 План:")
+        lines.append(f"• Вход: <b>{sig['entry_price']}</b>")
 
     if sig.get("stop") is not None:
-        lines.append(f"🛑 <b>Стоп:</b> {sig['stop']}")
+        lines.append(f"• Стоп: <b>{sig['stop']}</b>")
 
     if sig.get("tp1") is not None:
-        lines.append(f"💰 TP1: {sig['tp1']}")
+        lines.append(f"• TP1: <b>{sig['tp1']}</b>")
 
     if sig.get("tp2") is not None:
-        lines.append(f"💰 TP2: {sig['tp2']}")
+        lines.append(f"• TP2: <b>{sig['tp2']}</b>")
 
     if sig.get("rr1") is not None:
-        lines.append(f"⚖️ RR: {sig['rr1']}")
+        lines.append(f"• RR: <b>{sig['rr1']}</b>")
+
+    room = sig.get("room_to_target")
+    if room is not None:
+        lines.append(f"• Потенциал: <b>{room}%</b>")
+
+    oi = oi_status_text(sig)
+    if oi:
+        lines.append("")
+        lines.append(oi)
 
     lines.append("")
-    lines.append(oi_status_text(sig))
+    lines.append("🧠 Что делать:")
 
-    ctx = smart_context(sig)
-    if ctx:
-        lines.append(ctx)
+    verdict = str(sig.get("verdict", "")).lower()
 
-    oi_ctx = oi_trap_detector(sig)
-    if oi_ctx:
-        lines.append(oi_ctx)
-
-    lines.append("")
-    lines.append("🧠 <b>Что делать:</b>")
-    lines.append(sig.get("verdict", "наблюдать"))
+    if "можно" in verdict:
+        lines.append("✅ Можно искать вход по M15 после подтверждения.")
+    elif "наблюдать" in verdict:
+        lines.append("⏳ Пока наблюдать.")
+    elif "skip" in verdict:
+        lines.append("❌ Лучше пропустить.")
+    else:
+        lines.append(sig.get("verdict", "наблюдать"))
 
     return "\n".join(lines)
-
 
 
 def oi_status_text(sig):
