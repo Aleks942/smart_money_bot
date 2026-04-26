@@ -2707,10 +2707,7 @@ def is_entry_signal(s):
     oi = s.get("oi_change", None)
 
     if oi is not None:
-        if "⬆️" in direction and oi < -1:
-            return False
-
-        if "⬇️" in direction and oi < -1.5:
+        if oi <= OI_BAD:
             return False
 
     return True
