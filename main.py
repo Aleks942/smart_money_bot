@@ -4855,17 +4855,59 @@ def smart_context(sig):
         flags = sig.get("flags", [])
         oi = sig.get("oi_change", 0)
 
-        if "BREAKOUT_UP" in flags and oi < 0:
-            return "🪤 Ложный пробой вверх"
-
-        if "BREAKOUT_DOWN" in flags and oi < 0:
-            return "🪤 Ложный пробой вниз"
-
         if "COMP_5M" in flags and oi > 0:
             return "🐋 Идёт набор позиции"
 
         if "VOL_SPIKE" in flags and oi > 2:
             return "💥 Возможен вынос и продолжение"
+
+        return None
+
+    except:
+        return None
+
+def oi_trap_detector(sig):
+    try:
+        flags = sig.get("flags", [])
+        oi = sig.get("oi_change", None)
+        direction = str(sig.get("direction", ""))
+        score = float(sig.get("score", 0) or 0)
+
+        if oi is None:
+            return None
+
+        # =====================
+        # REAL MONEY MOVE
+        # =====================
+        if "⬆️" in direction and oi >= OI_STRONG:
+            return "✅ OI CONFIRM: рост поддержан новыми деньгами"
+
+        if "⬇️" in direction and oi >= OI_STRONG:
+            return "✅ OI CONFIRM: падение поддержано новыми шортами"
+
+        # =====================
+        # WEAK MOVE
+        # =====================
+        if "⬆️" in direction and oi <= OI_BAD:
+            return "⚠️ OI WARNING: цена растёт, но интерес падает — возможен ложный рост"
+
+        if "⬇️" in direction and oi <= OI_BAD:
+            return "⚠️ OI WARNING: цена падает, но интерес падает — возможно закрытие позиций"
+
+        # =====================
+        # TRAP RISK
+        # =====================
+        if "BREAKOUT_UP" in flags and oi < OI_GOOD:
+            return "🪤 TRAP RISK: пробой вверх без сильного OI"
+
+        if "BREAKOUT_DOWN" in flags and oi < OI_GOOD:
+            return "🪤 TRAP RISK: пробой вниз без сильного OI"
+
+        # =====================
+        # SQUEEZE / IMPULSE
+        # =====================
+        if "VOL_SPIKE" in flags and oi >= OI_STRONG and score >= 6:
+            return "💥 SQUEEZE/IMPULSE: объём + OI подтверждают сильное движение"
 
         return None
 
