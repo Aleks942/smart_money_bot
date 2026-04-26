@@ -2674,11 +2674,11 @@ def is_entry_signal(s):
     
         return True
     
-    def update_stats(result, move_pct, signal):
-    
-        try:
-            with open("stats.json", "r") as f:
-                stats = json.load(f)
+def update_stats(result, move_pct, signal):
+
+    try:
+        with open("stats.json", "r") as f:
+            stats = json.load(f)
     except:
         stats = {
             "total": 0,
