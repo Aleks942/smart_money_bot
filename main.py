@@ -5598,7 +5598,11 @@ if __name__ == "__main__":
                 try:
 
                     sig = build_signal(instId)
-
+                
+                    oi_change = get_open_interest(instId)
+                    if isinstance(sig, dict):
+                        sig["oi_change"] = oi_change
+                
                     if not isinstance(sig, dict):
                         print(f"[RAW_SKIP] {instId} build_signal_returned_non_dict")
                         continue
