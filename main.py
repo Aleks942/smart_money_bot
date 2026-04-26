@@ -5919,7 +5919,7 @@ if __name__ == "__main__":
                                 )
 
                                 if swing_sig.get("sendable"):
-                                    send_telegram(format_swing_telegram(swing_sig))
+                                    send_telegram(msg_swing(swing_sig))
                                     swing_sent[instId] = now_sw_ts
                                     state["swing_sent"] = swing_sent
 
