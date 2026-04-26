@@ -5478,6 +5478,18 @@ def rank_signal(sig):
         if "близко" in verdict:
             rank -= 2.0
 
+        # ===== OPEN INTEREST BONUS =====
+        oi = sig.get("oi_change")
+        direction = str(sig.get("direction", ""))
+
+        if oi is not None:
+            if "⬆️" in direction and oi > 0:
+                rank += 1.5
+            elif "⬇️" in direction and oi > 0:
+                rank += 1.5
+            elif oi < 0:
+                rank -= 0.5
+
         return round(rank, 2)
 
     except:
