@@ -4821,6 +4821,9 @@ def msg_swing(sig):
     if sig.get("rr1") is not None:
         lines.append(f"⚖️ RR: {sig['rr1']}")
 
+    if sig.get("oi_change") is not None:
+        lines.append(f"💰 OI: {sig['oi_change']}%")
+
     lines.append(f"🧠 {sig.get('verdict','')}")
 
     return "\n".join(lines)
