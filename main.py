@@ -5903,14 +5903,22 @@ if __name__ == "__main__":
             # =====================
             # AFTER SCAN
             # =====================
-
+            
             for s in alerts:
                 s["rank"] = rank_signal(s)
                 s["grade"] = confirm_grade(s)
             
+            # добавляем SWING сигналы в общий список
+            if "swing_candidates" in locals():
+                for sw in swing_candidates:
+                    if sw.get("sendable"):
+                        sw["rank"] = rank_signal(sw)
+                        sw["grade"] = confirm_grade(sw)
+                        alerts.append(sw)
+            
             alerts.sort(key=lambda s: s.get("rank", 0), reverse=True)
             manip_watch.sort(key=lambda s: s.get("acc_score", 0), reverse=True)
-
+            
             cycle_info = time.strftime("%Y-%m-%d %H:%M:%S")
 
             print("ALERTS FOUND:", len(alerts))
