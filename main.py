@@ -4811,7 +4811,7 @@ def msg_full(sig):
 
     return "\n".join(lines)
 
- def msg_swing(sig):
+def msg_swing(sig):
     side = str(sig.get("side", "")).upper()
 
     if side == "LONG":
