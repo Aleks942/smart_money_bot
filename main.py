@@ -4840,6 +4840,9 @@ def msg_swing(sig):
             lines.append("⚖️ OI: 0%")
 
     lines.append(f"🧠 {sig.get('verdict','')}")
+    ctx = smart_context(sig)
+    if ctx:
+        lines.append(ctx)
 
     return "\n".join(lines)
 
