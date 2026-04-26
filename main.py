@@ -5401,6 +5401,35 @@ def check_signal_results():
             f"📊 RESULT {symbol}\n"
             f"{result} | {round(move_pct,2)}%"
         )
+
+def rank_signal(sig):
+    try:
+        rank = 0.0
+
+        rank += float(sig.get("score", 0)) * 1.2
+        rank += min(float(sig.get("rr1", 0)), 5) * 1.5
+        rank += float(sig.get("h4_bias_score", 0)) * 0.8
+        rank += float(sig.get("h1_setup_score", 0)) * 1.0
+        rank += float(sig.get("m15_trigger_score", 0)) * 1.1
+
+        if str(sig.get("status", "")) == "SWING TRIGGER":
+            rank += 2.0
+
+        if sig.get("late"):
+            rank -= 3.0
+
+        verdict = str(sig.get("verdict", "")).lower()
+
+        if "широкая" in verdict:
+            rank -= 2.0
+
+        if "близко" in verdict:
+            rank -= 2.0
+
+        return round(rank, 2)
+
+    except:
+        return 0.0
 # =========================
 # MAIN LOOP (STABLE VERSION)
 # =========================
