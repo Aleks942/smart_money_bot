@@ -5430,6 +5430,38 @@ def rank_signal(sig):
 
     except:
         return 0.0
+
+def confirm_grade(sig):
+    try:
+        checks = 0
+
+        if sig.get("rr1", 0) >= 1.8:
+            checks += 1
+
+        if sig.get("h4_bias_score", 0) >= 3:
+            checks += 1
+
+        if sig.get("h1_setup_score", 0) >= 3:
+            checks += 1
+
+        if sig.get("m15_trigger_score", 0) >= 3:
+            checks += 1
+
+        if not sig.get("late", False):
+            checks += 1
+
+        status = str(sig.get("status", ""))
+
+        if status == "SWING TRIGGER" and checks >= 4:
+            return "CONFIRMED"
+
+        if checks >= 3:
+            return "WATCH"
+
+        return "SKIP"
+
+    except:
+        return "SKIP"
 # =========================
 # MAIN LOOP (STABLE VERSION)
 # =========================
