@@ -5970,7 +5970,10 @@ if __name__ == "__main__":
                 send_telegram("\n".join(top_lines))
 
             for sig in alerts[:DETAIL_TOP_K]:
-                send_telegram(choose_detail_message(sig))
+                if str(sig.get("status","")).startswith("SWING"):
+                    send_telegram(msg_swing(sig))
+                else:
+                    send_telegram(choose_detail_message(sig))
 
             if MANIP_ALERT_ENABLED:
 
