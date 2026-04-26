@@ -78,7 +78,12 @@ SWING_MIN_H4_SCORE = int(os.getenv("SWING_MIN_H4_SCORE") or "3")
 SWING_MIN_H1_SCORE = int(os.getenv("SWING_MIN_H1_SCORE") or "3")
 SWING_MIN_TRIGGER_SCORE = int(os.getenv("SWING_MIN_TRIGGER_SCORE") or "3")
 
-if SWING_MODE == "AGGRESSIVE":
+mode_now = SWING_MODE
+
+if SWING_MODE == "AUTO":
+    mode_now = "AGGRESSIVE" if ALERT_MIN_SCORE <= 3 else "SAFE"
+
+if mode_now == "AGGRESSIVE":
     SWING_MIN_ROOM_TO_TARGET_PCT = 1.2
     SWING_MAX_STOP_PCT = 6.0
     SWING_MIN_RR = 1.4
@@ -86,6 +91,7 @@ else:
     SWING_MIN_ROOM_TO_TARGET_PCT = 2.0
     SWING_MAX_STOP_PCT = 4.0
     SWING_MIN_RR = 1.8
+
 SWING_LATE_FROM_EMA_PCT = float(os.getenv("SWING_LATE_FROM_EMA_PCT") or "6.5")
 SWING_MAX_ENTRY_ZONE_PCT = float(os.getenv("SWING_MAX_ENTRY_ZONE_PCT") or "6.0")
 SWING_REQUIRE_STOP_OUTSIDE_ZONE = (os.getenv("SWING_REQUIRE_STOP_OUTSIDE_ZONE") or "1").strip() != "0"
