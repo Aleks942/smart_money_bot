@@ -5917,27 +5917,25 @@ if __name__ == "__main__":
             print(f"EARLY FOUND: {early_count} | START FOUND: {start_count} | PRE FOUND: {pre_count}")
             print(f"EARLY BUY SYMBOLS: {early_buy_symbols}")
             print(f"EARLY SELL SYMBOLS: {early_sell_symbols}")
-            
+
             market_msg = msg_market_pressure(early_buy_symbols, early_sell_symbols)
             if market_msg:
                 send_telegram(market_msg)
 
+            msg = summary_message(alerts, cycle_info, regime)
+            if msg:
+                send_telegram(msg)
 
+            if alerts:
+                top_lines = []
+                top_lines.append("🧠 AI RANKING TOP SIGNALS")
 
-msg = summary_message(alerts, cycle_info, regime)
-if msg:
-    send_telegram(msg)
+                for i, s in enumerate(alerts[:3], start=1):
+                    top_lines.append(
+                        f"{i}) {s['instId']} | {s.get('grade')} | rank={round(s.get('rank',0),2)}"
+                    )
 
-if alerts:
-    top_lines = []
-    top_lines.append("🧠 AI RANKING TOP SIGNALS")
-
-for i, s in enumerate(alerts[:3], start=1):
-    top_lines.append(
-        f"{i}) {s['instId']} | {s.get('grade')} | rank={round(s.get('rank',0),2)}"
-    )
-
-    send_telegram("\n".join(top_lines))
+                send_telegram("\n".join(top_lines))
 
             for sig in alerts[:DETAIL_TOP_K]:
                 send_telegram(choose_detail_message(sig))
