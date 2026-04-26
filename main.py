@@ -5850,7 +5850,12 @@ if __name__ == "__main__":
                             last_sw_ts = float(swing_sent.get(instId, 0) or 0)
                             now_sw_ts = time.time()
 
-                            can_send_swing = (now_sw_ts - last_sw_ts) >= SWING_ALERT_COOLDOWN_SEC
+                            same_symbol_locked = (now_sw_ts - last_sw_ts) < SWING_ALERT_COOLDOWN_SEC
+
+                            if SWING_ONE_IDEA_PER_SYMBOL:
+                                can_send_swing = not same_symbol_locked
+                            else:
+                                can_send_swing = True
 
                             # чтобы не дёргать H4/H1/M15 на совсем мусорных монетах
                             swing_candidate = (
