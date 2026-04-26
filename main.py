@@ -4868,13 +4868,17 @@ def summary_message(alerts, cycle_info, regime):
         tgt = sig.get("target", None)
         oi = sig.get("oi_change", None)
         oi_text = f" | OI {oi}%" if oi is not None else ""
+        
+if tgt is not None:
+    lines.append(
+        f"• {sym}: {score}/10 acc={acc} {direction} | {entry} | {stage}{oi_text} | tgt {tgt}"
+    )
+else:
+    lines.append(
+        f"• {sym}: {score}/10 acc={acc} {direction} | {entry} | {stage}{oi_text}"
+    )
 
-        if tgt is not None:
-            lines.append(f"• {sym}: {score}/10 acc={acc} {direction} | {entry} | {stage} | tgt {tgt}")
-        else:
-            lines.append(f"• {sym}: {score}/10 acc={acc} {direction} | {entry} | {stage}")
-
-    return "\n".join(lines)
+return "\n".join(lines)
 
 # =========================
 # PRE-MOVE MANIPULATION WATCH (V2)
