@@ -2663,9 +2663,14 @@ def is_entry_signal(s):
     if s.get("exp_move_max", 0) < 0.8:
         return False
 
-    rsi_state = s.get("rsi_state")
-    if rsi_state in ["EXTREME_OVERBOUGHT", "EXTREME_OVERSOLD"]:
-        return False
+rsi_state = s.get("rsi_state")
+direction = str(s.get("direction") or "")
+
+if rsi_state == "EXTREME_OVERBOUGHT" and "⬆️" in direction:
+    return False
+
+if rsi_state == "EXTREME_OVERSOLD" and "⬇️" in direction:
+    return False
 
     return True
 
