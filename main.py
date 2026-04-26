@@ -5906,6 +5906,7 @@ if __name__ == "__main__":
 
             for s in alerts:
                 s["rank"] = rank_signal(s)
+                s["grade"] = confirm_grade(s)
             
             alerts.sort(key=lambda s: s.get("rank", 0), reverse=True)
             manip_watch.sort(key=lambda s: s.get("acc_score", 0), reverse=True)
