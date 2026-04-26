@@ -4843,6 +4843,9 @@ def msg_swing(sig):
     ctx = smart_context(sig)
     if ctx:
         lines.append(ctx)
+    
+    lines.append(f"DEBUG FLAGS: {sig.get('flags')}")
+    lines.append(f"DEBUG OI: {sig.get('oi_change')}")
 
     return "\n".join(lines)
 
