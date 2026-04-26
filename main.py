@@ -4808,7 +4808,7 @@ def msg_swing(sig):
     lines = []
     lines.append(f"{icon} SWING {side} — {sig['symbol']}")
     lines.append(f"Статус: {sig.get('status','')}")
-    
+
     if sig.get("entry_price") is not None:
         lines.append(f"🎯 Entry: {sig['entry_price']}")
 
@@ -4821,8 +4821,14 @@ def msg_swing(sig):
     if sig.get("rr1") is not None:
         lines.append(f"⚖️ RR: {sig['rr1']}")
 
-    if sig.get("oi_change") is not None:
-        lines.append(f"💰 OI: {sig['oi_change']}%")
+    oi = sig.get("oi_change", None)
+    if oi is not None:
+        if oi > 0:
+            lines.append(f"💰 OI: +{oi}% (деньги заходят)")
+        elif oi < 0:
+            lines.append(f"💨 OI: {oi}% (интерес падает)")
+        else:
+            lines.append("⚖️ OI: 0%")
 
     lines.append(f"🧠 {sig.get('verdict','')}")
 
