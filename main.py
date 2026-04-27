@@ -6118,20 +6118,20 @@ if __name__ == "__main__":
                                     swing_sent[instId] = now_sw_ts
                                     state["swing_sent"] = swing_sent
                                 
-                                print(
-                                    f"[SWING] {instId} "
-                                    f"status={swing_sig.get('status')} "
-                                    f"side={swing_sig.get('side')} "
-                                    f"h4={swing_sig.get('h4_bias')} "
-                                    f"h1={swing_sig.get('h1_setup_type')} "
-                                    f"m15={swing_sig.get('m15_trigger_type')} "
-                                    f"rr1={swing_sig.get('rr1')}"
-                                )
-
-                            except Exception as e:
-                                import traceback
-                                print(f"[SWING_ERROR] {instId}: {e}")
-                                print(traceback.format_exc())
+                                    print(
+                                        f"[SWING] {instId} "
+                                        f"status={swing_sig.get('status')} "
+                                        f"side={swing_sig.get('side')} "
+                                        f"h4={swing_sig.get('h4_bias')} "
+                                        f"h1={swing_sig.get('h1_setup_type')} "
+                                        f"m15={swing_sig.get('m15_trigger_type')} "
+                                        f"rr1={swing_sig.get('rr1')}"
+                                    )
+                                
+                                except Exception as e:
+                                    import traceback
+                                    print(f"[SWING_ERROR] {instId}: {e}")
+                                    print(traceback.format_exc())
 
                     if sig.get("swing_only_candidate"):
                         print(
