@@ -4930,6 +4930,35 @@ def coin_risk_label(sig):
 
     except Exception:
         return "⚪ Риск монеты: нет данных", []
+
+def stop_risk_text(sig):
+    try:
+        entry = sig.get("entry_price")
+        stop = sig.get("stop")
+        side = str(sig.get("side", "")).upper()
+
+        if entry is None or stop is None:
+            return None
+
+        entry = float(entry)
+        stop = float(stop)
+
+        if entry <= 0:
+            return None
+
+        dist_pct = abs(entry - stop) / entry * 100
+        dist_pct = round(dist_pct, 2)
+
+        if dist_pct <= 1.0:
+            return f"🟢 Стоп: хороший ({dist_pct}%)"
+
+        if dist_pct <= 2.5:
+            return f"🟡 Стоп: широкий ({dist_pct}%)"
+
+        return f"🔴 Стоп: высокий риск ({dist_pct}%)"
+
+    except Exception:
+        return None
     
 def msg_swing(sig):
     side = str(sig.get("side", "")).upper()
