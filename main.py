@@ -1284,7 +1284,16 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         entry_price = _swing_mid(entry_zone)
         stop = h1_setup.get("invalidation_level") if h1_setup else None
 
-        if m15_trigger and m15_trigger.get("trigger_ok"):
+        m15_ready = (
+            m15_trigger
+            and (
+                m15_trigger.get("trigger_ok")
+                or m15_trigger.get("ok")
+                or m15_trigger.get("trigger_type") not in ("none", None, "")
+            )
+        )
+        
+        if m15_ready:
             status = "SWING TRIGGER"
             verdict = "можно работать по M15 trigger"
             sendable = True
