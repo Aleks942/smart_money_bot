@@ -493,11 +493,11 @@ def analyze_h4_context(df_h4: pd.DataFrame) -> dict:
             "close": round(last_close, 6),
         }
 
-except Exception as e:
-    print(f"[SWING_BUILD_ERROR] {instId}: {e}")
-    import traceback
-    print(traceback.format_exc())
-    return empty
+    except Exception as e:
+        print(f"[SWING_BUILD_ERROR] {instId}: {e}")
+        import traceback
+        print(traceback.format_exc())
+        return empty
 
 # =========================
 # SWING H1 SETUP ANALYSIS
