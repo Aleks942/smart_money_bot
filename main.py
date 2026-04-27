@@ -5186,7 +5186,7 @@ def summary_message(alerts, cycle_info, regime):
     for i, sig in enumerate(alerts[:top_n], start=1):
 
         sym = sig.get("instId", "?")
-        score = round(float(sig.get("score", 0)), 2)
+        score = round(float(sig.get("score") or sig.get("rank") or 0), 2)
         acc = sig.get("acc_score", 0)
         direction = dir_badge(sig.get("direction", ""))
         entry = sig.get("entry", "WAIT")
@@ -5248,11 +5248,9 @@ def manip_summary_message(watch, cycle_info, regime):
     lines.append(f"⏱ Cycle: {cycle_info}")
     lines.append(f"🧭 BTC regime: {regime}")
 
-    # ✅ если пусто — НИЧЕГО не отправляем
     if not watch:
         return None
 
-    # показываем топ
     top_n = min(len(watch), 3)
     lines.append(f"Top {top_n}:")
 
