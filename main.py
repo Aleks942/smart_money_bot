@@ -5982,6 +5982,13 @@ if __name__ == "__main__":
         try:
 
             regime, _btc = btc_regime()
+            MARKET_MODE = "NEUTRAL"
+
+            if "BULL" in str(regime).upper() or "UP" in str(regime).upper():
+                MARKET_MODE = "BULL"
+            
+            elif "BEAR" in str(regime).upper() or "DOWN" in str(regime).upper():
+                MARKET_MODE = "BEAR"
 
             alerts = []
             manip_watch = []
