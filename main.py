@@ -4997,6 +4997,14 @@ def msg_swing(sig):
         lines.append("")
         lines.append(oi)
 
+    risk_label, risk_reasons = coin_risk_label(sig)
+    lines.append(risk_label)
+
+    if risk_reasons:
+        lines.append("Причины риска:")
+        for r in risk_reasons:
+            lines.append(f"• {r}")
+
     lines.append("")
     lines.append("🧠 Что делать:")
 
