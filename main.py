@@ -6092,6 +6092,12 @@ if __name__ == "__main__":
                     
                                 print(
                                     f"[SWING_DEBUG] {instId} "
+                                    f"h4_ok={h4_ctx.get('ok')} "
+                                    f"h4_bias={h4_ctx.get('bias')} "
+                                    f"h1_ok={h1_setup.get('ok')} "
+                                    f"h1_type={h1_setup.get('setup_type')} "
+                                    f"m15_ok={m15_trigger.get('ok')} "
+                                    f"m15_type={m15_trigger.get('trigger_type')} "
                                     f"status={swing_sig.get('status')} "
                                     f"sendable={swing_sig.get('sendable')} "
                                     f"rr1={swing_sig.get('rr1')} "
