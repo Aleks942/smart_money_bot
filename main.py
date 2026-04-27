@@ -6532,28 +6532,28 @@ if __name__ == "__main__":
                 if len(ranked) > 0:
                     send_telegram("\n".join(top_lines))
 
-            # =====================
-            # TOP ALERTS (без дублей и мусора)
-            # =====================
-            
-            top_alerts = [
-                s for s in alerts
-                if not str(s.get("status", "")).startswith("SWING")
-                and float(s.get("score", 0)) >= 7
-            ][:TOP_ALERTS_LIMIT]
-            
-            sent_ids = set()
-            
-            for sig in top_alerts:
-                sid = sig.get("instId")
-            
-                if sid in sent_ids:
-                    continue
-            
-                if sid in sent_sw:
-                    continue
-            
-                sent_ids.add(sid)
-                send_telegram(choose_detail_message(sig))
-            
-            save_state(state)
+                # =====================
+                # TOP ALERTS (без дублей и мусора)
+                # =====================
+                
+                top_alerts = [
+                    s for s in alerts
+                    if not str(s.get("status", "")).startswith("SWING")
+                    and float(s.get("score", 0)) >= 7
+                ][:TOP_ALERTS_LIMIT]
+                
+                sent_ids = set()
+                
+                for sig in top_alerts:
+                    sid = sig.get("instId")
+                
+                    if sid in sent_ids:
+                        continue
+                
+                    if sid in sent_sw:
+                        continue
+                
+                    sent_ids.add(sid)
+                    send_telegram(choose_detail_message(sig))
+                
+                save_state(state)
