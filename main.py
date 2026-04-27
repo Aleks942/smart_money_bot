@@ -6503,7 +6503,15 @@ if __name__ == "__main__":
             if swing_top:
                 send_telegram("🏆 SWING TOP SETUPS")
             
+                sent_sw = set()
+            
                 for sw in swing_top:
+                    sid = sw.get("instId")
+            
+                    if sid in sent_sw:
+                        continue
+            
+                    sent_sw.add(sid)
                     send_telegram(msg_swing(sw))
 
             if alerts:
