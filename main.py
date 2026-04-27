@@ -5260,7 +5260,7 @@ def summary_message(alerts, cycle_info, regime):
         sym = sig.get("instId", "?")
         score = round(float(sig.get("score", 0)), 2)
         acc = sig.get("acc_score", 0)
-        direction = sig.get("direction", "⚖️")
+        direction = dir_badge(sig.get("direction", ""))
         entry = sig.get("entry", "WAIT")
         stage = sig.get("stage", "")
         tgt = sig.get("target", None)
