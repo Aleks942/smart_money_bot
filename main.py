@@ -4675,6 +4675,13 @@ def msg_medium(sig):
     lines.append(f"📊 {score}/10 | {direction} (up={up_w}, down={down_w}) | acc={acc}")
     lines.append(f"🎯 ENTRY: {entry} — {entry_reason}")
     lines.append(f"🧬 STAGE: {stage} — {stage_reason}")
+        oi_text = oi_status_text(sig)
+    if oi_text:
+        lines.append(oi_text)
+
+    oi_hint = oi_trap_detector(sig)
+    if oi_hint:
+        lines.append(oi_hint)
 
     pm = sig.get("pmeta") or {}
     if (
