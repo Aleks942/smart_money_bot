@@ -5421,6 +5421,19 @@ def mark_safe_entry(state, instId):
     state["symbols"].setdefault(instId, {})
     state["symbols"][instId]["last_safe_entry_ts"] = now_ts()
 
+def should_send_summary(state, text):
+    last = state.get("last_summary_text", "")
+    now = now_ts()
+    last_ts = int(state.get("last_summary_ts", 0) or 0)
+
+    # одинаковое сообщение меньше 10 минут не шлем
+    if text == last and (now - last_ts) < 600:
+        return False
+
+    state["last_summary_text"] = text
+    state["last_summary_ts"] = now
+    return True
+
 # =========================
 # START AFTERGLOW
 # =========================
