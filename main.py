@@ -6399,10 +6399,10 @@ if __name__ == "__main__":
                     
                     summary_ok = (
                         score >= 5.5
-                        or acc >=2 
+                        or (acc >= 2 and score >= 4)
                         or sig.get("sendable", False)
                     )
-                    
+                        
                     if summary_ok:
                         if not any(a.get("instId") == sig.get("instId") for a in alerts):
                             alerts.append(sig)
