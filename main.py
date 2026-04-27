@@ -1236,7 +1236,7 @@ def _fmt_px(x):
         return str(x)
 
 
-def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: dict) -> dict:
+def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: dict, sig: dict = None) -> dict:
     empty = {
         "ok": False,
         "symbol": instId,
