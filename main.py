@@ -1287,12 +1287,12 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         entry_price = _swing_mid(entry_zone)
         stop = h1_setup.get("invalidation_level") if h1_setup else None
 
-        m15_ready = (
+        m15_ready = bool(
             m15_trigger
             and (
-                m15_trigger.get("trigger_ok")
-                or m15_trigger.get("ok")
-                or m15_trigger.get("trigger_type") not in ("none", None, "")
+                m15_trigger.get("trigger_ok") is True
+                or m15_trigger.get("ok") is True
+                or str(m15_trigger.get("trigger_type", "none")) not in ("none", "", "None")
             )
         )
         
