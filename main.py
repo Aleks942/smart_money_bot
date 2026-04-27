@@ -4524,9 +4524,6 @@ def pro_edge_filter(sig, regime):
         return False
 
     return True
-
-    return True
-
       
 
 # =========================
