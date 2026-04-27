@@ -4539,6 +4539,36 @@ def pro_edge_filter(sig, regime):
     return True
 
 # =========================
+# AI FILTER DEBUG
+# =========================
+def debug_ai_filter_result(sig, regime, passed, layer="INTRADAY"):
+
+    if not isinstance(sig, dict):
+        return
+
+    symbol = sig.get("symbol") or sig.get("instId") or "UNKNOWN"
+    score = sig.get("score")
+    acc = sig.get("acc_score")
+    direction = sig.get("direction")
+    tier = sig.get("tier")
+    swing_candidate = sig.get("swing_only_candidate")
+    below_main = sig.get("below_main_min_score")
+    flags = sig.get("flags") or []
+
+    print(
+        f"[AI_FILTER][{layer}] "
+        f"{'PASSED' if passed else 'BLOCKED'} "
+        f"{symbol} | "
+        f"regime={regime} | "
+        f"score={score} | acc={acc} | tier={tier} | "
+        f"direction={direction} | "
+        f"swing_candidate={swing_candidate} | "
+        f"below_main={below_main} | "
+        f"flags={flags}",
+        flush=True
+    )
+
+# =========================
 # TRADER INTERPRETATION
 # =========================
 def interpret_combo(sig):
