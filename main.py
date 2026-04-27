@@ -4969,7 +4969,7 @@ def msg_swing(sig):
     lines = []
     lines.append(f"{icon} <b>{grade} — {sig['symbol']}</b>")
     lines.append("")
-    lines.append(f"📊 Сила сигнала: <b>{score}/10</b>")
+    lines.append(f"📊 Сила сигнала: <b>{score_show}/10</b>")
     lines.append(f"🧭 Направление: <b>{side_ru}</b>")
     lines.append("")
 
