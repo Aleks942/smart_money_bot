@@ -6556,6 +6556,7 @@ if __name__ == "__main__":
                 ranked = [
                     s for s in alerts
                     if float(s.get("rank", 0)) > 0
+                    and str(s.get("grade", "SKIP")) != "SKIP"
                 ][:3]
             
                 for i, s in enumerate(ranked, start=1):
@@ -6563,7 +6564,8 @@ if __name__ == "__main__":
                         f"{i}) {s['instId']} | {s.get('grade')} | rank={round(s.get('rank',0),2)}"
                     )
             
-                send_telegram("\n".join(top_lines))
+                if len(ranked) > 0:
+                    send_telegram("\n".join(top_lines))
 
             # =====================
             # TOP ALERTS (без дублей и мусора)
