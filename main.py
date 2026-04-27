@@ -6512,48 +6512,47 @@ if __name__ == "__main__":
                     sent_sw.add(sid)
                     send_telegram(msg_swing(sw))
             
-          
-
+        
             if alerts:
                 top_lines = []
                 top_lines.append("🧠 AI RANKING TOP SIGNALS")
-            
+
                 ranked = [
                     s for s in alerts
                     if float(s.get("rank", 0)) > 0
                     and str(s.get("grade", "SKIP")) != "SKIP"
                 ][:3]
-            
+
                 for i, s in enumerate(ranked, start=1):
                     top_lines.append(
                         f"{i}) {s['instId']} | {s.get('grade')} | rank={round(s.get('rank',0),2)}"
                     )
-            
+
                 if ranked:
                     send_telegram("\n".join(top_lines))
-            
-                # =====================
-                # TOP ALERTS
-                # =====================
-            
+
                 top_alerts = [
                     s for s in alerts
                     if not str(s.get("status", "")).startswith("SWING")
                     and float(s.get("rank", 0)) >= 7
                 ][:TOP_ALERTS_LIMIT]
-            
+
                 sent_ids = set()
-            
+
                 for sig in top_alerts:
                     sid = sig.get("instId")
-            
+
                     if sid in sent_ids:
                         continue
-            
+
                     if sid in sent_sw:
                         continue
-            
+
                     sent_ids.add(sid)
                     send_telegram(choose_detail_message(sig))
-                    
-                 save_state(state)
+
+            save_state(state)
+
+        except Exception as e:
+            err = traceback.format_exc()
+            send_telegram(f"❌ Scan Error:\n{err}")
