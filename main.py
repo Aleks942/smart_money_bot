@@ -6558,7 +6558,7 @@ if __name__ == "__main__":
                 send_telegram(market_msg)
 
             msg = summary_message(alerts, cycle_info, regime)
-            if msg:
+            if msg and should_send_summary(state, msg):
                 send_telegram(msg)
 
             if swing_top:
