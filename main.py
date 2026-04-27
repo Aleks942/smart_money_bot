@@ -5231,51 +5231,49 @@ def choose_detail_message(sig):
 
     return msg
 
-
 def summary_message(alerts, cycle_info, regime):
-
-    lines = []
-
-    lines.append("🚨 SMART MONEY SCAN — MARKET SUMMARY")
-    lines.append(f"⏱ Cycle: {cycle_info}")
-    lines.append(f"🧭 BTC regime: {regime}")
 
     if not alerts:
         return None
 
+    lines = []
+    lines.append("🚨 SMART MONEY SCAN — MARKET SUMMARY")
+    lines.append(f"⏱ Cycle: {cycle_info}")
+    lines.append(f"🧭 BTC regime: {regime}")
+    lines.append("")
+
     top_n = min(len(alerts), 3)
-    lines.append(f"Top {top_n}:")
 
-    for sig in alerts[:top_n]:
+    for i, sig in enumerate(alerts[:top_n], start=1):
 
-        sym = sig.get("instId") or sig.get("symbol") or sig.get("sym") or "?"
+        sym = sig.get("instId", "?")
         score = round(float(sig.get("score", 0)), 2)
         acc = sig.get("acc_score", 0)
-
         direction = sig.get("direction", "⚖️")
         entry = sig.get("entry", "WAIT")
         stage = sig.get("stage", "")
-
         tgt = sig.get("target", None)
 
         oi = sig.get("oi_change", None)
-        oi_text = f"OI: {oi_badge(oi)}" if oi is not None else "OI: ⚪ n/a"
+        oi_line = ""
+        if oi is not None:
+            oi_line = f"💰 OI: {oi_badge(oi)}"
 
-        row = (
-            f"• {sym}\n"
-            f"  📊 Score: {score}/10 | acc={acc}\n"
-            f"  🧭 {direction}\n"
-            f"  🎯 {entry}\n"
-            f"  🧬 {stage}\n"
-            f"  💰 {oi_text}"
-        )
+        lines.append(f"{i}) {sym}")
+        lines.append(f"📊 Score: {score}/10 | acc={acc}")
+        lines.append(f"🧭 {direction}")
+        lines.append(f"🎯 {entry}")
+        lines.append(f"🧬 {stage}")
 
-        if tgt is not None:
-            row += f"\n  🎯 Target: {tgt}"
+        if oi_line:
+            lines.append(oi_line)
 
-        lines.append(row)
+        if tgt:
+            lines.append(f"🎯 Target: {tgt}")
 
-    return "\n\n".join(lines)
+        lines.append("")
+
+    return "\n".join(lines)
 
 # =========================
 # PRE-MOVE MANIPULATION WATCH (V2)
