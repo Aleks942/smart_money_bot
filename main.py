@@ -6369,9 +6369,15 @@ if __name__ == "__main__":
                             f"sent_main_now={sent_main_now}"
                         )
 
-                    if entry_ok and profit_ok and can_alert_now and (not sent_main_now):
+                    # Для summary добавляем сильные сигналы мягче
+                    if sig.get("score", 0) >= 7:
                         if not any(a.get("instId") == sig.get("instId") for a in alerts):
                             alerts.append(sig)
+                            print(f"[SUMMARY_ADD] {instId} score={sig.get('score')}")
+                    
+                    # Для live отправки строгие условия оставляем отдельно
+                    if entry_ok and profit_ok and can_alert_now and (not sent_main_now):
+                        print(f"[LIVE_OK] {instId}")
 
                     
                     # =====================
