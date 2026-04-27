@@ -6056,24 +6056,32 @@ if __name__ == "__main__":
                         print(f"[RAW_SKIP] {instId} build_signal_returned_non_dict")
                         continue
                     
+                    oi_ttl = int(os.getenv("OI_CACHE_TTL_SEC", "1800"))
+
                     new_oi = get_open_interest_change(instId)
-
-                    if new_oi is None:
-                        prev = state["symbols"].get(instId, {}).get("last_oi_change")
-                        sig["oi_change"] = prev
                     
-                    if prev is None:
-                        print(f"[OI_NONE] {instId} no fresh data / no cache")
-                    else:
-                        print(f"[OI_CACHE] {instId} using cached OI={prev}%")
-
-                    else:
+                    state["symbols"].setdefault(instId, {})
+                    sym_state = state["symbols"][instId]
+                    
+                    if new_oi is not None:
                         sig["oi_change"] = new_oi
-                        state["symbols"].setdefault(instId, {})
-                        state["symbols"][instId]["last_oi_change"] = new_oi
+                        sym_state["last_oi_change"] = new_oi
+                        sym_state["last_oi_ts"] = now_ts()
                     
-                        print(f"[OI_NEW] {instId} OI={new_oi}%")
-                                    
+                        print(f"[OI_NEW] {instId} fresh OI={new_oi}%", flush=True)
+                    
+                    else:
+                        prev = sym_state.get("last_oi_change")
+                        prev_ts = int(sym_state.get("last_oi_ts", 0) or 0)
+                        age = now_ts() - prev_ts
+                    
+                        if prev is not None and age <= oi_ttl:
+                            sig["oi_change"] = prev
+                            print(f"[OI_CACHE] {instId} cached OI={prev}% age={age}s", flush=True)
+                        else:
+                            sig["oi_change"] = None
+                            print(f"[OI_NONE] {instId} no fresh OI / cache expired", flush=True)
+                                                        
                    
             
                     # =====================
