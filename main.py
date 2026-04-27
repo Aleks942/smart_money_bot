@@ -6479,8 +6479,8 @@ if __name__ == "__main__":
             manip_watch.sort(key=lambda s: s.get("acc_score", 0), reverse=True)
             swing_top = [
                 s for s in alerts
-                if str(s.get("status", "")).startswith("SWING")
-                and s.get("sendable", False)
+                if str(s.get("status","")).startswith("SWING")
+                and str(s.get("grade","")) != "WATCH"
             ]
             
             swing_top = swing_top[:3]
