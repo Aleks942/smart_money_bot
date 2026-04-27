@@ -6550,14 +6550,10 @@ if __name__ == "__main__":
                 if sid in sent_ids:
                     continue
             
+                if sid in sent_sw:
+                    continue
+            
                 sent_ids.add(sid)
                 send_telegram(choose_detail_message(sig))
-
+            
             save_state(state)
-
-        except Exception as e:
-
-            err = traceback.format_exc()
-            send_telegram(f"❌ Scan Error:\n{err}")
-
-        time.sleep(POLL_SECONDS)
