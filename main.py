@@ -5291,18 +5291,44 @@ def manip_summary_message(watch, cycle_info, regime):
 def should_alert_symbol(state, sig):
     sym = sig["instId"]
     ss = state["symbols"].get(sym, {})
+
     prev_score = ss.get("prev_score")
     prev_flags = ss.get("prev_flags", [])
+    prev_entry = ss.get("prev_entry")
+    prev_direction = ss.get("prev_direction")
     last_alert_ts = ss.get("last_alert_ts", 0)
+
     now = now_ts()
 
     if now - int(last_alert_ts or 0) < ALERT_COOLDOWN_SEC:
         return False
 
-    changed = (prev_score is None) or (sig["score"] != prev_score) or (sig["flags"] != prev_flags)
-    crossed = (prev_score or 0) < ALERT_MIN_SCORE and sig["score"] >= ALERT_MIN_SCORE
-    return changed or crossed
+    cur_score = sig.get("score", 0)
+    cur_flags = sig.get("flags", [])
+    cur_entry = sig.get("entry")
+    cur_direction = sig.get("direction")
 
+    same_signal = (
+        prev_score == cur_score
+        and prev_entry == cur_entry
+        and prev_direction == cur_direction
+        and set(prev_flags) == set(cur_flags)
+    )
+
+    if same_signal:
+        return False
+
+    changed = (
+        prev_score is None
+        or cur_score != prev_score
+        or set(cur_flags) != set(prev_flags)
+        or cur_entry != prev_entry
+        or cur_direction != prev_direction
+    )
+
+    crossed = (prev_score or 0) < ALERT_MIN_SCORE and cur_score >= ALERT_MIN_SCORE
+
+    return changed or crossed
 def should_manip_alert(state, sig):
     sym = sig["instId"]
     ss = state["symbols"].get(sym, {})
