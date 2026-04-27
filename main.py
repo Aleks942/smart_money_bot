@@ -6181,10 +6181,13 @@ if __name__ == "__main__":
                                 )
                     
                                 if swing_sig.get("sendable"):
+                                    swing_candidates.append(swing_sig)
+                                
                                     send_telegram(msg_swing(swing_sig))
+                                
                                     swing_sent[instId] = now_sw_ts
                                     state["swing_sent"] = swing_sent
-                    
+                                
                                     print(
                                         f"[SWING] {instId} "
                                         f"side={swing_sig.get('side')} "
