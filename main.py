@@ -1463,6 +1463,9 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             and rr1 >= 2.2
         )
 
+        soft_room_pass = False
+        soft_stop_pass = False
+
         if status in ("SWING SETUP", "SWING TRIGGER") and not late:
 
             if not entry_zone_ok and rr1 < 2.0:
