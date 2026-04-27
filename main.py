@@ -1499,7 +1499,7 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
                     sendable = False
                     reject_reason = "wide_stop"
             
-            elif not rr_ok:
+            elif not rr_ok and status != "SWING TRIGGER":
                 verdict = "RR слабый, сделка некрасивая"
                 sendable = False
                 reject_reason = "weak_rr"
