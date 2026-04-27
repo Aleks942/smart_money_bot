@@ -4527,18 +4527,6 @@ def pro_edge_filter(sig, regime):
       
 
 # =========================
-# TRADER INTERPRETATION
-# =========================
-
-    # BTC bias (чуть сильнее)
-    if regime == "RISK_OFF" and "ВВЕРХ" in direction:
-        return False
-    if regime == "RISK_ON" and "ВНИЗ" in direction:
-        return False
-
-    return True
-
-# =========================
 # AI FILTER DEBUG
 # =========================
 def debug_ai_filter_result(sig, regime, passed, layer="INTRADAY"):
