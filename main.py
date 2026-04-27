@@ -5024,6 +5024,9 @@ def msg_swing(sig):
 
     if sig.get("rr1") is not None:
         lines.append(f"• RR: <b>{sig['rr1']}</b>")
+     stop_info = stop_risk_text(sig)
+    if stop_info:
+        lines.append(f"• {stop_info}")
 
     room = sig.get("room_to_target")
     if room is not None:
