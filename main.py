@@ -6497,11 +6497,11 @@ if __name__ == "__main__":
             msg = summary_message(alerts, cycle_info, regime)
             if msg and should_send_summary(state, msg):
                 send_telegram(msg)
-
+            
+            sent_sw = set()
+            
             if swing_top:
                 send_telegram("🏆 SWING TOP SETUPS")
-            
-                sent_sw = set()
             
                 for sw in swing_top:
                     sid = sw.get("instId")
@@ -6511,6 +6511,8 @@ if __name__ == "__main__":
             
                     sent_sw.add(sid)
                     send_telegram(msg_swing(sw))
+            
+          
 
             if alerts:
                 top_lines = []
