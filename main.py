@@ -4673,6 +4673,8 @@ def msg_medium(sig):
     stage_reason = sig.get("stage_reason", "")
     target = sig.get("target")
     flags = sig.get("flags", [])
+    oi_text = oi_status_text(sig)
+    oi_trap = oi_trap_detector(sig)
 
     lines.append(f"{tier}")
     lines.append(f"🧠 RADAR MEDIUM — {fmt_symbol(inst)}")
