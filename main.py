@@ -4910,7 +4910,7 @@ def msg_swing(sig):
     m15_text = m15_map.get(m15_raw, m15_raw)
 
     lines = []
-    lines.append(f"{icon} <b>СРЕДНЕСРОК — {sig['symbol']}</b>")
+    lines.append(f"{icon} <b>{grade} — {sig['symbol']}</b>")
     lines.append("")
     lines.append(f"📊 Сила сигнала: <b>{score}/10</b>")
     lines.append(f"🧭 Направление: <b>{side_ru}</b>")
