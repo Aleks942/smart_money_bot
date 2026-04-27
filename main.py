@@ -1258,6 +1258,11 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
     }
 
     try:
+
+        h4_ctx = h4_ctx or {}
+        h1_setup = h1_setup or {}
+        m15_trigger = m15_trigger or {}
+        sig = sig or {}
         if not h4_ctx or not h4_ctx.get("ok"):
             return empty
 
