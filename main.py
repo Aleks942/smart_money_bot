@@ -94,7 +94,7 @@ if mode_now == "AGGRESSIVE":
     SWING_MIN_RR = 1.8
 else:
     SWING_MIN_ROOM_TO_TARGET_PCT = 1.6
-    SWING_MAX_STOP_PCT = 5.0
+    SWING_MAX_STOP_PCT = 7.0
     SWING_MIN_RR = 1.8
 
 SWING_LATE_FROM_EMA_PCT = float(os.getenv("SWING_LATE_FROM_EMA_PCT") or "8.0")
