@@ -6061,10 +6061,18 @@ if __name__ == "__main__":
                     if new_oi is None:
                         prev = state["symbols"].get(instId, {}).get("last_oi_change")
                         sig["oi_change"] = prev
+                    
+                    if prev is None:
+                        print(f"[OI_NONE] {instId} no fresh data / no cache")
                     else:
-                        sig["oi_change"] = new_oi
-                        state["symbols"].setdefault(instId, {})
-                        state["symbols"][instId]["last_oi_change"] = new_oi
+                        print(f"[OI_CACHE] {instId} using cached OI={prev}%")
+
+else:
+    sig["oi_change"] = new_oi
+    state["symbols"].setdefault(instId, {})
+    state["symbols"][instId]["last_oi_change"] = new_oi
+
+    print(f"[OI_NEW] {instId} OI={new_oi}%")
                 
                    
             
