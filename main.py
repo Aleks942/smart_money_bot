@@ -6056,33 +6056,28 @@ if __name__ == "__main__":
                             swing_sent = state.get("swing_sent", {})
                             if not isinstance(swing_sent, dict):
                                 swing_sent = {}
-
+                    
                             last_sw_ts = float(swing_sent.get(instId, 0) or 0)
                             now_sw_ts = time.time()
-
+                    
                             same_symbol_locked = (now_sw_ts - last_sw_ts) < SWING_ALERT_COOLDOWN_SEC
-
-                            if SWING_ONE_IDEA_PER_SYMBOL:
-                                can_send_swing = not same_symbol_locked
-                            else:
-                                can_send_swing = True
-
-                            # чтобы не дёргать H4/H1/M15 на совсем мусорных монетах
+                            can_send_swing = (not same_symbol_locked) if SWING_ONE_IDEA_PER_SYMBOL else True
+                    
                             swing_candidate = (
                                 float(sig.get("score", 0) or 0) >= max(4, MIN_SCORE)
                                 or int(sig.get("acc_score", 0) or 0) >= 2
                                 or bool(sig.get("early_pressure_label"))
                             )
-
+                    
                             if can_send_swing and swing_candidate:
                                 df_h4 = get_tf_candles(instId, tf="4h", limit=200) if SWING_USE_H4 else pd.DataFrame()
                                 df_h1 = get_tf_candles(instId, tf="1h", limit=200) if SWING_USE_H1 else pd.DataFrame()
                                 df_m15 = get_tf_candles(instId, tf="15m", limit=200) if SWING_USE_M15 else pd.DataFrame()
-
+                    
                                 h4_ctx = analyze_h4_context(df_h4) if not df_h4.empty else {"ok": False}
                                 h1_setup = analyze_h1_setup(df_h1, h4_ctx) if not df_h1.empty else {"ok": False}
                                 m15_trigger = analyze_m15_trigger(df_m15, h1_setup, h4_ctx) if not df_m15.empty else {"ok": False}
-
+                    
                                 swing_sig = build_swing_signal(instId, h4_ctx, h1_setup, m15_trigger, sig) or {
                                     "status": "NONE",
                                     "sendable": False,
@@ -6094,45 +6089,30 @@ if __name__ == "__main__":
                                     "h1_setup_type": "none",
                                     "m15_trigger_type": "none"
                                 }
-                                
+                    
                                 print(
                                     f"[SWING_DEBUG] {instId} "
-                                    f"h4_ok={h4_ctx.get('ok')} "
-                                    f"h4_bias={h4_ctx.get('bias')} "
-                                    f"h4_score={h4_ctx.get('bias_score')} "
-                                    f"h1_ok={h1_setup.get('ok')} "
-                                    f"h1_type={h1_setup.get('setup_type')} "
-                                    f"h1_score={h1_setup.get('setup_score')} "
-                                    f"m15_ok={m15_trigger.get('ok')} "
-                                    f"m15_trigger={m15_trigger.get('trigger_type')} "
-                                    f"m15_score={m15_trigger.get('trigger_score')} "
                                     f"status={swing_sig.get('status')} "
                                     f"sendable={swing_sig.get('sendable')} "
-                                    f"late={swing_sig.get('late')} "
                                     f"rr1={swing_sig.get('rr1')} "
                                     f"verdict={swing_sig.get('verdict')}"
                                 )
-                                
+                    
                                 if swing_sig.get("sendable"):
                                     send_telegram(msg_swing(swing_sig))
                                     swing_sent[instId] = now_sw_ts
                                     state["swing_sent"] = swing_sent
-                                
+                    
                                     print(
                                         f"[SWING] {instId} "
-                                        f"status={swing_sig.get('status')} "
                                         f"side={swing_sig.get('side')} "
-                                        f"h4={swing_sig.get('h4_bias')} "
-                                        f"h1={swing_sig.get('h1_setup_type')} "
-                                        f"m15={swing_sig.get('m15_trigger_type')} "
                                         f"rr1={swing_sig.get('rr1')}"
                                     )
-                                
-                                except Exception as e:
-                                    import traceback
-                                    print(f"[SWING_ERROR] {instId}: {e}")
-                                    print(traceback.format_exc())
-
+                    
+                        except Exception as e:
+                            import traceback
+                            print(f"[SWING_ERROR] {instId}: {e}")
+                            print(traceback.format_exc())
                     if sig.get("swing_only_candidate"):
                         print(
                             f"[SWING_ONLY_SKIP_MAIN] {instId} "
