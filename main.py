@@ -3,6 +3,7 @@ import time
 import json
 import math
 import requests
+import traceback
 import pandas as pd
 import traceback
 from dotenv import load_dotenv
