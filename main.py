@@ -4873,6 +4873,56 @@ def swing_grade(sig):
 
     except:
         return 0, "🔴 SKIP"
+
+def coin_risk_label(sig):
+    try:
+        symbol = sig.get("instId") or sig.get("symbol") or ""
+        price = float(sig.get("price", 0) or 0)
+        oi = sig.get("oi_change")
+        flags = set(sig.get("flags", []))
+
+        risk = 0
+        reasons = []
+
+        # мемы / мелкие токены чаще резче двигаются
+        risky_names = ["1000", "PEPE", "DOGE", "SHIB", "FLOKI", "BONK", "TRUMP", "FART"]
+        if any(x in symbol.upper() for x in risky_names):
+            risk += 1
+            reasons.append("мем/агрессивный токен")
+
+        # очень дешёвые монеты чаще шумные
+        if price > 0 and price < 0.05:
+            risk += 1
+            reasons.append("очень низкая цена")
+
+        # OI падает — интерес уходит
+        if oi is not None:
+            oi = float(oi)
+            if oi <= OI_BAD:
+                risk += 1
+                reasons.append("OI падает")
+
+        # ловушки/манипуляции
+        if (
+            "SWEEP_UP" in flags or
+            "SWEEP_DOWN" in flags or
+            "FAKE_DUMP" in flags or
+            "BULL_TRAP" in flags or
+            "BEAR_TRAP" in flags
+        ):
+            risk += 1
+            reasons.append("есть признаки манипуляции")
+
+        if risk >= 3:
+            return "🔴 Риск монеты: высокий", reasons[:3]
+
+        if risk >= 1:
+            return "🟡 Риск монеты: средний", reasons[:3]
+
+        return "🟢 Риск монеты: нормальный", reasons[:3]
+
+    except Exception:
+        return "⚪ Риск монеты: нет данных", []
     
 def msg_swing(sig):
     side = str(sig.get("side", "")).upper()
