@@ -6088,9 +6088,13 @@ if __name__ == "__main__":
                                     "sendable": False,
                                     "late": False,
                                     "rr1": 0.0,
-                                    "verdict": "no_signal"
+                                    "verdict": "no_signal",
+                                    "side": "NEUTRAL",
+                                    "h4_bias": "NONE",
+                                    "h1_setup_type": "none",
+                                    "m15_trigger_type": "none"
                                 }
-
+                                
                                 print(
                                     f"[SWING_DEBUG] {instId} "
                                     f"h4_ok={h4_ctx.get('ok')} "
@@ -6108,12 +6112,12 @@ if __name__ == "__main__":
                                     f"rr1={swing_sig.get('rr1')} "
                                     f"verdict={swing_sig.get('verdict')}"
                                 )
-
+                                
                                 if swing_sig.get("sendable"):
                                     send_telegram(msg_swing(swing_sig))
                                     swing_sent[instId] = now_sw_ts
                                     state["swing_sent"] = swing_sent
-
+                                
                                     print(
                                         f"[SWING] {instId} "
                                         f"status={swing_sig.get('status')} "
@@ -6124,10 +6128,10 @@ if __name__ == "__main__":
                                         f"rr1={swing_sig.get('rr1')}"
                                     )
 
-                        except Exception as e:
-                            import traceback
-                            print(f"[SWING_ERROR] {instId}: {e}")
-                            print(traceback.format_exc())
+                                except Exception as e:
+                                    import traceback
+                                    print(f"[SWING_ERROR] {instId}: {e}")
+                                    print(traceback.format_exc())
 
                     if sig.get("swing_only_candidate"):
                         print(
