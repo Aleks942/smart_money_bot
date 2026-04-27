@@ -6013,6 +6013,7 @@ if __name__ == "__main__":
             pre_count = 0
             early_buy_symbols = []
             early_sell_symbols = []
+            swing_candidates = []
 
             # =====================
             # SCAN MONETS
