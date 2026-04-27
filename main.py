@@ -6374,8 +6374,8 @@ if __name__ == "__main__":
                         )
                     
                     summary_ok = (
-                        score >= 7
-                        or acc >= 3
+                        score >= 5.5
+                        or acc >=2 
                         or sig.get("sendable", False)
                     )
                     
