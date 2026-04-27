@@ -6354,11 +6354,15 @@ if __name__ == "__main__":
                     # =====================
                     # ADD TO ALERTS (для summary)
                     # =====================
-
-                    if sig.get("score", 0) >= 7:
+                    
+                    score = float(sig.get("score", 0))
+                    acc   = int(sig.get("acc_score", 0))
+                    
+                    if score >= 7:
                         print(
                             f"[CHECK] {instId} "
-                            f"score={sig.get('score')} "
+                            f"score={score} "
+                            f"acc={acc} "
                             f"entry={sig.get('entry')} "
                             f"stage={sig.get('stage')} "
                             f"dir={sig.get('direction')} "
@@ -6368,15 +6372,27 @@ if __name__ == "__main__":
                             f"can_alert_now={can_alert_now} "
                             f"sent_main_now={sent_main_now}"
                         )
-
-                    # Для summary добавляем сильные сигналы мягче
-                    if sig.get("score", 0) >= 7:
+                    
+                    summary_ok = (
+                        score >= 7
+                        or acc >= 3
+                        or sig.get("sendable", False)
+                    )
+                    
+                    if summary_ok:
                         if not any(a.get("instId") == sig.get("instId") for a in alerts):
                             alerts.append(sig)
-                            print(f"[SUMMARY_ADD] {instId} score={sig.get('score')}")
+                            print(f"[SUMMARY_ADD] {instId} score={score} acc={acc}")
                     
-                    # Для live отправки строгие условия оставляем отдельно
-                    if entry_ok and profit_ok and can_alert_now and (not sent_main_now):
+                    # Для live логики строгие условия отдельно
+                    live_ok = (
+                        entry_ok
+                        and profit_ok
+                        and can_alert_now
+                        and (not sent_main_now)
+                    )
+                    
+                    if live_ok:
                         print(f"[LIVE_OK] {instId}")
 
                     
