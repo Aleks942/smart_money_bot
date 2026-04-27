@@ -4853,12 +4853,25 @@ def swing_grade(sig):
         total += h1 * 0.9
         total += m15 * 1.0
         total += min(room, 10) * 0.15
-
+        
         if sig.get("late"):
             total -= 2
-
+        
+        try:
+            entry = float(sig.get("entry_price", 0))
+            stop = float(sig.get("stop", 0))
+        
+            if entry > 0 and stop > 0:
+                stop_pct = abs(entry - stop) / entry * 100
+        
+                if stop_pct > 4:
+                    total -= 2
+                elif stop_pct > 2:
+                    total -= 1
+        except:
+            pass
+        
         total = round(total, 1)
-
         risk_label, _ = coin_risk_label(sig)
 
         if total >= 9:
