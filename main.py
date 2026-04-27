@@ -4690,21 +4690,23 @@ def msg_medium(sig):
         )
 
     if sig.get("rsi7") is not None and sig.get("rsi14") is not None:
-        lines.append(
-            f"📍 RSI7={sig['rsi7']:.1f} | RSI14={sig['rsi14']:.1f} | {sig.get('rsi_state', 'UNKNOWN')}"
-        )
-
+    lines.append(
+        f"📍 RSI7={sig['rsi7']:.1f} | RSI14={sig['rsi14']:.1f} | {sig.get('rsi_state', 'UNKNOWN')}"
+    )
+    
     lines.append(f"📊 {score}/10 | {direction} (up={up_w}, down={down_w}) | acc={acc}")
     lines.append(f"🎯 ENTRY: {entry} — {entry_reason}")
-    lines.append(f"🧬 STAGE: {stage} — {stage_reason}")
+    
     oi_text = oi_status_text(sig)
     if oi_text:
         lines.append(oi_text)
-
+    
     oi_hint = oi_trap_detector(sig)
     if oi_hint:
         lines.append(oi_hint)
-
+    
+    lines.append(f"🧬 STAGE: {stage} — {stage_reason}")
+    
     pm = sig.get("pmeta") or {}
     if (
         pm.get("range_lo") is not None
