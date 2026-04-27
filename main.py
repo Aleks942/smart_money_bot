@@ -4941,6 +4941,7 @@ def msg_swing(sig):
         side_ru = "ШОРТ / вниз"
 
     score, grade = swing_grade(sig)
+    score_show = min(score, 10)
 
     # --- переводы внутренних кодов ---
     h1_map = {
