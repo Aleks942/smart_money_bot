@@ -6453,8 +6453,6 @@ if __name__ == "__main__":
                     send_telegram(msg_swing(sig))
                 else:
                     send_telegram(choose_detail_message(sig))
-                else:
-                    send_telegram(choose_detail_message(sig))
 
             if MANIP_ALERT_ENABLED:
 
