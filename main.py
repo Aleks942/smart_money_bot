@@ -6186,6 +6186,12 @@ if __name__ == "__main__":
                     tier = sig.get("tier")
 
                     entry_ok = is_entry_signal(sig)
+
+                    # допуск сильных сигналов
+                    if (not entry_ok) and score >= 7:
+                        if sig.get("entry") in ["🟡 AGGRESSIVE", "🟢 SAFE", "SAFE ENTRY"]:
+                            entry_ok = True
+                    
                     profit_ok = is_profitable(sig)
                     can_alert_now = should_alert_symbol(state, sig)
                     
