@@ -1251,6 +1251,10 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         "late": False,
         "sendable": False,
         "verdict": "no_signal",
+        "oi_change": None,
+        "flags": [],
+        "price": None,
+        "instId": instId,
     }
 
     try:
