@@ -6447,7 +6447,7 @@ if __name__ == "__main__":
 
                 send_telegram("\n".join(top_lines))
 
-            top_alerts = alerts[:3]
+           top_alerts = alerts[:TOP_ALERTS_LIMIT]
 
             for sig in top_alerts:
                 if str(sig.get("status", "")).startswith("SWING"):
