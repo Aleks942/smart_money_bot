@@ -4880,6 +4880,7 @@ def swing_grade(sig):
 
     except Exception:
         return 0, "🔴 SKIP"
+        
 def coin_risk_label(sig):
     try:
         symbol = sig.get("instId") or sig.get("symbol") or ""
