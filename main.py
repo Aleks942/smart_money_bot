@@ -6443,6 +6443,12 @@ if __name__ == "__main__":
             if msg:
                 send_telegram(msg)
 
+            if swing_top:
+                send_telegram("🏆 SWING TOP SETUPS")
+            
+                for sw in swing_top:
+                    send_telegram(msg_swing(sw))
+
             if alerts:
                 top_lines = []
                 top_lines.append("🧠 AI RANKING TOP SIGNALS")
