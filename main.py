@@ -5996,7 +5996,15 @@ if __name__ == "__main__":
                         print(f"[RAW_SKIP] {instId} build_signal_returned_non_dict")
                         continue
                     
-                    sig["oi_change"] = get_open_interest_change(instId)
+                    new_oi = get_open_interest_change(instId)
+
+                    if new_oi is None:
+                        prev = state["symbols"].get(instId, {}).get("last_oi_change")
+                        sig["oi_change"] = prev
+                    else:
+                        sig["oi_change"] = new_oi
+                        state["symbols"].setdefault(instId, {})
+                        state["symbols"][instId]["last_oi_change"] = new_oi
                 
                    
             
