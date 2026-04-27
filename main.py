@@ -1462,17 +1462,19 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
                     status in ("SWING SETUP", "SWING TRIGGER")
                     and rr1 >= 2.0
                 )
-            
-                if not soft_room_pass:
-                    verdict = "слишком близко к H4 сопротивлению/поддержке"
-                    sendable = False
-                    reject_reason = "small_room"
+
+
+            if not soft_room_pass:
+                verdict = "слишком близко к H4 сопротивлению/поддержке"
+                sendable = False
+                reject_reason = "small_room"
             
             elif not stop_ok and not strong_trigger_override:
             
                 soft_stop_pass = (
                     status in ("SWING SETUP", "SWING TRIGGER")
                     and rr1 >= 3.0
+                    and stop_pct <= 5.0
                 )
             
                 if not soft_stop_pass:
@@ -1484,8 +1486,10 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
                 verdict = "RR слабый, сделка некрасивая"
                 sendable = False
                 reject_reason = "weak_rr"
-
-        return {
+            
+            return {
+            
+               
             "ok": True,
             "symbol": instId,
             "status": status,
