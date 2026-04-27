@@ -2824,7 +2824,7 @@ def show_stats():
     fail = stats.get("fail", 0)
     neutral = stats.get("neutral", max(total - hit - fail, 0))
     resolved = stats.get("resolved", hit + fail)
-    avg_move = stats.get("sum_move", 0) / total if total > 0 else 0
+    avg_move = stats.get("sum_move", 0) / resolved if resolved > 0 else 0
 
     winrate = (hit / resolved * 100) if resolved > 0 else 0
 
