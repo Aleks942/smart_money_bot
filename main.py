@@ -4847,7 +4847,6 @@ def swing_grade(sig):
         m15 = float(sig.get("m15_trigger_score", 0))
 
         total = 0.0
-
         total += score * 0.8
         total += min(rr, 5) * 0.8
         total += h4 * 0.7
@@ -4862,14 +4861,25 @@ def swing_grade(sig):
 
         risk_label, _ = coin_risk_label(sig)
 
-if total >= 9:
-    title = "🔥 ТОП СДЕЛКА"
-elif total >= 7:
-    title = "🟢 GOOD SETUP"
-elif total >= 5:
-    title = "🟡 WATCH"
-else:
-    title = "🔴 SKIP"
+        if total >= 9:
+            title = "🔥 ТОП СДЕЛКА"
+        elif total >= 7:
+            title = "🟢 GOOD SETUP"
+        elif total >= 5:
+            title = "🟡 WATCH"
+        else:
+            title = "🔴 SKIP"
+
+        if "высокий" in risk_label.lower():
+            if title == "🔥 ТОП СДЕЛКА":
+                title = "🟢 GOOD SETUP"
+            elif title == "🟢 GOOD SETUP":
+                title = "🟡 WATCH"
+
+        return total, title
+
+    except Exception:
+        return 0, "🔴 SKIP"
 
 # если высокий риск — понижаем уровень
 if "высокий" in risk_label.lower():
