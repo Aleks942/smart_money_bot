@@ -4880,19 +4880,6 @@ def swing_grade(sig):
 
     except Exception:
         return 0, "🔴 SKIP"
-
-# если высокий риск — понижаем уровень
-if "высокий" in risk_label.lower():
-    if title == "🔥 ТОП СДЕЛКА":
-        title = "🟢 GOOD SETUP"
-    elif title == "🟢 GOOD SETUP":
-        title = "🟡 WATCH"
-
-return total, title
-
-except:
-    return 0, "🔴 SKIP"
-
 def coin_risk_label(sig):
     try:
         symbol = sig.get("instId") or sig.get("symbol") or ""
