@@ -6083,6 +6083,16 @@ if __name__ == "__main__":
                     # =====================
 
                     sig = apply_regime_bias(sig, regime)
+                    # AI market filter
+                    if MARKET_MODE == "BEAR":
+                        if "⬆️" in str(sig.get("direction", "")) and float(sig.get("score", 0)) < 7:
+                            print(f"[AI_FILTER] skip weak long in bear market {instId}")
+                            continue
+                    
+                    if MARKET_MODE == "BULL":
+                        if "⬇️" in str(sig.get("direction", "")) and float(sig.get("score", 0)) < 7:
+                            print(f"[AI_FILTER] skip weak short in bull market {instId}")
+                            continue
 
                     # =====================
                     # SAVE SIGNAL
