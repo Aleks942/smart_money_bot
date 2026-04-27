@@ -1478,14 +1478,9 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
                 soft_room_pass = (
                     rr1 >= 2.0
                 )
-            
-                if not soft_room_pass:
-                    verdict = "слишком близко к H4 сопротивлению/поддержке"
-                    sendable = False
-                    reject_reason = "small_room"
+    
 
-
-            if not soft_room_pass:
+            elif not soft_room_pass:
                 verdict = "слишком близко к H4 сопротивлению/поддержке"
                 sendable = False
                 reject_reason = "small_room"
