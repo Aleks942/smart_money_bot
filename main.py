@@ -6555,5 +6555,5 @@ if __name__ == "__main__":
             
                     sent_ids.add(sid)
                     send_telegram(choose_detail_message(sig))
-            
-            save_state(state)
+                    
+                 save_state(state)
