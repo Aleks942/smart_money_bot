@@ -5356,10 +5356,14 @@ def mark_manip_sent(state, sig):
 
 def update_symbol_state(state, sig):
     sym = sig["instId"]
+
     state["symbols"].setdefault(sym, {})
-    state["symbols"][sym]["prev_score"] = sig["score"]
-    state["symbols"][sym]["prev_flags"] = sig["flags"]
-    state["symbols"][sym]["last_ts"] = sig["ts"]
+
+    state["symbols"][sym]["prev_score"] = sig.get("score")
+    state["symbols"][sym]["prev_flags"] = sig.get("flags", [])
+    state["symbols"][sym]["prev_entry"] = sig.get("entry")
+    state["symbols"][sym]["prev_direction"] = sig.get("direction")
+    state["symbols"][sym]["last_ts"] = sig.get("ts", now_ts())
     
 def safe_entry_recent(state, instId):
     ss = state["symbols"].get(instId, {})
