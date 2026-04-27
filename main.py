@@ -6119,7 +6119,9 @@ if __name__ == "__main__":
                                     )
 
                         except Exception as e:
+                            import traceback
                             print(f"[SWING_ERROR] {instId}: {e}")
+                            print(traceback.format_exc())
 
                     if sig.get("swing_only_candidate"):
                         print(
