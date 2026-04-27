@@ -5261,7 +5261,7 @@ def manip_summary_message(watch, cycle_info, regime):
         acc = sig.get("acc_score", 0)
         stage = sig.get("stage", "")
         direction = sig.get("direction", "")
-        score = sig.get("score", 0)
+        score = float(sig.get("score") or sig.get("rank") or 0)
 
         lines.append(f"• {sym}: acc={acc} | {stage} | {direction} | score={score}/10")
 
