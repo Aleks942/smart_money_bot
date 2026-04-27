@@ -4691,7 +4691,7 @@ def msg_medium(sig):
 
     if sig.get("rsi7") is not None and sig.get("rsi14") is not None:
     lines.append(
-        f"📍 RSI7={sig['rsi7']:.1f} | RSI14={sig['rsi14']:.1f} | {sig.get('rsi_state', 'UNKNOWN')}"
+    f"📍 RSI7={sig['rsi7']:.1f} | RSI14={sig['rsi14']:.1f} | {sig.get('rsi_state', 'UNKNOWN')}"
     )
     
     lines.append(f"📊 {score}/10 | {direction} (up={up_w}, down={down_w}) | acc={acc}")
