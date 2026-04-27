@@ -6055,7 +6055,7 @@ if __name__ == "__main__":
                                 h1_setup = analyze_h1_setup(df_h1, h4_ctx) if not df_h1.empty else {"ok": False}
                                 m15_trigger = analyze_m15_trigger(df_m15, h1_setup, h4_ctx) if not df_m15.empty else {"ok": False}
 
-                                swing_sig = build_swing_signal(instId, h4_ctx, h1_setup, m15_trigger)
+                                swing_sig = build_swing_signal(instId, h4_ctx, h1_setup, m15_trigger, sig)
 
                                 print(
                                     f"[SWING_DEBUG] {instId} "
