@@ -1509,6 +1509,10 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             "sendable": bool(sendable),
             "verdict": verdict,
             "reject_reason": reject_reason,
+            "oi_change": (sig or {}).get("oi_change"),
+            "flags": (sig or {}).get("flags", []),
+            "price": (sig or {}).get("price"),
+            "instId": instId,
         }
 
     except Exception:
