@@ -5196,16 +5196,23 @@ def oi_trap_detector(sig):
 
 def choose_detail_message(sig):
     if MESSAGE_MODE == "SHORT":
-        return msg_short(sig)
-    if MESSAGE_MODE == "MEDIUM":
-        return msg_medium(sig)
-    if MESSAGE_MODE == "FULL":
-        return msg_full(sig)
-    if sig["score"] >= EDGE_HIGH_SCORE:
-        return msg_full(sig)
-    if sig["score"] >= EDGE_MID_SCORE:
-        return msg_medium(sig)
-    return msg_short(sig)
+        msg = msg_short(sig)
+    elif MESSAGE_MODE == "MEDIUM":
+        msg = msg_medium(sig)
+    elif MESSAGE_MODE == "FULL":
+        msg = msg_full(sig)
+    elif sig["score"] >= EDGE_HIGH_SCORE:
+        msg = msg_full(sig)
+    elif sig["score"] >= EDGE_MID_SCORE:
+        msg = msg_medium(sig)
+    else:
+        msg = msg_short(sig)
+
+    oi = sig.get("oi_change")
+    if oi is not None:
+        msg += f"\n📊 OI: {oi_badge(oi)}"
+
+    return msg
 
 
 def summary_message(alerts, cycle_info, regime):
