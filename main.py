@@ -6067,13 +6067,13 @@ if __name__ == "__main__":
                     else:
                         print(f"[OI_CACHE] {instId} using cached OI={prev}%")
 
-else:
-    sig["oi_change"] = new_oi
-    state["symbols"].setdefault(instId, {})
-    state["symbols"][instId]["last_oi_change"] = new_oi
-
-    print(f"[OI_NEW] {instId} OI={new_oi}%")
-                
+                    else:
+                        sig["oi_change"] = new_oi
+                        state["symbols"].setdefault(instId, {})
+                        state["symbols"][instId]["last_oi_change"] = new_oi
+                    
+                        print(f"[OI_NEW] {instId} OI={new_oi}%")
+                                    
                    
             
                     # =====================
