@@ -4888,7 +4888,7 @@ if "высокий" in risk_label.lower():
     elif title == "🟢 GOOD SETUP":
         title = "🟡 WATCH"
 
-    return total, title
+return total, title
 
 except:
     return 0, "🔴 SKIP"
