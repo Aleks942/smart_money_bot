@@ -5249,26 +5249,33 @@ def summary_message(alerts, cycle_info, regime):
     for sig in alerts[:top_n]:
 
         sym = sig.get("instId") or sig.get("symbol") or sig.get("sym") or "?"
-        score = sig.get("score", 0)
+        score = round(float(sig.get("score", 0)), 2)
         acc = sig.get("acc_score", 0)
-        direction = sig.get("direction", "")
-        entry = sig.get("entry", "")
+
+        direction = sig.get("direction", "⚖️")
+        entry = sig.get("entry", "WAIT")
         stage = sig.get("stage", "")
+
         tgt = sig.get("target", None)
 
         oi = sig.get("oi_change", None)
-        oi_text = f" | OI {oi}%" if oi is not None else ""
+        oi_text = f"OI: {oi_badge(oi)}" if oi is not None else "OI: ⚪ n/a"
+
+        row = (
+            f"• {sym}\n"
+            f"  📊 Score: {score}/10 | acc={acc}\n"
+            f"  🧭 {direction}\n"
+            f"  🎯 {entry}\n"
+            f"  🧬 {stage}\n"
+            f"  💰 {oi_text}"
+        )
 
         if tgt is not None:
-            lines.append(
-                f"• {sym}: {score}/10 acc={acc} {direction} | {entry} | {stage}{oi_text} | tgt {tgt}"
-            )
-        else:
-            lines.append(
-                f"• {sym}: {score}/10 acc={acc} {direction} | {entry} | {stage}{oi_text}"
-            )
+            row += f"\n  🎯 Target: {tgt}"
 
-    return "\n".join(lines)
+        lines.append(row)
+
+    return "\n\n".join(lines)
 
 # =========================
 # PRE-MOVE MANIPULATION WATCH (V2)
