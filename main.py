@@ -4860,14 +4860,23 @@ def swing_grade(sig):
 
         total = round(total, 1)
 
-        if total >= 9:
-            title = "🔥 ТОП СДЕЛКА"
-        elif total >= 7:
-            title = "🟢 GOOD SETUP"
-        elif total >= 5:
-            title = "🟡 WATCH"
-        else:
-            title = "🔴 SKIP"
+        risk_label, _ = coin_risk_label(sig)
+
+if total >= 9:
+    title = "🔥 ТОП СДЕЛКА"
+elif total >= 7:
+    title = "🟢 GOOD SETUP"
+elif total >= 5:
+    title = "🟡 WATCH"
+else:
+    title = "🔴 SKIP"
+
+# если высокий риск — понижаем на уровень
+if "высокий" in risk_label.lower():
+    if title == "🔥 ТОП СДЕЛКА":
+        title = "🟢 GOOD SETUP"
+    elif title == "🟢 GOOD SETUP":
+        title = "🟡 WATCH"
 
         return total, title
 
