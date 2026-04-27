@@ -4774,6 +4774,17 @@ def oi_badge(oi):
     else:
         return f"🔴 {oi:.2f}%"
 
+def dir_badge(direction):
+    d = str(direction).upper()
+
+    if "ВВЕРХ" in d or "LONG" in d or "UP" in d:
+        return "🟢⬆️⬆️ ВВЕРХ"
+
+    if "ВНИЗ" in d or "SHORT" in d or "DOWN" in d:
+        return "🔴⬇️⬇️ ВНИЗ"
+
+    return "⚪↔️ БАЛАНС"
+
 def msg_watch(sig):
 
     lines = []
