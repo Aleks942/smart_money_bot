@@ -1295,6 +1295,7 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
                 or str(m15_trigger.get("trigger_type", "none")) not in ("none", "", "None")
             )
         )
+        print(f"[M15_READY] {instId} ready={m15_ready} raw={m15_trigger}")
         
         if m15_ready:
             status = "SWING TRIGGER"
