@@ -98,7 +98,7 @@ else:
     SWING_MIN_RR = 1.8
 
 SWING_LATE_FROM_EMA_PCT = float(os.getenv("SWING_LATE_FROM_EMA_PCT") or "8.0")
-SWING_MAX_ENTRY_ZONE_PCT = float(os.getenv("SWING_MAX_ENTRY_ZONE_PCT") or "4.5")
+SWING_MAX_ENTRY_ZONE_PCT = float(os.getenv("SWING_MAX_ENTRY_ZONE_PCT") or "8")
 SWING_REQUIRE_STOP_OUTSIDE_ZONE = (os.getenv("SWING_REQUIRE_STOP_OUTSIDE_ZONE") or "1").strip() != "0"
 SWING_BUILD_MIN_SCORE = int(os.getenv("SWING_BUILD_MIN_SCORE") or "2")
 
