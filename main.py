@@ -4545,17 +4545,18 @@ def debug_ai_filter_result(sig, regime, passed, layer="INTRADAY"):
     flags = sig.get("flags") or []
 
     print(
-        f"[AI_FILTER][{layer}] "
-        f"{'PASSED' if passed else 'BLOCKED'} "
-        f"{symbol} | "
-        f"regime={regime} | "
-        f"score={score} | acc={acc} | tier={tier} | "
-        f"direction={direction} | "
-        f"swing_candidate={swing_candidate} | "
-        f"below_main={below_main} | "
-        f"flags={flags}",
-        flush=True
-    )
+    f"[AI_FILTER][{layer}] "
+    f"{'PASSED' if passed else 'BLOCKED'} "
+    f"{symbol} | "
+    f"regime={regime} | "
+    f"score={score} | acc={acc} | tier={tier} | "
+    f"direction={direction} | "
+    f"oi={oi} | "
+    f"swing_candidate={swing_candidate} | "
+    f"below_main={below_main} | "
+    f"flags={flags}",
+    flush=True
+)
 
 # =========================
 # TRADER INTERPRETATION
