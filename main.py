@@ -4835,6 +4835,44 @@ def msg_full(sig):
             lines.append(f"• {n}")
 
     return "\n".join(lines)
+
+
+def swing_grade(sig):
+    try:
+        score = float(sig.get("score", 0))
+        rr = float(sig.get("rr1", 0))
+        room = float(sig.get("room_to_target", 0))
+        h4 = float(sig.get("h4_bias_score", 0))
+        h1 = float(sig.get("h1_setup_score", 0))
+        m15 = float(sig.get("m15_trigger_score", 0))
+
+        total = 0.0
+
+        total += score * 0.8
+        total += min(rr, 5) * 0.8
+        total += h4 * 0.7
+        total += h1 * 0.9
+        total += m15 * 1.0
+        total += min(room, 10) * 0.15
+
+        if sig.get("late"):
+            total -= 2
+
+        total = round(total, 1)
+
+        if total >= 9:
+            title = "🔥 ТОП СДЕЛКА"
+        elif total >= 7:
+            title = "🟢 GOOD SETUP"
+        elif total >= 5:
+            title = "🟡 WATCH"
+        else:
+            title = "🔴 SKIP"
+
+        return total, title
+
+    except:
+        return 0, "🔴 SKIP"
     
 def msg_swing(sig):
     side = str(sig.get("side", "")).upper()
