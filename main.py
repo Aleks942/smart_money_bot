@@ -4757,6 +4757,23 @@ def msg_medium(sig):
 
     return "\n".join(lines)
 
+def oi_badge(oi):
+    try:
+        oi = float(oi)
+    except:
+        return "⚪ n/a"
+
+    if oi >= 3:
+        return f"🟢 +{oi:.2f}%"
+    elif oi >= 1:
+        return f"🟡 +{oi:.2f}%"
+    elif oi > -1:
+        return f"⚪ {oi:.2f}%"
+    elif oi > -3:
+        return f"🟠 {oi:.2f}%"
+    else:
+        return f"🔴 {oi:.2f}%"
+
 def msg_watch(sig):
 
     lines = []
