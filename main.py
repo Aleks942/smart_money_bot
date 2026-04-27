@@ -6536,23 +6536,26 @@ if __name__ == "__main__":
 
                 send_telegram("\n".join(top_lines))
 
-            top_alerts = alerts[:TOP_ALERTS_LIMIT]
-
+            # =====================
+            # TOP ALERTS (без дублей и мусора)
+            # =====================
+            
+            top_alerts = [
+                s for s in alerts
+                if not str(s.get("status", "")).startswith("SWING")
+                and float(s.get("score", 0)) >= 7
+            ][:TOP_ALERTS_LIMIT]
+            
+            sent_ids = set()
+            
             for sig in top_alerts:
-                if str(sig.get("status", "")).startswith("SWING"):
-                    send_telegram(msg_swing(sig))
-                else:
-                    send_telegram(choose_detail_message(sig))
-
-            if MANIP_ALERT_ENABLED:
-
-                msg2 = manip_summary_message(manip_watch, cycle_info, regime)
-
-                if msg2:
-                    send_telegram(msg2)
-
-                for sig in manip_watch[:MANIP_DETAIL_TOP_K]:
-                    send_telegram(msg_watch(sig))
+                sid = sig.get("instId")
+            
+                if sid in sent_ids:
+                    continue
+            
+                sent_ids.add(sid)
+                send_telegram(choose_detail_message(sig))
 
             save_state(state)
 
