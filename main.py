@@ -5959,44 +5959,30 @@ def get_open_interest_change(symbol):
 
 def is_best_only_signal(sig):
     try:
-        score = float(sig.get("score", 0) or 0)
-        acc = int(sig.get("acc_score", 0) or 0)
-        rank = float(sig.get("rank", 0) or 0)
+        rank = float(sig.get("rank", 0))
+        score = float(sig.get("score", 0))
+        acc = int(sig.get("acc_score", 0))
+        rr1 = float(sig.get("rr1", 0))
+        late = bool(sig.get("late", False))
         grade = str(sig.get("grade", "SKIP"))
         status = str(sig.get("status", ""))
-        rr1 = float(sig.get("rr1", 0) or 0)
-        late = bool(sig.get("late", False))
-        oi = sig.get("oi_change")
 
         if grade == "SKIP":
             return False
 
-        if score < 7:
+        if status.startswith("SWING"):
             return False
 
-        if acc < 2:
-            return False
-
-        if rank < 10:
-            return False
-
-        if rr1 < 2:
-            return False
-
-        if late:
-            return False
-
-        if oi is not None and float(oi) < 0:
-            return False
-
-        if status not in ["SWING TRIGGER", "SAFE"]:
-            return False
-
-        return True
+        return (
+            rank >= 10
+            and score >= 4
+            and acc >= 2
+            and rr1 >= 1.8
+            and not late
+        )
 
     except:
         return False
-
                            
 # =========================
 # MAIN LOOP (STABLE VERSION)
