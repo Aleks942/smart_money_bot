@@ -17,6 +17,22 @@ from ai_scoring import get_ai_multiplier
 from market_context import apply_market_context
 
 # =========================
+# ANTI-SPAM TELEGRAM
+# =========================
+
+LAST_SENT = {}
+
+def can_send(symbol, sec=300):
+    now = time.time()
+    last = LAST_SENT.get(symbol, 0)
+
+    if now - last < sec:
+        return False
+
+    LAST_SENT[symbol] = now
+    return True
+
+# =========================
 # SIGNAL COOLDOWN
 # =========================
 SIGNAL_COOLDOWN = 900   # 15 минут
