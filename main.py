@@ -6553,7 +6553,7 @@ if __name__ == "__main__":
                 top_alerts = [
                     s for s in alerts
                     if not str(s.get("status", "")).startswith("SWING")
-                    and float(s.get("rank", 0)) >= 7
+                    and float(s.get("rank", 0)) >= 9
                 ][:TOP_ALERTS_LIMIT]
             
                 sent_ids = set()
