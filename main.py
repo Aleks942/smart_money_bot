@@ -6585,9 +6585,8 @@ if __name__ == "__main__":
                     side = str(s.get("side", "")).upper()
                     direction = "LONG ⬆️" if side == "LONG" else "SHORT ⬇️"
                 
-                    reasons = []
-                
                     flags = s.get("flags", [])
+                    reasons = []
                 
                     if "PRESSURE_UP" in flags:
                         reasons.append("давление вверх")
@@ -6602,18 +6601,30 @@ if __name__ == "__main__":
                         reasons.append("пробой вниз")
                 
                     if "CONTINUATION_UP" in flags:
-                        reasons.append("продолжение роста")
+                        reasons.append("рост продолжается")
                 
                     if "CONTINUATION_DOWN" in flags:
-                        reasons.append("продолжение падения")
+                        reasons.append("падение продолжается")
                 
                     reason_text = ", ".join(reasons[:2]) if reasons else "контекст"
                 
+                    if rank >= 22:
+                        badge = "🟢 ELITE"
+                    elif rank >= 18:
+                        badge = "🟡 STRONG"
+                    else:
+                        badge = "⚪ WATCH"
+                
+                    if i == 1:
+                        title = "👑 ТОП-1"
+                    else:
+                        title = f"{i})"
+                
                     top_lines.append(
-                        f"{i}) {symbol} | {direction} | {grade} | rank={rank}\n"
+                        f"{title} {symbol} | {direction}\n"
+                        f"{badge} | {grade} | rank={rank}\n"
                         f"• {reason_text}"
                     )
-            
                 text = "\n".join(top_lines).strip()
             
                 if len(top_lines) > 1 and text:
