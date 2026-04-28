@@ -6536,8 +6536,16 @@ if __name__ == "__main__":
             
             alerts.sort(key=lambda s: s.get("rank", 0), reverse=True)
             manip_watch.sort(key=lambda s: s.get("acc_score", 0), reverse=True)
+            
+            swing_top = [
+                s for s in alerts
+                if str(s.get("status", "")).startswith("SWING")
+                and str(s.get("grade", "")) != "WATCH"
+            ][:3]
+            
+            sent_sw = set()
             ready_swings = []
-
+            
             for sw in swing_top:
                 sid = sw.get("instId")
             
@@ -6555,6 +6563,7 @@ if __name__ == "__main__":
                 for sid, text in ready_swings:
                     sent_sw.add(sid)
                     send_telegram(text)
+            
             
             swing_top = swing_top[:3]
             
