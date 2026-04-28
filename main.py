@@ -6576,69 +6576,6 @@ if __name__ == "__main__":
                 send_telegram(msg)
             
             
-            if alerts:
-                top_lines = []
-                top_lines.append("🧠 AI RANKING TOP SIGNALS")
-            
-                ranked = [
-                    s for s in alerts
-                    if float(s.get("rank", 0)) > 0
-                    and str(s.get("grade", "SKIP")) != "SKIP"
-                ][:3]
-            
-                for i, s in enumerate(ranked, start=1):
-                    symbol = s.get("instId", "?")
-                    grade = s.get("grade", "SKIP")
-                    rank = round(float(s.get("rank", 0)), 2)
-                
-                    side = str(s.get("side", "")).upper()
-                    direction = "LONG ⬆️" if side == "LONG" else "SHORT ⬇️"
-                
-                    flags = s.get("flags", [])
-                    reasons = []
-                
-                    if "PRESSURE_UP" in flags:
-                        reasons.append("давление вверх")
-                
-                    if "PRESSURE_DOWN" in flags:
-                        reasons.append("давление вниз")
-                
-                    if "BREAKOUT_CONFIRM_UP" in flags:
-                        reasons.append("пробой вверх")
-                
-                    if "BREAKOUT_CONFIRM_DOWN" in flags:
-                        reasons.append("пробой вниз")
-                
-                    if "CONTINUATION_UP" in flags:
-                        reasons.append("рост продолжается")
-                
-                    if "CONTINUATION_DOWN" in flags:
-                        reasons.append("падение продолжается")
-                
-                    reason_text = ", ".join(reasons[:2]) if reasons else "контекст"
-                
-                    if rank >= 22:
-                        badge = "🟢 ELITE"
-                    elif rank >= 18:
-                        badge = "🟡 STRONG"
-                    else:
-                        badge = "⚪ WATCH"
-                
-                    if i == 1:
-                        title = "👑 ТОП-1"
-                    else:
-                        title = f"{i})"
-                
-                    top_lines.append(
-                        f"{title} {symbol} | {direction}\n"
-                        f"{badge} | {grade} | rank={rank}\n"
-                        f"• {reason_text}"
-                    )
-                text = "\n".join(top_lines).strip()
-            
-                if len(top_lines) > 1 and text:
-                    send_telegram(text)
-            
                 top_alerts = [
                     s for s in alerts
                     if is_best_only_signal(s)
