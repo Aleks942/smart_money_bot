@@ -6461,7 +6461,7 @@ if __name__ == "__main__":
                     # =====================
 
                     if (not recent_safe_lock) and start_ready and trigger_allowed(state, instId, "last_start_trigger_ts", TRIGGER_START_COOLDOWN):
-                        send_telegram(msg_start_trigger(sig))
+                        # send_telegram(msg_start_trigger(sig))
                         start_count += 1
                         trigger_mark(state, instId, "last_start_trigger_ts")
                         sent_start_now = True
