@@ -6552,12 +6552,12 @@ if __name__ == "__main__":
                 if text:
                     ready_swings.append((sid, text))
             
-            if ready_swings:
-                send_telegram("🏆 SWING TOP SETUPS")
-            
-                for sid, text in ready_swings:
-                    sent_sw.add(sid)
-                    send_telegram(text)
+            # if ready_swings:
+            #     send_telegram("🏆 SWING TOP SETUPS")
+            #
+            #     for sid, text in ready_swings:
+            #         sent_sw.add(sid)
+            #         send_telegram(text)
             
             
             cycle_info = time.strftime("%Y-%m-%d %H:%M:%S")
