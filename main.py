@@ -5970,13 +5970,13 @@ def is_best_only_signal(sig):
         if grade != "CONFIRMED":
             return False
 
-        if rank < 18:
+        if rank < 22:
             return False
 
-        if score < 6:
+        if score < 7:
             return False
 
-        if acc < 2:
+        if acc < 3:
             return False
 
         if rr1 < 2.5:
