@@ -5976,10 +5976,10 @@ def is_best_only_signal(sig):
         if score < 7:
             return False
 
-        if acc < 3:
+        if acc < 2:
             return False
 
-        if rr1 < 2.5:
+        if rr1 < 3:
             return False
 
         if late:
