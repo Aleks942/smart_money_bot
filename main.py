@@ -6553,8 +6553,12 @@ if __name__ == "__main__":
                 top_alerts = [
                     s for s in alerts
                     if not str(s.get("status", "")).startswith("SWING")
-                    and float(s.get("score", 0)) >= 7
+                    and float(s.get("score", 0)) >= 5.5
                     and int(s.get("acc_score", 0)) >= 2
+                    and (
+                        "ACCUMULATION" in str(s.get("stage", ""))
+                        or "TRANSITION" in str(s.get("stage", ""))
+                    )
                 ][:TOP_ALERTS_LIMIT]
             
                 sent_ids = set()
