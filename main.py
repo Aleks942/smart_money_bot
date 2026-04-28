@@ -6443,7 +6443,7 @@ if __name__ == "__main__":
                         and early_ready
                         and can_alert_now
                     ):
-                        send_telegram(msg_early_pressure(sig))
+                        # send_telegram(msg_early_pressure(sig))
                         print(
                             f"[EARLY_SENT] {instId} "
                             f"side={sig.get('early_pressure_side')} "
