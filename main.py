@@ -6553,10 +6553,8 @@ if __name__ == "__main__":
                 top_alerts = [
                     s for s in alerts
                     if not str(s.get("status", "")).startswith("SWING")
-                    and (
-                        str(s.get("entry","")) == "SAFE ENTRY"
-                        or float(s.get("rank", 0)) >= 10
-                    )
+                    and float(s.get("score", 0)) >= 7
+                    and int(s.get("acc_score", 0)) >= 2
                 ][:TOP_ALERTS_LIMIT]
             
                 sent_ids = set()
