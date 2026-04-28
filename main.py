@@ -5188,29 +5188,30 @@ def summary_message(alerts, cycle_info, regime):
         sym = sig.get("instId", "?")
         score = round(float(sig.get("score") or sig.get("rank") or 0), 2)
         acc = sig.get("acc_score", 0)
+
         direction = dir_badge(sig.get("direction", ""))
         entry = sig.get("entry", "WAIT")
-        stage = sig.get("stage", "")
+        stage = sig.get("stage", "NEUTRAL")
+
         tgt = sig.get("target", None)
 
         oi = sig.get("oi_change", None)
-        oi_line = ""
-        if oi is not None:
-            oi_line = f"💰 OI: {oi_badge(oi)}"
+        oi_text = oi_badge(oi) if oi is not None else "⚪ n/a"
 
-        lines.append(f"{i}) {sym}")
-        lines.append(f"📊 Score: {score}/10 | acc={acc}")
-        lines.append(f"🧭 {direction}")
-        lines.append(f"🎯 {entry}")
-        lines.append(f"🧬 {stage}")
-
-        if oi_line:
-            lines.append(oi_line)
+        row = (
+            f"{i}) {sym} | "
+            f"{score}/10 | "
+            f"acc={acc} | "
+            f"{direction} | "
+            f"{entry} | "
+            f"{stage} | "
+            f"OI {oi_text}"
+        )
 
         if tgt:
-            lines.append(f"🎯 Target: {tgt}")
+            row += f" | tgt {tgt}"
 
-        lines.append("")
+        lines.append(row)
 
     return "\n".join(lines)
 
