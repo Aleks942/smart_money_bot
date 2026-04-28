@@ -5176,42 +5176,44 @@ def summary_message(alerts, cycle_info, regime):
         return None
 
     lines = []
-    lines.append("🚨 SMART MONEY SCAN — MARKET SUMMARY")
-    lines.append(f"⏱ Cycle: {cycle_info}")
-    lines.append(f"🧭 BTC regime: {regime}")
+    lines.append("🚨 SMART MONEY SCAN")
+    lines.append(f"⏱ {cycle_info}")
+    lines.append(f"🧭 BTC: {regime}")
     lines.append("")
 
-    top_n = min(len(alerts), 3)
+    clean = []
+    used = set()
 
-    for i, sig in enumerate(alerts[:top_n], start=1):
+    for s in alerts:
+        sym = s.get("instId")
+        if sym in used:
+            continue
+        used.add(sym)
+        clean.append(s)
 
+    top = clean[:3]
+
+    for i, sig in enumerate(top, start=1):
         sym = sig.get("instId", "?")
-        score = round(float(sig.get("score") or sig.get("rank") or 0), 2)
-        acc = sig.get("acc_score", 0)
+        score = round(float(sig.get("score", 0)), 2)
+        rank = round(float(sig.get("rank", 0)), 1)
 
         direction = dir_badge(sig.get("direction", ""))
         entry = sig.get("entry", "WAIT")
         stage = sig.get("stage", "NEUTRAL")
 
-        tgt = sig.get("target", None)
-
         oi = sig.get("oi_change", None)
-        oi_text = oi_badge(oi) if oi is not None else "⚪ n/a"
+        oi_text = oi_badge(oi) if oi is not None else "n/a"
 
-        row = (
+        lines.append(
             f"{i}) {sym} | "
-            f"{score}/10 | "
-            f"acc={acc} | "
+            f"score {score}/10 | "
+            f"rank {rank} | "
             f"{direction} | "
             f"{entry} | "
             f"{stage} | "
             f"OI {oi_text}"
         )
-
-        if tgt:
-            row += f" | tgt {tgt}"
-
-        lines.append(row)
 
     return "\n".join(lines)
 
