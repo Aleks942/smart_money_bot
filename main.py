@@ -6632,10 +6632,9 @@ if __name__ == "__main__":
             
                 top_alerts = [
                     s for s in alerts
-                    if not str(s.get("status", "")).startswith("SWING")
-                    and is_best_only_signal(s)
-                ][:TOP_ALERTS_LIMIT]
-            
+                    if is_best_only_signal(s)
+                ][:3]
+                            
                 sent_ids = set()
             
                 for sig in top_alerts:
