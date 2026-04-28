@@ -6565,8 +6565,6 @@ if __name__ == "__main__":
                     send_telegram(text)
             
             
-            swing_top = swing_top[:3]
-            
             cycle_info = time.strftime("%Y-%m-%d %H:%M:%S")
 
             print("ALERTS FOUND:", len(alerts))
