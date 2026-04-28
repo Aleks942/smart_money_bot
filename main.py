@@ -5965,23 +5965,36 @@ def is_best_only_signal(sig):
         rr1 = float(sig.get("rr1", 0))
         late = bool(sig.get("late", False))
         grade = str(sig.get("grade", "SKIP"))
-        status = str(sig.get("status", ""))
+        oi = sig.get("oi_change")
+        entry = str(sig.get("entry", ""))
 
-        if grade == "SKIP":
+        if grade != "CONFIRMED":
             return False
 
-        if status.startswith("SWING"):
+        if rank < 18:
             return False
 
-        return (
-            rank >= 10
-            and score >= 4
-            and acc >= 2
-            and rr1 >= 1.8
-            and not late
-        )
+        if score < 6:
+            return False
 
-    except:
+        if acc < 2:
+            return False
+
+        if rr1 < 2:
+            return False
+
+        if late:
+            return False
+
+        if "WAIT" in entry:
+            return False
+
+        if oi is not None and float(oi) < -0.5:
+            return False
+
+        return True
+
+    except Exception:
         return False
                            
 # =========================
