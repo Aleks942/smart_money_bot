@@ -6603,8 +6603,10 @@ if __name__ == "__main__":
                         f"{i}) {s['instId']} | {s.get('grade')} | rank={round(s.get('rank', 0), 2)}"
                     )
             
-                if ranked:
-                    send_telegram("\n".join(top_lines))
+                text = "\n".join(top_lines).strip()
+            
+                if len(top_lines) > 1 and text:
+                    send_telegram(text)
             
                 top_alerts = [
                     s for s in alerts
