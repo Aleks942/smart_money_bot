@@ -6578,8 +6578,40 @@ if __name__ == "__main__":
                 ][:3]
             
                 for i, s in enumerate(ranked, start=1):
+                    symbol = s.get("instId", "?")
+                    grade = s.get("grade", "SKIP")
+                    rank = round(float(s.get("rank", 0)), 2)
+                
+                    side = str(s.get("side", "")).upper()
+                    direction = "LONG ⬆️" if side == "LONG" else "SHORT ⬇️"
+                
+                    reasons = []
+                
+                    flags = s.get("flags", [])
+                
+                    if "PRESSURE_UP" in flags:
+                        reasons.append("давление вверх")
+                
+                    if "PRESSURE_DOWN" in flags:
+                        reasons.append("давление вниз")
+                
+                    if "BREAKOUT_CONFIRM_UP" in flags:
+                        reasons.append("пробой вверх")
+                
+                    if "BREAKOUT_CONFIRM_DOWN" in flags:
+                        reasons.append("пробой вниз")
+                
+                    if "CONTINUATION_UP" in flags:
+                        reasons.append("продолжение роста")
+                
+                    if "CONTINUATION_DOWN" in flags:
+                        reasons.append("продолжение падения")
+                
+                    reason_text = ", ".join(reasons[:2]) if reasons else "контекст"
+                
                     top_lines.append(
-                        f"{i}) {s['instId']} | {s.get('grade')} | rank={round(s.get('rank', 0), 2)}"
+                        f"{i}) {symbol} | {direction} | {grade} | rank={rank}\n"
+                        f"• {reason_text}"
                     )
             
                 text = "\n".join(top_lines).strip()
