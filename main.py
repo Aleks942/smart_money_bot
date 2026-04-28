@@ -6657,7 +6657,7 @@ if __name__ == "__main__":
             
                     sent_ids.add(sid)
             
-                    if can_send(sid, 900):
+                    if can_send(sid, 3600):
                         send_telegram(choose_detail_message(sig))
             
             save_state(state)
