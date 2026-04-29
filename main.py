@@ -6117,7 +6117,8 @@ if __name__ == "__main__":
                     else:
                         sig["oi_change"] = None
                         print(f"[OI_NONE] {instId} no fresh OI / cache expired", flush=True)
-
+                    
+                    
                     # =====================
                     # LOAD CANDLES FOR TA
                     # =====================
@@ -6126,6 +6127,7 @@ if __name__ == "__main__":
                     candles_h1 = get_klines(instId, "60", 200)
                     candles_day = get_klines(instId, "D", 200)
                     candles_month = get_klines(instId, "M", 120)
+                    
                     
                     # =====================
                     # TA SNIPER
@@ -6141,9 +6143,7 @@ if __name__ == "__main__":
                     )
                     
                     if ta:
-                        send_telegram(...)
-
-            
+                        send_telegram(
                             f"🎯 <b>TA SNIPER — {ta['symbol']}</b>\n\n"
                             f"🧭 Направление: <b>{ta['side']}</b>\n"
                             f"💵 Вход: <b>{ta['entry']}</b>\n"
