@@ -6111,12 +6111,52 @@ if __name__ == "__main__":
                         prev_ts = int(sym_state.get("last_oi_ts", 0) or 0)
                         age = now_ts() - prev_ts
                     
-                        if prev is not None and age <= oi_ttl:
-                            sig["oi_change"] = prev
-                            print(f"[OI_CACHE] {instId} cached OI={prev}% age={age}s", flush=True)
-                        else:
-                            sig["oi_change"] = None
-                            print(f"[OI_NONE] {instId} no fresh OI / cache expired", flush=True)
+                    if prev is not None and age <= oi_ttl:
+                        sig["oi_change"] = prev
+                        print(f"[OI_CACHE] {instId} cached OI={prev}% age={age}s", flush=True)
+                    else:
+                        sig["oi_change"] = None
+                        print(f"[OI_NONE] {instId} no fresh OI / cache expired", flush=True)
+
+                    # =====================
+                    # LOAD CANDLES FOR TA
+                    # =====================
+                    
+                    candles_m15 = get_klines(instId, "15", 200)
+                    candles_h1 = get_klines(instId, "60", 200)
+                    candles_day = get_klines(instId, "D", 200)
+                    candles_month = get_klines(instId, "M", 120)
+                    
+                    # =====================
+                    # TA SNIPER
+                    # =====================
+                    
+                    ta = analyze_ta_sniper(
+                        symbol=instId,
+                        candles_month=candles_month,
+                        candles_day=candles_day,
+                        candles_h1=candles_h1,
+                        candles_m15=candles_m15,
+                        max_stop_pct=3.5
+                    )
+                    
+                    if ta:
+                        send_telegram(...)
+
+            
+                            f"🎯 <b>TA SNIPER — {ta['symbol']}</b>\n\n"
+                            f"🧭 Направление: <b>{ta['side']}</b>\n"
+                            f"💵 Вход: <b>{ta['entry']}</b>\n"
+                            f"🛑 Стоп: <b>{ta['stop']}</b> ({ta['stop_pct']}%)\n"
+                            f"🎯 TP1: <b>{ta['tp1']}</b>\n"
+                            f"🎯 TP2: <b>{ta['tp2']}</b>\n\n"
+                            f"📍 Исторический уровень: <b>{ta['level_price']}</b>\n"
+                            f"📏 Дистанция до уровня: <b>{ta['level_distance_pct']}%</b>\n"
+                            f"📦 Проторговка M15: <b>{ta['range_bars']} свечей</b>\n"
+                            f"🧲 Диапазон: {ta['range_low']} → {ta['range_high']}\n"
+                            f"💪 Buyer: {ta['buyer_power']} | Seller: {ta['seller_power']}\n"
+                            f"⚡ Breakout: {ta['breakout']}"
+                        )
                                                         
                    
             
