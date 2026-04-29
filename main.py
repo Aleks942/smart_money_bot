@@ -15,6 +15,7 @@ from sniper_engine import sniper_signal
 from signal_analyst import init_db, save_signal, get_open_signals, close_signal
 from ai_scoring import get_ai_multiplier
 from market_context import apply_market_context
+from ta_sniper import analyze_ta_sniper
 
 # =========================
 # ANTI-SPAM TELEGRAM
