@@ -6086,45 +6086,45 @@ if __name__ == "__main__":
 
                 try:
 
-                sig = build_signal(instId)
-
-                if not isinstance(sig, dict):
-                    print(f"[RAW_SKIP] {instId} build_signal_returned_non_dict")
-                    continue
-                
-                # =====================
-                # OI BLOCK (FIX)
-                # =====================
-                
-                oi_ttl = int(os.getenv("OI_CACHE_TTL_SEC", "1800"))
-                
-                new_oi = get_open_interest_change(instId)
-                
-                state["symbols"].setdefault(instId, {})
-                sym_state = state["symbols"][instId]
-                
-                prev = sym_state.get("last_oi_change")
-                prev_ts = int(sym_state.get("last_oi_ts", 0) or 0)
-                age = now_ts() - prev_ts if prev_ts else None
-                
-                if new_oi is not None:
-                    sig["oi_change"] = new_oi
-                    sym_state["last_oi_change"] = new_oi
-                    sym_state["last_oi_ts"] = now_ts()
-                
-                    print(f"[OI_NEW] {instId} fresh OI={new_oi}%", flush=True)
-                
-                elif prev is not None and age is not None and age <= oi_ttl:
-                    sig["oi_change"] = prev
-                    print(f"[OI_CACHE] {instId} cached OI={prev}% age={age}s", flush=True)
-                
-                else:
-                    sig["oi_change"] = None
-                    print(f"[OI_NONE] {instId} no fresh OI / cache expired", flush=True)
-                
-                # =====================
-                # LOAD CANDLES FOR TA
-                # =====================
+                    sig = build_signal(instId)
+    
+                    if not isinstance(sig, dict):
+                        print(f"[RAW_SKIP] {instId} build_signal_returned_non_dict")
+                        continue
+                    
+                    # =====================
+                    # OI BLOCK (FIX)
+                    # =====================
+                    
+                    oi_ttl = int(os.getenv("OI_CACHE_TTL_SEC", "1800"))
+                    
+                    new_oi = get_open_interest_change(instId)
+                    
+                    state["symbols"].setdefault(instId, {})
+                    sym_state = state["symbols"][instId]
+                    
+                    prev = sym_state.get("last_oi_change")
+                    prev_ts = int(sym_state.get("last_oi_ts", 0) or 0)
+                    age = now_ts() - prev_ts if prev_ts else None
+                    
+                    if new_oi is not None:
+                        sig["oi_change"] = new_oi
+                        sym_state["last_oi_change"] = new_oi
+                        sym_state["last_oi_ts"] = now_ts()
+                    
+                        print(f"[OI_NEW] {instId} fresh OI={new_oi}%", flush=True)
+                    
+                    elif prev is not None and age is not None and age <= oi_ttl:
+                        sig["oi_change"] = prev
+                        print(f"[OI_CACHE] {instId} cached OI={prev}% age={age}s", flush=True)
+                    
+                    else:
+                        sig["oi_change"] = None
+                        print(f"[OI_NONE] {instId} no fresh OI / cache expired", flush=True)
+                    
+                    # =====================
+                    # LOAD CANDLES FOR TA
+                    # =====================
                     
                     
                     oi_ttl = int(os.getenv("OI_CACHE_TTL_SEC", "1800"))
