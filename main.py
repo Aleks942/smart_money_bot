@@ -6192,7 +6192,40 @@ if __name__ == "__main__":
                         print(f"[TA_ERROR] {instId} {e}", flush=True)
                         ta = None
                     
+                    # =====================
+                    # ELITE FILTER
+                    # =====================
                     
+                    elite = False
+                    reasons = []
+                    
+                    # 1. есть swing сигнал
+                    if sig.get("sendable"):
+                        elite = True
+                        reasons.append("SWING_OK")
+                    
+                    # 2. хороший риск/прибыль
+                    rr1 = sig.get("rr1", 0)
+                    if rr1 >= 2:
+                        reasons.append("RR_OK")
+                    else:
+                        elite = False
+                    
+                    # 3. подтверждение давления
+                    flags = sig.get("flags", [])
+                    if "PRESSURE_DOWN" in flags or "PRESSURE_UP" in flags:
+                        reasons.append("PRESSURE_OK")
+                    else:
+                        elite = False
+                    
+                    # 4. TA совпадает по направлению
+                    if isinstance(ta, dict):
+                        if ta.get("side") == sig.get("side"):
+                            reasons.append("TA_CONFIRM")
+                        else:
+                            elite = False
+                    else:
+                        elite = False
                     # =====================
                     # SEND SIGNAL
                     # =====================
