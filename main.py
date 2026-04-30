@@ -6159,11 +6159,11 @@ if __name__ == "__main__":
                     # LOAD CANDLES FOR TA
                     # =====================
                     
-                    candles_m15 = get_tf_candles_bybit(instId, "15m", 200)
-                    candles_h1 = get_tf_candles_bybit(instId, "1h", 200)
-                    candles_day = get_tf_candles_bybit(instId, "1d", 200)
-                    candles_month = get_tf_candles_bybit(instId, "1M", 120)
                     
+                    candles_m15 = get_tf_candles(instId, "15m", 200)
+                    candles_h1 = get_tf_candles(instId, "1h", 200)
+                    candles_day = get_tf_candles(instId, "1d", 200)
+                    candles_month = get_tf_candles(instId, "1M", 120)
                     
                     # =====================
                     # TA SNIPER
