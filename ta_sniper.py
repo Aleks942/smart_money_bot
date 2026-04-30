@@ -89,7 +89,7 @@ def find_range_m15(candles, min_bars=5, max_bars=20, max_width_pct=2.5):
     Ищет диапазон / проторговку.
     """
 
-    if not candles or len(candles) < max_bars:
+    if candles is None or len(candles) < max_bars:
         return None
 
     best = None
