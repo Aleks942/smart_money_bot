@@ -6166,32 +6166,51 @@ if __name__ == "__main__":
                     candles_month = get_tf_candles(instId, "1M", 120)
                     
                     # =====================
-                    # TA SNIPER
+                    # TA SNIPER (SAFE)
                     # =====================
                     
-                    ta = analyze_ta_sniper(
-                        symbol=instId,
-                        candles_month=candles_month,
-                        candles_day=candles_day,
-                        candles_h1=candles_h1,
-                        candles_m15=candles_m15,
-                        max_stop_pct=3.5
-                    )
+                    try:
+                        if (
+                            candles_m15 is None or candles_m15.empty or
+                            candles_h1 is None or candles_h1.empty or
+                            candles_day is None or candles_day.empty or
+                            candles_month is None or candles_month.empty
+                        ):
+                            print(f"[TA_SKIP] {instId} empty candles", flush=True)
+                            ta = None
+                        else:
+                            ta = analyze_ta_sniper(
+                                symbol=instId,
+                                candles_month=candles_month,
+                                candles_day=candles_day,
+                                candles_h1=candles_h1,
+                                candles_m15=candles_m15,
+                                max_stop_pct=3.5
+                            )
                     
-                    if ta:
+                    except Exception as e:
+                        print(f"[TA_ERROR] {instId} {e}", flush=True)
+                        ta = None
+                    
+                    
+                    # =====================
+                    # SEND SIGNAL
+                    # =====================
+                    
+                    if isinstance(ta, dict):
                         send_telegram(
-                            f"🎯 <b>TA SNIPER — {ta['symbol']}</b>\n\n"
-                            f"🧭 Направление: <b>{ta['side']}</b>\n"
-                            f"💵 Вход: <b>{ta['entry']}</b>\n"
-                            f"🛑 Стоп: <b>{ta['stop']}</b> ({ta['stop_pct']}%)\n"
-                            f"🎯 TP1: <b>{ta['tp1']}</b>\n"
-                            f"🎯 TP2: <b>{ta['tp2']}</b>\n\n"
-                            f"📍 Исторический уровень: <b>{ta['level_price']}</b>\n"
-                            f"📏 Дистанция до уровня: <b>{ta['level_distance_pct']}%</b>\n"
-                            f"📦 Проторговка M15: <b>{ta['range_bars']} свечей</b>\n"
-                            f"🧲 Диапазон: {ta['range_low']} → {ta['range_high']}\n"
-                            f"💪 Buyer: {ta['buyer_power']} | Seller: {ta['seller_power']}\n"
-                            f"⚡ Breakout: {ta['breakout']}"
+                            f"🎯 <b>TA SNIPER — {ta.get('symbol')}</b>\n\n"
+                            f"🧭 Направление: <b>{ta.get('side')}</b>\n"
+                            f"💵 Вход: <b>{ta.get('entry')}</b>\n"
+                            f"🛑 Стоп: <b>{ta.get('stop')}</b> ({ta.get('stop_pct')}%)\n"
+                            f"🎯 TP1: <b>{ta.get('tp1')}</b>\n"
+                            f"🎯 TP2: <b>{ta.get('tp2')}</b>\n\n"
+                            f"📍 Уровень: <b>{ta.get('level_price')}</b>\n"
+                            f"📏 Дистанция: <b>{ta.get('level_distance_pct')}%</b>\n"
+                            f"📦 Проторговка: <b>{ta.get('range_bars')} свечей</b>\n"
+                            f"🧲 Диапазон: {ta.get('range_low')} → {ta.get('range_high')}\n"
+                            f"💪 Buyer: {ta.get('buyer_power')} | Seller: {ta.get('seller_power')}\n"
+                            f"⚡ Breakout: {ta.get('breakout')}"
                         )
                                                         
                    
