@@ -22,7 +22,7 @@ def find_reversal_levels(candles, lookback=120, tolerance_pct=1.0, min_touches=2
     Подходит для MONTH / DAY / H1.
     """
 
-if candles is None or len(candles) < 20:
+    if candles is None or len(candles) < 20:
         return []
 
     candles = candles[-lookback:]
