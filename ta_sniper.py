@@ -266,7 +266,7 @@ def analyze_ta_sniper(
     история → уровни → M15 проторговка → сила → выход → вход/стоп.
     """
 
-    if not candles_m15 or len(candles_m15) < 30:
+    if candles_m15 is None or candles_m15.empty or len(candles_m15) < 30:
         return None
 
     price = c(candles_m15[-1])
