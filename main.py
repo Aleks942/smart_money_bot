@@ -6226,6 +6226,17 @@ if __name__ == "__main__":
                             elite = False
                     else:
                         elite = False
+
+                    if elite:
+                        send_telegram(
+                            f"🔥 <b>ELITE SIGNAL — {instId}</b>\n\n"
+                            f"🧭 Side: {sig.get('side')}\n"
+                            f"💰 Price: {sig.get('price')}\n"
+                            f"📊 RR: {rr1}\n\n"
+                            f"📌 Reasons: {', '.join(reasons)}"
+                        )
+
+                    
                     # =====================
                     # SEND SIGNAL
                     # =====================
