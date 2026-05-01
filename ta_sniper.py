@@ -70,11 +70,16 @@ def find_reversal_levels(candles, lookback=120, tolerance_pct=1.0, min_touches=2
     
         high = h(row)
         low = l(row)
-
-        if high > h(candles[i-1]) and high > h(candles[i-2]) and high > h(candles[i+1]) and high > h(candles[i+2]):
+    
+        prev1 = candles.iloc[i-1] if hasattr(candles, "iloc") else candles[i-1]
+        prev2 = candles.iloc[i-2] if hasattr(candles, "iloc") else candles[i-2]
+        next1 = candles.iloc[i+1] if hasattr(candles, "iloc") else candles[i+1]
+        next2 = candles.iloc[i+2] if hasattr(candles, "iloc") else candles[i+2]
+    
+        if high > h(prev1) and high > h(prev2) and high > h(next1) and high > h(next2):
             raw.append(high)
-
-        if low < l(candles[i-1]) and low < l(candles[i-2]) and low < l(candles[i+1]) and low < l(candles[i+2]):
+    
+        if low < l(prev1) and low < l(prev2) and low < l(next1) and low < l(next2):
             raw.append(low)
 
     levels = []
