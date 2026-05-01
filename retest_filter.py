@@ -3,7 +3,21 @@ def retest_ok(sig: dict, m15: dict) -> dict:
     if not isinstance(sig, dict) or not isinstance(m15, dict):
         return {"ok": False, "reason": "bad_inputs"}
 
-    side = sig.get("side")
+    # =====================
+    # SIDE NORMALIZATION
+    # =====================
+    side_raw = str(sig.get("side") or "").upper()
+
+    if "LONG" in side_raw or "BUY" in side_raw or "UP" in side_raw:
+        side = "LONG"
+    elif "SHORT" in side_raw or "SELL" in side_raw or "DOWN" in side_raw:
+        side = "SHORT"
+    else:
+        return {"ok": False, "reason": f"bad_side_{side_raw}"}
+
+    # =====================
+    # M15 DATA
+    # =====================
     close = m15.get("close")
     ema20 = m15.get("ema20")
     vwap = m15.get("vwap")
@@ -11,7 +25,6 @@ def retest_ok(sig: dict, m15: dict) -> dict:
 
     if close is None or ema20 is None or vwap is None or atr <= 0:
         return {"ok": False, "reason": "no_m15_data"}
-
     close = m15.get("close")
     micro = m15.get("micro_stop")
     
