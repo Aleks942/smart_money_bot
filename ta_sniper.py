@@ -287,7 +287,12 @@ def analyze_ta_sniper(
     if candles_m15 is None or candles_m15.empty or len(candles_m15) < 30:
         return None
 
-    price = c(candles_m15.iloc[-1])
+    last = safe_last(candles_m15)
+
+    if last is None:
+        return None
+    
+    price = c(last)
 
     # 1. уровни с истории
     month_levels = find_reversal_levels(
