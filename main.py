@@ -1393,7 +1393,7 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         
         
         # =====================
-        # OI FILTER (СРАЗУ ПОСЛЕ RSI)
+        # OI FILTER
         # =====================
         oi = sig.get("oi_change")
         
@@ -1406,10 +1406,10 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             if sig.get("side") in ("LONG", "BUY") and oi < 0:
                 print(f"[OI_SKIP] {instId} слабый LONG (OI падает)", flush=True)
                 return empty
-
-    if sig.get("side") in ("SHORT", "SELL") and oi < 0:
-        print(f"[OI_SKIP] {instId} слабый SHORT (OI падает)", flush=True)
-        return empty
+        
+            if sig.get("side") in ("SHORT", "SELL") and oi < 0:
+                print(f"[OI_SKIP] {instId} слабый SHORT (OI падает)", flush=True)
+                return empty
 
         # =====================
         # SCORE FILTER
