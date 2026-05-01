@@ -1396,17 +1396,21 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         # RR (ОБЩИЙ ДЛЯ ВСЕХ)
         # =====================
         tp1 = sig.get("tp1")
-        
+
         if tp1 is None or entry is None or stop is None:
             rr = 0
         else:
             rr = abs(tp1 - entry) / max(abs(entry - stop), 1e-9)
-
+        
+        print(f"[RR] {instId} rr={round(rr,2)}", flush=True)
+        
         # =====================
         # RR FILTER
         # =====================
-        if rr < 3:
-            print(f"[RR_SKIP] {instId} rr={round(rr,2)}", flush=True)
+        score = sig.get("score", 0)
+        
+        if rr < 1 and score < 6:
+            print(f"[RR_SKIP] {instId} rr={round(rr,2)} score={score}", flush=True)
             return empty
         
         
