@@ -1413,6 +1413,31 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             stop = m15_trigger.get("micro_stop")
 
         # =====================
+        # FLAT FILTER (БОКОВИК)
+        # =====================
+        
+        ema20 = float(m15_trigger.get("ema20") or 0)
+        vwap = float(m15_trigger.get("vwap") or 0)
+        atr = float(m15_trigger.get("atr") or 0)
+        price = float(m15_trigger.get("close") or 0)
+        
+        # диапазон через ATR
+        range_pct = (atr / price * 100) if price > 0 else 0
+        
+        # расстояние между EMA и VWAP
+        ema_dist = abs(ema20 - vwap) / price * 100 if price > 0 else 0
+        
+        # условия флета
+        is_flat = (
+            range_pct < 0.2   # слабое движение
+            and ema_dist < 0.1  # нет тренда
+        )
+        
+        if is_flat:
+            print(f"[FLAT_SKIP] {instId} range={round(range_pct,3)} ema_dist={round(ema_dist,3)}", flush=True)
+            return
+
+        # =====================
         # SEND TELEGRAM
         # =====================
         send_telegram(
