@@ -4271,14 +4271,6 @@ def is_market_cap_ok(instId, market_caps):
 # =====================
 # MAIN FUNCTION
 # =====================
-def get_market_candidates_bybit():
-    tickers = get_bybit_tickers_linear()
-    print("BYBIT TICKERS COUNT:", len(tickers))
-
-    raw_candidates = []
-
-    for t in tickers:
-        sym = t.get("symbol", "")
 
 
 def get_market_candidates_bybit():
