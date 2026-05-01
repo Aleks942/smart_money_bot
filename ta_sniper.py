@@ -59,10 +59,30 @@ def find_reversal_levels(candles, lookback=120, tolerance_pct=1.0, min_touches=2
     Подходит для MONTH / DAY / H1.
     """
 
-    if candles is None or len(candles) < 20:
+    # =====================
+    # SAFE CHECK + NORMALIZE
+    # =====================
+    if candles is None:
         return []
-
+    
+    # если pandas → переводим в list
+    if hasattr(candles, "iloc"):
+        if candles.empty:
+            return []
+        candles = candles.values.tolist()
+    
+    # если уже list
+    elif isinstance(candles, list):
+        if len(candles) < 20:
+            return []
+    else:
+        return []
+    
+    # =====================
+    # ОБРЕЗКА
+    # =====================
     candles = candles[-lookback:]
+    
     raw = []
 
     for i in range(2, len(candles) - 2):
