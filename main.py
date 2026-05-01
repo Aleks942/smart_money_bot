@@ -19,6 +19,60 @@ from ta_sniper import analyze_ta_sniper
 from retest_filter import retest_ok
 import traceback
 
+def detect_market_phase(df_h1):
+    try:
+        if df_h1 is None or len(df_h1) < 50:
+            return {"phase": "UNKNOWN", "score": 0}
+
+        close = df_h1["close"]
+
+        ema20 = close.ewm(span=20).mean()
+        ema50 = close.ewm(span=50).mean()
+
+        last_price = float(close.iloc[-1])
+        ema20_last = float(ema20.iloc[-1])
+        ema50_last = float(ema50.iloc[-1])
+
+        # расстояние между EMA
+        spread = abs(ema20_last - ema50_last) / last_price * 100
+
+        # наклон EMA20
+        slope = ema20.iloc[-1] - ema20.iloc[-5]
+
+        trend_score = 0
+
+        # направление
+        if ema20_last > ema50_last:
+            trend_score += 1
+        elif ema20_last < ema50_last:
+            trend_score += 1
+
+        # наклон
+        if abs(slope) > last_price * 0.001:
+            trend_score += 1
+
+        # расширение (есть движение)
+        if spread > 0.2:
+            trend_score += 1
+
+        # классификация
+        if trend_score >= 3:
+            phase = "TREND"
+        elif trend_score == 2:
+            phase = "TRANSITION"
+        else:
+            phase = "FLAT"
+
+        return {
+            "phase": phase,
+            "score": trend_score,
+            "spread": round(spread, 3)
+        }
+
+    except Exception as e:
+        print(f"[PHASE_ERROR] {e}", flush=True)
+        return {"phase": "UNKNOWN", "score": 0}
+
 # =====================
 # MONEY FLOW
 # =====================
