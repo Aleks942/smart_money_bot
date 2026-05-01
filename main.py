@@ -1466,6 +1466,19 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         
         if "prev_rsi" not in sig:
             sig["prev_rsi"] = rsi
+
+        # =====================
+        # LOAD PREVIOUS VALUES
+        # =====================
+        prev_price = sig.get("prev_price")
+        prev_rsi = sig.get("prev_rsi")
+        
+        try:
+            prev_price = float(prev_price)
+            prev_rsi = float(prev_rsi)
+        except:
+            prev_price = None
+            prev_rsi = None
         
         # LONG дивергенция (плохо для лонга)
         if sig.get("side") in ("LONG", "BUY"):
