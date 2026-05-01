@@ -4294,26 +4294,29 @@ def get_market_candidates_bybit():
         instId = sym  # BYBIT symbol format, e.g. BTCUSDT
         raw_candidates.append((instId, vol_usdt, pct))
 
-    if not raw_candidates:
-        print("[MARKET_CAP] no raw candidates before market cap filter")
-        return []
+  if not raw_candidates:
+    print("[MARKET_CAP] no raw candidates before market cap filter")
+    return []
 
-    raw_candidates.sort(key=lambda x: (x[1], abs(x[2])), reverse=True)
+raw_candidates.sort(key=lambda x: (x[1], abs(x[2])), reverse=True)
 
-    MARKET_CAP_PREFETCH_MULT = int(os.getenv("MARKET_CAP_PREFETCH_MULT") or "3")
-    prefetch_limit = SCAN_BATCH * MARKET_CAP_PREFETCH_MULT
+MARKET_CAP_PREFETCH_MULT = int(os.getenv("MARKET_CAP_PREFETCH_MULT") or "3")
+prefetch_limit = SCAN_BATCH * MARKET_CAP_PREFETCH_MULT
 
-    raw_candidates = raw_candidates[:prefetch_limit]
+raw_candidates = raw_candidates[:prefetch_limit]
 
-    base_coins = [get_base_coin(instId) for instId, _, _ in raw_candidates]
-    market_caps = fetch_market_caps_usd(base_coins)
+base_coins = [get_base_coin(instId) for instId, _, _ in raw_candidates]
+market_caps = fetch_market_caps_usd(base_coins)
 
-    if not market_caps:
+# =====================
+# FIX HERE
+# =====================
+if not market_caps:
     print("[MARKET_CAP] CoinGecko returned no market cap data -> fallback to raw candidates")
     raw_candidates.sort(key=lambda x: (x[1], abs(x[2])), reverse=True)
     return raw_candidates[:SCAN_TOP_N]
 
-    filtered_candidates = []
+filtered_candidates = [] 
     
     for instId, vol_usdt, pct in raw_candidates:
         if is_market_cap_ok(instId, market_caps):
