@@ -5555,37 +5555,46 @@ def swing_grade(sig):
         total += h1 * 0.9
         total += m15 * 1.0
         total += min(room, 10) * 0.15
-        
+
         if sig.get("late"):
             total -= 2
-        
+
         try:
             entry = float(sig.get("entry_price", 0))
             stop = float(sig.get("stop", 0))
-        
+
             if entry > 0 and stop > 0:
                 stop_pct = abs(entry - stop) / entry * 100
-        
+
                 if stop_pct > 4:
                     total -= 2
                 elif stop_pct > 2:
                     total -= 1
         except:
             pass
-        
-        total = round(total, 1)
-        risk_label, _ = coin_risk_label(sig)
 
+        total = round(total, 1)
+
+        # ❗ сразу фильтр слабых
+        if total < 5:
+            return 0, None
+
+        # безопасный риск
+        try:
+            risk_label, _ = coin_risk_label(sig)
+        except:
+            risk_label = "unknown"
+
+        # уровни
         if total >= 9:
             title = "🔥 ТОП СДЕЛКА"
         elif total >= 7:
             title = "🟢 GOOD SETUP"
-        elif total >= 5:
-            title = "🟡 WATCH"
         else:
-            title = "🔴 SKIP"
+            title = "🟡 WATCH"
 
-        if "высокий" in risk_label.lower():
+        # понижение из-за риска
+        if isinstance(risk_label, str) and "высокий" in risk_label.lower():
             if title == "🔥 ТОП СДЕЛКА":
                 title = "🟢 GOOD SETUP"
             elif title == "🟢 GOOD SETUP":
@@ -5594,7 +5603,7 @@ def swing_grade(sig):
         return total, title
 
     except Exception:
-        return 0, "🔴 SKIP"
+        return 0, None
         
 def coin_risk_label(sig):
     try:
