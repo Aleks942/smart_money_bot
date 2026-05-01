@@ -1438,6 +1438,29 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             return
 
         # =====================
+        # CONTINUATION FILTER
+        # =====================
+        
+        close = float(m15_trigger.get("close") or 0)
+        ema20 = float(m15_trigger.get("ema20") or 0)
+        vwap = float(m15_trigger.get("vwap") or 0)
+        
+        # сила продолжения
+        if sig.get("side") in ("LONG", "BUY"):
+        
+            # цена должна быть выше EMA и VWAP
+            if close < ema20 or close < vwap:
+                print(f"[CONT_SKIP] {instId} weak long continuation", flush=True)
+                return
+        
+        elif sig.get("side") in ("SHORT", "SELL"):
+        
+            # цена должна быть ниже EMA и VWAP
+            if close > ema20 or close > vwap:
+                print(f"[CONT_SKIP] {instId} weak short continuation", flush=True)
+                return
+
+        # =====================
         # SEND TELEGRAM
         # =====================
         send_telegram(
