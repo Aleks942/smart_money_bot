@@ -4288,7 +4288,7 @@ def get_market_candidates_bybit():
     raw_candidates = []
 
     for t in tickers:
-    sym = t.get("symbol", "")
+        sym = t.get("symbol", "")
 
     if not sym.endswith("USDT"):
         continue
