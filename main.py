@@ -6649,7 +6649,7 @@ if __name__ == "__main__":
                     # =====================
                     
                     try:
-                       if (
+                        if (
                             is_empty(candles_m15) or
                             is_empty(candles_h1) or
                             is_empty(candles_day) or
