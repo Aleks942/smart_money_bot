@@ -1416,12 +1416,12 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
                 f"📌 Причина: {rt.get('reason')}"
             )
         
-                # fallback
-                if m15_trigger.get("close") is not None:
-                    entry_price = float(m15_trigger.get("close"))
-        
-                if m15_trigger.get("micro_stop") is not None:
-                    stop = m15_trigger.get("micro_stop")
+            # fallback
+            if m15_trigger.get("close") is not None:
+                entry_price = float(m15_trigger.get("close"))
+    
+            if m15_trigger.get("micro_stop") is not None:
+                stop = m15_trigger.get("micro_stop")
         
         elif h1_setup and h1_setup.get("setup_type") not in ("none", None):
             status = "SWING SETUP"
