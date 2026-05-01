@@ -4294,42 +4294,43 @@ def get_market_candidates_bybit():
         instId = sym  # BYBIT symbol format, e.g. BTCUSDT
         raw_candidates.append((instId, vol_usdt, pct))
 
-          if not raw_candidates:
+        if not raw_candidates:
             print("[MARKET_CAP] no raw candidates before market cap filter")
             return []
-        
+    
+        # сортировка
         raw_candidates.sort(key=lambda x: (x[1], abs(x[2])), reverse=True)
-        
+    
+        # префетч
         MARKET_CAP_PREFETCH_MULT = int(os.getenv("MARKET_CAP_PREFETCH_MULT") or "3")
         prefetch_limit = SCAN_BATCH * MARKET_CAP_PREFETCH_MULT
-        
+    
         raw_candidates = raw_candidates[:prefetch_limit]
-        
+    
+        # получаем market cap
         base_coins = [get_base_coin(instId) for instId, _, _ in raw_candidates]
         market_caps = fetch_market_caps_usd(base_coins)
-        
-    # =====================
-    # FIX HERE
-    # =====================
-    if not market_caps:
-        print("[MARKET_CAP] CoinGecko returned no market cap data -> fallback to raw candidates")
-        raw_candidates.sort(key=lambda x: (x[1], abs(x[2])), reverse=True)
-        return raw_candidates[:SCAN_TOP_N]
     
-    filtered_candidates = [] 
+        # fallback если нет данных
+        if not market_caps:
+            print("[MARKET_CAP] CoinGecko returned no market cap data -> fallback")
+            return raw_candidates[:SCAN_TOP_N]
     
-    for instId, vol_usdt, pct in raw_candidates:
-        if is_market_cap_ok(instId, market_caps):
-            filtered_candidates.append((instId, vol_usdt, pct))
+        # фильтрация
+        filtered_candidates = []
     
-    print(
-        f"[MARKET_CAP] raw={len(raw_candidates)} "
-        f"passed={len(filtered_candidates)} "
-        f"threshold={MARKET_CAP_MIN_USD}"
-    )
+        for instId, vol_usdt, pct in raw_candidates:
+            if is_market_cap_ok(instId, market_caps):
+                filtered_candidates.append((instId, vol_usdt, pct))
     
-    filtered_candidates.sort(key=lambda x: (x[1], abs(x[2])), reverse=True)
-    return filtered_candidates[:SCAN_TOP_N]
+        print(
+            f"[MARKET_CAP] raw={len(raw_candidates)} "
+            f"passed={len(filtered_candidates)} "
+            f"threshold={MARKET_CAP_MIN_USD}"
+        )
+    
+        filtered_candidates.sort(key=lambda x: (x[1], abs(x[2])), reverse=True)
+        return filtered_candidates[:SCAN_TOP_N]
 
 
 def get_market_candidates():
