@@ -1398,14 +1398,31 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
                     print(f"[H4_SKIP] {instId} near resistance dist={round(dist,2)}%", flush=True)
                     return
             
-            # SHORT — проверка поддержки
+            # =====================
+            # H4 FILTER (SHORT)
+            # =====================
             if sig.get("side") in ("SHORT", "SELL") and support_zone:
                 support = float(support_zone[0])
-                dist = abs(price_now - support) / price_now * 100
+                dist = abs(entry - support) / entry * 100
             
                 if dist < 0.8:
                     print(f"[H4_SKIP] {instId} near support dist={round(dist,2)}%", flush=True)
                     return
+            
+            
+            # =====================
+            # FALLBACK (СНАЧАЛА)
+            # =====================
+            if m15_trigger.get("close") is not None:
+                entry = float(m15_trigger.get("close"))
+            
+            if m15_trigger.get("micro_stop") is not None:
+                stop = m15_trigger.get("micro_stop")
+            
+            
+            # =====================
+            # SEND TELEGRAM (ПОСЛЕДНИЙ ШАГ)
+            # =====================
             send_telegram(
                 f"🎯 <b>RETEST ENTRY — {instId}</b>\n\n"
                 f"🧭 Side: <b>{sig.get('side')}</b>\n"
@@ -1415,13 +1432,6 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
                 f"📊 RR: <b>{round(rr,2)}</b>\n\n"
                 f"📌 Причина: {rt.get('reason')}"
             )
-        
-            # fallback
-            if m15_trigger.get("close") is not None:
-                entry_price = float(m15_trigger.get("close"))
-    
-            if m15_trigger.get("micro_stop") is not None:
-                stop = m15_trigger.get("micro_stop")
         
         elif h1_setup and h1_setup.get("setup_type") not in ("none", None):
             status = "SWING SETUP"
