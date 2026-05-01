@@ -1281,15 +1281,18 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
     }
 
     try:
-
         h4_ctx = h4_ctx or {}
         h1_setup = h1_setup or {}
         m15_trigger = m15_trigger or {}
         sig = sig or {}
+
         if not h4_ctx or not h4_ctx.get("ok"):
             return empty
 
-        side = h1_setup.get("side", "NEUTRAL") if h1_setup else "NEUTRAL"
+        # =====================
+        # SIDE
+        # =====================
+        side = h1_setup.get("side", "NEUTRAL")
         if side not in ("LONG", "SHORT"):
             side = "LONG" if h4_ctx.get("bias") == "LONG" else (
                 "SHORT" if h4_ctx.get("bias") == "SHORT" else "NEUTRAL"
@@ -1298,141 +1301,144 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         if side == "NEUTRAL":
             return empty
 
-        status = "SWING CONTEXT"
-        verdict = "только контекст, входа пока нет"
-        sendable = False
-        reject_reason = "no_setup"
-
-        entry_zone = h1_setup.get("entry_zone") if h1_setup else None
-        entry_price = _swing_mid(entry_zone)
-        stop = h1_setup.get("invalidation_level") if h1_setup else None
-
+        # =====================
+        # M15 CHECK
+        # =====================
         m15_ready = bool(
-            m15_trigger
-            and (
+            m15_trigger and (
                 m15_trigger.get("trigger_ok") is True
                 or m15_trigger.get("ok") is True
                 or str(m15_trigger.get("trigger_type", "none")) not in ("none", "", "None")
             )
         )
-        # =====================
-        # M15 CHECK
-        # =====================
+
         print(f"[M15_READY] {instId} ready={m15_ready} raw={m15_trigger}")
-        
-        if m15_ready:
-            status = "SWING TRIGGER"
-            verdict = "можно работать по M15 trigger"
-        
+
+        if not m15_ready:
+            return empty
+
         # =====================
-        # RETEST ENTRY
+        # RETEST
         # =====================
         rt = retest_ok(sig, m15_trigger)
-        
+
         if not rt.get("ok"):
             print(f"[RETEST_SKIP] {instId} {rt.get('reason')}", flush=True)
-            sendable = False
-        
-        else:
-            print(f"[RETEST_OK] {instId}", flush=True)
-            sendable = True
-        
-            entry = rt["entry"]
-            stop = rt["stop"]
-        
-            rr = abs(sig.get("tp1") - entry) / max(abs(entry - stop), 1e-9)
-        
-            # =====================
-            # RR FILTER
-            # =====================
-            if rr < 3:
-                print(f"[RR_SKIP] {instId} rr={round(rr,2)}", flush=True)
-                return
-        
-            # =====================
-            # SCORE FILTER
-            # =====================
-            score = float(sig.get("score") or 0)
-        
-            if score < 7:
-                print(f"[SCORE_SKIP] {instId} score={score}", flush=True)
-                return
-        
-            # =====================
-            # RSI FILTER
-            # =====================
-            rsi = sig.get("rsi") or sig.get("rsi14")
-        
-            try:
-                rsi = float(rsi)
-            except:
-                rsi = None
-        
-            if rsi is not None:
-                if sig.get("side") in ("LONG", "BUY") and rsi > 75:
-                    print(f"[RSI_SKIP] {instId} LONG rsi={rsi}", flush=True)
-                    return
-        
-                if sig.get("side") in ("SHORT", "SELL") and rsi < 25:
-                    print(f"[RSI_SKIP] {instId} SHORT rsi={rsi}", flush=True)
-                    return
-        
-            # =====================
-            # SEND SIGNAL (ТОЛЬКО ТУТ)
-            # =====================
+            return empty
 
-            # =====================
-            # H4 LEVEL FILTER
-            # =====================
-            support_zone = h4_ctx.get("support_zone")
-            resistance_zone = h4_ctx.get("resistance_zone")
-            
-            price_now = entry  # используем цену входа
-            
-            # LONG — проверка сопротивления
-            if sig.get("side") in ("LONG", "BUY") and resistance_zone:
-                resistance = float(resistance_zone[1])
-                dist = abs(resistance - price_now) / price_now * 100
-            
-                if dist < 0.8:  # 🔥 можно менять 0.5–1.0
-                    print(f"[H4_SKIP] {instId} near resistance dist={round(dist,2)}%", flush=True)
-                    return
-            
-            # =====================
-            # H4 FILTER (SHORT)
-            # =====================
-            if sig.get("side") in ("SHORT", "SELL") and support_zone:
-                support = float(support_zone[0])
-                dist = abs(entry - support) / entry * 100
-            
-                if dist < 0.8:
-                    print(f"[H4_SKIP] {instId} near support dist={round(dist,2)}%", flush=True)
-                    return
-            
-            
-            # =====================
-            # FALLBACK (СНАЧАЛА)
-            # =====================
-            if m15_trigger.get("close") is not None:
-                entry = float(m15_trigger.get("close"))
-            
-            if m15_trigger.get("micro_stop") is not None:
-                stop = m15_trigger.get("micro_stop")
-            
-            
-            # =====================
-            # SEND TELEGRAM (ПОСЛЕДНИЙ ШАГ)
-            # =====================
-            send_telegram(
-                f"🎯 <b>RETEST ENTRY — {instId}</b>\n\n"
-                f"🧭 Side: <b>{sig.get('side')}</b>\n"
-                f"💵 Entry: <b>{entry}</b>\n"
-                f"🛑 Stop: <b>{stop}</b>\n"
-                f"🎯 TP1: <b>{sig.get('tp1')}</b>\n"
-                f"📊 RR: <b>{round(rr,2)}</b>\n\n"
-                f"📌 Причина: {rt.get('reason')}"
-            )
-        
+        print(f"[RETEST_OK] {instId}", flush=True)
+
+        entry = rt["entry"]
+        stop = rt["stop"]
+
+        rr = abs(sig.get("tp1") - entry) / max(abs(entry - stop), 1e-9)
+
+        # =====================
+        # RR FILTER
+        # =====================
+        if rr < 3:
+            print(f"[RR_SKIP] {instId} rr={round(rr,2)}", flush=True)
+            return empty
+
+        # =====================
+        # SCORE FILTER
+        # =====================
+        score = float(sig.get("score") or 0)
+        if score < 7:
+            print(f"[SCORE_SKIP] {instId} score={score}", flush=True)
+            return empty
+
+        # =====================
+        # RSI FILTER
+        # =====================
+        rsi = sig.get("rsi") or sig.get("rsi14")
+        try:
+            rsi = float(rsi)
+        except:
+            rsi = None
+
+        if rsi is not None:
+            if side == "LONG" and rsi > 75:
+                print(f"[RSI_SKIP] {instId} LONG rsi={rsi}", flush=True)
+                return empty
+            if side == "SHORT" and rsi < 25:
+                print(f"[RSI_SKIP] {instId} SHORT rsi={rsi}", flush=True)
+                return empty
+
+        # =====================
+        # H4 FILTER
+        # =====================
+        support_zone = h4_ctx.get("support_zone")
+        resistance_zone = h4_ctx.get("resistance_zone")
+
+        if side == "LONG" and resistance_zone:
+            resistance = float(resistance_zone[1])
+            dist = abs(resistance - entry) / entry * 100
+            if dist < 0.8:
+                print(f"[H4_SKIP] {instId} near resistance {round(dist,2)}%", flush=True)
+                return empty
+
+        if side == "SHORT" and support_zone:
+            support = float(support_zone[0])
+            dist = abs(entry - support) / entry * 100
+            if dist < 0.8:
+                print(f"[H4_SKIP] {instId} near support {round(dist,2)}%", flush=True)
+                return empty
+
+        # =====================
+        # IMPULSE FILTER
+        # =====================
+        atr = float(m15_trigger.get("atr") or 0)
+        price = float(m15_trigger.get("close") or 0)
+        atr_pct = (atr / price * 100) if price > 0 else 0
+
+        vol = float(sig.get("volume") or 0)
+        avg_vol = float(sig.get("avg_volume") or 0)
+
+        if atr_pct < 0.15:
+            print(f"[IMPULSE_SKIP] {instId} weak ATR", flush=True)
+            return empty
+
+        if avg_vol > 0 and vol < avg_vol * 1.2:
+            print(f"[IMPULSE_SKIP] {instId} weak volume", flush=True)
+            return empty
+
+        # =====================
+        # FALLBACK
+        # =====================
+        if m15_trigger.get("close") is not None:
+            entry = float(m15_trigger.get("close"))
+
+        if m15_trigger.get("micro_stop") is not None:
+            stop = m15_trigger.get("micro_stop")
+
+        # =====================
+        # SEND TELEGRAM
+        # =====================
+        send_telegram(
+            f"🎯 <b>RETEST ENTRY — {instId}</b>\n\n"
+            f"🧭 Side: <b>{side}</b>\n"
+            f"💵 Entry: <b>{entry}</b>\n"
+            f"🛑 Stop: <b>{stop}</b>\n"
+            f"🎯 TP1: <b>{sig.get('tp1')}</b>\n"
+            f"📊 RR: <b>{round(rr,2)}</b>\n\n"
+            f"📌 Причина: {rt.get('reason')}"
+        )
+
+        return {
+            "ok": True,
+            "symbol": instId,
+            "side": side,
+            "entry_price": entry,
+            "stop": stop,
+            "tp1": sig.get("tp1"),
+            "rr1": rr,
+            "sendable": True
+        }
+
+    except Exception as e:
+        print(f"[SWING_ERROR] {instId} {e}", flush=True)
+        return empty
         if h1_setup and h1_setup.get("setup_type") not in ("none", None):
             status = "SWING SETUP"
             verdict = "сетап есть, но лучше ждать M15 trigger"
