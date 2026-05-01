@@ -1754,6 +1754,56 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
 
         
         # =====================
+        # SNIPER PRO FILTER
+        # =====================
+        
+        # базовая проверка
+        if entry is None or stop is None or sig.get("tp1") is None:
+            print(f"[PRO_SKIP] {instId} empty trade", flush=True)
+            return empty
+        
+        tp1 = sig.get("tp1")
+        
+        # RR
+        if entry and stop and tp1:
+            rr = abs(tp1 - entry) / max(abs(entry - stop), 1e-9)
+        else:
+            rr = 0
+        
+        # fallback
+        if rr == 0 and entry and stop:
+            rr = 2.0
+            print(f"[RR_FIX] {instId}", flush=True)
+        
+        print(f"[RR] {instId} rr={round(rr,2)}", flush=True)
+        
+        score = sig.get("score", 0)
+        
+        # RR фильтр
+        if rr < 1 and score < 6:
+            print(f"[PRO_SKIP] weak RR", flush=True)
+            return empty
+        
+        
+        # RSI
+        rsi = sig.get("rsi") or sig.get("rsi14")
+        
+        try:
+            rsi = float(rsi)
+        except:
+            rsi = None
+        
+        if rsi is not None:
+            if side in ("LONG", "BUY") and rsi > 80:
+                print(f"[PRO_SKIP] RSI high", flush=True)
+                return empty
+        
+            if side in ("SHORT", "SELL") and rsi < 20:
+                print(f"[PRO_SKIP] RSI low", flush=True)
+                return empty
+        
+        
+        # =====================
         # SEND TELEGRAM
         # =====================
         send_telegram(
@@ -1761,7 +1811,7 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             f"🧭 Side: <b>{side}</b>\n"
             f"💵 Entry: <b>{entry}</b>\n"
             f"🛑 Stop: <b>{stop}</b>\n"
-            f"🎯 TP1: <b>{sig.get('tp1')}</b>\n"
+            f"🎯 TP1: <b>{tp1}</b>\n"
             f"📊 RR: <b>{round(rr,2)}</b>\n\n"
             f"📌 Причина: {rt.get('reason')}"
         )
