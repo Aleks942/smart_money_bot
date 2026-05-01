@@ -4616,6 +4616,8 @@ def build_signal(instId):
         "ts": now_ts(),
         "created_at": time.time(),
     }
+    # 🔥 DECISION LAYER
+    signal["decision"] = decision_engine(signal)
     
     signal.update(detect_early_pressure(signal))
     
