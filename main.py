@@ -1402,13 +1402,14 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         else:
             rr = abs(tp1 - entry) / max(abs(entry - stop), 1e-9)
         
-        # 🔥 ВОТ СЮДА ВСТАВКА
+        # 🔥 ВАЖНО — СЮДА
         if rr == 0 and entry and stop:
-            rr = 2.0  # дефолт для swing
+            rr = 2.0
             print(f"[RR_FIX] {instId} fallback rr=2.0", flush=True)
         
         print(f"[RR] {instId} rr={round(rr,2)}", flush=True)
-                
+
+
         # =====================
         # RR FILTER
         # =====================
