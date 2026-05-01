@@ -1354,14 +1354,48 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         # =====================
         rt = retest_ok(sig, m15_trigger)
 
+        # =====================
+        # RETEST OVERRIDE (важно)
+        # =====================
         if not rt.get("ok"):
-            print(f"[RETEST_SKIP] {instId} {rt.get('reason')}", flush=True)
-            return empty
-
-        print(f"[RETEST_OK] {instId}", flush=True)
-
-        entry = rt["entry"]
-        stop = rt["stop"]
+        
+            flags = set(sig.get("flags", []))
+            direction = sig.get("direction", "")
+        
+            strong_momentum = (
+                "BREAKOUT_UP" in flags or
+                "CONTINUATION_UP" in flags or
+                "BREAKOUT_DOWN" in flags or
+                "CONTINUATION_DOWN" in flags
+            )
+        
+            if strong_momentum:
+                print(f"[RETEST_OVERRIDE] {instId} strong momentum → allow", flush=True)
+        
+                # используем текущую цену как вход
+                entry = sig.get("price")
+        
+                # ставим стоп за экстремум
+                if "ВВЕРХ" in direction:
+                    stop = entry * 0.985
+                elif "ВНИЗ" in direction:
+                    stop = entry * 1.015
+                else:
+                    return empty
+        
+            else:
+                print(f"[RETEST_SKIP] {instId} {rt.get('reason')}", flush=True)
+                return empty
+        
+        else:
+            print(f"[RETEST_OK] {instId}", flush=True)
+        
+            entry = rt["entry"]
+            stop = rt["stop"]
+                print(f"[RETEST_OK] {instId}", flush=True)
+        
+                entry = rt["entry"]
+                stop = rt["stop"]
 
         rr = abs(sig.get("tp1") - entry) / max(abs(entry - stop), 1e-9)
 
