@@ -1317,6 +1317,37 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         if not m15_ready:
             return empty
 
+        def detect_market_mode(m15_trigger: dict) -> str:
+            atr = float(m15_trigger.get("atr") or 0)
+            price = float(m15_trigger.get("close") or 0)
+            ema20 = float(m15_trigger.get("ema20") or 0)
+            vwap = float(m15_trigger.get("vwap") or 0)
+        
+            if price <= 0:
+                return "НЕИЗВЕСТНО"
+        
+            # нормализуем
+            atr_pct = atr / price * 100
+            ema_dist = abs(ema20 - vwap) / price * 100
+        
+            # =====================
+            # ЛОГИКА
+            # =====================
+        
+            # 💤 ФЛЕТ
+            if atr_pct < 0.15 and ema_dist < 0.1:
+                return "ФЛЕТ"
+        
+            # 💣 ХАОС
+            if atr_pct > 0.8:
+                return "ХАОС"
+        
+            # 🚀 ТРЕНД
+            if ema_dist > 0.2:
+                return "ТРЕНД"
+        
+            return "НЕЯСНО"
+
         # =====================
         # RETEST
         # =====================
