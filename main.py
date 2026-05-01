@@ -1324,51 +1324,71 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             status = "SWING TRIGGER"
             verdict = "можно работать по M15 trigger"
         
+        # =====================
+        # RETEST ENTRY
+        # =====================
+        rt = retest_ok(sig, m15_trigger)
+        
+        if not rt.get("ok"):
+            print(f"[RETEST_SKIP] {instId} {rt.get('reason')}", flush=True)
+            sendable = False
+        
+        else:
+            print(f"[RETEST_OK] {instId}", flush=True)
+            sendable = True
+        
+            entry = rt["entry"]
+            stop = rt["stop"]
+        
+            rr = abs(sig.get("tp1") - entry) / max(abs(entry - stop), 1e-9)
+        
             # =====================
-            # RETEST ENTRY
+            # RR FILTER
             # =====================
-            rt = retest_ok(sig, m15_trigger)
+            if rr < 3:
+                print(f"[RR_SKIP] {instId} rr={round(rr,2)}", flush=True)
+                return
         
-            if not rt.get("ok"):
-                print(f"[RETEST_SKIP] {instId} {rt.get('reason')}", flush=True)
-                sendable = False
+            # =====================
+            # SCORE FILTER
+            # =====================
+            score = float(sig.get("score") or 0)
         
-            else:
-                print(f"[RETEST_OK] {instId}", flush=True)
-                sendable = True
+            if score < 7:
+                print(f"[SCORE_SKIP] {instId} score={score}", flush=True)
+                return
         
-                entry = rt["entry"]
-                stop = rt["stop"]
+            # =====================
+            # RSI FILTER
+            # =====================
+            rsi = sig.get("rsi") or sig.get("rsi14")
         
-                rr = abs(sig.get("tp1") - entry) / max(abs(entry - stop), 1e-9)
-                
-                # =====================
-                # SCORE FILTER
-                # =====================
-                score = float(sig.get("score") or 0)
-                
-                if score < 7:
-                    print(f"[SCORE_SKIP] {instId} score={score}", flush=True)
-                    sendable = False
+            try:
+                rsi = float(rsi)
+            except:
+                rsi = None
+        
+            if rsi is not None:
+                if sig.get("side") in ("LONG", "BUY") and rsi > 75:
+                    print(f"[RSI_SKIP] {instId} LONG rsi={rsi}", flush=True)
                     return
-
-                # =====================
-                # RR FILTER
-                # =====================
-                if rr < 3:
-                    print(f"[RR_SKIP] {instId} rr={round(rr,2)}", flush=True)
-                    sendable = False
-                    return  # ❗ сразу выходим, сигнал не нужен
-                        
-                send_telegram(
-                    f"🎯 <b>RETEST ENTRY — {instId}</b>\n\n"
-                    f"🧭 Side: <b>{sig.get('side')}</b>\n"
-                    f"💵 Entry: <b>{entry}</b>\n"
-                    f"🛑 Stop: <b>{stop}</b>\n"
-                    f"🎯 TP1: <b>{sig.get('tp1')}</b>\n"
-                    f"📊 RR: <b>{round(rr,2)}</b>\n\n"
-                    f"📌 Причина: {rt.get('reason')}"
-                )
+        
+                if sig.get("side") in ("SHORT", "SELL") and rsi < 25:
+                    print(f"[RSI_SKIP] {instId} SHORT rsi={rsi}", flush=True)
+                    return
+        
+            # =====================
+            # SEND SIGNAL (ТОЛЬКО ТУТ)
+            # =====================
+            send_telegram(
+                f"🎯 <b>RETEST ENTRY — {instId}</b>\n\n"
+                f"🧭 Side: <b>{sig.get('side')}</b>\n"
+                f"💵 Entry: <b>{entry}</b>\n"
+                f"🛑 Stop: <b>{stop}</b>\n"
+                f"🎯 TP1: <b>{sig.get('tp1')}</b>\n"
+                f"📊 RR: <b>{round(rr,2)}</b>\n\n"
+                f"📌 Причина: {rt.get('reason')}"
+            )
         
                 # fallback
                 if m15_trigger.get("close") is not None:
