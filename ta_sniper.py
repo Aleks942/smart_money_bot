@@ -6,11 +6,30 @@ def f(x, default=0.0):
         return default
 
 
-def o(c): return f(c[1])
-def h(c): return f(c[2])
-def l(c): return f(c[3])
-def c(candle): return f(candle[4])
-def v(candle): return f(candle[5]) if len(candle) > 5 else 0.0
+def o(c):
+    if hasattr(c, "get"):
+        return f(c.get("open", 0))
+    return f(c[1])
+
+def h(c):
+    if hasattr(c, "get"):
+        return f(c.get("high", 0))
+    return f(c[2])
+
+def l(c):
+    if hasattr(c, "get"):
+        return f(c.get("low", 0))
+    return f(c[3])
+
+def c(candle):
+    if hasattr(candle, "get"):
+        return f(candle.get("close", 0))
+    return f(candle[4])
+
+def v(candle):
+    if hasattr(candle, "get"):
+        return f(candle.get("volume", 0))
+    return f(candle[5]) if len(candle) > 5 else 0
 
 def safe_last(c):
     if c is None:
