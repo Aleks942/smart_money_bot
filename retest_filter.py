@@ -36,12 +36,18 @@ def retest_ok(sig: dict, m15: dict) -> dict:
     if "БАЛАНС" in side_raw or "BALANCE" in side_raw or "NEUTRAL" in side_raw:
         return {"ok": False, "reason": "neutral_market"}
     
-    # финал
-    if "LONG" in side_raw or "BUY" in side_raw or "UP" in side_raw:
+    # =====================
+    # FINAL SIDE DETECTION (STRONG)
+    # =====================
+    
+    if any(x in side_raw for x in ["LONG", "BUY", "UP", "BULL", "РОСТ"]):
         side = "LONG"
-    elif "SHORT" in side_raw or "SELL" in side_raw or "DOWN" in side_raw:
+    
+    elif any(x in side_raw for x in ["SHORT", "SELL", "DOWN", "BEAR", "ПАДЕНИЕ"]):
         side = "SHORT"
+    
     else:
+        print(f"[RETEST_DEBUG] bad side_raw={side_raw}", flush=True)
         return {"ok": False, "reason": f"bad_side_{side_raw}"}
 
     # =====================
