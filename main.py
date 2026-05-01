@@ -3862,6 +3862,52 @@ def direction_hint(flags):
         return "⬇️ ВНИЗ", reasons, up, down
     return "⚖️ БАЛАНС", reasons, up, down
 
+def decision_engine(sig):
+
+    score = sig.get("score", 0)
+    acc = sig.get("acc_score", 0)
+    oi = sig.get("oi_change")
+    ema = sig.get("ema_state")
+    rsi = sig.get("rsi_state")
+    stage = sig.get("stage", "")
+    flags = set(sig.get("flags", []))
+
+    confidence = 0
+
+    confidence += score * 1.2
+    confidence += acc * 0.8
+
+    if oi is not None:
+        if oi >= OI_STRONG:
+            confidence += 2
+        elif oi >= OI_GOOD:
+            confidence += 1
+        elif oi <= OI_BAD:
+            confidence -= 2
+
+    if "ВВЕРХ" in sig.get("direction", "") and ema == "EMA_BULL":
+        confidence += 1
+    if "ВНИЗ" in sig.get("direction", "") and ema == "EMA_BEAR":
+        confidence += 1
+
+    if "ATR_EXPANSION" in flags and "VOL_SPIKE" in flags:
+        confidence += 2
+
+    if "SWEEP_UP" in flags or "SWEEP_DOWN" in flags:
+        confidence += 1
+
+    if rsi in ("EXTREME_OVERBOUGHT", "EXTREME_OVERSOLD"):
+        confidence -= 1
+
+    if confidence >= 10:
+        return "ELITE"
+    elif confidence >= 7:
+        return "STRONG"
+    elif confidence >= 5:
+        return "NORMAL"
+    else:
+        return "WEAK"
+
 def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, price, target):
 
     if "БАЛАНС" in direction_text:
