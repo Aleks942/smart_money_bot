@@ -1392,15 +1392,15 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             stop = rt["stop"]
 
 
-# =====================
-# RR (ОБЩИЙ ДЛЯ ВСЕХ)
-# =====================
-tp1 = sig.get("tp1")
-
-if tp1 is None or entry is None or stop is None:
-    rr = 0
-else:
-    rr = abs(tp1 - entry) / max(abs(entry - stop), 1e-9)
+        # =====================
+        # RR (ОБЩИЙ ДЛЯ ВСЕХ)
+        # =====================
+        tp1 = sig.get("tp1")
+        
+        if tp1 is None or entry is None or stop is None:
+            rr = 0
+        else:
+            rr = abs(tp1 - entry) / max(abs(entry - stop), 1e-9)
 
         # =====================
         # RR FILTER
