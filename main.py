@@ -1315,52 +1315,55 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
                 or str(m15_trigger.get("trigger_type", "none")) not in ("none", "", "None")
             )
         )
+        # =====================
+        # M15 CHECK
+        # =====================
         print(f"[M15_READY] {instId} ready={m15_ready} raw={m15_trigger}")
-
+        
         if m15_ready:
-        status = "SWING TRIGGER"
-        verdict = "можно работать по M15 trigger"
-    
-        # =====================
-        # RETEST ENTRY (ЧИСТЫЙ)
-        # =====================
-        rt = retest_ok(sig, m15_trigger)
+            status = "SWING TRIGGER"
+            verdict = "можно работать по M15 trigger"
         
-        if not rt.get("ok"):
-            print(f"[RETEST_SKIP] {instId} {rt.get('reason')}", flush=True)
-            sendable = False
+            # =====================
+            # RETEST ENTRY
+            # =====================
+            rt = retest_ok(sig, m15_trigger)
         
-        else:
-            print(f"[RETEST_OK] {instId}", flush=True)
-            sendable = True
+            if not rt.get("ok"):
+                print(f"[RETEST_SKIP] {instId} {rt.get('reason')}", flush=True)
+                sendable = False
         
-            entry = rt["entry"]
-            stop = rt["stop"]
+            else:
+                print(f"[RETEST_OK] {instId}", flush=True)
+                sendable = True
         
-            rr = abs(sig.get("tp1") - entry) / max(abs(entry - stop), 1e-9)
+                entry = rt["entry"]
+                stop = rt["stop"]
         
-            send_telegram(
-                f"🎯 <b>RETEST ENTRY — {instId}</b>\n\n"
-                f"🧭 Side: <b>{sig.get('side')}</b>\n"
-                f"💵 Entry: <b>{entry}</b>\n"
-                f"🛑 Stop: <b>{stop}</b>\n"
-                f"🎯 TP1: <b>{sig.get('tp1')}</b>\n"
-                f"📊 RR: <b>{round(rr,2)}</b>\n\n"
-                f"📌 Причина: {rt.get('reason')}"
-            )
+                rr = abs(sig.get("tp1") - entry) / max(abs(entry - stop), 1e-9)
         
-            # fallback для дальнейшей логики
-            if m15_trigger.get("close") is not None:
-                entry_price = float(m15_trigger.get("close"))
-
-    if m15_trigger.get("micro_stop") is not None:
-        stop = m15_trigger.get("micro_stop")
-
+                send_telegram(
+                    f"🎯 <b>RETEST ENTRY — {instId}</b>\n\n"
+                    f"🧭 Side: <b>{sig.get('side')}</b>\n"
+                    f"💵 Entry: <b>{entry}</b>\n"
+                    f"🛑 Stop: <b>{stop}</b>\n"
+                    f"🎯 TP1: <b>{sig.get('tp1')}</b>\n"
+                    f"📊 RR: <b>{round(rr,2)}</b>\n\n"
+                    f"📌 Причина: {rt.get('reason')}"
+                )
+        
+                # fallback
+                if m15_trigger.get("close") is not None:
+                    entry_price = float(m15_trigger.get("close"))
+        
+                if m15_trigger.get("micro_stop") is not None:
+                    stop = m15_trigger.get("micro_stop")
+        
         elif h1_setup and h1_setup.get("setup_type") not in ("none", None):
             status = "SWING SETUP"
             verdict = "сетап есть, но лучше ждать M15 trigger"
             sendable = True
-
+        
         else:
             status = "SWING CONTEXT"
             verdict = "есть контекст H4, но H1 сетап ещё не готов"
