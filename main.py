@@ -1630,6 +1630,12 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
                 return
 
         # =====================
+        # UPDATE PREVIOUS VALUES
+        # =====================
+        sig["prev_price"] = price_now
+        sig["prev_rsi"] = rsi
+
+        # =====================
         # SEND TELEGRAM
         # =====================
         send_telegram(
@@ -1641,7 +1647,13 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             f"📊 RR: <b>{round(rr,2)}</b>\n\n"
             f"📌 Причина: {rt.get('reason')}"
         )
-
+        
+        # =====================
+        # UPDATE PREVIOUS VALUES (ПОСЛЕ ОТПРАВКИ)
+        # =====================
+        sig["prev_price"] = price_now
+        sig["prev_rsi"] = rsi
+        
         return {
             "ok": True,
             "symbol": instId,
