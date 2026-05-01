@@ -17,6 +17,7 @@ from ai_scoring import get_ai_multiplier
 from market_context import apply_market_context
 from ta_sniper import analyze_ta_sniper
 from retest_filter import retest_ok
+import traceback
 
 
 # =========================
@@ -6658,11 +6659,12 @@ if __name__ == "__main__":
                                 candles_m15=candles_m15,
                                 max_stop_pct=3.5
                             )
-                    
+                   
                     except Exception as e:
-                        print(f"[TA_ERROR] {instId} {e}", flush=True)
-                        ta = None
-                    
+                        print(f"[TA_ERROR] {instId} {type(e).__name__}: {e}", flush=True)
+                        print(traceback.format_exc(), flush=True)
+                        ta = None 
+                         
                     # =====================
                     # ELITE FILTER
                     # =====================
