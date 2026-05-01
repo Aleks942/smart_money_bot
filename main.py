@@ -1457,6 +1457,15 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             prev_rsi = None
         
         price_now = float(m15_trigger.get("close") or 0)
+
+        # =====================
+        # SAVE PREVIOUS VALUES
+        # =====================
+        if "prev_price" not in sig:
+            sig["prev_price"] = price_now
+        
+        if "prev_rsi" not in sig:
+            sig["prev_rsi"] = rsi
         
         # LONG дивергенция (плохо для лонга)
         if sig.get("side") in ("LONG", "BUY"):
