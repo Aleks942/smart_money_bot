@@ -260,21 +260,56 @@ def buyer_seller_power(candles, lookback=8):
 # =========================
 
 def detect_breakout(candles, range_data, buffer_pct=0.12):
-    if not candles or not range_data:
+    # =====================
+    # SAFE CHECK
+    # =====================
+    if candles is None or range_data is None:
+        return None
+    
+    # pandas
+    if hasattr(candles, "empty"):
+        if candles.empty:
+            return None
+    
+    # list
+    elif isinstance(candles, list):
+        if len(candles) == 0:
+            return None
+    
+    
+    # =====================
+    # LAST CLOSE
+    # =====================
+    try:
+        if hasattr(candles, "iloc"):  # pandas
+            last_close = float(candles["close"].iloc[-1])
+        else:  # list
+            last_close = c(candles[-1])
+    except Exception as e:
+        print(f"[BREAKOUT_ERROR] {e}", flush=True)
         return None
 
-    last_close = c(candles[-1])
 
-    high = range_data["high"]
-    low = range_data["low"]
+# =====================
+# RANGE
+# =====================
+high = range_data.get("high")
+low = range_data.get("low")
 
-    if last_close > high * (1 + buffer_pct / 100):
-        return "BREAKOUT_UP"
-
-    if last_close < low * (1 - buffer_pct / 100):
-        return "BREAKOUT_DOWN"
-
+if high is None or low is None:
     return None
+
+
+# =====================
+# BREAKOUT LOGIC
+# =====================
+if last_close > high * (1 + buffer_pct / 100):
+    return "BREAKOUT_UP"
+
+if last_close < low * (1 - buffer_pct / 100):
+    return "BREAKOUT_DOWN"
+
+return None
 
 
 # =========================
