@@ -1380,6 +1380,32 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             # =====================
             # SEND SIGNAL (ТОЛЬКО ТУТ)
             # =====================
+
+            # =====================
+            # H4 LEVEL FILTER
+            # =====================
+            support_zone = h4_ctx.get("support_zone")
+            resistance_zone = h4_ctx.get("resistance_zone")
+            
+            price_now = entry  # используем цену входа
+            
+            # LONG — проверка сопротивления
+            if sig.get("side") in ("LONG", "BUY") and resistance_zone:
+                resistance = float(resistance_zone[1])
+                dist = abs(resistance - price_now) / price_now * 100
+            
+                if dist < 0.8:  # 🔥 можно менять 0.5–1.0
+                    print(f"[H4_SKIP] {instId} near resistance dist={round(dist,2)}%", flush=True)
+                    return
+            
+            # SHORT — проверка поддержки
+            if sig.get("side") in ("SHORT", "SELL") and support_zone:
+                support = float(support_zone[0])
+                dist = abs(price_now - support) / price_now * 100
+            
+                if dist < 0.8:
+                    print(f"[H4_SKIP] {instId} near support dist={round(dist,2)}%", flush=True)
+                    return
             send_telegram(
                 f"🎯 <b>RETEST ENTRY — {instId}</b>\n\n"
                 f"🧭 Side: <b>{sig.get('side')}</b>\n"
