@@ -1437,6 +1437,42 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
                 return empty
 
         # =====================
+        # RSI DIVERGENCE FILTER
+        # =====================
+        rsi = sig.get("rsi") or sig.get("rsi14")
+        
+        try:
+            rsi = float(rsi)
+        except:
+            rsi = None
+        
+        prev_price = sig.get("prev_price")
+        prev_rsi = sig.get("prev_rsi")
+        
+        try:
+            prev_price = float(prev_price)
+            prev_rsi = float(prev_rsi)
+        except:
+            prev_price = None
+            prev_rsi = None
+        
+        price_now = float(m15_trigger.get("close") or 0)
+        
+        # LONG дивергенция (плохо для лонга)
+        if sig.get("side") in ("LONG", "BUY"):
+            if prev_price and prev_rsi and rsi:
+                if price_now > prev_price and rsi < prev_rsi:
+                    print(f"[DIV_SKIP] {instId} bearish divergence", flush=True)
+                    return empty
+        
+        # SHORT дивергенция (плохо для шорта)
+        if sig.get("side") in ("SHORT", "SELL"):
+            if prev_price and prev_rsi and rsi:
+                if price_now < prev_price and rsi > prev_rsi:
+                    print(f"[DIV_SKIP] {instId} bullish divergence", flush=True)
+                    return empty
+
+        # =====================
         # H4 FILTER
         # =====================
         support_zone = h4_ctx.get("support_zone")
