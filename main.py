@@ -2401,6 +2401,13 @@ def save_state(state):
 def now_ts():
     return int(time.time())
 
+def is_empty(c):
+    return (
+        c is None or
+        (hasattr(c, "empty") and c.empty) or
+        (isinstance(c, list) and len(c) == 0)
+    )
+
 def get_last_price(symbol: str) -> float:
     candles = fetch_candles(symbol, "5m", 2)
     if not candles:
