@@ -12,8 +12,8 @@ def retest_ok(sig: dict, m15: dict) -> dict:
     if close is None or ema20 is None or vwap is None or atr <= 0:
         return {"ok": False, "reason": "no_m15_data"}
 
-    r_low = sig.get("range_low")
-    r_high = sig.get("range_high")
+    r_low = m15.get("micro_stop")
+    r_high = m15.get("close")
 
     if r_low is None or r_high is None:
         return {"ok": False, "reason": "no_range"}
