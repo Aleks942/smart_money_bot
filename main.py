@@ -1541,23 +1541,7 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
                 print(f"[H4_SKIP] {instId} near support {round(dist,2)}%", flush=True)
                 return empty
 
-        # =====================
-        # IMPULSE FILTER
-        # =====================
-        atr = float(m15_trigger.get("atr") or 0)
-        price = float(m15_trigger.get("close") or 0)
-        atr_pct = (atr / price * 100) if price > 0 else 0
-
-        vol = float(sig.get("volume") or 0)
-        avg_vol = float(sig.get("avg_volume") or 0)
-
-        if atr_pct < 0.15:
-            print(f"[IMPULSE_SKIP] {instId} weak ATR", flush=True)
-            return empty
-
-        if avg_vol > 0 and vol < avg_vol * 1.2:
-            print(f"[IMPULSE_SKIP] {instId} weak volume", flush=True)
-            return empty
+        
 
         # =====================
         # FALLBACK
