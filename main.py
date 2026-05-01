@@ -6649,11 +6649,11 @@ if __name__ == "__main__":
                     # =====================
                     
                     try:
-                        if (
-                            candles_m15 is None or candles_m15.empty or
-                            candles_h1 is None or candles_h1.empty or
-                            candles_day is None or candles_day.empty or
-                            candles_month is None or candles_month.empty
+                       if (
+                            is_empty(candles_m15) or
+                            is_empty(candles_h1) or
+                            is_empty(candles_day) or
+                            is_empty(candles_month)
                         ):
                             print(f"[TA_SKIP] {instId} empty candles", flush=True)
                             ta = None
