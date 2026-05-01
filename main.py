@@ -1322,46 +1322,39 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         verdict = "можно работать по M15 trigger"
     
         # =====================
-        # RETEST ENTRY
+        # RETEST ENTRY (ЧИСТЫЙ)
         # =====================
         rt = retest_ok(sig, m15_trigger)
-    
+        
         if not rt.get("ok"):
             print(f"[RETEST_SKIP] {instId} {rt.get('reason')}", flush=True)
-            sendable = False   # ❗ КЛЮЧЕВОЕ
+            sendable = False
+        
         else:
             print(f"[RETEST_OK] {instId}", flush=True)
             sendable = True
         
-            # =====================
-            # RETEST ENTRY (ВСТАВКА СЮДА)
-            # =====================
-            rt = retest_ok(sig, m15_trigger)
+            entry = rt["entry"]
+            stop = rt["stop"]
         
-            if not rt.get("ok"):
-                print(f"[RETEST_SKIP] {instId} {rt.get('reason')}", flush=True)
-            else:
-                entry = rt["entry"]
-                stop = rt["stop"]
+            rr = abs(sig.get("tp1") - entry) / max(abs(entry - stop), 1e-9)
         
-                rr = abs(sig.get("tp1") - entry) / max(abs(entry - stop), 1e-9)
+            send_telegram(
+                f"🎯 <b>RETEST ENTRY — {instId}</b>\n\n"
+                f"🧭 Side: <b>{sig.get('side')}</b>\n"
+                f"💵 Entry: <b>{entry}</b>\n"
+                f"🛑 Stop: <b>{stop}</b>\n"
+                f"🎯 TP1: <b>{sig.get('tp1')}</b>\n"
+                f"📊 RR: <b>{round(rr,2)}</b>\n\n"
+                f"📌 Причина: {rt.get('reason')}"
+            )
         
-                send_telegram(
-                    f"🎯 <b>RETEST ENTRY — {instId}</b>\n\n"
-                    f"🧭 Side: <b>{sig.get('side')}</b>\n"
-                    f"💵 Entry: <b>{entry}</b>\n"
-                    f"🛑 Stop: <b>{stop}</b>\n"
-                    f"🎯 TP1: <b>{sig.get('tp1')}</b>\n"
-                    f"📊 RR: <b>{round(rr,2)}</b>\n\n"
-                    f"📌 Причина: {rt.get('reason')}"
-                )
-
-            # для trigger берём более реальную текущую цену, а не середину старой H1-зоны
+            # fallback для дальнейшей логики
             if m15_trigger.get("close") is not None:
                 entry_price = float(m15_trigger.get("close"))
 
-            if m15_trigger.get("micro_stop") is not None:
-                stop = m15_trigger.get("micro_stop")
+    if m15_trigger.get("micro_stop") is not None:
+        stop = m15_trigger.get("micro_stop")
 
         elif h1_setup and h1_setup.get("setup_type") not in ("none", None):
             status = "SWING SETUP"
