@@ -141,13 +141,24 @@ def find_range_m15(candles, min_bars=5, max_bars=20, max_width_pct=2.5):
     for bars in range(min_bars, max_bars + 1):
         zone = candles[-bars:]
 
-        # фильтр мусора
-        clean_zone = [
-            x for x in zone
-            if isinstance(x, (list, tuple)) or hasattr(x, "__getitem__")
-        ]
+        clean_zone = []
         
-        if not clean_zone:
+        for x in zone:
+            # ✅ pandas строка (Series)
+            if hasattr(x, "to_dict"):
+                clean_zone.append(x)
+                continue
+        
+            # ✅ норм свеча list/tuple
+            if isinstance(x, (list, tuple)) and len(x) >= 5:
+                clean_zone.append(x)
+                continue
+        
+            # ❌ мусор (строки, None, dict без структуры)
+            print(f"[BAD_CANDLE] {type(x)} -> {str(x)[:30]}", flush=True)
+        
+        # если данных мало — пропускаем
+        if len(clean_zone) < min_bars:
             continue
         
         try:
@@ -156,15 +167,18 @@ def find_range_m15(candles, min_bars=5, max_bars=20, max_width_pct=2.5):
         
             last = clean_zone[-1]
         
-            if hasattr(last, "iloc"):  # pandas
+            # pandas
+            if hasattr(last, "to_dict"):
                 close = float(last["close"])
-            else:  # список
+        
+            # list
+            else:
                 close = c(last)
         
         except Exception as e:
-            print(f"[RANGE_ERROR] {e}", flush=True)
+            print(f"[RANGE_ERROR] {type(e).__name__}: {e}", flush=True)
             continue
-
+        
         if close <= 0:
             continue
 
