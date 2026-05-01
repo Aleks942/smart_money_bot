@@ -1651,6 +1651,51 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
                 print(f"[TRAP_SKIP] {instId} weak breakdown", flush=True)
                 return empty
 
+        # =====================
+        # IMPULSE 2.0 (STRONG MOVE FILTER)
+        # =====================
+        atr = float(m15_trigger.get("atr") or 0)
+        price = float(m15_trigger.get("close") or 0)
+        ema20 = float(m15_trigger.get("ema20") or 0)
+        
+        # защита
+        if price <= 0 or atr <= 0:
+            print(f"[IMPULSE_SKIP] {instId} no data", flush=True)
+            return empty
+        
+        # сила движения
+        atr_pct = atr / price * 100
+        
+        # расстояние от EMA (перегрев)
+        ema_dist = abs(price - ema20) / price * 100
+        
+        # объём
+        vol = float(sig.get("volume") or sig.get("vol") or 0)
+        avg_vol = float(sig.get("avg_volume") or sig.get("vol_avg") or 0)
+        
+        vol_ok = True
+        if avg_vol > 0:
+            vol_ok = vol > avg_vol * 1.3
+        
+        # =====================
+        # УСЛОВИЯ
+        # =====================
+        
+        # ❌ слабое движение
+        if atr_pct < 0.2:
+            print(f"[IMPULSE_SKIP] {instId} weak move {round(atr_pct,3)}%", flush=True)
+            return empty
+        
+        # ❌ нет объёма
+        if not vol_ok:
+            print(f"[IMPULSE_SKIP] {instId} weak volume", flush=True)
+            return empty
+        
+        # ❌ перегрев (вход в конец движения)
+        if ema_dist > 1.2:
+            print(f"[IMPULSE_SKIP] {instId} overextended {round(ema_dist,2)}%", flush=True)
+            return empty
+
         
         # =====================
         # SEND TELEGRAM
