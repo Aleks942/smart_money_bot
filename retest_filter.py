@@ -88,29 +88,29 @@ def retest_ok(sig: dict, m15: dict) -> dict:
             return {"ok": True, "entry": entry, "stop": stop, "reason": "retest_short"}
 
     # =====================
-# FALLBACK RETEST (SWING SAVE)
-# =====================
-
-print(f"[RETEST_FALLBACK] using soft entry | side={side}", flush=True)
-
-if side == "LONG":
-    entry = close
-    stop = r_low - tol
-    return {
-        "ok": True,
-        "entry": entry,
-        "stop": stop,
-        "reason": "fallback_long"
-    }
-
-if side == "SHORT":
-    entry = close
-    stop = r_high + tol
-    return {
-        "ok": True,
-        "entry": entry,
-        "stop": stop,
-        "reason": "fallback_short"
-    }
-
-return {"ok": False, "reason": "no_retest"}
+    # FALLBACK RETEST (SWING SAVE)
+    # =====================
+    
+    print(f"[RETEST_FALLBACK] using soft entry | side={side}", flush=True)
+    
+    if side == "LONG":
+        entry = close
+        stop = r_low - tol
+        return {
+            "ok": True,
+            "entry": entry,
+            "stop": stop,
+            "reason": "fallback_long"
+        }
+    
+    if side == "SHORT":
+        entry = close
+        stop = r_high + tol
+        return {
+            "ok": True,
+            "entry": entry,
+            "stop": stop,
+            "reason": "fallback_short"
+        }
+    
+    return {"ok": False, "reason": "no_retest"}
