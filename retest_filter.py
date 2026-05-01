@@ -1,0 +1,53 @@
+def retest_ok(sig: dict, m15: dict) -> dict:
+
+    if not isinstance(sig, dict) or not isinstance(m15, dict):
+        return {"ok": False, "reason": "bad_inputs"}
+
+    side = sig.get("side")
+    close = m15.get("close")
+    ema20 = m15.get("ema20")
+    vwap = m15.get("vwap")
+    atr = float(m15.get("atr") or 0)
+
+    if close is None or ema20 is None or vwap is None or atr <= 0:
+        return {"ok": False, "reason": "no_m15_data"}
+
+    r_low = sig.get("range_low")
+    r_high = sig.get("range_high")
+
+    if r_low is None or r_high is None:
+        return {"ok": False, "reason": "no_range"}
+
+    tol = atr * 0.3
+
+    # LONG
+    if side in ("LONG", "BUY"):
+        zone_ok = (r_high - tol) <= close <= (r_high + tol)
+        structure_ok = close > ema20 and close > vwap
+
+        if zone_ok and structure_ok:
+            return {
+                "ok": True,
+                "entry": close,
+                "stop": m15.get("micro_stop") or (r_low - tol),
+                "reason": "retest_long"
+            }
+
+        return {"ok": False, "reason": "no_retest_long"}
+
+    # SHORT
+    if side in ("SHORT", "SELL"):
+        zone_ok = (r_low - tol) <= close <= (r_low + tol)
+        structure_ok = close < ema20 and close < vwap
+
+        if zone_ok and structure_ok:
+            return {
+                "ok": True,
+                "entry": close,
+                "stop": m15.get("micro_stop") or (r_high + tol),
+                "reason": "retest_short"
+            }
+
+        return {"ok": False, "reason": "no_retest_short"}
+
+    return {"ok": False, "reason": "bad_side"}
