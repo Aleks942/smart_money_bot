@@ -4268,6 +4268,10 @@ def is_market_cap_ok(instId, market_caps):
         return False
 
 
+
+# =====================
+# MAIN FUNCTION
+# =====================
 def get_market_candidates_bybit():
     tickers = get_bybit_tickers_linear()
     print("BYBIT TICKERS COUNT:", len(tickers))
@@ -4324,24 +4328,35 @@ def get_market_candidates_bybit():
 
     raw_candidates.sort(key=lambda x: (x[1], abs(x[2])), reverse=True)
 
-    print("[MARKET_CAP] SKIPPED (DEBUG MODE)")
-    return raw_candidates[:SCAN_TOP_N]
+    # =====================
+    # MARKET CAP
+    # =====================
+    MARKET_CAP_PREFETCH_MULT = int(os.getenv("MARKET_CAP_PREFETCH_MULT") or "3")
+    prefetch_limit = SCAN_BATCH * MARKET_CAP_PREFETCH_MULT
 
-# фильтрация
-filtered_candidates = []
+    prefetch_candidates = raw_candidates[:prefetch_limit]
 
-for instId, vol_usdt, pct in raw_candidates:
-    if is_market_cap_ok(instId, market_caps):
-        filtered_candidates.append((instId, vol_usdt, pct))
+    base_coins = [get_base_coin(instId) for instId, _, _ in prefetch_candidates]
+    market_caps = fetch_market_caps_usd(base_coins)
 
-print(
-    f"[MARKET_CAP] raw={len(raw_candidates)} "
-    f"passed={len(filtered_candidates)}"
-)
+    if not market_caps:
+        print("[MARKET_CAP] SKIPPED (DEBUG MODE)")
+        return raw_candidates[:SCAN_TOP_N]
 
-filtered_candidates.sort(key=lambda x: (x[1], abs(x[2])), reverse=True)
+    filtered_candidates = []
 
-return filtered_candidates[:SCAN_TOP_N]
+    for instId, vol_usdt, pct in raw_candidates:
+        if is_market_cap_ok(instId, market_caps):
+            filtered_candidates.append((instId, vol_usdt, pct))
+
+    print(
+        f"[MARKET_CAP] raw={len(raw_candidates)} "
+        f"passed={len(filtered_candidates)}"
+    )
+
+    filtered_candidates.sort(key=lambda x: (x[1], abs(x[2])), reverse=True)
+
+    return filtered_candidates[:SCAN_TOP_N]
     
         
 def get_market_candidates():
