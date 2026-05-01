@@ -13,8 +13,18 @@ def c(candle): return f(candle[4])
 def v(candle): return f(candle[5]) if len(candle) > 5 else 0.0
 
 def safe_last(c):
+    if c is None:
+        return None
+
+    if hasattr(c, "empty") and c.empty:
+        return None
+
+    if isinstance(c, list) and len(c) == 0:
+        return None
+
     if hasattr(c, "iloc"):
         return c.iloc[-1]
+
     return c[-1]
 
 
