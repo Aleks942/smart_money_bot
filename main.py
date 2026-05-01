@@ -7030,6 +7030,15 @@ if __name__ == "__main__":
                                     "h1_setup_type": "none",
                                     "m15_trigger_type": "none"
                                 }
+                                try:
+                                    rr = float(swing_sig.get("rr1"))
+                                except:
+                                    rr = 0
+                                
+                                if rr <= 0:
+                                    rr = 2.0
+                                    print(f"[RR_FIX_SWING] {instId} fallback rr=2.0", flush=True)
+                                
                                 swing_sig["rr1"] = rr
                                 # =====================
                                 # SWING OVERRIDE (СРЕДНЕСРОК БЕЗ M15)
