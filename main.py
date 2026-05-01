@@ -6882,6 +6882,20 @@ if __name__ == "__main__":
                                         swing_sig["sendable"] = True
                                         swing_sig["status"] = "HTF_SWING"
                                         swing_sig["verdict"] = "htf_override"
+
+                                # =====================
+                                # FIX SIDE FROM H4
+                                # =====================
+                                
+                                if swing_sig.get("side") == "NEUTRAL":
+                                
+                                    h4_bias = h4_ctx.get("bias")
+                                
+                                    if h4_bias == "LONG":
+                                        swing_sig["side"] = "BUY"
+                                
+                                    elif h4_bias == "SHORT":
+                                        swing_sig["side"] = "SELL"
                     
                                 print(
                                     f"[SWING_DEBUG] {instId} "
