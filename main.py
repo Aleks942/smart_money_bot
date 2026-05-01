@@ -1316,11 +1316,34 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             )
         )
         print(f"[M15_READY] {instId} ready={m15_ready} raw={m15_trigger}")
-        
+
         if m15_ready:
             status = "SWING TRIGGER"
             verdict = "можно работать по M15 trigger"
             sendable = True
+        
+            # =====================
+            # RETEST ENTRY (ВСТАВКА СЮДА)
+            # =====================
+            rt = retest_ok(sig, m15_trigger)
+        
+            if not rt.get("ok"):
+                print(f"[RETEST_SKIP] {instId} {rt.get('reason')}", flush=True)
+            else:
+                entry = rt["entry"]
+                stop = rt["stop"]
+        
+                rr = abs(sig.get("tp1") - entry) / max(abs(entry - stop), 1e-9)
+        
+                send_telegram(
+                    f"🎯 <b>RETEST ENTRY — {instId}</b>\n\n"
+                    f"🧭 Side: <b>{sig.get('side')}</b>\n"
+                    f"💵 Entry: <b>{entry}</b>\n"
+                    f"🛑 Stop: <b>{stop}</b>\n"
+                    f"🎯 TP1: <b>{sig.get('tp1')}</b>\n"
+                    f"📊 RR: <b>{round(rr,2)}</b>\n\n"
+                    f"📌 Причина: {rt.get('reason')}"
+                )
 
             # для trigger берём более реальную текущую цену, а не середину старой H1-зоны
             if m15_trigger.get("close") is not None:
