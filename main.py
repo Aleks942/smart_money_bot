@@ -4334,7 +4334,8 @@ def get_market_candidates_bybit():
         MARKET_CAP_PREFETCH_MULT = int(os.getenv("MARKET_CAP_PREFETCH_MULT") or "3")
         prefetch_limit = SCAN_BATCH * MARKET_CAP_PREFETCH_MULT
     
-        raw_candidates = raw_candidates[:prefetch_limit]
+        # НЕ режем до получения market cap
+        prefetch_candidates = raw_candidates[:prefetch_limit]
     
         # получаем market cap
         base_coins = [get_base_coin(instId) for instId, _, _ in raw_candidates]
