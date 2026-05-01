@@ -6867,6 +6867,21 @@ if __name__ == "__main__":
                                     "h1_setup_type": "none",
                                     "m15_trigger_type": "none"
                                 }
+                                # =====================
+                                # SWING OVERRIDE (СРЕДНЕСРОК БЕЗ M15)
+                                # =====================
+                                
+                                if not swing_sig.get("sendable"):
+                                
+                                    h4_ok = h4_ctx.get("ok")
+                                    h1_ok = h1_setup.get("ok")
+                                
+                                    if h4_ok and h1_ok:
+                                        print(f"[SWING_OVERRIDE] {instId} HTF strong → allow", flush=True)
+                                
+                                        swing_sig["sendable"] = True
+                                        swing_sig["status"] = "HTF_SWING"
+                                        swing_sig["verdict"] = "htf_override"
                     
                                 print(
                                     f"[SWING_DEBUG] {instId} "
