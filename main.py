@@ -1392,10 +1392,6 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         
             entry = rt["entry"]
             stop = rt["stop"]
-                print(f"[RETEST_OK] {instId}", flush=True)
-        
-                entry = rt["entry"]
-                stop = rt["stop"]
 
         rr = abs(sig.get("tp1") - entry) / max(abs(entry - stop), 1e-9)
 
