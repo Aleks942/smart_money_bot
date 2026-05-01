@@ -12,6 +12,11 @@ def l(c): return f(c[3])
 def c(candle): return f(candle[4])
 def v(candle): return f(candle[5]) if len(candle) > 5 else 0.0
 
+def safe_last(c):
+    if hasattr(c, "iloc"):
+        return c.iloc[-1]
+    return c[-1]
+
 
 
 
