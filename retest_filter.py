@@ -13,16 +13,16 @@ def retest_ok(sig: dict, m15: dict) -> dict:
         or str(sig.get("direction") or "")
     ).upper()
     
-    # fallback 1 — из trigger
+    # fallback 1
     if not side_raw:
         trigger_type = str(m15.get("trigger_type") or "").lower()
     
         if "momentum" in trigger_type:
-            side_raw = "LONG"   # 🔥 временно считаем momentum = LONG
+            side_raw = "LONG"
         elif "down" in trigger_type:
             side_raw = "SHORT"
     
-    # fallback 2 — из EMA (самый надёжный)
+    # fallback 2 (EMA)
     if not side_raw:
         close = float(m15.get("close") or 0)
         ema20 = float(m15.get("ema20") or 0)
@@ -31,6 +31,10 @@ def retest_ok(sig: dict, m15: dict) -> dict:
             side_raw = "LONG"
         elif close < ema20:
             side_raw = "SHORT"
+    
+    # ❗ НОВОЕ
+    if "БАЛАНС" in side_raw or "BALANCE" in side_raw or "NEUTRAL" in side_raw:
+        return {"ok": False, "reason": "neutral_market"}
     
     # финал
     if "LONG" in side_raw or "BUY" in side_raw or "UP" in side_raw:
