@@ -2,18 +2,28 @@ def retest_ok(sig: dict, m15: dict) -> dict:
 
     if not isinstance(sig, dict) or not isinstance(m15, dict):
         return {"ok": False, "reason": "bad_inputs"}
+        
+# =====================
+# SIDE NORMALIZATION
+# =====================
+side_raw = str(sig.get("side") or "").upper()
 
-    # =====================
-    # SIDE NORMALIZATION
-    # =====================
-    side_raw = str(sig.get("side") or "").upper()
+# fallback если сигнала нет
+if not side_raw:
+    trigger_type = str(m15.get("trigger_type") or "").lower()
 
-    if "LONG" in side_raw or "BUY" in side_raw or "UP" in side_raw:
-        side = "LONG"
-    elif "SHORT" in side_raw or "SELL" in side_raw or "DOWN" in side_raw:
-        side = "SHORT"
-    else:
-        return {"ok": False, "reason": f"bad_side_{side_raw}"}
+    if "long" in trigger_type or "up" in trigger_type:
+        side_raw = "LONG"
+    elif "short" in trigger_type or "down" in trigger_type:
+        side_raw = "SHORT"
+
+# нормализация
+if "LONG" in side_raw or "BUY" in side_raw or "UP" in side_raw:
+    side = "LONG"
+elif "SHORT" in side_raw or "SELL" in side_raw or "DOWN" in side_raw:
+    side = "SHORT"
+else:
+    return {"ok": False, "reason": f"bad_side_{side_raw}"}
 
     # =====================
     # M15 DATA
