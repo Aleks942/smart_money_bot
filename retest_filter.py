@@ -6,16 +6,23 @@ def retest_ok(sig: dict, m15: dict) -> dict:
     # =====================
     # SIDE NORMALIZATION
     # =====================
-    side_raw = str(sig.get("side") or "").upper()
-
+    
+    side_raw = (
+        str(sig.get("side") or "")
+        or str(sig.get("signal") or "")
+        or str(sig.get("direction") or "")
+    ).upper()
+    
+    # fallback если side пустой
     if not side_raw:
         trigger_type = str(m15.get("trigger_type") or "").lower()
-
-        if "long" in trigger_type or "up" in trigger_type:
+    
+        if "momentum" in trigger_type or "up" in trigger_type:
             side_raw = "LONG"
-        elif "short" in trigger_type or "down" in trigger_type:
+        elif "down" in trigger_type:
             side_raw = "SHORT"
-
+    
+    # нормализация
     if "LONG" in side_raw or "BUY" in side_raw or "UP" in side_raw:
         side = "LONG"
     elif "SHORT" in side_raw or "SELL" in side_raw or "DOWN" in side_raw:
