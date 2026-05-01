@@ -7077,6 +7077,9 @@ if __name__ == "__main__":
                                 df_h4 = get_tf_candles(instId, tf="4h", limit=200) if SWING_USE_H4 else pd.DataFrame()
                                 df_h1 = get_tf_candles(instId, tf="1h", limit=200) if SWING_USE_H1 else pd.DataFrame()
                                 df_m15 = get_tf_candles(instId, tf="15m", limit=200) if SWING_USE_M15 else pd.DataFrame()
+                                market_phase = detect_market_phase(df_h1)
+
+                                print(f"[MARKET] {instId} phase={market_phase['phase']} score={market_phase['score']}", flush=True)
                     
                                 h4_ctx = analyze_h4_context(df_h4) if not df_h4.empty else {"ok": False}
                                 h1_setup = analyze_h1_setup(df_h1, h4_ctx) if not df_h1.empty else {"ok": False}
