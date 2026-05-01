@@ -1801,7 +1801,23 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             if side in ("SHORT", "SELL") and rsi < 20:
                 print(f"[PRO_SKIP] RSI low", flush=True)
                 return empty
+
+        # =====================
+        # SIGNAL CLASSIFICATION
+        # =====================
         
+        level = "C"
+        
+        if rr >= 2 and score >= 6:
+            if mf.get("ok") and oi_confirm:
+                level = "A"
+            else:
+                level = "B"
+        
+        elif rr >= 1.2 and score >= 4:
+            level = "B"
+        
+        print(f"[LEVEL] {instId} level={level}", flush=True)
         
         # =====================
         # SEND TELEGRAM
