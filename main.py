@@ -4251,6 +4251,35 @@ def is_bad_symbol(instId: str) -> bool:
 
     return False
 
+# =====================
+# MARKET CAP CHECK
+# =====================
+def is_market_cap_ok(instId, market_caps):
+    try:
+        base = get_base_coin(instId)
+        cap = market_caps.get(base)
+
+        if cap is None:
+            return False
+
+        return cap >= MARKET_CAP_MIN_USD
+
+    except Exception:
+        return False
+
+
+# =====================
+# MAIN FUNCTION
+# =====================
+def get_market_candidates_bybit():
+    tickers = get_bybit_tickers_linear()
+    print("BYBIT TICKERS COUNT:", len(tickers))
+
+    raw_candidates = []
+
+    for t in tickers:
+        sym = t.get("symbol", "")
+
 
 def get_market_candidates_bybit():
     tickers = get_bybit_tickers_linear()
