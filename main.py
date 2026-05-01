@@ -19,6 +19,55 @@ from ta_sniper import analyze_ta_sniper
 from retest_filter import retest_ok
 import traceback
 
+# =====================
+# MONEY FLOW
+# =====================
+def money_flow_ok(candles, oi_change, direction):
+    try:
+        if candles is None:
+            return {"ok": False}
+
+        # если pandas → в список
+        if hasattr(candles, "iloc"):
+            if candles.empty:
+                return {"ok": False}
+            data = candles.values.tolist()
+        else:
+            data = candles
+
+        if len(data) < 3:
+            return {"ok": False}
+
+        last = data[-1]
+        prev = data[-2]
+
+        close_now = float(last[4])
+        close_prev = float(prev[4])
+
+        move_pct = (close_now - close_prev) / close_prev * 100 if close_prev else 0
+
+        vol_now = float(last[5]) if len(last) > 5 else 0
+        vol_prev = float(prev[5]) if len(prev) > 5 else 1
+
+        vol_ok = vol_now > vol_prev
+        impulse_ok = abs(move_pct) > 0.3
+
+        oi_ok = False
+        if oi_change is not None:
+            try:
+                if float(oi_change) > 0:
+                    oi_ok = True
+            except:
+                pass
+
+        return {
+            "ok": vol_ok and impulse_ok and oi_ok
+        }
+
+    except Exception as e:
+        print(f"[MF_ERROR] {e}", flush=True)
+        return {"ok": False}
+
 
 # =========================
 # ANTI-SPAM TELEGRAM
