@@ -1370,6 +1370,46 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         if rr < 3:
             print(f"[RR_SKIP] {instId} rr={round(rr,2)}", flush=True)
             return empty
+        
+        
+        # =====================
+        # RSI FILTER (СЮДА)
+        # =====================
+        rsi = sig.get("rsi") or sig.get("rsi14")
+        
+        try:
+            rsi = float(rsi)
+        except:
+            rsi = None
+        
+        if rsi is not None:
+            if sig.get("side") in ("LONG", "BUY") and rsi > 80:
+                print(f"[RSI_SKIP] {instId} перегрев LONG rsi={rsi}", flush=True)
+                return empty
+        
+            if sig.get("side") in ("SHORT", "SELL") and rsi < 20:
+                print(f"[RSI_SKIP] {instId} перепроданность SHORT rsi={rsi}", flush=True)
+                return empty
+        
+        
+        # =====================
+        # OI FILTER (СРАЗУ ПОСЛЕ RSI)
+        # =====================
+        oi = sig.get("oi_change")
+        
+        try:
+            oi = float(oi)
+        except:
+            oi = None
+        
+        if oi is not None:
+            if sig.get("side") in ("LONG", "BUY") and oi < 0:
+                print(f"[OI_SKIP] {instId} слабый LONG (OI падает)", flush=True)
+                return empty
+
+    if sig.get("side") in ("SHORT", "SELL") and oi < 0:
+        print(f"[OI_SKIP] {instId} слабый SHORT (OI падает)", flush=True)
+        return empty
 
         # =====================
         # SCORE FILTER
