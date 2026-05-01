@@ -1341,13 +1341,6 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
                 stop = rt["stop"]
         
                 rr = abs(sig.get("tp1") - entry) / max(abs(entry - stop), 1e-9)
-                # =====================
-                # RR FILTER
-                # =====================
-                if rr < 3:
-                    print(f"[RR_SKIP] {instId} rr={round(rr,2)}", flush=True)
-                    sendable = False
-                    return
                 
                 # =====================
                 # SCORE FILTER
