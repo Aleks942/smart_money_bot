@@ -6884,6 +6884,7 @@ if __name__ == "__main__":
                                     "h1_setup_type": "none",
                                     "m15_trigger_type": "none"
                                 }
+                                swing_sig["rr1"] = rr
                                 # =====================
                                 # SWING OVERRIDE (СРЕДНЕСРОК БЕЗ M15)
                                 # =====================
