@@ -1441,7 +1441,7 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         
         
         # =====================
-        # OI FILTER
+        # OI INTELLIGENCE
         # =====================
         oi = sig.get("oi_change")
         
@@ -1450,14 +1450,38 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         except:
             oi = None
         
-        if oi is not None:
-            if sig.get("side") in ("LONG", "BUY") and oi < 0:
-                print(f"[OI_SKIP] {instId} слабый LONG (OI падает)", flush=True)
-                return empty
+        score = sig.get("score", 0)
         
-            if sig.get("side") in ("SHORT", "SELL") and oi < 0:
-                print(f"[OI_SKIP] {instId} слабый SHORT (OI падает)", flush=True)
-                return empty
+        oi_confirm = False
+        oi_weak = False
+        
+        if oi is not None:
+        
+            # 🔥 деньги заходят
+            if oi > 0.05:
+                oi_confirm = True
+                print(f"[OI_CONFIRM] {instId} oi={oi}", flush=True)
+        
+            # ⚠️ деньги выходят
+            elif oi < -0.05:
+                oi_weak = True
+                print(f"[OI_WEAK] {instId} oi={oi}", flush=True)
+
+
+# =====================
+# OI FILTER
+# =====================
+if oi_weak and score < 6:
+    print(f"[OI_SKIP] {instId} weak OI + low score", flush=True)
+    return empty
+
+
+# =====================
+# OI BOOST
+# =====================
+if oi_confirm:
+    sig["score"] = sig.get("score", 0) + 1
+    print(f"[OI_BOOST] {instId} +1 score", flush=True)
 
         # =====================
         # SCORE FILTER
