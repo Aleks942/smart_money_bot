@@ -1433,7 +1433,7 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
                 f"📌 Причина: {rt.get('reason')}"
             )
         
-        elif h1_setup and h1_setup.get("setup_type") not in ("none", None):
+        if h1_setup and h1_setup.get("setup_type") not in ("none", None):
             status = "SWING SETUP"
             verdict = "сетап есть, но лучше ждать M15 trigger"
             sendable = True
