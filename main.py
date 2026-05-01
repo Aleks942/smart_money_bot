@@ -1318,8 +1318,19 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         print(f"[M15_READY] {instId} ready={m15_ready} raw={m15_trigger}")
 
         if m15_ready:
-            status = "SWING TRIGGER"
-            verdict = "можно работать по M15 trigger"
+        status = "SWING TRIGGER"
+        verdict = "можно работать по M15 trigger"
+    
+        # =====================
+        # RETEST ENTRY
+        # =====================
+        rt = retest_ok(sig, m15_trigger)
+    
+        if not rt.get("ok"):
+            print(f"[RETEST_SKIP] {instId} {rt.get('reason')}", flush=True)
+            sendable = False   # ❗ КЛЮЧЕВОЕ
+        else:
+            print(f"[RETEST_OK] {instId}", flush=True)
             sendable = True
         
             # =====================
