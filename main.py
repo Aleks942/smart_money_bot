@@ -4368,23 +4368,7 @@ filtered_candidates.sort(key=lambda x: (x[1], abs(x[2])), reverse=True)
 
 return filtered_candidates[:SCAN_TOP_N]
     
-        # фильтрация
-        filtered_candidates = []
-    
-        for instId, vol_usdt, pct in raw_candidates:
-            if is_market_cap_ok(instId, market_caps):
-                filtered_candidates.append((instId, vol_usdt, pct))
-    
-        print(
-            f"[MARKET_CAP] raw={len(raw_candidates)} "
-            f"passed={len(filtered_candidates)} "
-            f"threshold={MARKET_CAP_MIN_USD}"
-        )
-    
-        filtered_candidates.sort(key=lambda x: (x[1], abs(x[2])), reverse=True)
-        return filtered_candidates[:SCAN_TOP_N]
-
-
+        
 def get_market_candidates():
     if is_bybit():
         return get_market_candidates_bybit()
