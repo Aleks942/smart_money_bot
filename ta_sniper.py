@@ -141,9 +141,29 @@ def find_range_m15(candles, min_bars=5, max_bars=20, max_width_pct=2.5):
     for bars in range(min_bars, max_bars + 1):
         zone = candles[-bars:]
 
-        high = max(h(x) for x in zone)
-        low = min(l(x) for x in zone)
-        close = c(zone[-1])
+        # фильтр мусора
+        clean_zone = [
+            x for x in zone
+            if isinstance(x, (list, tuple)) or hasattr(x, "__getitem__")
+        ]
+        
+        if not clean_zone:
+            continue
+        
+        try:
+            high = max(h(x) for x in clean_zone)
+            low = min(l(x) for x in clean_zone)
+        
+            last = clean_zone[-1]
+        
+            if hasattr(last, "iloc"):  # pandas
+                close = float(last["close"])
+            else:  # список
+                close = c(last)
+        
+        except Exception as e:
+            print(f"[RANGE_ERROR] {e}", flush=True)
+            continue
 
         if close <= 0:
             continue
