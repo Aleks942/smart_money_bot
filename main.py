@@ -4616,12 +4616,19 @@ def build_signal(instId):
         "ts": now_ts(),
         "created_at": time.time(),
     }
-    # 🔥 DECISION LAYER
-    signal["decision"] = decision_engine(signal)
+    # =========================
+    # EXTRA SIGNAL LAYERS
+    # =========================
     
     signal.update(detect_early_pressure(signal))
     
     signal["sniper"] = sniper_signal(signal)
+    
+    # =========================
+    # FINAL DECISION
+    # =========================
+    
+    signal["decision"] = decision_engine(signal)
     
     return signal
 
