@@ -1,4 +1,6 @@
 import pandas as pd
+
+
 def f(x, default=0.0):
     try:
         return float(x)
@@ -6,47 +8,43 @@ def f(x, default=0.0):
         return default
 
 
-def o(c):
-    if hasattr(c, "get"):
-        return f(c.get("open", 0))
-    return f(c[1])
+def normalize_candles(candles):
+    if candles is None:
+        return []
 
-def h(c):
-    if hasattr(c, "get"):
-        return f(c.get("high", 0))
-    return f(c[2])
+    if hasattr(candles, "empty"):
+        if candles.empty:
+            return []
+        rows = []
+        for _, r in candles.iterrows():
+            rows.append([
+                r.get("ts", None),
+                r.get("open", 0),
+                r.get("high", 0),
+                r.get("low", 0),
+                r.get("close", 0),
+                r.get("volume", 0),
+            ])
+        return rows
 
-def l(c):
-    if hasattr(c, "get"):
-        return f(c.get("low", 0))
-    return f(c[3])
+    if isinstance(candles, list):
+        return [x for x in candles if isinstance(x, (list, tuple)) and len(x) >= 5]
 
-def c(candle):
-    if hasattr(candle, "get"):
-        return f(candle.get("close", 0))
-    return f(candle[4])
+    return []
 
-def v(candle):
-    if hasattr(candle, "get"):
-        return f(candle.get("volume", 0))
-    return f(candle[5]) if len(candle) > 5 else 0
 
-def safe_last(c):
-    if c is None:
+def o(x): return f(x[1])
+def h(x): return f(x[2])
+def l(x): return f(x[3])
+def c(x): return f(x[4])
+def v(x): return f(x[5]) if len(x) > 5 else 0.0
+
+
+def safe_last(candles):
+    candles = normalize_candles(candles)
+    if not candles:
         return None
-
-    if hasattr(c, "empty") and c.empty:
-        return None
-
-    if isinstance(c, list) and len(c) == 0:
-        return None
-
-    if hasattr(c, "iloc"):
-        return c.iloc[-1]
-
-    return c[-1]
-
-
+    return candles[-1]
 
 
 # =========================
@@ -54,57 +52,40 @@ def safe_last(c):
 # =========================
 
 def find_reversal_levels(candles, lookback=120, tolerance_pct=1.0, min_touches=2):
-    """
-    Ищет уровни, где цена разворачивалась.
-    Подходит для MONTH / DAY / H1.
-    """
+    candles = normalize_candles(candles)
 
-    # =====================
-    # SAFE CHECK + NORMALIZE
-    # =====================
-    if candles is None:
+    if len(candles) < 20:
         return []
-    
-    # если pandas → переводим в list
-    if hasattr(candles, "iloc"):
-        if candles.empty:
-            return []
-        candles = candles.values.tolist()
-    
-    # если уже list
-    elif isinstance(candles, list):
-        if len(candles) < 20:
-            return []
-    else:
-        return []
-    
-    # =====================
-    # ОБРЕЗКА
-    # =====================
+
     candles = candles[-lookback:]
-    
     raw = []
 
     for i in range(2, len(candles) - 2):
-        row = candles.iloc[i] if hasattr(candles, "iloc") else candles[i]
-    
-        high = h(row)
-        low = l(row)
-    
-        prev1 = candles.iloc[i-1] if hasattr(candles, "iloc") else candles[i-1]
-        prev2 = candles.iloc[i-2] if hasattr(candles, "iloc") else candles[i-2]
-        next1 = candles.iloc[i+1] if hasattr(candles, "iloc") else candles[i+1]
-        next2 = candles.iloc[i+2] if hasattr(candles, "iloc") else candles[i+2]
-    
-        if high > h(prev1) and high > h(prev2) and high > h(next1) and high > h(next2):
+        high = h(candles[i])
+        low = l(candles[i])
+
+        if (
+            high > h(candles[i - 1])
+            and high > h(candles[i - 2])
+            and high > h(candles[i + 1])
+            and high > h(candles[i + 2])
+        ):
             raw.append(high)
-    
-        if low < l(prev1) and low < l(prev2) and low < l(next1) and low < l(next2):
+
+        if (
+            low < l(candles[i - 1])
+            and low < l(candles[i - 2])
+            and low < l(candles[i + 1])
+            and low < l(candles[i + 2])
+        ):
             raw.append(low)
 
     levels = []
 
     for price in raw:
+        if price <= 0:
+            continue
+
         added = False
 
         for lvl in levels:
@@ -131,6 +112,9 @@ def find_reversal_levels(candles, lookback=120, tolerance_pct=1.0, min_touches=2
 def nearest_level(price, levels, max_distance_pct=2.0):
     best = None
 
+    if price <= 0:
+        return None
+
     for lvl in levels:
         dist = abs(price - lvl["price"]) / price * 100
 
@@ -149,14 +133,9 @@ def nearest_level(price, levels, max_distance_pct=2.0):
 # =========================
 
 def find_range_m15(candles, min_bars=5, max_bars=20, max_width_pct=2.5):
-    # если DataFrame → превращаем в список свечей
-    if hasattr(candles, "iloc"):
-        candles = candles.values.tolist()
-    """
-    Ищет диапазон / проторговку.
-    """
+    candles = normalize_candles(candles)
 
-    if candles is None or len(candles) < max_bars:
+    if len(candles) < max_bars:
         return None
 
     best = None
@@ -164,44 +143,17 @@ def find_range_m15(candles, min_bars=5, max_bars=20, max_width_pct=2.5):
     for bars in range(min_bars, max_bars + 1):
         zone = candles[-bars:]
 
-        clean_zone = []
-        
-        for x in zone:
-            # ✅ pandas строка (Series)
-            if hasattr(x, "to_dict"):
-                clean_zone.append(x)
-                continue
-        
-            # ✅ норм свеча list/tuple
-            if isinstance(x, (list, tuple)) and len(x) >= 5:
-                clean_zone.append(x)
-                continue
-        
-            # ❌ мусор (строки, None, dict без структуры)
-            print(f"[BAD_CANDLE] {type(x)} -> {str(x)[:30]}", flush=True)
-        
-        # если данных мало — пропускаем
-        if len(clean_zone) < min_bars:
+        if len(zone) < min_bars:
             continue
-        
+
         try:
-            high = max(h(x) for x in clean_zone)
-            low = min(l(x) for x in clean_zone)
-        
-            last = clean_zone[-1]
-        
-            # pandas
-            if hasattr(last, "to_dict"):
-                close = float(last["close"])
-        
-            # list
-            else:
-                close = c(last)
-        
+            high = max(h(x) for x in zone)
+            low = min(l(x) for x in zone)
+            close = c(zone[-1])
         except Exception as e:
             print(f"[RANGE_ERROR] {type(e).__name__}: {e}", flush=True)
             continue
-        
+
         if close <= 0:
             continue
 
@@ -224,10 +176,7 @@ def find_range_m15(candles, min_bars=5, max_bars=20, max_width_pct=2.5):
 # =========================
 
 def buyer_seller_power(candles, lookback=8):
-    """
-    Считает силу стороны по телам свечей и объёму.
-    """
-
+    candles = normalize_candles(candles)
     zone = candles[-lookback:]
 
     if len(zone) < 3:
@@ -237,7 +186,7 @@ def buyer_seller_power(candles, lookback=8):
             "bias": "NEUTRAL"
         }
 
-    avg_vol = sum(v(x) for x in zone) / len(zone)
+    avg_vol = sum(v(x) for x in zone) / max(len(zone), 1)
 
     buy = 0.0
     sell = 0.0
@@ -252,8 +201,8 @@ def buyer_seller_power(candles, lookback=8):
         full = max(high - low, 0.00000001)
         body = abs(close - open_)
         body_power = body / full
-
         vol_power = vol / avg_vol if avg_vol > 0 else 1
+
         power = body_power * vol_power
 
         if close > open_:
@@ -280,56 +229,30 @@ def buyer_seller_power(candles, lookback=8):
 # =========================
 
 def detect_breakout(candles, range_data, buffer_pct=0.12):
-    # =====================
-    # SAFE CHECK
-    # =====================
-    if candles is None or range_data is None:
+    candles = normalize_candles(candles)
+
+    if not candles or range_data is None:
         return None
-    
-    # pandas
-    if hasattr(candles, "empty"):
-        if candles.empty:
-            return None
-    
-    # list
-    elif isinstance(candles, list):
-        if len(candles) == 0:
-            return None
-    
-    
-    # =====================
-    # LAST CLOSE
-    # =====================
+
+    high = range_data.get("high")
+    low = range_data.get("low")
+
+    if high is None or low is None:
+        return None
+
     try:
-        if hasattr(candles, "iloc"):  # pandas
-            last_close = float(candles["close"].iloc[-1])
-        else:  # list
-            last_close = c(candles[-1])
+        last_close = c(candles[-1])
     except Exception as e:
-        print(f"[BREAKOUT_ERROR] {e}", flush=True)
+        print(f"[BREAKOUT_ERROR] {type(e).__name__}: {e}", flush=True)
         return None
 
+    if last_close > high * (1 + buffer_pct / 100):
+        return "BREAKOUT_UP"
 
-# =====================
-# RANGE
-# =====================
-high = range_data.get("high")
-low = range_data.get("low")
+    if last_close < low * (1 - buffer_pct / 100):
+        return "BREAKOUT_DOWN"
 
-if high is None or low is None:
     return None
-
-
-# =====================
-# BREAKOUT LOGIC
-# =====================
-if last_close > high * (1 + buffer_pct / 100):
-    return "BREAKOUT_UP"
-
-if last_close < low * (1 - buffer_pct / 100):
-    return "BREAKOUT_DOWN"
-
-return None
 
 
 # =========================
@@ -337,8 +260,14 @@ return None
 # =========================
 
 def build_entry_plan(symbol, side, price, range_data, max_stop_pct=3.5):
-    high = range_data["high"]
-    low = range_data["low"]
+    if not range_data:
+        return None
+
+    high = range_data.get("high")
+    low = range_data.get("low")
+
+    if high is None or low is None:
+        return None
 
     if side == "LONG":
         entry = price
@@ -380,8 +309,8 @@ def build_entry_plan(symbol, side, price, range_data, max_stop_pct=3.5):
         "stop_pct": round(stop_pct, 2),
         "range_high": round(high, 8),
         "range_low": round(low, 8),
-        "range_bars": range_data["bars"],
-        "range_width_pct": range_data["width_pct"]
+        "range_bars": range_data.get("bars"),
+        "range_width_pct": range_data.get("width_pct")
     }
 
 
@@ -397,22 +326,24 @@ def analyze_ta_sniper(
     candles_m15,
     max_stop_pct=3.5
 ):
-    """
-    Главный движок:
-    история → уровни → M15 проторговка → сила → выход → вход/стоп.
-    """
+    candles_month = normalize_candles(candles_month)
+    candles_day = normalize_candles(candles_day)
+    candles_h1 = normalize_candles(candles_h1)
+    candles_m15 = normalize_candles(candles_m15)
 
-    if candles_m15 is None or candles_m15.empty or len(candles_m15) < 30:
+    if len(candles_m15) < 30:
         return None
 
     last = safe_last(candles_m15)
 
     if last is None:
         return None
-    
+
     price = c(last)
 
-    # 1. уровни с истории
+    if price <= 0:
+        return None
+
     month_levels = find_reversal_levels(
         candles_month,
         lookback=120,
@@ -434,7 +365,6 @@ def analyze_ta_sniper(
     if not near:
         return None
 
-    # 2. проторговка M15
     range_data = find_range_m15(
         candles_m15,
         min_bars=5,
@@ -445,13 +375,11 @@ def analyze_ta_sniper(
     if not range_data:
         return None
 
-    # 3. выход из диапазона
     breakout = detect_breakout(candles_m15, range_data)
 
     if not breakout:
         return None
 
-    # 4. сила стороны
     power = buyer_seller_power(candles_m15, lookback=8)
 
     side = None
@@ -465,7 +393,6 @@ def analyze_ta_sniper(
     if not side:
         return None
 
-    # 5. план сделки
     plan = build_entry_plan(
         symbol=symbol,
         side=side,
