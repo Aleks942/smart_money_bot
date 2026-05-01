@@ -1461,6 +1461,46 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
                 return
 
         # =====================
+        # FAKE BREAKOUT (ANTI-TRAP)
+        # =====================
+        
+        support_zone = h4_ctx.get("support_zone")
+        resistance_zone = h4_ctx.get("resistance_zone")
+        
+        close = float(m15_trigger.get("close") or 0)
+        atr = float(m15_trigger.get("atr") or 0)
+        
+        # буфер от уровня (чтобы не входить "в сам уровень")
+        buffer = atr * 0.5  # можно 0.3–0.8
+        
+        if sig.get("side") in ("LONG", "BUY") and resistance_zone:
+            resistance = float(resistance_zone[1])
+        
+            # ❌ слишком близко к сопротивлению → могут выбить и развернуть
+            if abs(resistance - close) < buffer:
+                print(f"[TRAP_SKIP] {instId} near resistance trap zone", flush=True)
+                return
+        
+            # ❌ ложный пробой: цена уже вернулась под уровень
+            if close < resistance:
+                print(f"[TRAP_SKIP] {instId} failed breakout (below resistance)", flush=True)
+                return
+        
+        
+        elif sig.get("side") in ("SHORT", "SELL") and support_zone:
+            support = float(support_zone[0])
+        
+            # ❌ слишком близко к поддержке
+            if abs(close - support) < buffer:
+                print(f"[TRAP_SKIP] {instId} near support trap zone", flush=True)
+                return
+        
+            # ❌ ложный пробой: цена вернулась выше поддержки
+            if close > support:
+                print(f"[TRAP_SKIP] {instId} failed breakdown (above support)", flush=True)
+                return
+
+        # =====================
         # SEND TELEGRAM
         # =====================
         send_telegram(
