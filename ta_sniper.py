@@ -1,3 +1,4 @@
+import pandas as pd
 def f(x, default=0.0):
     try:
         return float(x)
@@ -10,6 +11,8 @@ def h(c): return f(c[2])
 def l(c): return f(c[3])
 def c(candle): return f(candle[4])
 def v(candle): return f(candle[5]) if len(candle) > 5 else 0.0
+
+
 
 
 # =========================
