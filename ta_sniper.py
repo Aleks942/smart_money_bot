@@ -129,6 +129,9 @@ def nearest_level(price, levels, max_distance_pct=2.0):
 # =========================
 
 def find_range_m15(candles, min_bars=5, max_bars=20, max_width_pct=2.5):
+    # если DataFrame → превращаем в список свечей
+    if hasattr(candles, "iloc"):
+        candles = candles.values.tolist()
     """
     Ищет диапазон / проторговку.
     """
