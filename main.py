@@ -1415,7 +1415,7 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         # SCORE FILTER
         # =====================
         score = float(sig.get("score") or 0)
-        if score < 7:
+        if score < 5:
             print(f"[SCORE_SKIP] {instId} score={score}", flush=True)
             return empty
 
