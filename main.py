@@ -1372,10 +1372,8 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             if strong_momentum:
                 print(f"[RETEST_OVERRIDE] {instId} strong momentum → allow", flush=True)
         
-                # используем текущую цену как вход
                 entry = sig.get("price")
         
-                # ставим стоп за экстремум
                 if "ВВЕРХ" in direction:
                     stop = entry * 0.985
                 elif "ВНИЗ" in direction:
@@ -1393,7 +1391,16 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             entry = rt["entry"]
             stop = rt["stop"]
 
-        rr = abs(sig.get("tp1") - entry) / max(abs(entry - stop), 1e-9)
+
+# =====================
+# RR (ОБЩИЙ ДЛЯ ВСЕХ)
+# =====================
+tp1 = sig.get("tp1")
+
+if tp1 is None or entry is None or stop is None:
+    rr = 0
+else:
+    rr = abs(tp1 - entry) / max(abs(entry - stop), 1e-9)
 
         # =====================
         # RR FILTER
