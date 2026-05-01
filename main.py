@@ -6770,7 +6770,7 @@ if __name__ == "__main__":
                         elite = False
                     
                     # 4. TA совпадает по направлению
-                    if isinstance(ta, dict) and ta.get("entry") and ta.get("stop"):
+                    if isinstance(ta, dict) and ta.get("entry") and ta.get("stop") and ta.get("tp1"):
                         if ta.get("side") == sig.get("side"):
                             reasons.append("TA_CONFIRM")
                         else:
@@ -6792,7 +6792,7 @@ if __name__ == "__main__":
                     # SEND SIGNAL
                     # =====================
                     
-                    if isinstance(ta, dict) and ta.get("entry") and ta.get("stop"):
+                    if isinstance(ta, dict) and ta.get("entry") and ta.get("stop") and ta.get("tp1"):
                         send_telegram(
                             f"🎯 <b>TA SNIPER — {ta.get('symbol')}</b>\n\n"
                             f"🧭 Направление: <b>{ta.get('side')}</b>\n"
