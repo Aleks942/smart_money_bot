@@ -1487,12 +1487,39 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
                     print(f"[DIV_SKIP] {instId} bearish divergence", flush=True)
                     return empty
         
+    
         # SHORT дивергенция (плохо для шорта)
         if sig.get("side") in ("SHORT", "SELL"):
             if prev_price and prev_rsi and rsi:
                 if price_now < prev_price and rsi > prev_rsi:
                     print(f"[DIV_SKIP] {instId} bullish divergence", flush=True)
                     return empty
+        
+        
+        # =====================
+        # 👉 ВСТАВИТЬ СЮДА (DOUBLE DIVERGENCE)
+        # =====================
+        oi = sig.get("oi_change")
+        
+        try:
+            oi = float(oi)
+        except:
+            oi = None
+        
+        # LONG — ослабление
+        if side == "LONG":
+            if prev_price and prev_rsi and rsi and oi is not None:
+                if price_now > prev_price and rsi < prev_rsi and oi < 0:
+                    print(f"[DOUBLE_DIV_SKIP] {instId} LONG weak", flush=True)
+                    return empty
+        
+        # SHORT — ослабление
+        if side == "SHORT":
+            if prev_price and prev_rsi and rsi and oi is not None:
+                if price_now < prev_price and rsi > prev_rsi and oi < 0:
+                    print(f"[DOUBLE_DIV_SKIP] {instId} SHORT weak", flush=True)
+                    return empty
+
 
         # =====================
         # H4 FILTER
