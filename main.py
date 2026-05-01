@@ -1867,6 +1867,13 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             level = "B"
         
         print(f"[LEVEL] {instId} level={level}", flush=True)
+
+        # =====================
+        # FILTER WEAK (C)
+        # =====================
+        if level == "C":
+            print(f"[SKIP] {instId} weak signal (C)", flush=True)
+            return empty
         
         # =====================
         # SEND TELEGRAM
