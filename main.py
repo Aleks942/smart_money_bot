@@ -4316,8 +4316,8 @@ def get_market_candidates_bybit():
     filtered_candidates = []
 
     for instId, vol_usdt, pct in raw_candidates:
-        if is_market_cap_ok(instId, market_caps):
-            filtered_candidates.append((instId, vol_usdt, pct))
+    if is_market_cap_ok(instId, market_caps):
+        filtered_candidates.append((instId, vol_usdt, pct))
 
     print(
         f"[MARKET_CAP] raw={len(raw_candidates)} "
