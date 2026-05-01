@@ -4288,63 +4288,85 @@ def get_market_candidates_bybit():
     raw_candidates = []
 
     for t in tickers:
-        sym = t.get("symbol", "")
+    sym = t.get("symbol", "")
 
-        if not sym.endswith("USDT"):
+    if not sym.endswith("USDT"):
+        continue
+
+    if is_bad_symbol(sym):
+        continue
+
+    try:
+        vol_usdt = float(t.get("turnover24h") or 0.0)
+    except Exception:
+        vol_usdt = 0.0
+
+    try:
+        last = float(t.get("lastPrice") or 0.0)
+        prev = float(t.get("prevPrice24h") or 0.0)
+        pct = ((last - prev) / prev * 100.0) if prev > 0 else 0.0
+    except Exception:
+        pct = 0.0
+
+    if vol_usdt < SCAN_MIN_VOL_USDT:
+        continue
+
+    abs_pct = abs(pct)
+
+    normal_move_ok = abs_pct >= SCAN_MIN_PCT_24H
+    prebreak_move_ok = PREBREAK_SCAN_MIN_PCT_24H <= abs_pct <= PREBREAK_SCAN_MAX_PCT_24H
+
+    if not ACCUMULATION_MODE:
+        if not (normal_move_ok or prebreak_move_ok):
             continue
 
-        if is_bad_symbol(sym):
-            continue
+    instId = sym
+    raw_candidates.append((instId, vol_usdt, pct))
 
-        try:
-            vol_usdt = float(t.get("turnover24h") or 0.0)
-        except Exception:
-            vol_usdt = 0.0
 
-        try:
-            last = float(t.get("lastPrice") or 0.0)
-            prev = float(t.get("prevPrice24h") or 0.0)
-            pct = ((last - prev) / prev * 100.0) if prev > 0 else 0.0
-        except Exception:
-            pct = 0.0
+# =====================
+# 👉 ВОТ СЮДА ВСЁ НИЖЕ (ВНЕ ЦИКЛА)
+# =====================
 
-        if vol_usdt < SCAN_MIN_VOL_USDT:
-            continue
+print(f"[DEBUG] raw_candidates before filter: {len(raw_candidates)}", flush=True)
 
-        abs_pct = abs(pct)
+if not raw_candidates:
+    print("[MARKET_CAP] no raw candidates before market cap filter")
+    return []
 
-        normal_move_ok = abs_pct >= SCAN_MIN_PCT_24H
-        prebreak_move_ok = PREBREAK_SCAN_MIN_PCT_24H <= abs_pct <= PREBREAK_SCAN_MAX_PCT_24H
+# сортировка
+raw_candidates.sort(key=lambda x: (x[1], abs(x[2])), reverse=True)
 
-        if not ACCUMULATION_MODE:
-            if not (normal_move_ok or prebreak_move_ok):
-                continue
+# префетч
+MARKET_CAP_PREFETCH_MULT = int(os.getenv("MARKET_CAP_PREFETCH_MULT") or "3")
+prefetch_limit = SCAN_BATCH * MARKET_CAP_PREFETCH_MULT
 
-        instId = sym  # BYBIT symbol format, e.g. BTCUSDT
-        raw_candidates.append((instId, vol_usdt, pct))
+prefetch_candidates = raw_candidates[:prefetch_limit]
 
-        if not raw_candidates:
-            print("[MARKET_CAP] no raw candidates before market cap filter")
-            return []
-    
-        # сортировка
-        raw_candidates.sort(key=lambda x: (x[1], abs(x[2])), reverse=True)
-    
-        # префетч
-        MARKET_CAP_PREFETCH_MULT = int(os.getenv("MARKET_CAP_PREFETCH_MULT") or "3")
-        prefetch_limit = SCAN_BATCH * MARKET_CAP_PREFETCH_MULT
-    
-        # НЕ режем до получения market cap
-        prefetch_candidates = raw_candidates[:prefetch_limit]
-    
-        # получаем market cap
-        base_coins = [get_base_coin(instId) for instId, _, _ in raw_candidates]
-        market_caps = fetch_market_caps_usd(base_coins)
-    
-        # fallback если нет данных
-        if not market_caps:
-            print("[MARKET_CAP] CoinGecko returned no market cap data -> fallback")
-            return raw_candidates[:SCAN_TOP_N]
+# получаем market cap
+base_coins = [get_base_coin(instId) for instId, _, _ in prefetch_candidates]
+market_caps = fetch_market_caps_usd(base_coins)
+
+# fallback
+if not market_caps:
+    print("[MARKET_CAP] SKIPPED (DEBUG MODE)")
+    return raw_candidates[:SCAN_TOP_N]
+
+# фильтрация
+filtered_candidates = []
+
+for instId, vol_usdt, pct in raw_candidates:
+    if is_market_cap_ok(instId, market_caps):
+        filtered_candidates.append((instId, vol_usdt, pct))
+
+print(
+    f"[MARKET_CAP] raw={len(raw_candidates)} "
+    f"passed={len(filtered_candidates)}"
+)
+
+filtered_candidates.sort(key=lambda x: (x[1], abs(x[2])), reverse=True)
+
+return filtered_candidates[:SCAN_TOP_N]
     
         # фильтрация
         filtered_candidates = []
