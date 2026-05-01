@@ -1468,20 +1468,20 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
                 print(f"[OI_WEAK] {instId} oi={oi}", flush=True)
 
 
-# =====================
-# OI FILTER
-# =====================
-if oi_weak and score < 6:
-    print(f"[OI_SKIP] {instId} weak OI + low score", flush=True)
-    return empty
-
-
-# =====================
-# OI BOOST
-# =====================
-if oi_confirm:
-    sig["score"] = sig.get("score", 0) + 1
-    print(f"[OI_BOOST] {instId} +1 score", flush=True)
+        # =====================
+        # OI FILTER
+        # =====================
+        if oi_weak and score < 6:
+            print(f"[OI_SKIP] {instId} weak OI + low score", flush=True)
+            return empty
+        
+        
+        # =====================
+        # OI BOOST
+        # =====================
+        if oi_confirm:
+            sig["score"] = sig.get("score", 0) + 1
+            print(f"[OI_BOOST] {instId} +1 score", flush=True)
 
         # =====================
         # SCORE FILTER
