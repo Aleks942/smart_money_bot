@@ -5,7 +5,7 @@ import math
 import requests
 import traceback
 import pandas as pd
-import traceback
+
 from dotenv import load_dotenv
 from priority_engine import find_global_priority, should_send_priority
 from wall_detector import WallTracker
@@ -17,7 +17,7 @@ from ai_scoring import get_ai_multiplier
 from market_context import apply_market_context
 from ta_sniper import analyze_ta_sniper
 from retest_filter import retest_ok
-import traceback
+
 
 def detect_market_phase(df_h1):
     try:
