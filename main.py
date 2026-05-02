@@ -3796,6 +3796,7 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
             (early_breakout and (up_w >= 4 or down_w >= 4))
         )
     )
+    flags = sig.get("flags", [])
     
     if safe_cond:
 
