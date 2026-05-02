@@ -4461,7 +4461,7 @@ def sniper_signal(sig):
         "BREAKOUT_CONFIRM_DOWN" in flags
     )
 
-    impulse = (
+    impulse_ok = (
         "VOL_SPIKE" in flags and
         "ATR_EXPANSION" in flags
     )
