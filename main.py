@@ -1092,31 +1092,6 @@ def analyze_m15_trigger(df_m15: pd.DataFrame, h1_setup: dict, h4_ctx: dict) -> d
     except Exception:
         return empty
 
-# =========================
-# SWING M15 TRIGGER
-# =========================
-def analyze_m15_trigger(df_m15: pd.DataFrame, h1_setup: dict, h4_ctx: dict) -> dict:
-    """
-    Возвращает:
-    - trigger_ok
-    - trigger_type
-    - trigger_score
-    - entry_now
-    - micro_stop
-    """
-    empty = {
-        "ok": False,
-        "trigger_ok": False,
-        "entry_now": False,
-        "trigger_type": "none",
-        "trigger_score": 0,
-        "micro_stop": None,
-        "close": None,
-        "ema20": None,
-        "vwap": None,
-        "atr": 0.0,
-        "reason": "no_trigger",
-    }
 
     try:
         if df_m15 is None or df_m15.empty or len(df_m15) < 30:
