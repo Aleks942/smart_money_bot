@@ -909,14 +909,7 @@ def analyze_h1_setup(df_h1: pd.DataFrame, h4_ctx: dict) -> dict:
 # SWING M15 TRIGGER
 # =========================
 def analyze_m15_trigger(df_m15: pd.DataFrame, h1_setup: dict, h4_ctx: dict) -> dict:
-    """
-    Возвращает:
-    - trigger_ok
-    - trigger_type
-    - trigger_score
-    - entry_now
-    - micro_stop
-    """
+
     empty = {
         "ok": False,
         "trigger_ok": False,
@@ -963,10 +956,9 @@ def analyze_m15_trigger(df_m15: pd.DataFrame, h1_setup: dict, h4_ctx: dict) -> d
         last_high = float(high.iloc[-1])
         last_low = float(low.iloc[-1])
         last_ema20 = float(ema20.iloc[-1])
-        last_vwap = float(vwap_s.iloc[-1]) if not vwap_s.empty and pd.notna(vwap_s.iloc[-1]) else last_close
-        last_atr = float(atr_s.iloc[-1]) if not atr_s.empty and pd.notna(atr_s.iloc[-1]) else 0.0
+        last_vwap = float(vwap_s.iloc[-1]) if not vwap_s.empty else last_close
+        last_atr = float(atr_s.iloc[-1]) if not atr_s.empty else 0.0
 
-        prev12 = df.iloc[-13:-1] if len(df) >= 13 else df.iloc[:-1]
         prev6 = df.iloc[-7:-1] if len(df) >= 7 else df.iloc[:-1]
         recent3 = df.tail(3)
 
@@ -975,8 +967,21 @@ def analyze_m15_trigger(df_m15: pd.DataFrame, h1_setup: dict, h4_ctx: dict) -> d
         vol_mult = (vol_now / vol_avg) if vol_avg > 0 else 0.0
 
         zone_low, zone_high = entry_zone
-        zone_mid = (zone_low + zone_high) / 2.0
         zone_buf = last_atr * 0.20 if last_atr > 0 else last_close * 0.003
+
+        # =====================
+        # PRO МЕТРИКИ
+        # =====================
+        rng = max(last_high - last_low, 1e-9)
+        last_open = float(df["open"].iloc[-1])
+
+        body = abs(last_close - last_open)
+        body_ratio = body / rng
+
+        strong_candle = body_ratio >= 0.55
+
+        micro_range = float(high.tail(5).max()) - float(low.tail(5).min())
+        compression_ready = (micro_range / last_close) <= 0.012 if last_close > 0 else False
 
         trigger_score = 0
         trigger_type = "none"
@@ -985,31 +990,27 @@ def analyze_m15_trigger(df_m15: pd.DataFrame, h1_setup: dict, h4_ctx: dict) -> d
         micro_stop = None
         reason = "no_trigger"
 
-        # -------------------------
-        # LONG trigger
-        # -------------------------
+        # =====================
+        # LONG
+        # =====================
         if side == "LONG":
             in_zone = (last_close >= zone_low - zone_buf) and (last_close <= zone_high + zone_buf)
             above_ema = last_close >= last_ema20
             above_vwap = last_close >= last_vwap
 
-            local_break = False
-            if not prev6.empty:
-                local_break = last_close > float(prev6["high"].max())
+            local_break = not prev6.empty and last_close > float(prev6["high"].max())
 
             retest_hold = (
-                in_zone
-                and above_ema
-                and above_vwap
+                in_zone and above_ema and above_vwap
                 and float(recent3["low"].min()) > float(invalidation)
             )
 
-            if above_ema:
-                trigger_score += 1
-            if above_vwap:
-                trigger_score += 1
-            if vol_mult >= 1.10:
-                trigger_score += 1
+            if above_ema: trigger_score += 1
+            if above_vwap: trigger_score += 1
+            if vol_mult >= 1.10: trigger_score += 1
+            if strong_candle: trigger_score += 1
+            if compression_ready: trigger_score += 1
+
             if retest_hold:
                 trigger_score += 1
                 trigger_type = "retest_hold"
@@ -1017,48 +1018,40 @@ def analyze_m15_trigger(df_m15: pd.DataFrame, h1_setup: dict, h4_ctx: dict) -> d
 
             if local_break:
                 trigger_score += 1
-                if trigger_type == "none":
+
+                if compression_ready and strong_candle:
+                    trigger_type = "compression_break"
+                    reason = "m15_compression_break_long"
+                elif trigger_type == "none":
                     trigger_type = "breakout_push"
                     reason = "m15_breakout_long"
 
-            if trigger_score >= SWING_MIN_TRIGGER_SCORE and (retest_hold or local_break):
+            if trigger_score >= SWING_MIN_TRIGGER_SCORE:
                 trigger_ok = True
                 entry_now = True
                 micro_stop = round(max(invalidation, last_low - zone_buf), 6)
 
-        # -------------------------
-        # SHORT trigger
-        # -------------------------
+        # =====================
+        # SHORT
+        # =====================
         if side == "SHORT":
             in_zone = (last_close >= zone_low - zone_buf) and (last_close <= zone_high + zone_buf)
             below_ema = last_close <= last_ema20
             below_vwap = last_close <= last_vwap
 
-            local_break = False
-            if not prev6.empty:
-                local_break = last_close < float(prev6["low"].min())
+            local_break = not prev6.empty and last_close < float(prev6["low"].min())
 
             retest_hold = (
-                in_zone
-                and below_ema
-                and below_vwap
+                in_zone and below_ema and below_vwap
                 and float(recent3["high"].max()) < float(invalidation)
             )
 
-            if below_ema:
-                trigger_score += 1
-            
-            if below_vwap:
-                trigger_score += 1
-            
-            if vol_mult >= 1.10:
-                trigger_score += 1
-            
-            if strong_candle:
-                trigger_score += 1
-            
-            if compression_ready:
-                trigger_score += 1
+            if below_ema: trigger_score += 1
+            if below_vwap: trigger_score += 1
+            if vol_mult >= 1.10: trigger_score += 1
+            if strong_candle: trigger_score += 1
+            if compression_ready: trigger_score += 1
+
             if retest_hold:
                 trigger_score += 1
                 trigger_type = "retest_hold"
@@ -1070,17 +1063,25 @@ def analyze_m15_trigger(df_m15: pd.DataFrame, h1_setup: dict, h4_ctx: dict) -> d
                     trigger_type = "breakout_push"
                     reason = "m15_breakout_short"
 
-            if trigger_score >= SWING_MIN_TRIGGER_SCORE and (retest_hold or local_break):
+            if trigger_score >= SWING_MIN_TRIGGER_SCORE:
                 trigger_ok = True
                 entry_now = True
                 micro_stop = round(min(invalidation, last_high + zone_buf), 6)
 
+        # =====================
+        # FALLBACK
+        # =====================
+        if trigger_score >= SWING_MIN_TRIGGER_SCORE and trigger_type == "none":
+            trigger_type = "momentum_ready"
+            trigger_ok = True
+            entry_now = True
+
         return {
             "ok": True,
-            "trigger_ok": bool(trigger_ok),
-            "entry_now": bool(entry_now),
+            "trigger_ok": trigger_ok,
+            "entry_now": entry_now,
             "trigger_type": trigger_type,
-            "trigger_score": int(trigger_score),
+            "trigger_score": trigger_score,
             "micro_stop": micro_stop,
             "close": round(last_close, 6),
             "ema20": round(last_ema20, 6),
