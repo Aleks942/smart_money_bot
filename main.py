@@ -3460,13 +3460,7 @@ def too_late_from_range(price, pmeta, max_dist_pct=0.8):
 
     return False
 
-    dist_to_hi = abs(hi - price) / price * 100.0
-    dist_to_lo = abs(price - lo) / price * 100.0
-    nearest = min(dist_to_hi, dist_to_lo)
-
-    return nearest > max_dist_pct
-
-
+    
 def too_close_to_target(price, target, min_room_pct=0.35):
     if target is None or price <= 0:
         return False
@@ -6656,25 +6650,25 @@ if __name__ == "__main__":
                                 except Exception as e:
                                     print(f"[CAP_VOL_ERROR] {instId} {e}", flush=True)
                                                     
-                                                                swing_sig = build_swing_signal(instId, h4_ctx, h1_setup, m15_trigger, sig) or {
-                                                                    "status": "NONE",
-                                                                    "sendable": False,
-                                                                    "late": False,
-                                                                    "rr1": 0.0,
-                                                                    "verdict": "no_signal",
-                                                                    "side": "NEUTRAL",
-                                                                    "h4_bias": "NONE",
-                                                                    "h1_setup_type": "none",
-                                                                    "m15_trigger_type": "none"
-                                                                }
-                                                                try:
-                                                                    rr = float(swing_sig.get("rr1"))
-                                                                except:
-                                                                    rr = 0
-                                                                
-                                                                if rr <= 0:
-                                                                    rr = 2.0
-                                                                    print(f"[RR_FIX_SWING] {instId} fallback rr=2.0", flush=True)
+                                    swing_sig = build_swing_signal(instId, h4_ctx, h1_setup, m15_trigger, sig) or {
+                                        "status": "NONE",
+                                        "sendable": False,
+                                        "late": False,
+                                        "rr1": 0.0,
+                                        "verdict": "no_signal",
+                                        "side": "NEUTRAL",
+                                        "h4_bias": "NONE",
+                                        "h1_setup_type": "none",
+                                        "m15_trigger_type": "none"
+                                    }
+                                    try:
+                                        rr = float(swing_sig.get("rr1"))
+                                    except:
+                                        rr = 0
+                                    
+                                    if rr <= 0:
+                                        rr = 2.0
+                                        print(f"[RR_FIX_SWING] {instId} fallback rr=2.0", flush=True)
                                                                 
                                 swing_sig["rr1"] = rr
                                 # =====================
