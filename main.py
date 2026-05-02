@@ -3802,20 +3802,7 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
 
         return "🟢 SAFE ENTRY", "Подтверждение + импульс по направлению"
 
-    # =========================
-    # SAFE ENTRY
-    # =========================
-    safe_cond = (
-        score >= EDGE_HIGH_SCORE and
-        ("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags) and
-        "ATR_EXPANSION" in flags and
-        "VOL_SPIKE" in flags and
-        (up_w >= 3 or down_w >= 3)
-    )
-
-    if safe_cond:
-        return "🟢 SAFE ENTRY", "Подтверждение + импульс"
-
+    
     # =========================
     # AGGRESSIVE ENTRY
     # =========================
