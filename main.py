@@ -1844,7 +1844,8 @@ def fetch_market_caps_usd(base_coins):
         missing = base_coins.copy()
     
     # если всё уже есть в кеше — сразу отдаём
-    if not missing:
+    # если всё есть в кеше И кеш свежий — используем его
+    if not missing and (now - _market_cap_cache["ts"] < MARKET_CAP_CACHE_TTL_SEC):
         return _market_cap_cache["data"]
     now = time.time()
 
