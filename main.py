@@ -1837,6 +1837,15 @@ def fetch_market_caps_usd(base_coins):
     """
 
     base_coins = sorted({str(x).upper().strip() for x in base_coins if x})
+    # 🔥 быстрый фильтр — берем только новые монеты (экономим API)
+    if _market_cap_cache["data"]:
+        missing = [c for c in base_coins if c not in _market_cap_cache["data"]]
+    else:
+        missing = base_coins.copy()
+    
+    # если всё уже есть в кеше — сразу отдаём
+    if not missing:
+        return _market_cap_cache["data"]
     now = time.time()
 
     market_cap_fail_cooldown_sec = int(os.getenv("MARKET_CAP_FAIL_COOLDOWN_SEC", "1800"))
@@ -1861,7 +1870,7 @@ def fetch_market_caps_usd(base_coins):
     retry_sleep_sec = float(os.getenv("MARKET_CAP_RETRY_SLEEP_SEC", "8.0"))
     max_retries = int(os.getenv("MARKET_CAP_MAX_RETRIES", "2"))
 
-    for chunk in _chunked(base_coins, chunk_size):
+    for chunk in _chunked(missing, chunk_size):
         success = False
 
         for attempt in range(max_retries):
