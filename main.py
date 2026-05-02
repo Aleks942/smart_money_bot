@@ -1544,7 +1544,7 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             # цена должна быть выше EMA и VWAP
             if close < ema20 or close < vwap:
                 print(f"[CONT_SKIP] {instId} weak long continuation", flush=True)
-               return empty 
+                return empty 
         
         elif sig.get("side") in ("SHORT", "SELL"):
         
