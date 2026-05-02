@@ -1906,13 +1906,34 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
                 return empty
 
         # =====================
+        # MARKET FILTER
+        # =====================
+        phase = market_phase.get("phase")
+        score = sig.get("score", 0)
+        
+        if phase == "FLAT":
+            print(f"[FLAT_SKIP] {instId}", flush=True)
+            return empty
+        
+        if phase == "TRANSITION" and score < 6:
+            print(f"[TRANSITION_SKIP] {instId}", flush=True)
+            return empty
+        
+        if phase == "TREND":
+            sig["score"] = sig.get("score", 0) + 1
+            print(f"[TREND_BOOST] {instId}", flush=True)
+        
+        # 🔥 ВОТ ЭТО ДОБАВЬ
+        score = sig.get("score", 0)
+
+        # =====================
         # SIGNAL CLASSIFICATION
         # =====================
         
         level = "C"
         
         if rr >= 2 and score >= 6:
-            if mf.get("ok") and oi_confirm:
+            if (mf and mf.get("ok")) and oi_confirm:
                 level = "A"
             else:
                 level = "B"
@@ -1921,6 +1942,7 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             level = "B"
         
         print(f"[LEVEL] {instId} level={level}", flush=True)
+
 
         # =====================
         # FILTER WEAK (C)
