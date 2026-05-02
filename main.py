@@ -3774,6 +3774,7 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
         "VOL_SPIKE" in flags or
         "ATR_EXPANSION" in flags
     )
+    direction_code = direction_code_from_text(direction_text)
     
     flow_ok = False
 
