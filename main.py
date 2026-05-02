@@ -3797,18 +3797,18 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
     )
     
     if safe_cond:
-    if too_close_to_target(price, target, min_room_pct=0.6):
-        return "🔴 WAIT", "Поздний вход — нет запаса хода"
-
-    if target is not None:
-        try:
-            dist_pct = abs(target - price) / price * 100
-            if dist_pct < 0.8:
-                return "🔴 WAIT", "Слишком маленький потенциал движения"
-        except:
-            pass
-
+        if too_close_to_target(price, target, min_room_pct=0.6):
+            return "🔴 WAIT", "Поздний вход — нет запаса хода"
     
+        if target is not None:
+            try:
+                dist_pct = abs(target - price) / price * 100
+                if dist_pct < 0.8:
+                    return "🔴 WAIT", "Слишком маленький потенциал движения"
+            except:
+                pass
+
+            return "🟢 SAFE ENTRY", "Подтверждение + импульс по направлению"
     # =========================
     # AGGRESSIVE ENTRY
     # =========================
