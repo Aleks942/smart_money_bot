@@ -4482,11 +4482,16 @@ def sniper_signal(sig):
         "WHALE_FLOW" in flags or
         "WHALE_ACC" in flags
     )
-
+    impulse_ok = (
+        "VOL_SPIKE" in flags and
+        "ATR_EXPANSION" in flags
+    )
+    
     if breakout and impulse_ok and liquidity and orderbook and whale and score >= 7:
         return True
-
+    
     return False
+        
 # =========================
 # SCANNER (LEVEL 1 FAST FILTER)
 # =========================
