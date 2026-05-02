@@ -3799,36 +3799,53 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
     
     if safe_cond:
 
-        # 🚫 ЛОВУШКИ ЛИКВИДНОСТИ
-        trap_flags = {
-            "SWEEP_UP", "SWEEP_DOWN",
-            "FAKE_DUMP",
-            "BULL_TRAP", "BEAR_TRAP",
-            "STOP_HUNT_UP", "STOP_HUNT_DOWN"
-        }
-        # 🚫 ПЕРЕГРЕТОЕ ДВИЖЕНИЕ (OVEREXTENSION)
-        if target is not None:
-            try:
-                move_pct = abs(target - price) / price * 100
-                if move_pct > 12:
-                    return "🔴 WAIT", "Движение уже слишком растянуто"
-            except:
-                pass
+            # 🚫 КОНФЛИКТ НАПРАВЛЕНИЯ (САМЫЙ ВАЖНЫЙ ФИЛЬТР)
+            long_signals = {"CONFLUENCE_LONG", "PRESSURE_UP", "EMA_BULL", "BREAKOUT_UP"}
+            short_signals = {"PRESSURE_DOWN", "BREAKOUT_DOWN", "BREAKOUT_CONFIRM_DOWN"}
     
-        if any(f in flags for f in trap_flags):
-            return "🔴 WAIT", "Ловушка ликвидности — пропуск" 
-        if too_close_to_target(price, target, min_room_pct=0.6):
-            return "🔴 WAIT", "Поздний вход — нет запаса хода"
+            long_score = sum(1 for f in flags if f in long_signals)
+            short_score = sum(1 for f in flags if f in short_signals)
     
-        if target is not None:
-            try:
-                dist_pct = abs(target - price) / price * 100
-                if dist_pct < 0.8:
-                    return "🔴 WAIT", "Слишком маленький потенциал движения"
-            except:
-                pass
+            if long_score > 0 and short_score > 0:
+                return "🔴 WAIT", "Конфликт сигналов (лонг/шорт одновременно)"
     
-        return "🟢 SAFE ENTRY", "Подтверждение + импульс по направлению"
+            # 🚫 СЛАБЫЙ ПЕРЕВЕС (опционально, но советую)
+            if abs(long_score - short_score) <= 1:
+                return "🔴 WAIT", "Нет явного перевеса стороны"
+    
+    
+            # 🚫 ЛОВУШКИ ЛИКВИДНОСТИ
+            trap_flags = {
+                "SWEEP_UP", "SWEEP_DOWN",
+                "FAKE_DUMP",
+                "BULL_TRAP", "BEAR_TRAP",
+                "STOP_HUNT_UP", "STOP_HUNT_DOWN"
+            }
+    
+            # 🚫 ПЕРЕГРЕТОЕ ДВИЖЕНИЕ
+            if target is not None:
+                try:
+                    move_pct = abs(target - price) / price * 100
+                    if move_pct > 12:
+                        return "🔴 WAIT", "Движение уже слишком растянуто"
+                except:
+                    pass
+    
+            if any(f in flags for f in trap_flags):
+                return "🔴 WAIT", "Ловушка ликвидности — пропуск"
+    
+            if too_close_to_target(price, target, min_room_pct=0.6):
+                return "🔴 WAIT", "Поздний вход — нет запаса хода"
+    
+            if target is not None:
+                try:
+                    dist_pct = abs(target - price) / price * 100
+                    if dist_pct < 0.8:
+                        return "🔴 WAIT", "Слишком маленький потенциал движения"
+                except:
+                    pass
+    
+            return "🟢 SAFE ENTRY", "Подтверждение + импульс по направлению"
 
     
     # =========================
