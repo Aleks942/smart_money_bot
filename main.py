@@ -3798,6 +3798,17 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
     )
     
     if safe_cond:
+
+        # 🚫 ЛОВУШКИ ЛИКВИДНОСТИ
+        trap_flags = {
+            "SWEEP_UP", "SWEEP_DOWN",
+            "FAKE_DUMP",
+            "BULL_TRAP", "BEAR_TRAP",
+            "STOP_HUNT_UP", "STOP_HUNT_DOWN"
+        }
+    
+    if any(f in flags for f in trap_flags):
+        return "🔴 WAIT", "Ловушка ликвидности — пропуск" 
         if too_close_to_target(price, target, min_room_pct=0.6):
             return "🔴 WAIT", "Поздний вход — нет запаса хода"
     
@@ -3810,6 +3821,8 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
                 pass
     
         return "🟢 SAFE ENTRY", "Подтверждение + импульс по направлению"
+
+    
     # =========================
     # AGGRESSIVE ENTRY
     # =========================
