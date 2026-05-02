@@ -3807,8 +3807,8 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
             "STOP_HUNT_UP", "STOP_HUNT_DOWN"
         }
     
-    if any(f in flags for f in trap_flags):
-        return "🔴 WAIT", "Ловушка ликвидности — пропуск" 
+        if any(f in flags for f in trap_flags):
+            return "🔴 WAIT", "Ловушка ликвидности — пропуск" 
         if too_close_to_target(price, target, min_room_pct=0.6):
             return "🔴 WAIT", "Поздний вход — нет запаса хода"
     
