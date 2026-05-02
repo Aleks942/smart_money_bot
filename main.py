@@ -1837,6 +1837,8 @@ def fetch_market_caps_usd(base_coins):
     """
 
     base_coins = sorted({str(x).upper().strip() for x in base_coins if x})
+    if not base_coins:
+        return {}
     
     # 🔥 быстрый фильтр — берем только новые монеты (экономим API)
     if _market_cap_cache["data"]:
