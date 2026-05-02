@@ -1950,7 +1950,6 @@ def fetch_market_caps_usd(base_coins):
     {
         "BTC": 1800000000000,
         "ETH": 420000000000,
-        ...
     }
     """
 
@@ -1959,16 +1958,15 @@ def fetch_market_caps_usd(base_coins):
 
     market_cap_fail_cooldown_sec = int(os.getenv("MARKET_CAP_FAIL_COOLDOWN_SEC", "1800"))
 
-    # если CoinGecko недавно уже падал, не долбим его снова
     last_fail_ts = float(_market_cap_cache.get("last_fail_ts", 0) or 0)
     if last_fail_ts and (now - last_fail_ts < market_cap_fail_cooldown_sec):
-        print("[MARKET_CAP] recent fail cooldown active -> using cache/fallback path")
+        print("[MARKET_CAP] cooldown → cache")
         return _market_cap_cache["data"]
 
     if not base_coins:
         return {}
 
-    # если кэш свежий и там уже есть все нужные монеты — используем его
+    # cache hit
     if _market_cap_cache["data"] and (now - _market_cap_cache["ts"] < MARKET_CAP_CACHE_TTL_SEC):
         cached = _market_cap_cache["data"]
         if all(c in cached for c in base_coins):
@@ -2000,7 +1998,7 @@ def fetch_market_caps_usd(base_coins):
                 )
 
                 if r.status_code == 429:
-                    print(f"[MARKET_CAP] 429 rate limit on chunk, retry {attempt + 1}/{max_retries}")
+                    print(f"[MARKET_CAP] 429 retry {attempt+1}")
                     time.sleep(retry_sleep_sec * (attempt + 1))
                     continue
 
@@ -2021,15 +2019,15 @@ def fetch_market_caps_usd(base_coins):
                 break
 
             except Exception as e:
-                print(f"[MARKET_CAP] CoinGecko request error: {e}")
+                print(f"[MARKET_CAP ERROR] {e}")
                 time.sleep(retry_sleep_sec * (attempt + 1))
 
         if not success:
-            print(f"[MARKET_CAP] failed chunk: {chunk}")
+            print(f"[MARKET_CAP FAIL] {chunk}")
 
         time.sleep(request_sleep_sec)
 
-    # обновляем кэш только если реально что-то получили
+    # обновляем кэш
     if fresh:
         merged = dict(_market_cap_cache["data"])
         merged.update(fresh)
@@ -2038,16 +2036,20 @@ def fetch_market_caps_usd(base_coins):
         _market_cap_cache["last_fail_ts"] = 0
     else:
         _market_cap_cache["last_fail_ts"] = now
-    
+
+    # ✅ ВАЖНО — внутри функции
     return _market_cap_cache["data"]
-    
-    def is_market_cap_ok(symbol: str, market_caps: dict) -> bool:
-        base = get_base_coin(symbol)
-        mcap = market_caps.get(base)
-    
-        # если капитализацию не нашли — монету не берём
-        if mcap is None:
-            return False
+
+
+# =========================
+# MARKET CAP FILTER
+# =========================
+def is_market_cap_ok(symbol: str, market_caps: dict) -> bool:
+    base = get_base_coin(symbol)
+    mcap = market_caps.get(base)
+
+    if mcap is None:
+        return False
 
     return mcap >= MARKET_CAP_MIN_USD
 
