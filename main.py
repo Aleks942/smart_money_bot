@@ -1529,8 +1529,7 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         
         if is_flat:
             print(f"[FLAT_SKIP] {instId} range={round(range_pct,3)} ema_dist={round(ema_dist,3)}", flush=True)
-            return
-
+            return empty
         # =====================
         # CONTINUATION FILTER
         # =====================
