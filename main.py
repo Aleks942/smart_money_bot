@@ -6424,11 +6424,16 @@ if __name__ == "__main__":
 
                 try:
 
-                    sig = build_signal(instId)
-    
-                    if not isinstance(sig, dict):
-                        print(f"[RAW_SKIP] {instId} build_signal_returned_non_dict")
-                        continue
+            sig = build_signal(instId)
+        
+            # 🔴 КРИТИЧЕСКАЯ ЗАЩИТА
+            if not sig or not isinstance(sig, dict):
+                print(f"[RAW_SKIP] {instId} build_signal_returned_non_dict", flush=True)
+                continue
+        
+        except Exception as e:
+            print(f"[BUILD_SIGNAL_ERROR] {instId} {e}", flush=True)
+            continue
                     
                     # =====================
                     # OI BLOCK (FIX)
