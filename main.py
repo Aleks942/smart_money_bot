@@ -3806,6 +3806,14 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
             "BULL_TRAP", "BEAR_TRAP",
             "STOP_HUNT_UP", "STOP_HUNT_DOWN"
         }
+        # 🚫 ПЕРЕГРЕТОЕ ДВИЖЕНИЕ (OVEREXTENSION)
+        if target is not None:
+            try:
+                move_pct = abs(target - price) / price * 100
+                if move_pct > 12:
+                    return "🔴 WAIT", "Движение уже слишком растянуто"
+            except:
+                pass
     
         if any(f in flags for f in trap_flags):
             return "🔴 WAIT", "Ловушка ликвидности — пропуск" 
