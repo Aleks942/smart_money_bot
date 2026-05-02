@@ -1686,6 +1686,9 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         # =====================
         # MARKET FILTER
         # =====================
+        df_h1_phase = get_tf_candles(instId, tf="1h", limit=100)
+        market_phase = detect_market_phase(df_h1_phase)
+        
         phase = market_phase.get("phase")
         score = sig.get("score", 0)
         
