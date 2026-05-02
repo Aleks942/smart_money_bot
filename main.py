@@ -6634,7 +6634,6 @@ if __name__ == "__main__":
                                 
                                         vol_ratio = vol / avg
                                 
-                                        # 🔥 сильный вход денег
                                         if vol_ratio >= 2.0:
                                 
                                             if mcap < 500_000_000:
@@ -6649,27 +6648,32 @@ if __name__ == "__main__":
                                 
                                 except Exception as e:
                                     print(f"[CAP_VOL_ERROR] {instId} {e}", flush=True)
-                                                    
-                                    swing_sig = build_swing_signal(instId, h4_ctx, h1_setup, m15_trigger, sig) or {
-                                        "status": "NONE",
-                                        "sendable": False,
-                                        "late": False,
-                                        "rr1": 0.0,
-                                        "verdict": "no_signal",
-                                        "side": "NEUTRAL",
-                                        "h4_bias": "NONE",
-                                        "h1_setup_type": "none",
-                                        "m15_trigger_type": "none"
-                                    }
-                                    try:
-                                        rr = float(swing_sig.get("rr1"))
-                                    except:
-                                        rr = 0
-                                    
-                                    if rr <= 0:
-                                        rr = 2.0
-                                        print(f"[RR_FIX_SWING] {instId} fallback rr=2.0", flush=True)
-                                                                
+                                
+                                
+                                # =====================
+                                # BUILD SWING SIGNAL
+                                # =====================
+                                swing_sig = build_swing_signal(instId, h4_ctx, h1_setup, m15_trigger, sig) or {
+                                    "status": "NONE",
+                                    "sendable": False,
+                                    "late": False,
+                                    "rr1": 0.0,
+                                    "verdict": "no_signal",
+                                    "side": "NEUTRAL",
+                                    "h4_bias": "NONE",
+                                    "h1_setup_type": "none",
+                                    "m15_trigger_type": "none"
+                                }
+                                
+                                try:
+                                    rr = float(swing_sig.get("rr1") or 0)
+                                except:
+                                    rr = 0
+                                
+                                if rr <= 0:
+                                    rr = 2.0
+                                    print(f"[RR_FIX_SWING] {instId} fallback rr=2.0", flush=True)
+                                
                                 swing_sig["rr1"] = rr
                                 # =====================
                                 # SWING OVERRIDE (СРЕДНЕСРОК БЕЗ M15)
