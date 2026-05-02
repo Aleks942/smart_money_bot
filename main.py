@@ -1837,6 +1837,7 @@ def fetch_market_caps_usd(base_coins):
     """
 
     base_coins = sorted({str(x).upper().strip() for x in base_coins if x})
+    
     # 🔥 быстрый фильтр — берем только новые монеты (экономим API)
     if _market_cap_cache["data"]:
         missing = [c for c in base_coins if c not in _market_cap_cache["data"]]
@@ -1856,8 +1857,7 @@ def fetch_market_caps_usd(base_coins):
         print("[MARKET_CAP] cooldown → cache")
         return _market_cap_cache["data"]
 
-    if not base_coins:
-        return {}
+    
 
     # cache hit
     if _market_cap_cache["data"] and (now - _market_cap_cache["ts"] < MARKET_CAP_CACHE_TTL_SEC):
