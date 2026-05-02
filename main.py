@@ -2054,9 +2054,6 @@ def is_market_cap_ok(symbol: str, market_caps: dict) -> bool:
     return mcap >= MARKET_CAP_MIN_USD
 
 
-import time
-import requests
-
 def bybit_get(url, params, retries=3):
     for attempt in range(retries):
         try:
