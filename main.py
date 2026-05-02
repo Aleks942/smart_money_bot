@@ -3776,12 +3776,12 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
     )
     
     flow_ok = False
-    
-    if direction_text == "⬆️ ВВЕРХ":
+
+    if direction_code == "UP":
         if "PRESSURE_UP" in flags or "CONTINUATION_UP" in flags:
             flow_ok = True
     
-    if direction_text == "⬇️ ВНИЗ":
+    elif direction_code == "DOWN":
         if "PRESSURE_DOWN" in flags or "CONTINUATION_DOWN" in flags:
             flow_ok = True
     
