@@ -618,8 +618,8 @@ def analyze_h4_context(df_h4: pd.DataFrame) -> dict:
         }
 
     except Exception as e:
-        print(f"[SWING_BUILD_ERROR] {instId}: {e}")
-        import traceback
+        print(f"[SWING_BUILD_ERROR] H4: {e}")
+        print(traceback.format_exc())
         print(traceback.format_exc())
         return empty
 
