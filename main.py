@@ -1372,23 +1372,7 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             print(f"[SCORE_SKIP] {instId} score={score}", flush=True)
             return empty
 
-        # =====================
-        # RSI FILTER
-        # =====================
-        rsi = sig.get("rsi") or sig.get("rsi14")
-        try:
-            rsi = float(rsi)
-        except:
-            rsi = None
-
-        if rsi is not None:
-            if side == "LONG" and rsi > 75:
-                print(f"[RSI_SKIP] {instId} LONG rsi={rsi}", flush=True)
-                return empty
-            if side == "SHORT" and rsi < 25:
-                print(f"[RSI_SKIP] {instId} SHORT rsi={rsi}", flush=True)
-                return empty
-
+        
         # =====================
         # RSI DIVERGENCE FILTER
         # =====================
