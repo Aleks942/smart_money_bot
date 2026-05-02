@@ -3768,12 +3768,10 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
     early_breakout = (
         "BREAKOUT_UP" in flags or
         "BREAKOUT_DOWN" in flags
-    )
-        
-    impulse_ok = (
-        "VOL_SPIKE" in flags or
-        "ATR_EXPANSION" in flags
-    )
+   impulse_ok = (
+    "VOL_SPIKE" in flags and
+    "ATR_EXPANSION" in flags
+)
     
     flow_ok = False
 
