@@ -1927,13 +1927,16 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         score = sig.get("score", 0)
 
         # =====================
-        # SIGNAL CLASSIFICATION
+        # SIGNAL CLASSIFICATION (УРОВЕНЬ)
         # =====================
         
         level = "C"
         
+        # временно без money flow
+        mf_ok = False  
+        
         if rr >= 2 and score >= 6:
-            if (mf and mf.get("ok")) and oi_confirm:
+            if mf_ok and oi_confirm:
                 level = "A"
             else:
                 level = "B"
@@ -1942,14 +1945,15 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             level = "B"
         
         print(f"[LEVEL] {instId} level={level}", flush=True)
-
-
+        
+        
         # =====================
         # FILTER WEAK (C)
         # =====================
         if level == "C":
             print(f"[SKIP] {instId} weak signal (C)", flush=True)
             return empty
+        
         
         # =====================
         # SEND TELEGRAM
