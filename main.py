@@ -6414,30 +6414,28 @@ if __name__ == "__main__":
             # =====================
             # SCAN LOOP
             # =====================
-
+            
             for instId, vol_usdt, pct in candidates:
                 print(f"[LOOP] {instId} start")
                 print(f"[STEP1] {instId} before_fetch")
-                
-
+            
                 time.sleep(0.55)
-
+            
                 try:
-
-            sig = build_signal(instId)
-        
-            # 🔴 КРИТИЧЕСКАЯ ЗАЩИТА
-            if not sig or not isinstance(sig, dict):
-                print(f"[RAW_SKIP] {instId} build_signal_returned_non_dict", flush=True)
-                continue
-        
-        except Exception as e:
-            print(f"[BUILD_SIGNAL_ERROR] {instId} {e}", flush=True)
-            continue
-                    
-                    # =====================
-                    # OI BLOCK (FIX)
-                    # =====================
+                    sig = build_signal(instId)
+            
+                    # 🔴 КРИТИЧЕСКАЯ ЗАЩИТА
+                    if not sig or not isinstance(sig, dict):
+                        print(f"[RAW_SKIP] {instId} build_signal_returned_non_dict", flush=True)
+                        continue
+            
+                except Exception as e:
+                    print(f"[BUILD_SIGNAL_ERROR] {instId} {e}", flush=True)
+                    continue
+            
+                # =====================
+                # OI BLOCK (FIX)
+                # =====================
                     
                     oi_ttl = int(os.getenv("OI_CACHE_TTL_SEC", "1800"))
                     
