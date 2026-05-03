@@ -4562,6 +4562,19 @@ def build_signal(instId):
         "ts": now_ts(),
         "created_at": time.time(),
     }
+
+    # =====================
+    # SIGNAL STRENGTH
+    # =====================
+    rating, reasons_strength, strength = analyze_signal_strength({
+        "flags": signal.get("flags", []),
+        "score": signal.get("score", 0),
+        "oi_change": signal.get("oi_change", 0)
+    })
+    
+    signal["rating"] = rating
+    signal["strength"] = strength
+    signal["strength_reasons"] = reasons_strength
     # =========================
     # EXTRA SIGNAL LAYERS
     # =========================
