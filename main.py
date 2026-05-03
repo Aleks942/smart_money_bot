@@ -1824,8 +1824,8 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         # =====================
         # UPDATE PREVIOUS VALUES (ПОСЛЕ ОТПРАВКИ)
         # =====================
-        sig["prev_price"] = price_now
-        sig["prev_rsi"] = rsi
+        signal["prev_price"] = price_now
+        signal["prev_rsi"] = rsi
         
         return {
             "ok": True,
