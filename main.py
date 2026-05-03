@@ -4142,8 +4142,8 @@ def liquidity_target(pmeta, flags, price=None):
     if not pmeta:
         return None
 
-    hi = (pmeta or {}).get("range_hi")
     lo = (pmeta or {}).get("range_lo")
+    hi = (pmeta or {}).get("range_hi")
 
     if lo is None or hi is None:
         return None
