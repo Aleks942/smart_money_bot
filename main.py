@@ -4551,28 +4551,29 @@ def build_signal(instId):
     exp_min, exp_max = expected_move_pct(c5, pmeta)
 
     # =========================
-    # RESULT FILTER
+    # RESULT FILTER (FIXED)
     # =========================
     swing_only_candidate = False
     can_survive_for_swing = True
-
+    
     if score < MIN_SCORE:
-
+    
         has_breakout = (
             "BREAKOUT_CONFIRM_UP" in flags
             or "BREAKOUT_CONFIRM_DOWN" in flags
         )
-
+    
         has_pressure = (
             "PRESSURE_UP" in flags
             or "PRESSURE_DOWN" in flags
         )
-
+    
         has_continuation = (
             "CONTINUATION_UP" in flags
             or "CONTINUATION_DOWN" in flags
         )
-
+    
+        # --- НОРМАЛЬНЫЙ SWING ПРОХОД ---
         normal_swing_pass = (
             (
                 score >= SWING_BUILD_MIN_SCORE and (
@@ -4582,11 +4583,10 @@ def build_signal(instId):
                     or has_continuation
                 )
             )
-            or (
-                score >= 3
-            )
+            or score >= 3
         )
-
+    
+        # --- РАННИЙ ПРОХОД (ВАЖНО ДЛЯ ЛОВЛИ ДВИЖЕНИЯ) ---
         early_exception_pass = (
             score == 1 and (
                 acc_score >= 3
@@ -4595,17 +4595,20 @@ def build_signal(instId):
                 or (acc_score >= 2 and has_breakout)
             )
         )
-
+    
         can_survive_for_swing = (
             normal_swing_pass or early_exception_pass
         )
-
+    
+        # ❗ ГЛАВНОЕ ИЗМЕНЕНИЕ — НЕ ДЕЛАЕМ return
         if not can_survive_for_swing:
-            return _bs_skip(
-                f"score_below_min score={score} min={MIN_SCORE}"
-            )
-
-        swing_only_candidate = True
+            signal_type = "WEAK_SKIP"
+        else:
+            signal_type = "SWING_EARLY"
+            swing_only_candidate = True
+    
+    else:
+        signal_type = "NORMAL"
 
     # =========================
     # STAGE CALCULATION
