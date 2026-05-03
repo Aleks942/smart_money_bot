@@ -4621,85 +4621,83 @@ def build_signal(instId):
     tier = get_signal_tier(score, acc_score)
 
     signal = {
-    "instId": instId,
-    "symbol": instId,
-    "price": price,
-    "score": score,
-    "swing_only_candidate": swing_only_candidate,
-    "below_main_min_score": score < MIN_SCORE,
-    "tier": tier,
-    "flags": list(flags),
-    "pmeta": pmeta,
-    "acc_score": acc_score,
-    "strong_setup": strong_setup,
-    "direction": direction_text,
-    "direction_code": direction_code,
-    "dir_reasons": reasons,
-    "up_w": up_w,
-    "down_w": down_w,
-    "entry": entry,
-    "entry_type": entry,
-    "entry_price": price,
-    "entry_zone": entry_zone,
-    "entry_reason": entry_reason,
-    "stage": stage,
-    "stage_reason": stage_reason,
-    "target": tgt,
-    "exp_move_min": exp_min,
-    "exp_move_max": exp_max,
+        "instId": instId,
+        "symbol": instId,
+        "price": price,
+        "score": score,
+        "swing_only_candidate": swing_only_candidate,
+        "below_main_min_score": score < MIN_SCORE,
+        "tier": tier,
+        "flags": list(flags),
+        "pmeta": pmeta,
+        "acc_score": acc_score,
+        "strong_setup": strong_setup,
+        "direction": direction_text,
+        "direction_code": direction_code,
+        "dir_reasons": reasons,
+        "up_w": up_w,
+        "down_w": down_w,
+        "entry": entry,
+        "entry_type": entry,
+        "entry_price": price,
+        "entry_zone": entry_zone,
+        "entry_reason": entry_reason,
+        "stage": stage,
+        "stage_reason": stage_reason,
+        "target": tgt,
+        "exp_move_min": exp_min,
+        "exp_move_max": exp_max,
 
-    # ✅ FIX PROTECTION
-    "ema20": (ema_meta or {}).get("ema20"),
-    "ema50": (ema_meta or {}).get("ema50"),
-    "ema200": (ema_meta or {}).get("ema200"),
+        "ema20": (ema_meta or {}).get("ema20"),
+        "ema50": (ema_meta or {}).get("ema50"),
+        "ema200": (ema_meta or {}).get("ema200"),
 
-    "ema_state": ema_state,
-    "rsi7": rsi7,
-    "rsi14": rsi14,
-    "rsi_state": (rsi_state or {}).get("state"),
+        "ema_state": ema_state,
+        "rsi7": rsi7,
+        "rsi14": rsi14,
+        "rsi_state": (rsi_state or {}).get("state"),
 
-    "ts": now_ts(),
-    "created_at": time.time(),
-}
+        "ts": now_ts(),
+        "created_at": time.time(),
+    }
 
-    
-# =========================
-# FINAL DECISION (сначала)
-# =========================
-signal["decision"] = decision_engine(signal)
+    # =========================
+    # FINAL DECISION
+    # =========================
+    signal["decision"] = decision_engine(signal)
 
-# =====================
-# SIGNAL STRENGTH
-# =====================
-rating, reasons_strength, strength = analyze_signal_strength({
-    "flags": signal.get("flags", []),
-    "score": signal.get("score", 0),
-    "oi_change": signal.get("oi_change", 0)
-})
+    # =====================
+    # SIGNAL STRENGTH
+    # =====================
+    rating, reasons_strength, strength = analyze_signal_strength({
+        "flags": signal.get("flags", []),
+        "score": signal.get("score", 0),
+        "oi_change": signal.get("oi_change")
+    })
 
-signal["rating"] = rating
-signal["strength"] = strength
-signal["strength_reasons"] = reasons_strength
+    signal["rating"] = rating
+    signal["strength"] = strength
+    signal["strength_reasons"] = reasons_strength
 
-# =========================
-# EXTRA SIGNAL LAYERS
-# =========================
-signal.update(detect_early_pressure(signal))
-signal["sniper"] = sniper_signal(signal)
+    # =========================
+    # EXTRA SIGNAL LAYERS
+    # =========================
+    signal.update(detect_early_pressure(signal))
+    signal["sniper"] = sniper_signal(signal)
 
-# =========================
-# FINAL QUALITY FILTER (всегда в конце)
-# =========================
-ok, reason = signal_quality_filter(signal)
+    # =========================
+    # FINAL QUALITY FILTER
+    # =========================
+    ok, reason = signal_quality_filter(signal)
 
-signal["filter_pass"] = ok
-signal["filter_reason"] = reason
+    signal["filter_pass"] = ok
+    signal["filter_reason"] = reason
 
-if not ok:
-    print(f"[FILTER_BLOCK] {instId} reason={reason}", flush=True)
-    return None
+    if not ok:
+        print(f"[FILTER_BLOCK] {instId} reason={reason}", flush=True)
+        return None
 
-return signal
+    return signal
 # ==============================
 # 🎯 SNIPER SIGNAL ENGINE
 # ==============================
