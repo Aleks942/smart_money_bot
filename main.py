@@ -4626,7 +4626,10 @@ def build_signal(instId):
         "symbol": instId,
         "price": price,
         "score": score,
+    
+        # уже есть — оставляем
         "swing_only_candidate": swing_only_candidate,
+    
         "below_main_min_score": score < MIN_SCORE,
         "tier": tier,
         "flags": list(flags),
@@ -4644,7 +4647,6 @@ def build_signal(instId):
         "entry_zone": entry_zone,
         "entry_reason": entry_reason,
     
-        # ✅ ВСТАВЛЯЕМ СЮДА
         "stage": stage,
         "stage_reason": stage_reason,
     
@@ -4665,9 +4667,11 @@ def build_signal(instId):
         "created_at": time.time(),
     }
     
-    # отдельно тип сигнала
-    if score < 1:
-        signal["type"] = "EARLY"
+    # =========================
+    # ДОБАВЛЯЕМ ТОЛЬКО ЭТО 👇
+    # =========================
+    signal["type"] = signal_type
+    signal["can_survive_for_swing"] = can_survive_for_swing
 
     # =========================
     # FINAL DECISION
