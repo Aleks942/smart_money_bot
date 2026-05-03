@@ -19,9 +19,30 @@ from ta_sniper import analyze_ta_sniper
 from retest_filter import retest_ok
 
 
+# =========================
+# LOG SYSTEM (вставить в начало файла, после импортов)
+# =========================
+from datetime import datetime
+
+def log(msg, symbol=None, level="INFO"):
+    now = datetime.now().strftime("%d.%m %H:%M")
+    prefix = f"[{now}] [{level}]"
+    if symbol:
+        prefix += f" [{symbol}]"
+    print(f"{prefix} {msg}", flush=True)
+
+
+# =========================
+# BTC MARKET REGIME (V2 FIXED + LOG)
+# =========================
 def detect_market_phase(df_h1):
+
+    log("detect_market_phase START")
+
     try:
+        # 🔴 ПРОВЕРКА ДАННЫХ
         if df_h1 is None or len(df_h1) < 50:
+            log("not enough data for phase", level="WARN")
             return {"phase": "UNKNOWN", "score": 0}
 
         close = df_h1["close"]
@@ -33,35 +54,39 @@ def detect_market_phase(df_h1):
         ema20_last = float(ema20.iloc[-1])
         ema50_last = float(ema50.iloc[-1])
 
-        # расстояние между EMA
-        spread = abs(ema20_last - ema50_last) / last_price * 100
+        log(f"price={last_price} ema20={ema20_last} ema50={ema50_last}")
 
-        # наклон EMA20
+        # 📊 СПРЕД И НАКЛОН
+        spread = abs(ema20_last - ema50_last) / last_price * 100
         slope = ema20.iloc[-1] - ema20.iloc[-5]
+
+        log(f"spread={spread:.3f} slope={slope:.6f}")
 
         trend_score = 0
 
-        # направление
+        # 📈 НАПРАВЛЕНИЕ
         if ema20_last > ema50_last:
             trend_score += 1
         elif ema20_last < ema50_last:
             trend_score += 1
 
-        # наклон
+        # 📈 НАКЛОН
         if abs(slope) > last_price * 0.001:
             trend_score += 1
 
-        # расширение (есть движение)
+        # 📈 РАСШИРЕНИЕ
         if spread > 0.2:
             trend_score += 1
 
-        # классификация
+        # 📊 КЛАССИФИКАЦИЯ
         if trend_score >= 3:
             phase = "TREND"
         elif trend_score == 2:
             phase = "TRANSITION"
         else:
             phase = "FLAT"
+
+        log(f"phase={phase} score={trend_score}")
 
         return {
             "phase": phase,
@@ -70,7 +95,7 @@ def detect_market_phase(df_h1):
         }
 
     except Exception as e:
-        print(f"[PHASE_ERROR] {e}", flush=True)
+        log(f"PHASE_ERROR {e}", level="ERROR")
         return {"phase": "UNKNOWN", "score": 0}
 
 # =====================
