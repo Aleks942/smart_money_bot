@@ -4608,11 +4608,16 @@ def build_signal(instId):
         swing_only_candidate = True
 
     # =========================
+    # STAGE CALCULATION
+    # =========================
+    stage, stage_reason = smart_money_stage(score, flags)
+    
+    # =========================
     # SIGNAL OBJECT
     # =========================
-
+    
     tier = get_signal_tier(score, acc_score)
-
+    
     signal = {
         "instId": instId,
         "symbol": instId,
@@ -4635,24 +4640,31 @@ def build_signal(instId):
         "entry_price": price,
         "entry_zone": entry_zone,
         "entry_reason": entry_reason,
+    
+        # ✅ ВСТАВЛЯЕМ СЮДА
         "stage": stage,
         "stage_reason": stage_reason,
+    
         "target": tgt,
         "exp_move_min": exp_min,
         "exp_move_max": exp_max,
-
+    
         "ema20": (ema_meta or {}).get("ema20"),
         "ema50": (ema_meta or {}).get("ema50"),
         "ema200": (ema_meta or {}).get("ema200"),
-
+    
         "ema_state": ema_state,
         "rsi7": rsi7,
         "rsi14": rsi14,
         "rsi_state": (rsi_state or {}).get("state"),
-
+    
         "ts": now_ts(),
         "created_at": time.time(),
     }
+    
+    # отдельно тип сигнала
+    if score < 1:
+        signal["type"] = "EARLY"
 
     # =========================
     # FINAL DECISION
