@@ -4662,45 +4662,44 @@ def build_signal(instId):
     "created_at": time.time(),
 }
 
-    # =====================
-    # SIGNAL STRENGTH
-    # =====================
-    rating, reasons_strength, strength = analyze_signal_strength({
-        "flags": signal.get("flags", []),
-        "score": signal.get("score", 0),
-        "oi_change": signal.get("oi_change", 0)
-    })
     
-    signal["rating"] = rating
-    signal["strength"] = strength
-    signal["strength_reasons"] = reasons_strength
-    # =========================
-    # EXTRA SIGNAL LAYERS
-    # =========================
-    
-    signal.update(detect_early_pressure(signal))
-    
-    signal["sniper"] = sniper_signal(signal)
-    
-    # =========================
-    # FINAL DECISION
-    # =========================
-    
-    signal["decision"] = decision_engine(signal)
-    # =========================
-    # FINAL QUALITY FILTER
-    # =========================
-    ok, reason = signal_quality_filter(signal)
-    
-    signal["filter_pass"] = ok
-    signal["filter_reason"] = reason
+# =========================
+# FINAL DECISION (сначала)
+# =========================
+signal["decision"] = decision_engine(signal)
 
-    if not ok:
-        print(f"[FILTER_BLOCK] {instId} reason={reason}", flush=True)
-        return None
-        
-    return signal
+# =====================
+# SIGNAL STRENGTH
+# =====================
+rating, reasons_strength, strength = analyze_signal_strength({
+    "flags": signal.get("flags", []),
+    "score": signal.get("score", 0),
+    "oi_change": signal.get("oi_change", 0)
+})
 
+signal["rating"] = rating
+signal["strength"] = strength
+signal["strength_reasons"] = reasons_strength
+
+# =========================
+# EXTRA SIGNAL LAYERS
+# =========================
+signal.update(detect_early_pressure(signal))
+signal["sniper"] = sniper_signal(signal)
+
+# =========================
+# FINAL QUALITY FILTER (всегда в конце)
+# =========================
+ok, reason = signal_quality_filter(signal)
+
+signal["filter_pass"] = ok
+signal["filter_reason"] = reason
+
+if not ok:
+    print(f"[FILTER_BLOCK] {instId} reason={reason}", flush=True)
+    return None
+
+return signal
 # ==============================
 # 🎯 SNIPER SIGNAL ENGINE
 # ==============================
