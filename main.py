@@ -3289,25 +3289,7 @@ def cvd_detector(candles, lookback=12):
 
     return None
 
-    try:
-        hi = float(hi)
-        lo = float(lo)
-        price = float(price)
-        near_pct = float(near_pct)
-    except Exception:
-        return None
-
-    if price <= 0:
-        return None
-
-    dist_up = abs(hi - price) / price * 100.0
-    dist_dn = abs(price - lo) / price * 100.0
-
-    if dist_up <= near_pct:
-        return "UP"
-    if dist_dn <= near_pct:
-        return "DOWN"
-    return None
+    
 
 # ==============================
 # 🎯 LIQUIDITY MAP
