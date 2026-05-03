@@ -4043,10 +4043,7 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
     return "🔴 WAIT", "Недостаточно факторов"
 
 def smart_money_stage(score, flags):
-    flags = set(flags)
-
-    if score < 1:
-        return "⚪ NEUTRAL", "Структуры почти нет"
+    flags = set(flags or [])
 
     confirmed_up = "BREAKOUT_CONFIRM_UP" in flags
     confirmed_down = "BREAKOUT_CONFIRM_DOWN" in flags
@@ -4072,7 +4069,11 @@ def smart_money_stage(score, flags):
     stop_hunt_up = "STOP_HUNT_UP" in flags
     stop_hunt_down = "STOP_HUNT_DOWN" in flags
 
-    # 1. Реальное движение / подтверждённый импульс
+    # 0. EARLY
+    if score < 1:
+        return "⚪ EARLY", "Очень ранний интерес"
+
+    # 1. EXPANSION
     if (
         (confirmed_up or confirmed_down)
         and (
@@ -4082,9 +4083,9 @@ def smart_money_stage(score, flags):
             or (pressure_down and continuation_down)
         )
     ):
-        return "🟢 EXPANSION", "Подтверждённый импульс по направлению"
+        return "🟢 EXPANSION", "Подтверждённый импульс"
 
-    # 2. Манипуляция / сбор ликвидности
+    # 2. MANIPULATION
     if (
         fake_dump
         or sweep_up
@@ -4094,22 +4095,22 @@ def smart_money_stage(score, flags):
         or stop_hunt_up
         or stop_hunt_down
     ):
-        return "🟡 MANIPULATION", "Вероятен сбор ликвидности"
+        return "🟡 MANIPULATION", "Сбор ликвидности"
 
-    # 3. Накопление / сжатие
+    # 3. ACCUMULATION
     if comp:
-        return "🟣 ACCUMULATION", "Накопление/сжатие перед движением"
+        return "🟣 ACCUMULATION", "Сжатие перед движением"
 
-    # 4. Ранний направленный разгон, но ещё без полного подтверждения
+    # 4. TRANSITION
     if (
         (breakout_up and pressure_up)
         or (breakout_down and pressure_down)
         or (continuation_up and pressure_up)
         or (continuation_down and pressure_down)
     ):
-        return "🟠 TRANSITION", "Движение начинается, но ещё не полностью подтверждено"
+        return "🟠 TRANSITION", "Начало движения"
 
-    return "⚪ NEUTRAL", "Смешанные признаки"
+    return "⚪ NEUTRAL", "Смешанные сигналы"
 
     # =========================
     # EARLY PRESSURE DETECTOR
