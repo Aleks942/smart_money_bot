@@ -4243,6 +4243,17 @@ def build_signal(instId):
         print(f"[BUILD_SIGNAL_SKIP] {instId} {reason}", flush=True)
         return None
 
+    # =====================
+    # BASIC PROTECTION
+    # =====================
+    if isinstance(instId, tuple):
+        instId = instId[0]
+
+    if not instId:
+        return _bs_skip("empty_instId")
+        print(f"[BUILD_SIGNAL_SKIP] {instId} {reason}", flush=True)
+        return None
+
     if isinstance(instId, tuple):
         instId = instId[0]
 
