@@ -4151,11 +4151,14 @@ def calc_entry_zone(price, pmeta, flags, direction_code):
 def build_signal(instId):
 
     def _bs_skip(reason: str):
-        print(f"[BUILD_SIGNAL_SKIP] {instId} {reason}")
+        print(f"[BUILD_SIGNAL_SKIP] {instId} {reason}", flush=True)
         return None
 
     if isinstance(instId, tuple):
         instId = instId[0]
+
+    if not instId:
+        return _bs_skip("empty_instId")
 
     flags = set()
     score = 0
@@ -4171,13 +4174,15 @@ def build_signal(instId):
     if ORDERBOOK_ENABLED:
         try:
             ob_meta = orderbook_edge(instId)
-        except:
+        except Exception as e:
+            print(f"[ORDERBOOK_ERROR] {instId} {e}", flush=True)
             ob_meta = None
 
-    if ob_meta:
+    if isinstance(ob_meta, dict):
         if ob_meta.get("ob_bias") == "BIDS":
             flags.add("OB_BIDS")
             score += 1
+
         elif ob_meta.get("ob_bias") == "ASKS":
             flags.add("OB_ASKS")
             score += 1
