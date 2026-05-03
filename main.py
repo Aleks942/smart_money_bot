@@ -4326,14 +4326,6 @@ def build_signal(instId):
         print(f"[BUILD_SIGNAL_SKIP] {instId} {reason}", flush=True)
         return None
         
-# =========================
-# BUILD SIGNAL FOR SYMBOL
-# =========================
-def build_signal(instId):
-
-    def _bs_skip(reason: str):
-        print(f"[BUILD_SIGNAL_SKIP] {instId} | {reason}", flush=True)
-        return None
 
     # =====================
     # BASIC PROTECTION
