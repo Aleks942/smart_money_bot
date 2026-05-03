@@ -4045,7 +4045,7 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
 def smart_money_stage(score, flags):
     flags = set(flags)
 
-    if score < 2:
+    if score < 1:
         return "⚪ NEUTRAL", "Структуры почти нет"
 
     confirmed_up = "BREAKOUT_CONFIRM_UP" in flags
