@@ -4569,7 +4569,7 @@ def build_signal(instId):
         "ema_state": ema_state,
         "rsi7": rsi7,
         "rsi14": rsi14,
-        "rsi_state": rsi_state.get("state"),
+        (rsi_state or {}).get("state")
         "ts": now_ts(),
         "created_at": time.time(),
     }
