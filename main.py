@@ -3798,6 +3798,107 @@ def decision_engine(sig):
     else:
         return "WEAK"
 
+# =========================
+# 🔥 PRO QUALITY FILTER V2
+# =========================
+def signal_quality_filter(sig):
+
+    try:
+        flags = set(sig.get("flags", []))
+        score = float(sig.get("score", 0))
+        acc = float(sig.get("acc_score", 0))
+        direction = str(sig.get("direction", ""))
+        ema = sig.get("ema_state")
+        rsi = sig.get("rsi_state")
+        price = sig.get("price")
+        target = sig.get("target")
+
+        pm = sig.get("pmeta") or {}
+        range_pct = float(pm.get("range_pct") or 0)
+
+        # =====================
+        # 1. МИНИМАЛЬНАЯ СИЛА
+        # =====================
+        if score < 5:
+            return False, "low_score"
+
+        # =====================
+        # 2. НЕТ ИМПУЛЬСА
+        # =====================
+        impulse = (
+            "VOL_SPIKE" in flags or
+            "ATR_EXPANSION" in flags or
+            "BREAKOUT_CONFIRM_UP" in flags or
+            "BREAKOUT_CONFIRM_DOWN" in flags
+        )
+
+        if not impulse:
+            return False, "no_impulse"
+
+        # =====================
+        # 3. EMA ПРОТИВ
+        # =====================
+        if "ВВЕРХ" in direction and ema == "EMA_BEAR":
+            return False, "ema_against"
+
+        if "ВНИЗ" in direction and ema == "EMA_BULL":
+            return False, "ema_against"
+
+        # =====================
+        # 4. НЕТ ПЕРЕВЕСА
+        # =====================
+        up_w = sig.get("up_w", 0)
+        down_w = sig.get("down_w", 0)
+
+        if abs(up_w - down_w) < 2:
+            return False, "weak_side"
+
+        # =====================
+        # 5. ФЛЭТ / МАЛЫЙ RANGE
+        # =====================
+        if range_pct < 0.4:
+            return False, "flat_range"
+
+        # =====================
+        # 6. НЕТ ЗАПАСА ДО ЦЕЛИ
+        # =====================
+        if target is not None and price:
+            try:
+                dist = abs(target - price) / price * 100
+                if dist < 0.6:
+                    return False, "no_room"
+            except:
+                pass
+
+        # =====================
+        # 7. RSI ОПАСНАЯ ЗОНА
+        # =====================
+        if rsi in ("EXTREME_OVERBOUGHT", "EXTREME_OVERSOLD"):
+            return False, "rsi_extreme"
+
+        # =====================
+        # 8. ЛОВУШКИ
+        # =====================
+        traps = {
+            "SWEEP_UP", "SWEEP_DOWN",
+            "FAKE_DUMP",
+            "BULL_TRAP", "BEAR_TRAP"
+        }
+
+        if any(f in flags for f in traps):
+            return False, "trap"
+
+        # =====================
+        # 9. СЛАБОЕ НАКОПЛЕНИЕ
+        # =====================
+        if acc < 2:
+            return False, "no_accumulation"
+
+        return True, "ok"
+
+    except Exception as e:
+        return False, f"error_{e}"
+
 def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, price, target):
 
     if "БАЛАНС" in direction_text:
