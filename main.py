@@ -147,6 +147,70 @@ def money_flow_ok(candles, oi_change, direction):
         print(f"[MF_ERROR] {e}", flush=True)
         return {"ok": False}
 
+# =========================
+# SIGNAL STRENGTH ANALYZER
+# =========================
+def analyze_signal_strength(sig):
+
+    flags = set(sig.get("flags", []))
+    score = sig.get("score", 0)
+    oi = sig.get("oi_change", 0)
+
+    reasons = []
+    strength = 0
+
+    if "BREAKOUT_UP" in flags or "BREAKOUT_DOWN" in flags:
+        reasons.append("Пробой уровня")
+        strength += 2
+
+    if "CONTINUATION_UP" in flags:
+        reasons.append("Продолжение движения")
+        strength += 2
+
+    if "PRESSURE_UP" in flags:
+        reasons.append("Давление покупателей")
+        strength += 1
+
+    if "PRESSURE_DOWN" in flags:
+        reasons.append("Давление продавцов")
+        strength += 1
+
+    if "EMA_BULL" in flags:
+        reasons.append("Тренд вверх")
+        strength += 1
+
+    if "VOL_SPIKE" in flags:
+        reasons.append("Объем")
+        strength += 2
+
+    if "OB_WALL_BID" in flags:
+        reasons.append("Покупатель в стакане")
+        strength += 1
+
+    if "OB_WALL_ASK" in flags:
+        reasons.append("Продавец в стакане")
+        strength += 1
+
+    if oi is not None:
+        try:
+            if float(oi) > 0.2:
+                reasons.append("Рост OI")
+                strength += 2
+            elif float(oi) < -0.2:
+                reasons.append("Падение OI")
+                strength -= 1
+        except:
+            pass
+
+    if strength >= 7:
+        rating = "A"
+    elif strength >= 4:
+        rating = "B"
+    else:
+        rating = "C"
+
+    return rating, reasons, strength
+
 
 # =========================
 # ANTI-SPAM TELEGRAM
