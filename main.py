@@ -3533,8 +3533,8 @@ def too_late_from_range(price, pmeta, max_dist_pct=0.8):
     if not pmeta or price <= 0:
         return False
 
-    low = pmeta.get("range_low")
-    high = pmeta.get("range_high")
+    low = (pmeta or {}).get("range_low")
+    high = (pmeta or {}).get("range_high")
 
     if low is None or high is None:
         return False
