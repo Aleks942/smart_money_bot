@@ -4586,7 +4586,18 @@ def build_signal(instId):
     # =========================
     
     signal["decision"] = decision_engine(signal)
+    # =========================
+    # FINAL QUALITY FILTER
+    # =========================
+    ok, reason = signal_quality_filter(signal)
     
+    signal["filter_pass"] = ok
+    signal["filter_reason"] = reason
+
+    if not ok:
+        print(f"[FILTER_BLOCK] {instId} reason={reason}", flush=True)
+        return None
+        
     return signal
 
 # ==============================
