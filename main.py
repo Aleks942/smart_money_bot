@@ -3213,8 +3213,8 @@ def near_breakout(pmeta, price, near_pct):
     if not pmeta or not isinstance(pmeta, dict):
         return None
 
-    hi = pmeta.get("range_hi")
-    lo = pmeta.get("range_lo")
+    hi = (pmeta or {}).get("range_hi")
+    lo = (pmeta or {}).get("range_lo")
 
     if hi is None or lo is None:
         return None
