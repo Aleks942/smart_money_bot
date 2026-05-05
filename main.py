@@ -4815,6 +4815,8 @@ def build_signal(instId):
         "up_w": up_w,
         "down_w": down_w,
         "entry": entry,
+        "stop": stop,
+        "entry_reason": entry_reason,
         "entry_type": entry,
         "entry_price": price,
         "entry_zone": entry_zone,
