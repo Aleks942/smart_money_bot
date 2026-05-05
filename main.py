@@ -4587,32 +4587,7 @@ def calc_entry_zone(price, pmeta, flags, direction_code):
         print(f"[NO ENTRY] {instId} stage={stage}", flush=True)
         return None
 
-    # =========================
-    # SIGNAL OBJECT
-    # =========================
-    acc_score = score  # временно
-
-    tier = get_signal_tier(score, acc_score)
-
-    signal = {
-        "instId": instId,
-        "symbol": instId,
-        "price": price,
-        "score": score,
-        "tier": tier,
-        "flags": list(flags),
-        "acc_score": 0,
-
-        "stage": stage,
-        "stage_reason": stage_reason,
-
-        "ema20": (ema_meta or {}).get("ema20"),
-        "ema50": (ema_meta or {}).get("ema50"),
-        "ema200": (ema_meta or {}).get("ema200"),
-
-        "ts": now_ts(),
-    }
-
+    
     # =========================
     # FINAL FLAGS
     # =========================
