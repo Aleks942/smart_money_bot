@@ -4113,6 +4113,61 @@ def smart_money_stage(score, flags):
     return "⚪ NEUTRAL", "Смешанные сигналы"
 
     # =========================
+    # ENTRY LOGIC
+    # =========================
+    def decide_entry(stage, flags, price, c5):
+    
+        entry = None
+        stop = None
+        entry_reason = "NO_ENTRY"
+    
+        last = price
+    
+        highs = [c[2] for c in c5[-10:]] if c5 else []
+        lows = [c[3] for c in c5[-10:]] if c5 else []
+    
+        recent_high = max(highs) if highs else last
+        recent_low = min(lows) if lows else last
+    
+        if stage == "🟢 EXPANSION":
+    
+            if "BREAKOUT_CONFIRM_UP" in flags:
+                entry = last
+                stop = recent_low
+                entry_reason = "BREAKOUT_LONG"
+    
+            elif "BREAKOUT_CONFIRM_DOWN" in flags:
+                entry = last
+                stop = recent_high
+                entry_reason = "BREAKOUT_SHORT"
+    
+        elif stage == "🟠 TRANSITION":
+    
+            if "PRESSURE_UP" in flags:
+                entry = last
+                stop = recent_low
+                entry_reason = "EARLY_LONG"
+    
+            elif "PRESSURE_DOWN" in flags:
+                entry = last
+                stop = recent_high
+                entry_reason = "EARLY_SHORT"
+    
+        elif stage == "🟡 MANIPULATION":
+    
+            if "SWEEP_DOWN" in flags or "BEAR_TRAP" in flags:
+                entry = last
+                stop = recent_low
+                entry_reason = "REVERSAL_LONG"
+    
+            elif "SWEEP_UP" in flags or "BULL_TRAP" in flags:
+                entry = last
+                stop = recent_high
+                entry_reason = "REVERSAL_SHORT"
+    
+        return entry, stop, entry_reason
+
+    # =========================
     # EARLY PRESSURE DETECTOR
     # =========================
 def detect_early_pressure(sig):
