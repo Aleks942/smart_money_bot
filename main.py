@@ -4318,15 +4318,9 @@ def calc_entry_zone(price, pmeta, flags, direction_code):
             }
 
     return None
-# =========================
-# BUILD SIGNAL FOR SYMBOL
-# =========================
 def build_signal(instId):
 
-    def _bs_skip(reason: str):
-        print(f"[BUILD_SIGNAL_SKIP] {instId} {reason}", flush=True)
-        return None
-        
+    print(f"[STEP1] {instId} before_fetch", flush=True)
 
     # =====================
     # BASIC PROTECTION
@@ -4335,7 +4329,8 @@ def build_signal(instId):
         instId = instId[0]
 
     if not instId:
-        return _bs_skip("empty_instId")
+        print(f"[SKIP] empty_instId", flush=True)
+        return None  # единственное допустимое раннее завершение
 
     flags = set()
     score = 0
@@ -4344,6 +4339,10 @@ def build_signal(instId):
     pmeta = None
     tgt = None
     strong_setup = False
+
+    swing_only_candidate = False
+    can_survive_for_swing = True
+    signal_type = "NORMAL"
 
     # =========================
     # ORDERBOOK
@@ -4359,7 +4358,6 @@ def build_signal(instId):
         if ob_meta.get("ob_bias") == "BIDS":
             flags.add("OB_BIDS")
             score += 1
-
         elif ob_meta.get("ob_bias") == "ASKS":
             flags.add("OB_ASKS")
             score += 1
@@ -4380,14 +4378,23 @@ def build_signal(instId):
     c15 = fetch_candles(instId, "15m", 240)
 
     if not c5 or len(c5) < 20:
-        return _bs_skip("c5_empty_or_lt_20")
+        print(f"[WARN] {instId} c5 not enough", flush=True)
+        c5 = []
+
     if not c15 or len(c15) < 200:
-        return _bs_skip("c15_empty_or_lt_200")
+        print(f"[WARN] {instId} c15 not enough", flush=True)
+        c15 = []
 
-    price = float(c5[-1][4])
+    if not c5:
+        price = 0
+    else:
+        price = float(c5[-1][4])
 
-    ema_meta = get_ema_trend(c15)
-    ema_state = ema_meta.get("state", "EMA_UNKNOWN")
+    # =========================
+    # EMA
+    # =========================
+    ema_meta = get_ema_trend(c15) if c15 else {}
+    ema_state = (ema_meta or {}).get("state", "EMA_UNKNOWN")
 
     if ema_state == "EMA_BULL":
         flags.add("EMA_BULL")
@@ -4397,8 +4404,84 @@ def build_signal(instId):
         flags.add("EMA_MIXED")
 
     # =========================
-    # PRESSURE
+    # PRESSURE (пример базовый)
     # =========================
+    try:
+        pmeta = detect_pressure(c5)
+    except:
+        pmeta = {}
+
+    if (pmeta or {}).get("pressure") == "UP":
+        flags.add("PRESSURE_UP")
+        score += 1
+
+    if (pmeta or {}).get("pressure") == "DOWN":
+        flags.add("PRESSURE_DOWN")
+        score += 1
+
+    # =========================
+    # RESULT FILTER (FIX)
+    # =========================
+    if score < MIN_SCORE:
+
+        has_breakout = (
+            "BREAKOUT_CONFIRM_UP" in flags
+            or "BREAKOUT_CONFIRM_DOWN" in flags
+        )
+
+        has_pressure = (
+            "PRESSURE_UP" in flags
+            or "PRESSURE_DOWN" in flags
+        )
+
+        if score == 1 and (has_pressure or has_breakout):
+            signal_type = "SWING_EARLY"
+            swing_only_candidate = True
+        else:
+            signal_type = "WEAK_SKIP"
+            can_survive_for_swing = False
+    else:
+        signal_type = "NORMAL"
+
+    # =========================
+    # STAGE
+    # =========================
+    stage, stage_reason = smart_money_stage(score, flags)
+
+    # =========================
+    # SIGNAL OBJECT
+    # =========================
+    tier = get_signal_tier(score, 0)
+
+    signal = {
+        "instId": instId,
+        "symbol": instId,
+        "price": price,
+        "score": score,
+        "tier": tier,
+        "flags": list(flags),
+        "acc_score": 0,
+
+        "stage": stage,
+        "stage_reason": stage_reason,
+
+        "ema20": (ema_meta or {}).get("ema20"),
+        "ema50": (ema_meta or {}).get("ema50"),
+        "ema200": (ema_meta or {}).get("ema200"),
+
+        "ts": now_ts(),
+    }
+
+    # =========================
+    # FINAL FLAGS
+    # =========================
+    signal["type"] = signal_type
+    signal["swing_only_candidate"] = swing_only_candidate
+    signal["can_survive_for_swing"] = can_survive_for_swing
+
+    print(f"[SIGNAL] {instId} score={score} type={signal_type} stage={stage}", flush=True)
+
+    return signal
     pressure, pmeta = liquidity_pressure(c5)
 
     if pressure == "UP":
