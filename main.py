@@ -4477,19 +4477,7 @@ def calc_entry_zone(price, pmeta, flags, direction_code):
         flags.add("PRESSURE_DOWN")
         score += 1
 
-    def decide_entry(stage, flags, price, c5):
-
-    entry = None
-    stop = None
-    entry_reason = "NO_ENTRY"
-
-    last = price
-
-    highs = [c[2] for c in c5[-10:]] if c5 else []
-    lows = [c[3] for c in c5[-10:]] if c5 else []
-
-    recent_high = max(highs) if highs else last
-    recent_low = min(lows) if lows else last
+   
 
     # =========================
     # 🟢 EXPANSION (самый сильный)
