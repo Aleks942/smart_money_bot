@@ -4583,6 +4583,9 @@ def calc_entry_zone(price, pmeta, flags, direction_code):
     stage, stage_reason = smart_money_stage(score, flags)
 
     entry, stop, entry_reason = decide_entry(stage, flags, price, c5)
+    if entry is None:
+        print(f"[NO ENTRY] {instId} stage={stage}", flush=True)
+        return None
 
     # =========================
     # SIGNAL OBJECT
