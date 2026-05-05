@@ -4536,6 +4536,8 @@ def build_signal(instId):
     # =========================
     stage, stage_reason = smart_money_stage(score, flags)
 
+    entry, stop, entry_reason = decide_entry(stage, flags, price, c5)
+
     # =========================
     # SIGNAL OBJECT
     # =========================
