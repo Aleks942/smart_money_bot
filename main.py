@@ -4469,7 +4469,9 @@ def build_signal(instId):
     # =========================
     # SIGNAL OBJECT
     # =========================
-    tier = get_signal_tier(score, 0)
+    acc_score = score  # временно
+
+    tier = get_signal_tier(score, acc_score)
 
     signal = {
         "instId": instId,
