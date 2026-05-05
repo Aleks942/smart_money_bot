@@ -4042,78 +4042,77 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
 
     return "🔴 WAIT", "Недостаточно факторов"
 
-def smart_money_stage(score, flags):
-    flags = set(flags or [])
-
-    confirmed_up = "BREAKOUT_CONFIRM_UP" in flags
-    confirmed_down = "BREAKOUT_CONFIRM_DOWN" in flags
-    breakout_up = "BREAKOUT_UP" in flags
-    breakout_down = "BREAKOUT_DOWN" in flags
-
-    pressure_up = "PRESSURE_UP" in flags
-    pressure_down = "PRESSURE_DOWN" in flags
-
-    continuation_up = "CONTINUATION_UP" in flags
-    continuation_down = "CONTINUATION_DOWN" in flags
-
-    vol = "VOL_SPIKE" in flags
-    atr = "ATR_EXPANSION" in flags
-
-    comp = ("COMP_5M" in flags) or ("COMP_15M" in flags)
-
-    fake_dump = "FAKE_DUMP" in flags
-    sweep_up = "SWEEP_UP" in flags
-    sweep_down = "SWEEP_DOWN" in flags
-    bull_trap = "BULL_TRAP" in flags
-    bear_trap = "BEAR_TRAP" in flags
-    stop_hunt_up = "STOP_HUNT_UP" in flags
-    stop_hunt_down = "STOP_HUNT_DOWN" in flags
-
-    # 0. EARLY
-    if score < 1:
-        return "⚪ EARLY", "Очень ранний интерес"
-
-    # 1. EXPANSION
-    if (
-        (confirmed_up or confirmed_down)
-        and (
-            atr
-            or vol
-            or (pressure_up and continuation_up)
-            or (pressure_down and continuation_down)
-        )
-    ):
-        return "🟢 EXPANSION", "Подтверждённый импульс"
-
-    # 2. MANIPULATION
-    if (
-        fake_dump
-        or sweep_up
-        or sweep_down
-        or bull_trap
-        or bear_trap
-        or stop_hunt_up
-        or stop_hunt_down
-    ):
-        return "🟡 MANIPULATION", "Сбор ликвидности"
-
-    # 3. ACCUMULATION
-    if comp:
-        return "🟣 ACCUMULATION", "Сжатие перед движением"
-
-    # 4. TRANSITION
-    if (
-        (breakout_up and pressure_up)
-        or (breakout_down and pressure_down)
-        or (continuation_up and pressure_up)
-        or (continuation_down and pressure_down)
-    ):
-        return "🟠 TRANSITION", "Начало движения"
-
-    return "⚪ NEUTRAL", "Смешанные сигналы"
-
     # =========================
-    # ENTRY LOGIC
+    # STAGE
+    # =========================
+    def smart_money_stage(score, flags):
+        flags = set(flags or [])
+    
+        confirmed_up = "BREAKOUT_CONFIRM_UP" in flags
+        confirmed_down = "BREAKOUT_CONFIRM_DOWN" in flags
+        breakout_up = "BREAKOUT_UP" in flags
+        breakout_down = "BREAKOUT_DOWN" in flags
+    
+        pressure_up = "PRESSURE_UP" in flags
+        pressure_down = "PRESSURE_DOWN" in flags
+    
+        continuation_up = "CONTINUATION_UP" in flags
+        continuation_down = "CONTINUATION_DOWN" in flags
+    
+        vol = "VOL_SPIKE" in flags
+        atr = "ATR_EXPANSION" in flags
+    
+        comp = ("COMP_5M" in flags) or ("COMP_15M" in flags)
+    
+        fake_dump = "FAKE_DUMP" in flags
+        sweep_up = "SWEEP_UP" in flags
+        sweep_down = "SWEEP_DOWN" in flags
+        bull_trap = "BULL_TRAP" in flags
+        bear_trap = "BEAR_TRAP" in flags
+        stop_hunt_up = "STOP_HUNT_UP" in flags
+        stop_hunt_down = "STOP_HUNT_DOWN" in flags
+    
+        if score < 1:
+            return "⚪ EARLY", "Очень ранний интерес"
+    
+        if (
+            (confirmed_up or confirmed_down)
+            and (
+                atr
+                or vol
+                or (pressure_up and continuation_up)
+                or (pressure_down and continuation_down)
+            )
+        ):
+            return "🟢 EXPANSION", "Подтверждённый импульс"
+    
+        if (
+            fake_dump
+            or sweep_up
+            or sweep_down
+            or bull_trap
+            or bear_trap
+            or stop_hunt_up
+            or stop_hunt_down
+        ):
+            return "🟡 MANIPULATION", "Сбор ликвидности"
+    
+        if comp:
+            return "🟣 ACCUMULATION", "Сжатие перед движением"
+    
+        if (
+            (breakout_up and pressure_up)
+            or (breakout_down and pressure_down)
+            or (continuation_up and pressure_up)
+            or (continuation_down and pressure_down)
+        ):
+            return "🟠 TRANSITION", "Начало движения"
+    
+        return "⚪ NEUTRAL", "Смешанные сигналы"
+    
+    
+    # =========================
+    # ENTRY (ОТДЕЛЬНО!)
     # =========================
     def decide_entry(stage, flags, price, c5):
     
@@ -4166,7 +4165,13 @@ def smart_money_stage(score, flags):
                 entry_reason = "REVERSAL_SHORT"
     
         return entry, stop, entry_reason
-
+    
+    
+    # =========================
+    # MAIN
+    # =========================
+    def build_signal(instId):
+    ...
     # =========================
     # EARLY PRESSURE DETECTOR
     # =========================
@@ -4373,9 +4378,7 @@ def calc_entry_zone(price, pmeta, flags, direction_code):
             }
 
     return None
-def build_signal(instId):
 
-    print(f"[STEP1] {instId} before_fetch", flush=True)
 
     # =====================
     # BASIC PROTECTION
