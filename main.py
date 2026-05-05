@@ -4114,6 +4114,7 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
     # =========================
     # ENTRY (ОТДЕЛЬНО!)
     # =========================
+    print(f"[DEBUG] {instId} stage={stage} flags={flags}", flush=True)
     def decide_entry(stage, flags, price, c5):
     
         entry = None
