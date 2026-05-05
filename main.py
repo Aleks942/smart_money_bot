@@ -4846,8 +4846,7 @@ def calc_entry_zone(price, pmeta, flags, direction_code):
         "entry_type": entry,
         "entry_price": price,
         "entry_zone": entry_zone,
-        "entry_reason": entry_reason,
-    
+        
         "stage": stage,
         "stage_reason": stage_reason,
     
