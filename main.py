@@ -2535,7 +2535,7 @@ def early_edge_detector(candles, flags):
 
     return False
 
-    # =========================
+# =========================
 # LIQUIDITY SWEEP DETECTOR
 # =========================
 
