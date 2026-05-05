@@ -259,10 +259,10 @@ SCAN_MIN_PCT_24H = float(os.getenv("SCAN_MIN_PCT_24H") or "2")
 PREBREAK_SCAN_MAX_PCT_24H = float(os.getenv("PREBREAK_SCAN_MAX_PCT_24H") or "1.2")
 PREBREAK_SCAN_MIN_PCT_24H = float(os.getenv("PREBREAK_SCAN_MIN_PCT_24H") or "0.2")
 
-ALERT_MIN_SCORE = int(os.getenv("ALERT_MIN_SCORE") or "2")
+ALERT_MIN_SCORE = int(os.getenv("ALERT_MIN_SCORE") or "1")
 ALERT_TOP_M = int(os.getenv("ALERT_TOP_M") or "8")
 DETAIL_TOP_K = int(os.getenv("DETAIL_TOP_K") or "1")
-MIN_SCORE = int(os.getenv("MIN_SCORE") or "2")
+MIN_SCORE = int(os.getenv("MIN_SCORE") or "1")
 ONE_OPEN_SIGNAL_PER_SYMBOL = (os.getenv("ONE_OPEN_SIGNAL_PER_SYMBOL") or "1").strip() != "0"
 MIN_STOP_PCT = float(os.getenv("MIN_STOP_PCT") or "0.25")
 SWING_MODE = (os.getenv("SWING_MODE") or "AUTO").upper()
