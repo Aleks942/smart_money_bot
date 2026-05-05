@@ -4420,6 +4420,24 @@ def build_signal(instId):
         score += 1
 
     # =========================
+    # MOMENTUM / VOL
+    # =========================
+    try:
+        vol_spike = detect_volume_spike(c5)
+        atr_expansion = detect_atr_expansion(c5)
+    except:
+        vol_spike = False
+        atr_expansion = False
+    
+    if vol_spike:
+        flags.add("VOL_SPIKE")
+        score += 1
+    
+    if atr_expansion:
+        flags.add("ATR_EXPANSION")
+        score += 1
+
+    # =========================
     # RESULT FILTER (FIX)
     # =========================
     if score < MIN_SCORE:
