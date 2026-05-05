@@ -4172,7 +4172,7 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
     # MAIN
     # =========================
     def build_signal(instId):
-    ...
+        print(f"[STEP1] {instId} before_fetch", flush=True)
     # =========================
     # EARLY PRESSURE DETECTOR
     # =========================
