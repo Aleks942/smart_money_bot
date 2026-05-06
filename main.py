@@ -4167,6 +4167,16 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
         def build_signal(instId):
             print(f"[STEP1] {instId} before_fetch", flush=True)
         
+            signal = {
+                "symbol": instId,
+                "flags": [],
+                "score": 0,
+                "acc_score": 0,
+                "stage": "UNKNOWN"
+            }
+        
+            return signal
+                
             
     
         # =====================
