@@ -4510,27 +4510,7 @@ def build_signal(instId):
     else:
         signal_type = "NORMAL"
 
-    # =========================
-    # STAGE
-    # =========================
-    stage, stage_reason = smart_money_stage(score, flags)
-
-    entry, stop, entry_reason = decide_entry(stage, flags, price, c5)
-    if entry is None:
-        print(f"[NO ENTRY] {instId} stage={stage}", flush=True)
-        return None
-
-    
-    # =========================
-    # FINAL FLAGS
-    # =========================
-    signal["type"] = signal_type
-    signal["swing_only_candidate"] = swing_only_candidate
-    signal["can_survive_for_swing"] = can_survive_for_swing
-
-    print(f"[SIGNAL] {instId} score={score} type={signal_type} stage={stage}", flush=True)
-
-    return signal
+   
     pressure, pmeta = liquidity_pressure(c5)
 
     if pressure == "UP":
