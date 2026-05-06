@@ -4398,6 +4398,13 @@ def calc_entry_zone(price, pmeta, flags, direction_code):
             flags.add("WALL_REMOVED")
 
     # =========================
+    # MAIN SIGNAL BUILDER
+    # =========================
+    def build_signal(instId):
+    
+        print(f"[STEP1] {instId} before_fetch", flush=True)
+
+    # =========================
     # CANDLES
     # =========================
     c5 = fetch_candles(instId, "5m", 120)
