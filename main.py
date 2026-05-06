@@ -4821,11 +4821,6 @@ def calc_entry_zone(price, pmeta, flags, direction_code):
     signal["strength"] = strength
     signal["strength_reasons"] = reasons_strength
 
-    # =========================
-    # EXTRA SIGNAL LAYERS
-    # =========================
-    signal.update(detect_early_pressure(signal))
-    signal["sniper"] = sniper_signal(signal)
 
     # =========================
     # FINAL QUALITY FILTER
