@@ -4181,12 +4181,7 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
         if "CONTINUATION_DOWN" in flags:
             add_down(2, "CONTINUATION_DOWN")
     
-        return {
-            "early_pressure_side": None,
-            "early_pressure_score": max(up_score, down_score),
-            "early_pressure_label": "EARLY",
-            "early_pressure_reasons": up_reasons if up_score > down_score else down_reasons
-        }
+       
 
     # =====================
     # COMPRESSION = ДО ДВИЖЕНИЯ
