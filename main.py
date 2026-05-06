@@ -4397,9 +4397,9 @@ def calc_entry_zone(price, pmeta, flags, direction_code):
         if ob_meta.get("wall_removed"):
             flags.add("WALL_REMOVED")
 
-    # =========================
-    # MAIN SIGNAL BUILDER
-    # =========================
+# =========================
+# MAIN SIGNAL BUILDER
+# =========================
 def build_signal(instId):
     
         print(f"[STEP1] {instId} before_fetch", flush=True)
