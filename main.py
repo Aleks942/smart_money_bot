@@ -4402,7 +4402,7 @@ def calc_entry_zone(price, pmeta, flags, direction_code):
 # =========================
 def build_signal(instId):
     
-        print(f"[STEP1] {instId} before_fetch", flush=True)
+    print(f"[STEP1] {instId} before_fetch", flush=True)
 
     # =========================
     # CANDLES
