@@ -4452,48 +4452,6 @@ def calc_entry_zone(price, pmeta, flags, direction_code):
         flags.add("PRESSURE_DOWN")
         score += 1
 
-   
-
-    # =========================
-    # 🟠 TRANSITION (ранний вход)
-    # =========================
-    elif stage == "🟠 TRANSITION":
-
-        if "PRESSURE_UP" in flags:
-            entry = last
-            stop = recent_low
-            entry_reason = "EARLY_LONG"
-
-        elif "PRESSURE_DOWN" in flags:
-            entry = last
-            stop = recent_high
-            entry_reason = "EARLY_SHORT"
-
-    # =========================
-    # 🟣 ACCUMULATION (ждём выход)
-    # =========================
-    elif stage == "🟣 ACCUMULATION":
-
-        entry = None
-        stop = None
-        entry_reason = "WAIT_BREAKOUT"
-
-    # =========================
-    # 🟡 MANIPULATION (ловим разворот)
-    # =========================
-    elif stage == "🟡 MANIPULATION":
-
-        if "SWEEP_DOWN" in flags or "BEAR_TRAP" in flags:
-            entry = last
-            stop = recent_low
-            entry_reason = "REVERSAL_LONG"
-
-        elif "SWEEP_UP" in flags or "BULL_TRAP" in flags:
-            entry = last
-            stop = recent_high
-            entry_reason = "REVERSAL_SHORT"
-
-    return entry, stop, entry_reason
 
     # =========================
     # MOMENTUM / VOL
