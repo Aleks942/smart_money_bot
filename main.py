@@ -4166,6 +4166,18 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
                 entry_reason = "REVERSAL_SHORT"
     
         return entry, stop, entry_reason
+
+    # =========================
+    # TRADE PLAN BY STAGE
+    # =========================
+    def build_trade_plan(signal):
+        return {
+            "entry_plan": None,
+            "stop": None,
+            "rr": None,
+            "trade_status": "NO_TRADE",
+            "plan_reason": None
+        }
     
     
     # =========================
