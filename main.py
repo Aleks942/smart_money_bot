@@ -4798,18 +4798,7 @@ def calc_entry_zone(price, pmeta, flags, direction_code):
         f"ep={ep}",
         flush=True
     )
- 
-    # =========================
-    # EXTRA SIGNAL LAYERS
-    # =========================
-    ep = detect_early_pressure(signal)
-    if isinstance(ep, dict):
-        signal.update(ep)
-    
-    signal["sniper"] = sniper_signal(signal)
-
-    
-
+  
     # =========================
     # FINAL DECISION
     # =========================
