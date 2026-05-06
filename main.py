@@ -4819,8 +4819,11 @@ def calc_entry_zone(price, pmeta, flags, direction_code):
         "ts": now_ts(),
         "created_at": time.time(),
     }
-    ep = detect_early_pressure(signal)
+   ep = detect_early_pressure(signal)
     signal.update(ep)
+    
+    signal["type"] = signal_type
+    signal["can_survive_for_swing"] = can_survive_for_swing
     
     print(
         f"[EARLY_DEBUG] {instId} "
