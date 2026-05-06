@@ -4088,10 +4088,10 @@ def decide_entry(stage, flags, price, c5):
             stop = recent_low
             reason = "EARLY_LONG"
 
-        elif "PRESSURE_DOWN" in flags:
-            entry = last
-            stop = recent_high
-            reason = "EARLY_SHORT"
+    elif "PRESSURE_DOWN" in flags:
+        entry = last
+        stop = recent_high
+        reason = "EARLY_SHORT"
 
     elif stage == "🟡 MANIPULATION":
         if "SWEEP_DOWN" in flags:
