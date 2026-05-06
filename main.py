@@ -4848,12 +4848,6 @@ def calc_entry_zone(price, pmeta, flags, direction_code):
     signal["sniper"] = sniper_signal(signal)
 
     
-            
-    # =========================
-    # ДОБАВЛЯЕМ ТОЛЬКО ЭТО 👇
-    # =========================
-    signal["type"] = signal_type
-    signal["can_survive_for_swing"] = can_survive_for_swing
 
     # =========================
     # FINAL DECISION
