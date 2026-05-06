@@ -4048,124 +4048,74 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
     def smart_money_stage(score, flags):
         flags = set(flags or [])
     
-        confirmed_up = "BREAKOUT_CONFIRM_UP" in flags
-        confirmed_down = "BREAKOUT_CONFIRM_DOWN" in flags
-        breakout_up = "BREAKOUT_UP" in flags
-        breakout_down = "BREAKOUT_DOWN" in flags
-    
-        pressure_up = "PRESSURE_UP" in flags
-        pressure_down = "PRESSURE_DOWN" in flags
-    
-        continuation_up = "CONTINUATION_UP" in flags
-        continuation_down = "CONTINUATION_DOWN" in flags
-    
-        vol = "VOL_SPIKE" in flags
-        atr = "ATR_EXPANSION" in flags
-    
-        comp = ("COMP_5M" in flags) or ("COMP_15M" in flags)
-    
-        fake_dump = "FAKE_DUMP" in flags
-        sweep_up = "SWEEP_UP" in flags
-        sweep_down = "SWEEP_DOWN" in flags
-        bull_trap = "BULL_TRAP" in flags
-        bear_trap = "BEAR_TRAP" in flags
-        stop_hunt_up = "STOP_HUNT_UP" in flags
-        stop_hunt_down = "STOP_HUNT_DOWN" in flags
-    
         if score < 1:
             return "⚪ EARLY", "Очень ранний интерес"
     
-        if (
-            (confirmed_up or confirmed_down)
-            and (
-                atr
-                or vol
-                or (pressure_up and continuation_up)
-                or (pressure_down and continuation_down)
-            )
-        ):
+        if "BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags:
             return "🟢 EXPANSION", "Подтверждённый импульс"
     
-        if (
-            fake_dump
-            or sweep_up
-            or sweep_down
-            or bull_trap
-            or bear_trap
-            or stop_hunt_up
-            or stop_hunt_down
-        ):
+        if "SWEEP_DOWN" in flags or "SWEEP_UP" in flags:
             return "🟡 MANIPULATION", "Сбор ликвидности"
     
-        if comp:
-            return "🟣 ACCUMULATION", "Сжатие перед движением"
+        if "COMP_5M" in flags or "COMP_15M" in flags:
+            return "🟣 ACCUMULATION", "Сжатие"
     
-        if (
-            (breakout_up and pressure_up)
-            or (breakout_down and pressure_down)
-            or (continuation_up and pressure_up)
-            or (continuation_down and pressure_down)
-        ):
+        if "PRESSURE_UP" in flags or "PRESSURE_DOWN" in flags:
             return "🟠 TRANSITION", "Начало движения"
     
         return "⚪ NEUTRAL", "Смешанные сигналы"
-    
-    
+
     # =========================
-    # ENTRY (ОТДЕЛЬНО!)
+    # ENTRY
     # =========================
-    print(f"[DEBUG] {instId} stage={stage} flags={flags}", flush=True)
     def decide_entry(stage, flags, price, c5):
     
-        entry = None
-        stop = None
-        entry_reason = "NO_ENTRY"
-    
         last = price
-    
         highs = [c[2] for c in c5[-10:]] if c5 else []
         lows = [c[3] for c in c5[-10:]] if c5 else []
     
         recent_high = max(highs) if highs else last
         recent_low = min(lows) if lows else last
     
-        if stage == "🟢 EXPANSION":
+        entry = None
+        stop = None
+        reason = "NO_ENTRY"
     
+        if stage == "🟢 EXPANSION":
             if "BREAKOUT_CONFIRM_UP" in flags:
                 entry = last
                 stop = recent_low
-                entry_reason = "BREAKOUT_LONG"
+                reason = "LONG"
     
             elif "BREAKOUT_CONFIRM_DOWN" in flags:
                 entry = last
                 stop = recent_high
-                entry_reason = "BREAKOUT_SHORT"
+                reason = "SHORT"
     
         elif stage == "🟠 TRANSITION":
-    
             if "PRESSURE_UP" in flags:
                 entry = last
                 stop = recent_low
-                entry_reason = "EARLY_LONG"
+                reason = "EARLY_LONG"
     
             elif "PRESSURE_DOWN" in flags:
                 entry = last
                 stop = recent_high
-                entry_reason = "EARLY_SHORT"
+                reason = "EARLY_SHORT"
     
         elif stage == "🟡 MANIPULATION":
-    
-            if "SWEEP_DOWN" in flags or "BEAR_TRAP" in flags:
+            if "SWEEP_DOWN" in flags:
                 entry = last
                 stop = recent_low
-                entry_reason = "REVERSAL_LONG"
+                reason = "REVERSAL_LONG"
     
-            elif "SWEEP_UP" in flags or "BULL_TRAP" in flags:
+            elif "SWEEP_UP" in flags:
                 entry = last
                 stop = recent_high
-                entry_reason = "REVERSAL_SHORT"
+                reason = "REVERSAL_SHORT"
     
-        return entry, stop, entry_reason
+        return entry, stop, reason
+    
 
     # =========================
     # TRADE PLAN BY STAGE
@@ -4491,21 +4441,6 @@ def calc_entry_zone(price, pmeta, flags, direction_code):
         score += 1
 
    
-
-    # =========================
-    # 🟢 EXPANSION (самый сильный)
-    # =========================
-    if stage == "🟢 EXPANSION":
-
-        if "BREAKOUT_CONFIRM_UP" in flags:
-            entry = last
-            stop = recent_low
-            entry_reason = "BREAKOUT_LONG"
-
-        elif "BREAKOUT_CONFIRM_DOWN" in flags:
-            entry = last
-            stop = recent_high
-            entry_reason = "BREAKOUT_SHORT"
 
     # =========================
     # 🟠 TRANSITION (ранний вход)
