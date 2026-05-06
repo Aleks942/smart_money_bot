@@ -4650,7 +4650,7 @@ def build_signal(instId):
     tgt = liquidity_target(pmeta, flags, price)
 
     
-        score, flags, direction_text, up_w, down_w, rsi7, ema_state, price, tgt
+    score, flags, direction_text, up_w, down_w, rsi7, ema_state, price, tgt
     )
 
     entry_zone = calc_entry_zone(price, pmeta, flags, direction_code)
