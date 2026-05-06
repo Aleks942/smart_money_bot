@@ -4485,32 +4485,7 @@ def build_signal(instId):
     if atr_expansion:
         flags.add("ATR_EXPANSION")
         score += 1
-
-    # =========================
-    # RESULT FILTER (FIX)
-    # =========================
-    if score < MIN_SCORE:
-
-        has_breakout = (
-            "BREAKOUT_CONFIRM_UP" in flags
-            or "BREAKOUT_CONFIRM_DOWN" in flags
-        )
-
-        has_pressure = (
-            "PRESSURE_UP" in flags
-            or "PRESSURE_DOWN" in flags
-        )
-
-        if score == 1 and (has_pressure or has_breakout):
-            signal_type = "SWING_EARLY"
-            swing_only_candidate = True
-        else:
-            signal_type = "WEAK_SKIP"
-            can_survive_for_swing = False
-    else:
-        signal_type = "NORMAL"
-
-   
+ 
     pressure, pmeta = liquidity_pressure(c5)
 
     if pressure == "UP":
