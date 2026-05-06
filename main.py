@@ -4404,6 +4404,9 @@ def build_signal(instId):
     
     print(f"[STEP1] {instId} before_fetch", flush=True)
 
+    flags = set()
+    score = 0
+
     # =========================
     # CANDLES
     # =========================
