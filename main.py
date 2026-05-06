@@ -6821,35 +6821,7 @@ if __name__ == "__main__":
 
             print(f"Scanning {len(candidates)} symbols this cycle | index={scan_index}/{total_symbols}")
 
-            # =========================
-            # MAIN SIGNAL BUILDER
-            # =========================
-            def build_signal(instId):
-            
-                print(f"[STEP1] {instId} before_fetch", flush=True)
-            
-                flags = set()
-                score = 0
-                acc_score = 0
-            
-                signal = {
-                    "instId": instId,
-                    "symbol": instId,
-                    "flags": [],
-                    "score": 0,
-                    "acc_score": 0,
-                    "stage": "UNKNOWN",
-                }
-            
-                ep = detect_early_pressure(signal)
-                signal.update(ep)
-            
-                print(
-                    f"[EARLY_DEBUG] {instId} ep={ep}",
-                    flush=True
-                )
-            
-                return signal
+           
 
             # =====================
             # SCAN LOOP
