@@ -4772,6 +4772,7 @@ def calc_entry_zone(price, pmeta, flags, direction_code):
     # =========================
     
     tier = get_signal_tier(score, acc_score)
+    print(f"[FLAGS_RAW] {instId} {flags}", flush=True)
     
     signal = {
         "instId": instId,
