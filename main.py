@@ -4820,6 +4820,19 @@ def calc_entry_zone(price, pmeta, flags, direction_code):
         "ts": now_ts(),
         "created_at": time.time(),
     }
+
+    ep = detect_early_pressure(signal)
+    signal.update(ep)
+
+    print(
+        f"[EARLY_DEBUG] {instId} "
+        f"flags={signal.get('flags')} "
+        f"score={signal.get('score')} "
+        f"acc={signal.get('acc_score')} "
+        f"stage={signal.get('stage')} "
+        f"ep={ep}",
+        flush=True
+    )
  
     # =========================
     # EXTRA SIGNAL LAYERS
