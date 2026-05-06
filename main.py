@@ -3803,101 +3803,79 @@ def decision_engine(sig):
 # =========================
 def signal_quality_filter(sig):
 
-    try:
-        flags = set(sig.get("flags", []))
-        score = float(sig.get("score", 0))
-        acc = float(sig.get("acc_score", 0))
-        direction = str(sig.get("direction", ""))
-        ema = sig.get("ema_state")
-        rsi = sig.get("rsi_state")
-        price = sig.get("price")
-        target = sig.get("target")
+    flags = set(sig.get("flags", []))
+    score = float(sig.get("score", 0))
+    acc = int(sig.get("acc_score", 0))
+    stage = str(sig.get("stage", ""))
+    entry = str(sig.get("entry", ""))
+    ep_score = float(sig.get("early_pressure_score") or 0)
+    ep_label = sig.get("early_pressure_label")
+    pre_move = sig.get("pre_move")
 
-        pm = sig.get("pmeta") or {}
-        range_pct = float(pm.get("range_pct") or 0)
+    # =====================
+    # ЖЁСТКИЙ МУСОР
+    # =====================
+    if score <= 0 and acc == 0:
+        return False, "trash_signal"
 
-        # =====================
-        # 1. МИНИМАЛЬНАЯ СИЛА
-        # =====================
-        if score < 5:
-            return False, "low_score"
+    # =====================
+    # 🔥 СИЛЬНЫЙ СИГНАЛ — ПРОПУСКАЕМ ВСЕГДА
+    # =====================
+    if score >= 7:
+        return True, "strong_signal"
 
-        # =====================
-        # 2. НЕТ ИМПУЛЬСА
-        # =====================
-        impulse = (
-            "VOL_SPIKE" in flags or
-            "ATR_EXPANSION" in flags or
-            "BREAKOUT_CONFIRM_UP" in flags or
-            "BREAKOUT_CONFIRM_DOWN" in flags
-        )
+    # =====================
+    # 🟢 SAFE / ENTRY — пропускаем
+    # =====================
+    if "SAFE" in entry:
+        return True, "safe_entry"
 
-        if not impulse:
-            return False, "no_impulse"
+    # =====================
+    # 🟠 PRE-MOVE — ДО ДВИЖЕНИЯ (ключевое)
+    # =====================
+    if pre_move:
+        return True, "pre_move_entry"
 
-        # =====================
-        # 3. EMA ПРОТИВ
-        # =====================
-        if "ВВЕРХ" in direction and ema == "EMA_BEAR":
-            return False, "ema_against"
+    # =====================
+    # 🟠 EARLY PRESSURE — ловим заранее
+    # =====================
+    if ep_label and ep_score >= 5:
+        return True, "early_pressure"
 
-        if "ВНИЗ" in direction and ema == "EMA_BULL":
-            return False, "ema_against"
+    # =====================
+    # 🟣 ACCUMULATION / TRANSITION
+    # =====================
+    if acc >= 2 and (
+        "ACCUMULATION" in stage or
+        "TRANSITION" in stage
+    ):
+        return True, "accumulation_context"
 
-        # =====================
-        # 4. НЕТ ПЕРЕВЕСА
-        # =====================
-        up_w = sig.get("up_w", 0)
-        down_w = sig.get("down_w", 0)
+    # =====================
+    # 📊 STRUCTURE PASS
+    # =====================
+    has_structure = (
+        "PRESSURE_UP" in flags or
+        "PRESSURE_DOWN" in flags or
+        "PRE_BREAKOUT_BUY" in flags or
+        "PRE_BREAKOUT_SELL" in flags or
+        "CONTINUATION_UP" in flags or
+        "CONTINUATION_DOWN" in flags
+    )
 
-        if abs(up_w - down_w) < 2:
-            return False, "weak_side"
+    if score >= 3 and has_structure:
+        return True, "structure_pass"
 
-        # =====================
-        # 5. ФЛЭТ / МАЛЫЙ RANGE
-        # =====================
-        if range_pct < 0.4:
-            return False, "flat_range"
+    # =====================
+    # 🟡 WATCH MODE
+    # =====================
+    if score >= 2 and acc >= 1:
+        return True, "watchlist"
 
-        # =====================
-        # 6. НЕТ ЗАПАСА ДО ЦЕЛИ
-        # =====================
-        if target is not None and price:
-            try:
-                dist = abs(target - price) / price * 100
-                if dist < 0.6:
-                    return False, "no_room"
-            except:
-                pass
-
-        # =====================
-        # 7. RSI ОПАСНАЯ ЗОНА
-        # =====================
-        if rsi in ("EXTREME_OVERBOUGHT", "EXTREME_OVERSOLD"):
-            return False, "rsi_extreme"
-
-        # =====================
-        # 8. ЛОВУШКИ
-        # =====================
-        traps = {
-            "SWEEP_UP", "SWEEP_DOWN",
-            "FAKE_DUMP",
-            "BULL_TRAP", "BEAR_TRAP"
-        }
-
-        if any(f in flags for f in traps):
-            return False, "trap"
-
-        # =====================
-        # 9. СЛАБОЕ НАКОПЛЕНИЕ
-        # =====================
-        if acc < 2:
-            return False, "no_accumulation"
-
-        return True, "ok"
-
-    except Exception as e:
-        return False, f"error_{e}"
+    # =====================
+    # ❌ BLOCK
+    # =====================
+    return False, "low_score"
 
 def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, price, target):
 
