@@ -4649,7 +4649,7 @@ def build_signal(instId):
 
     tgt = liquidity_target(pmeta, flags, price)
 
-    entry, entry_reason = entry_engine(
+    
         score, flags, direction_text, up_w, down_w, rsi7, ema_state, price, tgt
     )
 
