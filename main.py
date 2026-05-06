@@ -4094,9 +4094,9 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
     
         return entry, stop, reason
     
-
+    
     # =========================
-    # TRADE PLAN BY STAGE
+    # TRADE PLAN
     # =========================
     def build_trade_plan(signal):
         return {
@@ -4107,36 +4107,67 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
             "plan_reason": None
         }
     
-    # =========================
-    # MAIN
-    # =========================
-    def build_signal(instId):
-        print(f"[STEP1] {instId} before_fetch", flush=True)
-        
+    
     # =========================
     # EARLY PRESSURE DETECTOR
     # =========================
     def detect_early_pressure(sig):
     
         flags = set(sig.get("flags", []))
-        stage = str(sig.get("stage", ""))
-        ema_state = sig.get("ema_state", "EMA_MIXED")
         acc = int(sig.get("acc_score", 0) or 0)
     
         up_score = 0
         down_score = 0
-        up_reasons = []
-        down_reasons = []
     
-        def add_up(points, reason):
-            nonlocal up_score
-            up_score += points
-            up_reasons.append(reason)
+        if "PRESSURE_UP" in flags:
+            up_score += 3
     
-        def add_down(points, reason):
-            nonlocal down_score
-            down_score += points
-            down_reasons.append(reason)
+        if "PRESSURE_DOWN" in flags:
+            down_score += 3
+    
+        if "PRE_BREAKOUT_BUY" in flags:
+            up_score += 3
+    
+        if "PRE_BREAKOUT_SELL" in flags:
+            down_score += 3
+    
+        if "CONTINUATION_UP" in flags:
+            up_score += 2
+    
+        if "CONTINUATION_DOWN" in flags:
+            down_score += 2
+    
+        if "COMP_5M" in flags:
+            up_score += 1
+            down_score += 1
+    
+        if acc >= 2:
+            up_score += 1
+            down_score += 1
+    
+        result = {
+            "early_pressure_side": None,
+            "early_pressure_score": 0
+        }
+    
+        if up_score > down_score and up_score >= 4:
+            result["early_pressure_side"] = "BUY"
+            result["early_pressure_score"] = up_score
+    
+        elif down_score > up_score and down_score >= 4:
+            result["early_pressure_side"] = "SELL"
+            result["early_pressure_score"] = down_score
+    
+        return result
+    
+    
+        # =========================
+        # MAIN
+        # =========================
+        def build_signal(instId):
+            print(f"[STEP1] {instId} before_fetch", flush=True)
+        
+            
     
         # =====================
         # CORE PRESSURE
