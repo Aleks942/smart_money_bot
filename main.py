@@ -4135,13 +4135,11 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
     # =========================
     def build_signal(instId):
         print(f"[STEP1] {instId} before_fetch", flush=True)
-    # =========================
-    # EARLY PRESSURE DETECTOR
-    # =========================
-def detect_early_pressure(sig):
+    def detect_early_pressure(sig):
     flags = set(sig.get("flags", []))
     stage = str(sig.get("stage", ""))
     ema_state = sig.get("ema_state", "EMA_MIXED")
+    acc = int(sig.get("acc_score", 0) or 0)
 
     up_score = 0
     down_score = 0
@@ -4158,52 +4156,91 @@ def detect_early_pressure(sig):
         down_score += points
         down_reasons.append(reason)
 
-    # -------------------------
-    # CORE DIRECTIONAL SIGNALS
-    # -------------------------
+    # =====================
+    # CORE PRESSURE
+    # =====================
     if "PRESSURE_UP" in flags:
         add_up(3, "PRESSURE_UP")
+
     if "PRESSURE_DOWN" in flags:
         add_down(3, "PRESSURE_DOWN")
 
+    if "PRE_BREAKOUT_BUY" in flags:
+        add_up(3, "PRE_BREAKOUT_BUY")
+
+    if "PRE_BREAKOUT_SELL" in flags:
+        add_down(3, "PRE_BREAKOUT_SELL")
+
     if "CONTINUATION_UP" in flags:
         add_up(2, "CONTINUATION_UP")
+
     if "CONTINUATION_DOWN" in flags:
         add_down(2, "CONTINUATION_DOWN")
 
-    if "BREAKOUT_UP" in flags:
-        add_up(2, "BREAKOUT_UP")
-    if "BREAKOUT_DOWN" in flags:
-        add_down(2, "BREAKOUT_DOWN")
+    # =====================
+    # COMPRESSION = ДО ДВИЖЕНИЯ
+    # =====================
+    if "COMP_5M" in flags:
+        if up_score > 0:
+            add_up(1, "COMP_5M")
+        if down_score > 0:
+            add_down(1, "COMP_5M")
 
-    # -------------------------
-    # EMA CONTEXT
-    # -------------------------
-    if ema_state == "EMA_BULL":
-        add_up(2, "EMA_BULL")
-    elif ema_state == "EMA_BEAR":
-        add_down(2, "EMA_BEAR")
+    if "COMP_15M" in flags:
+        if up_score > 0:
+            add_up(2, "COMP_15M")
+        if down_score > 0:
+            add_down(2, "COMP_15M")
 
-    # -------------------------
+    # =====================
+    # ACCUMULATION BOOST
+    # =====================
+    if acc >= 2:
+        if up_score > 0:
+            add_up(1, "ACC_SCORE")
+        if down_score > 0:
+            add_down(1, "ACC_SCORE")
+
+    if acc >= 3:
+        if up_score > 0:
+            add_up(2, "STRONG_ACCUMULATION")
+        if down_score > 0:
+            add_down(2, "STRONG_ACCUMULATION")
+
+    # =====================
     # STAGE BOOST
-    # -------------------------
+    # =====================
     if "ACCUMULATION" in stage:
         if up_score > 0:
-            add_up(1, "ACCUMULATION_CONTEXT")
+            add_up(2, "ACCUMULATION_STAGE")
         if down_score > 0:
-            add_down(1, "ACCUMULATION_CONTEXT")
+            add_down(2, "ACCUMULATION_STAGE")
 
     if "TRANSITION" in stage:
         if up_score > 0:
-            add_up(1, "TRANSITION_CONTEXT")
+            add_up(2, "TRANSITION_STAGE")
         if down_score > 0:
-            add_down(1, "TRANSITION_CONTEXT")
+            add_down(2, "TRANSITION_STAGE")
 
-    
+    if "MANIPULATION" in stage:
+        if "SWEEP_DOWN" in flags or "FAKE_DUMP" in flags or "BEAR_TRAP" in flags:
+            add_up(3, "MANIP_REVERSAL_LONG")
 
-    # -------------------------
-    # VOL / ATR BOOST
-    # -------------------------
+        if "SWEEP_UP" in flags or "BULL_TRAP" in flags:
+            add_down(3, "MANIP_REVERSAL_SHORT")
+
+    # =====================
+    # EMA CONTEXT
+    # =====================
+    if ema_state == "EMA_BULL":
+        add_up(1, "EMA_BULL")
+
+    elif ema_state == "EMA_BEAR":
+        add_down(1, "EMA_BEAR")
+
+    # =====================
+    # ОБЪЁМ / ATR
+    # =====================
     if "VOL_SPIKE" in flags:
         if up_score >= 3:
             add_up(1, "VOL_SPIKE")
@@ -4211,9 +4248,9 @@ def detect_early_pressure(sig):
             add_down(1, "VOL_SPIKE")
 
     if "ATR_EXPANSION" in flags:
-        if up_score >= 3:
+        if up_score >= 4:
             add_up(1, "ATR_EXPANSION")
-        if down_score >= 3:
+        if down_score >= 4:
             add_down(1, "ATR_EXPANSION")
 
     result = {
@@ -4225,7 +4262,7 @@ def detect_early_pressure(sig):
         "early_pressure_down_score": down_score,
     }
 
-    if up_score >= 6 and up_score >= down_score + 2:
+    if up_score >= 5 and up_score >= down_score + 1:
         result["early_pressure_side"] = "BUY"
         result["early_pressure_score"] = up_score
         result["early_pressure_label"] = (
@@ -4233,7 +4270,7 @@ def detect_early_pressure(sig):
         )
         result["early_pressure_reasons"] = up_reasons
 
-    elif down_score >= 6 and down_score >= up_score + 2:
+    elif down_score >= 5 and down_score >= up_score + 1:
         result["early_pressure_side"] = "SELL"
         result["early_pressure_score"] = down_score
         result["early_pressure_label"] = (
