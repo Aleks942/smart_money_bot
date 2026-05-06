@@ -4798,6 +4798,10 @@ def calc_entry_zone(price, pmeta, flags, direction_code):
         f"ep={ep}",
         flush=True
     )
+
+    signal["sniper"] = sniper_signal(signal)
+
+    ok, reason = signal_quality_filter(signal)
   
     # =========================
     # FINAL DECISION
