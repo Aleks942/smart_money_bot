@@ -4129,53 +4129,64 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
             "plan_reason": None
         }
     
-    
     # =========================
     # MAIN
     # =========================
     def build_signal(instId):
         print(f"[STEP1] {instId} before_fetch", flush=True)
+        
+    # =========================
+    # EARLY PRESSURE DETECTOR
+    # =========================
     def detect_early_pressure(sig):
-    flags = set(sig.get("flags", []))
-    stage = str(sig.get("stage", ""))
-    ema_state = sig.get("ema_state", "EMA_MIXED")
-    acc = int(sig.get("acc_score", 0) or 0)
-
-    up_score = 0
-    down_score = 0
-    up_reasons = []
-    down_reasons = []
-
-    def add_up(points, reason):
-        nonlocal up_score
-        up_score += points
-        up_reasons.append(reason)
-
-    def add_down(points, reason):
-        nonlocal down_score
-        down_score += points
-        down_reasons.append(reason)
-
-    # =====================
-    # CORE PRESSURE
-    # =====================
-    if "PRESSURE_UP" in flags:
-        add_up(3, "PRESSURE_UP")
-
-    if "PRESSURE_DOWN" in flags:
-        add_down(3, "PRESSURE_DOWN")
-
-    if "PRE_BREAKOUT_BUY" in flags:
-        add_up(3, "PRE_BREAKOUT_BUY")
-
-    if "PRE_BREAKOUT_SELL" in flags:
-        add_down(3, "PRE_BREAKOUT_SELL")
-
-    if "CONTINUATION_UP" in flags:
-        add_up(2, "CONTINUATION_UP")
-
-    if "CONTINUATION_DOWN" in flags:
-        add_down(2, "CONTINUATION_DOWN")
+    
+        flags = set(sig.get("flags", []))
+        stage = str(sig.get("stage", ""))
+        ema_state = sig.get("ema_state", "EMA_MIXED")
+        acc = int(sig.get("acc_score", 0) or 0)
+    
+        up_score = 0
+        down_score = 0
+        up_reasons = []
+        down_reasons = []
+    
+        def add_up(points, reason):
+            nonlocal up_score
+            up_score += points
+            up_reasons.append(reason)
+    
+        def add_down(points, reason):
+            nonlocal down_score
+            down_score += points
+            down_reasons.append(reason)
+    
+        # =====================
+        # CORE PRESSURE
+        # =====================
+        if "PRESSURE_UP" in flags:
+            add_up(3, "PRESSURE_UP")
+    
+        if "PRESSURE_DOWN" in flags:
+            add_down(3, "PRESSURE_DOWN")
+    
+        if "PRE_BREAKOUT_BUY" in flags:
+            add_up(3, "PRE_BREAKOUT_BUY")
+    
+        if "PRE_BREAKOUT_SELL" in flags:
+            add_down(3, "PRE_BREAKOUT_SELL")
+    
+        if "CONTINUATION_UP" in flags:
+            add_up(2, "CONTINUATION_UP")
+    
+        if "CONTINUATION_DOWN" in flags:
+            add_down(2, "CONTINUATION_DOWN")
+    
+        return {
+            "early_pressure_side": None,
+            "early_pressure_score": max(up_score, down_score),
+            "early_pressure_label": "EARLY",
+            "early_pressure_reasons": up_reasons if up_score > down_score else down_reasons
+        }
 
     # =====================
     # COMPRESSION = ДО ДВИЖЕНИЯ
