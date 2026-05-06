@@ -4864,21 +4864,24 @@ def calc_entry_zone(price, pmeta, flags, direction_code):
 
     signal["filter_pass"] = ok
     signal["filter_reason"] = reason
+
     print(
         f"[FILTER_DEBUG] {instId} "
         f"score={signal.get('score')} "
         f"acc={signal.get('acc_score')} "
         f"ep={signal.get('early_pressure_score')} "
         f"stage={signal.get('stage')} "
+        f"entry={signal.get('entry')} "
         f"reason={reason}",
         flush=True
     )
+
+    if not ok:
+        print(f"[FILTER_BLOCK] {instId} reason={reason}", flush=True)
+        return None
+
+    return signal
     
-        if not ok:
-            print(f"[FILTER_BLOCK] {instId} reason={reason}", flush=True)
-            return None
-    
-        return signal
 # ==============================
 # 🎯 SNIPER SIGNAL ENGINE
 # ==============================
