@@ -4174,7 +4174,12 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
                 "acc_score": 0,
                 "stage": "UNKNOWN"
             }
+
+            ep = detect_early_pressure(signal)
+            signal.update(ep)
         
+            print(f"[EARLY_DEBUG] {instId} {ep}", flush=True)
+                
             return signal
 
 
