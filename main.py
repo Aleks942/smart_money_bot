@@ -4020,146 +4020,146 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
 
     return "🔴 WAIT", "Недостаточно факторов"
 
-    # =========================
-    # STAGE
-    # =========================
-    def smart_money_stage(score, flags):
-        flags = set(flags or [])
-    
-        if score < 1:
-            return "⚪ EARLY", "Очень ранний интерес"
-    
-        if "BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags:
-            return "🟢 EXPANSION", "Подтверждённый импульс"
-    
-        if "SWEEP_DOWN" in flags or "SWEEP_UP" in flags:
-            return "🟡 MANIPULATION", "Сбор ликвидности"
-    
-        if "COMP_5M" in flags or "COMP_15M" in flags:
-            return "🟣 ACCUMULATION", "Сжатие"
-    
-        if "PRESSURE_UP" in flags or "PRESSURE_DOWN" in flags:
-            return "🟠 TRANSITION", "Начало движения"
-    
-        return "⚪ NEUTRAL", "Смешанные сигналы"
+# =========================
+# STAGE
+# =========================
+def smart_money_stage(score, flags):
+    flags = set(flags or [])
 
-    # =========================
-    # ENTRY
-    # =========================
-    def decide_entry(stage, flags, price, c5):
-    
-        last = price
-        highs = [c[2] for c in c5[-10:]] if c5 else []
-        lows = [c[3] for c in c5[-10:]] if c5 else []
-    
-        recent_high = max(highs) if highs else last
-        recent_low = min(lows) if lows else last
-    
-        entry = None
-        stop = None
-        reason = "NO_ENTRY"
-    
-        if stage == "🟢 EXPANSION":
-            if "BREAKOUT_CONFIRM_UP" in flags:
-                entry = last
-                stop = recent_low
-                reason = "LONG"
-    
-            elif "BREAKOUT_CONFIRM_DOWN" in flags:
-                entry = last
-                stop = recent_high
-                reason = "SHORT"
-    
-        elif stage == "🟠 TRANSITION":
-            if "PRESSURE_UP" in flags:
-                entry = last
-                stop = recent_low
-                reason = "EARLY_LONG"
-    
-            elif "PRESSURE_DOWN" in flags:
-                entry = last
-                stop = recent_high
-                reason = "EARLY_SHORT"
-    
-        elif stage == "🟡 MANIPULATION":
-            if "SWEEP_DOWN" in flags:
-                entry = last
-                stop = recent_low
-                reason = "REVERSAL_LONG"
-    
-            elif "SWEEP_UP" in flags:
-                entry = last
-                stop = recent_high
-                reason = "REVERSAL_SHORT"
-    
-        return entry, stop, reason
-    
-    
-    # =========================
-    # TRADE PLAN
-    # =========================
-    def build_trade_plan(signal):
-        return {
-            "entry_plan": None,
-            "stop": None,
-            "rr": None,
-            "trade_status": "NO_TRADE",
-            "plan_reason": None
-        }
-    
-    
-    # =========================
-    # EARLY PRESSURE DETECTOR
-    # =========================
-    def detect_early_pressure(sig):
-    
-        flags = set(sig.get("flags", []))
-        acc = int(sig.get("acc_score", 0) or 0)
-    
-        up_score = 0
-        down_score = 0
-    
+    if score < 1:
+        return "⚪ EARLY", "Очень ранний интерес"
+
+    if "BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags:
+        return "🟢 EXPANSION", "Подтверждённый импульс"
+
+    if "SWEEP_DOWN" in flags or "SWEEP_UP" in flags:
+        return "🟡 MANIPULATION", "Сбор ликвидности"
+
+    if "COMP_5M" in flags or "COMP_15M" in flags:
+        return "🟣 ACCUMULATION", "Сжатие"
+
+    if "PRESSURE_UP" in flags or "PRESSURE_DOWN" in flags:
+        return "🟠 TRANSITION", "Начало движения"
+
+    return "⚪ NEUTRAL", "Смешанные сигналы"
+
+# =========================
+# ENTRY
+# =========================
+def decide_entry(stage, flags, price, c5):
+
+    last = price
+    highs = [c[2] for c in c5[-10:]] if c5 else []
+    lows = [c[3] for c in c5[-10:]] if c5 else []
+
+    recent_high = max(highs) if highs else last
+    recent_low = min(lows) if lows else last
+
+    entry = None
+    stop = None
+    reason = "NO_ENTRY"
+
+    if stage == "🟢 EXPANSION":
+        if "BREAKOUT_CONFIRM_UP" in flags:
+            entry = last
+            stop = recent_low
+            reason = "LONG"
+
+        elif "BREAKOUT_CONFIRM_DOWN" in flags:
+            entry = last
+            stop = recent_high
+            reason = "SHORT"
+
+    elif stage == "🟠 TRANSITION":
         if "PRESSURE_UP" in flags:
-            up_score += 3
-    
-        if "PRESSURE_DOWN" in flags:
-            down_score += 3
-    
-        if "PRE_BREAKOUT_BUY" in flags:
-            up_score += 3
-    
-        if "PRE_BREAKOUT_SELL" in flags:
-            down_score += 3
-    
-        if "CONTINUATION_UP" in flags:
-            up_score += 2
-    
-        if "CONTINUATION_DOWN" in flags:
-            down_score += 2
-    
-        if "COMP_5M" in flags:
-            up_score += 1
-            down_score += 1
-    
-        if acc >= 2:
-            up_score += 1
-            down_score += 1
-    
-        result = {
-            "early_pressure_side": None,
-            "early_pressure_score": 0
-        }
-    
-        if up_score > down_score and up_score >= 4:
-            result["early_pressure_side"] = "BUY"
-            result["early_pressure_score"] = up_score
-    
-        elif down_score > up_score and down_score >= 4:
-            result["early_pressure_side"] = "SELL"
-            result["early_pressure_score"] = down_score
-    
-        return result
-    
+            entry = last
+            stop = recent_low
+            reason = "EARLY_LONG"
+
+        elif "PRESSURE_DOWN" in flags:
+            entry = last
+            stop = recent_high
+            reason = "EARLY_SHORT"
+
+    elif stage == "🟡 MANIPULATION":
+        if "SWEEP_DOWN" in flags:
+            entry = last
+            stop = recent_low
+            reason = "REVERSAL_LONG"
+
+        elif "SWEEP_UP" in flags:
+            entry = last
+            stop = recent_high
+            reason = "REVERSAL_SHORT"
+
+    return entry, stop, reason
+
+
+# =========================
+# TRADE PLAN
+# =========================
+def build_trade_plan(signal):
+    return {
+        "entry_plan": None,
+        "stop": None,
+        "rr": None,
+        "trade_status": "NO_TRADE",
+        "plan_reason": None
+    }
+
+
+# =========================
+# EARLY PRESSURE DETECTOR
+# =========================
+def detect_early_pressure(sig):
+
+    flags = set(sig.get("flags", []))
+    acc = int(sig.get("acc_score", 0) or 0)
+
+    up_score = 0
+    down_score = 0
+
+    if "PRESSURE_UP" in flags:
+        up_score += 3
+
+    if "PRESSURE_DOWN" in flags:
+        down_score += 3
+
+    if "PRE_BREAKOUT_BUY" in flags:
+        up_score += 3
+
+    if "PRE_BREAKOUT_SELL" in flags:
+        down_score += 3
+
+    if "CONTINUATION_UP" in flags:
+        up_score += 2
+
+    if "CONTINUATION_DOWN" in flags:
+        down_score += 2
+
+    if "COMP_5M" in flags:
+        up_score += 1
+        down_score += 1
+
+    if acc >= 2:
+        up_score += 1
+        down_score += 1
+
+    result = {
+        "early_pressure_side": None,
+        "early_pressure_score": 0
+    }
+
+    if up_score > down_score and up_score >= 4:
+        result["early_pressure_side"] = "BUY"
+        result["early_pressure_score"] = up_score
+
+    elif down_score > up_score and down_score >= 4:
+        result["early_pressure_side"] = "SELL"
+        result["early_pressure_score"] = down_score
+
+    return result
+
     
 def detect_early_pressure(sig):
 
