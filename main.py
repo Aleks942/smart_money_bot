@@ -4814,7 +4814,31 @@ def calc_entry_zone(price, pmeta, flags, direction_code):
         "ts": now_ts(),
         "created_at": time.time(),
     }
+
+    signal["type"] = signal_type
+    signal["can_survive_for_swing"] = can_survive_for_swing
+
+    # =========================
+    # EXTRA SIGNAL LAYERS
+    # =========================
+    ep = detect_early_pressure(signal)
+    if isinstance(ep, dict):
+        signal.update(ep)
     
+    signal["sniper"] = sniper_signal(signal)
+
+    # =========================
+    # FINAL QUALITY FILTER
+    # =========================
+    ok, reason = signal_quality_filter(signal)
+    
+    signal["filter_pass"] = ok
+    signal["filter_reason"] = reason
+    
+    if not ok:
+        print(f"[FILTER_BLOCK] {instId} reason={reason}", flush=True)
+        return None
+            
     # =========================
     # ДОБАВЛЯЕМ ТОЛЬКО ЭТО 👇
     # =========================
