@@ -4342,29 +4342,6 @@ def calc_entry_zone(price, pmeta, flags, direction_code):
 
     return None
 
-
-    # =====================
-    # BASIC PROTECTION
-    # =====================
-    if isinstance(instId, tuple):
-        instId = instId[0]
-
-    if not instId:
-        print(f"[SKIP] empty_instId", flush=True)
-        return None  # единственное допустимое раннее завершение
-
-    flags = set()
-    score = 0
-
-    ob_meta = None
-    pmeta = None
-    tgt = None
-    strong_setup = False
-
-    swing_only_candidate = False
-    can_survive_for_swing = True
-    signal_type = "NORMAL"
-
     # =========================
     # ORDERBOOK
     # =========================
