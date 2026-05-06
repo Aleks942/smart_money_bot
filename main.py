@@ -4804,17 +4804,7 @@ def calc_entry_zone(price, pmeta, flags, direction_code):
     
     signal["sniper"] = sniper_signal(signal)
 
-    # =========================
-    # FINAL QUALITY FILTER
-    # =========================
-    ok, reason = signal_quality_filter(signal)
     
-    signal["filter_pass"] = ok
-    signal["filter_reason"] = reason
-    
-    if not ok:
-        print(f"[FILTER_BLOCK] {instId} reason={reason}", flush=True)
-        return None
             
     # =========================
     # ДОБАВЛЯЕМ ТОЛЬКО ЭТО 👇
