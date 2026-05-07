@@ -7269,6 +7269,8 @@ if __name__ == "__main__":
                             send_telegram(msg_medium(sig))
                             sent_main_now = True
                             mark_alert_sent(state, sig)
+
+                    
                     elif tier == "🟠 РАННИЙ":
 
                         print(
