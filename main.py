@@ -7483,37 +7483,45 @@ if __name__ == "__main__":
             print(f"EARLY SELL SYMBOLS: {early_sell_symbols}")
 
             market_msg = msg_market_pressure(early_buy_symbols, early_sell_symbols)
+
             if market_msg:
                 send_telegram(market_msg)
-
+            
             # msg = summary_message(alerts, cycle_info, regime)
             # if msg and msg.strip() and should_send_summary(state, msg):
             #     send_telegram(msg)
-                        
             
-             top_alerts = [
-                    s for s in alerts
-                    if is_best_only_signal(s)
-                ][:3]
-                            
-                sent_ids = set()
+            # =====================
+            # TOP ALERTS
+            # =====================
             
-                for sig in top_alerts:
-                    sid = sig.get("instId")
+            top_alerts = [
+                s for s in alerts
+                if is_best_only_signal(s)
+            ][:3]
             
-                    if sid in sent_ids:
-                        continue
+            sent_ids = set()
             
-                    if sid in sent_sw:
-                        continue
+            for sig in top_alerts:
             
-                    sent_ids.add(sid)
+                sid = sig.get("instId")
             
-                    if can_send(sid, 3600):
-                        send_telegram(choose_detail_message(sig))
+                if sid in sent_ids:
+                    continue
+            
+                if sid in sent_sw:
+                    continue
+            
+                sent_ids.add(sid)
+            
+                if can_send(sid, 3600):
+            
+                    print(f"[TG_SEND_TRY] {sid}", flush=True)
+            
+                    send_telegram(choose_detail_message(sig))
             
             save_state(state)
-                
-        except Exception as e:
-            err = traceback.format_exc()
-            send_telegram(f"❌ Scan Error:\n{err}")
+            
+            except Exception as e:
+                err = traceback.format_exc()
+                send_telegram(f"❌ Scan Error:\n{err}")
