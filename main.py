@@ -7352,20 +7352,20 @@ if __name__ == "__main__":
                                 flush=True
                             )
 
-# =====================
-# LIVE LOGIC
-# =====================
-
-live_ok = (
-    entry_ok
-    and profit_ok
-    and can_alert_now
-    and (not sent_main_now)
-)
-
-if live_ok:
-
-    print(f"[LIVE_OK] {instId}", flush=True)
+                    # =====================
+                    # LIVE LOGIC
+                    # =====================
+                    
+                    live_ok = (
+                        entry_ok
+                        and profit_ok
+                        and can_alert_now
+                        and (not sent_main_now)
+                    )
+                    
+                    if live_ok:
+                    
+                        print(f"[LIVE_OK] {instId}", flush=True)
 
                     
                     # =====================
