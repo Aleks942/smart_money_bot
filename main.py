@@ -7166,32 +7166,20 @@ if __name__ == "__main__":
                     ep_score = sig.get("early_pressure_score", 0)
                     acc_score = sig.get("acc_score", 0)
                     
-                    # =====================
                     # DEFINE TIER
-                    # =====================
-                    
                     if sig.get("sniper"):
-                    
                         sig["tier"] = "🟢🟢 СИЛЬНЫЙ ВХОД"
                     
                     elif score >= 7:
-                    
                         sig["tier"] = "🟢 СИЛЬНЫЙ СИГНАЛ"
                     
                     elif score >= 5:
-                    
                         sig["tier"] = "🟡 СИГНАЛ"
                     
-                    elif (
-                        score >= 2
-                        or ep_score >= 5
-                        or acc_score >= 2
-                    ):
-                    
+                    elif score >= 4:
                         sig["tier"] = "🟠 РАННИЙ"
                     
                     else:
-                    
                         sig["tier"] = "🔴 СЛАБЫЙ"
                     
                     
