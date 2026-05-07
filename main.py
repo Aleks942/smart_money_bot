@@ -7163,37 +7163,62 @@ if __name__ == "__main__":
                     # =====================
                     
                     score = sig.get("score", 0)
+                    ep_score = sig.get("early_pressure_score", 0)
+                    acc_score = sig.get("acc_score", 0)
                     
+                    # =====================
                     # DEFINE TIER
+                    # =====================
+                    
                     if sig.get("sniper"):
+                    
                         sig["tier"] = "🟢🟢 СИЛЬНЫЙ ВХОД"
                     
                     elif score >= 7:
+                    
                         sig["tier"] = "🟢 СИЛЬНЫЙ СИГНАЛ"
                     
                     elif score >= 5:
+                    
                         sig["tier"] = "🟡 СИГНАЛ"
                     
-                    elif score >= 4:
+                    elif (
+                        score >= 2
+                        or ep_score >= 5
+                        or acc_score >= 2
+                    ):
+                    
                         sig["tier"] = "🟠 РАННИЙ"
                     
                     else:
+                    
                         sig["tier"] = "🔴 СЛАБЫЙ"
-
+                    
+                    
+                    # =====================
+                    # SAFE ENTRY LOCK
+                    # =====================
+                    
                     safe_entry_now = (
                         "SAFE ENTRY" in str(sig.get("entry", ""))
                         and is_entry_signal(sig)
                     )
-
+                    
                     recent_safe_lock = safe_entry_recent(state, instId)
-
+                    
                     if safe_entry_now:
+                    
                         mark_safe_entry(state, instId)
+                    
                         recent_safe_lock = True
-
+                    
+                    
+                    # =====================
+                    # COMMON FLAGS
+                    # =====================
                     
                     tier = sig.get("tier")
-
+                    
                     entry_ok = is_entry_signal(sig)
 
                     # допуск сильных сигналов
