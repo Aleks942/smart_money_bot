@@ -7271,7 +7271,7 @@ if __name__ == "__main__":
                             mark_alert_sent(state, sig)
 
                     
-                   elif tier == "🟠 РАННИЙ":
+                    elif tier == "🟠 РАННИЙ":
 
                         print(
                             f"[EARLY] {instId} "
