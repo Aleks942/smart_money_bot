@@ -7241,9 +7241,32 @@ if __name__ == "__main__":
                             send_telegram(msg_medium(sig))
                             sent_main_now = True
                             mark_alert_sent(state, sig)
-                    
                     elif tier == "🟠 РАННИЙ":
-                        print(f"[EARLY] {instId} score={score}")
+
+                        print(
+                            f"[EARLY] {instId} "
+                            f"score={score} "
+                            f"ep={sig.get('early_pressure_score')} "
+                            f"stage={sig.get('stage')}",
+                            flush=True
+                        )
+                    
+                        early_ok = (
+                            sig.get("early_pressure_score", 0) >= 5
+                            or sig.get("acc_score", 0) >= 2
+                            or sig.get("stage") in ["🟠 TRANSITION", "🟣 ACCUMULATION"]
+                        )
+                    
+                        if early_ok and can_alert_now:
+                    
+                            send_telegram(msg_medium(sig))
+                    
+                            sent_main_now = True
+                    
+                            mark_alert_sent(state, sig)
+                    
+                            print(f"[EARLY_SENT] {instId}", flush=True)
+                    
                     
                     # =====================
                     # ADD TO ALERTS (для summary)
