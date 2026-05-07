@@ -7271,7 +7271,7 @@ if __name__ == "__main__":
                             mark_alert_sent(state, sig)
 
                     
-                    elif tier == "🟠 РАННИЙ":
+                   elif tier == "🟠 РАННИЙ":
 
                         print(
                             f"[EARLY] {instId} "
@@ -7287,16 +7287,19 @@ if __name__ == "__main__":
                             or sig.get("stage") in ["🟠 TRANSITION", "🟣 ACCUMULATION"]
                         )
                     
-                        if early_ok:
+                        if early_ok and can_alert_now:
+                    
+                            print(f"[TG_SEND_TRY] {instId}", flush=True)
                     
                             send_telegram(msg_medium(sig))
+                    
+                            print(f"[TG_SEND_OK] {instId}", flush=True)
                     
                             sent_main_now = True
                     
                             mark_alert_sent(state, sig)
                     
                             print(f"[EARLY_SENT] {instId}", flush=True)
-                    
                     
                     # =====================
                     # ADD TO ALERTS (для summary)
