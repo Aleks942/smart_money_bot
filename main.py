@@ -7329,21 +7329,43 @@ if __name__ == "__main__":
                         or sig.get("sendable", False)
                     )
                         
-                    if summary_ok:
-                        if not any(a.get("instId") == sig.get("instId") for a in alerts):
-                            alerts.append(sig)
-                            print(f"[SUMMARY_ADD] {instId} score={score} acc={acc}")
+                    # =====================
+                    # SUMMARY ADD
+                    # =====================
                     
-                    # Для live логики строгие условия отдельно
-                    live_ok = (
-                        entry_ok
-                        and profit_ok
-                        and can_alert_now
-                        and (not sent_main_now)
+                    summary_ok = (
+                        score >= 1
+                        or sig.get("early_pressure_score", 0) >= 5
+                        or sig.get("acc_score", 0) >= 2
                     )
                     
-                    if live_ok:
-                        print(f"[LIVE_OK] {instId}")
+                    if summary_ok:
+                    
+                        if not any(a.get("instId") == sig.get("instId") for a in alerts):
+                    
+                            alerts.append(sig)
+                    
+                            print(
+                                f"[SUMMARY_ADD] {instId} "
+                                f"score={score} "
+                                f"acc={acc}",
+                                flush=True
+                            )
+
+# =====================
+# LIVE LOGIC
+# =====================
+
+live_ok = (
+    entry_ok
+    and profit_ok
+    and can_alert_now
+    and (not sent_main_now)
+)
+
+if live_ok:
+
+    print(f"[LIVE_OK] {instId}", flush=True)
 
                     
                     # =====================
