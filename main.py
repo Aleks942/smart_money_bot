@@ -7287,7 +7287,7 @@ if __name__ == "__main__":
                             or sig.get("stage") in ["🟠 TRANSITION", "🟣 ACCUMULATION"]
                         )
                     
-                        if early_ok and can_alert_now:
+                        if early_ok:
                     
                             send_telegram(msg_medium(sig))
                     
