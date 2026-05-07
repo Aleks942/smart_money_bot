@@ -7491,7 +7491,7 @@ if __name__ == "__main__":
             #     send_telegram(msg)
                         
             
-                top_alerts = [
+             top_alerts = [
                     s for s in alerts
                     if is_best_only_signal(s)
                 ][:3]
