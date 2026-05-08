@@ -7169,8 +7169,8 @@ if __name__ == "__main__":
 
                     print(f"[EARLY_SENT] {instId}", flush=True)
 
-           summary_ok = (
-               score >= 0
+            summary_ok = (
+                score >= 0
             )
             
             print(
