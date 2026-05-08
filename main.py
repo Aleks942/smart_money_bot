@@ -7516,34 +7516,34 @@ if __name__ == "__main__":
             # =====================
             # TOP ALERTS
             # =====================
-            
+
             top_alerts = [
                 s for s in alerts
                 if is_best_only_signal(s)
             ][:3]
-            
+
             sent_ids = set()
-            
+
             for sig in top_alerts:
-            
+
                 sid = sig.get("instId")
-            
+
                 if sid in sent_ids:
                     continue
-            
+
                 if sid in sent_sw:
                     continue
-            
+
                 sent_ids.add(sid)
-            
+
                 if can_send(sid, 3600):
-            
+
                     print(f"[TG_SEND_TRY] {sid}", flush=True)
-            
+
                     send_telegram(choose_detail_message(sig))
-                    
-             
-                save_state(state)
-            except Exception as e:
-                err = traceback.format_exc()
-                send_telegram(f"❌ Scan Error:\n{err}")
+
+            save_state(state)
+
+        except Exception as e:
+            err = traceback.format_exc()
+            send_telegram(f"❌ Scan Error:\n{err}")
