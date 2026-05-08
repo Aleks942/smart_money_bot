@@ -7016,7 +7016,7 @@ if __name__ == "__main__":
             
             
                         
-                        if sig.get("swing_only_candidate"):
+            if sig.get("swing_only_candidate"):
                             print(
                                 f"[SWING_ONLY_SKIP_MAIN] {instId} "
                                 f"score={sig.get('score')} "
