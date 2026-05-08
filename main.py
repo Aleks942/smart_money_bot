@@ -6740,29 +6740,48 @@ if __name__ == "__main__":
 
             print(f"Scanning {len(candidates)} symbols this cycle | index={scan_index}/{total_symbols}")
 
-
             # =====================
             # SCAN LOOP
-            # =====================  
+            # =====================
+            
             for instId, vol_usdt, pct in candidates:
             
+                print(f"[LOOP] {instId} start")
+            
+                time.sleep(0.55)
+            
+                try:
+            
+                    sig = build_signal(instId)
+            
+                    if not sig or not isinstance(sig, dict):
+                        print(f"[RAW_SKIP] {instId}", flush=True)
+                        continue
+            
+                except Exception as e:
+            
+                    print(f"[BUILD_SIGNAL_ERROR] {instId} {e}", flush=True)
+                    continue
+            
                 oi_ttl = int(os.getenv("OI_CACHE_TTL_SEC", "1800"))
-                
+            
                 new_oi = get_open_interest_change(instId)
-                
+            
                 state["symbols"].setdefault(instId, {})
-                
+            
                 sym_state = state["symbols"][instId]
-                
+            
                 prev = sym_state.get("last_oi_change")
-                
+            
                 prev_ts = int(sym_state.get("last_oi_ts", 0) or 0)
-                
+            
                 age = now_ts() - prev_ts if prev_ts else None
             
                 if new_oi is not None:
             
-                sig["oi_change"] = new_oi
+                    sig["oi_change"] = new_oi
+                       
+               
             
                 sym_state["last_oi_change"] = new_oi
             
