@@ -6929,95 +6929,95 @@ if __name__ == "__main__":
                                                 
            
             
-                    # =====================
-                    # DEFINE SETUP TYPE
-                    # =====================
+            # =====================
+            # DEFINE SETUP TYPE
+            # =====================
 
-                    sig["setup"] = get_signal_tier(sig["score"], sig["acc_score"])
+            sig["setup"] = get_signal_tier(sig["score"], sig["acc_score"])
 
-                    # =====================
-                    # AI SCORE MULTIPLIER
-                    # =====================
+            # =====================
+            # AI SCORE MULTIPLIER
+            # =====================
 
-                    setup = sig.get("setup", "UNKNOWN")
-                    mult = get_ai_multiplier(setup)
-                    sig["score"] = round(sig["score"] * mult, 2)
+            setup = sig.get("setup", "UNKNOWN")
+            mult = get_ai_multiplier(setup)
+            sig["score"] = round(sig["score"] * mult, 2)
 
-                    print(f"[STEP2] {instId} after_build_signal")
+            print(f"[STEP2] {instId} after_build_signal")
 
-                    # =====================
-                    # MARKET CONTEXT
-                    # =====================
+            # =====================
+            # MARKET CONTEXT
+            # =====================
 
-                    print(f"[STEP3] {instId} before_market_context")
-                    sig = apply_market_context(sig)
-                    print(f"[SIG_RAW] {instId} sig_exists={bool(sig)}")
-                    
-                    if not sig:
-                        print(f"[RAW_SKIP] {instId} no_signal_from_analyzer")
-                        continue
+            print(f"[STEP3] {instId} before_market_context")
+            sig = apply_market_context(sig)
+            print(f"[SIG_RAW] {instId} sig_exists={bool(sig)}")
+            
+            if not sig:
+                print(f"[RAW_SKIP] {instId} no_signal_from_analyzer")
+                continue
 
-                    # =====================
-                    # REGIME BIAS
-                    # =====================
+            # =====================
+            # REGIME BIAS
+            # =====================
 
-                    sig = apply_regime_bias(sig, regime)
-                    # AI market filter
-                    if MARKET_MODE == "BEAR":
-                        if "⬆️" in str(sig.get("direction", "")) and float(sig.get("score", 0)) < 7:
-                            print(f"[AI_FILTER] skip weak long in bear market {instId}")
-                            continue
-                    
-                    if MARKET_MODE == "BULL":
-                        if "⬇️" in str(sig.get("direction", "")) and float(sig.get("score", 0)) < 7:
-                            print(f"[AI_FILTER] skip weak short in bull market {instId}")
-                            continue
+            sig = apply_regime_bias(sig, regime)
+            # AI market filter
+            if MARKET_MODE == "BEAR":
+                if "⬆️" in str(sig.get("direction", "")) and float(sig.get("score", 0)) < 7:
+                    print(f"[AI_FILTER] skip weak long in bear market {instId}")
+                    continue
+            
+            if MARKET_MODE == "BULL":
+                if "⬇️" in str(sig.get("direction", "")) and float(sig.get("score", 0)) < 7:
+                    print(f"[AI_FILTER] skip weak short in bull market {instId}")
+                    continue
 
-                    # =====================
-                    # SAVE SIGNAL
-                    # =====================
+            # =====================
+            # SAVE SIGNAL
+            # =====================
 
-                    print(
-                        f"[SCAN] {instId} "
-                        f"price={sig.get('price')} "
-                        f"score={sig.get('score')} "
-                        f"acc={sig.get('acc_score')} "
-                        f"oi={sig.get('oi_change')} "
-                        f"flags={sig.get('flags')}"
+            print(
+                f"[SCAN] {instId} "
+                f"price={sig.get('price')} "
+                f"score={sig.get('score')} "
+                f"acc={sig.get('acc_score')} "
+                f"oi={sig.get('oi_change')} "
+                f"flags={sig.get('flags')}"
+            )
+
+            # =====================
+            # SWING LAYER (H4 / H1 / M15) — ADDON, НЕ ЛОМАЕТ СКАЛЬП
+            # =====================
+            if SWING_MODE:
+                try:
+                    swing_sent = state.get("swing_sent", {})
+                    if not isinstance(swing_sent, dict):
+                        swing_sent = {}
+            
+                    last_sw_ts = float(swing_sent.get(instId, 0) or 0)
+                    now_sw_ts = time.time()
+            
+                    same_symbol_locked = (now_sw_ts - last_sw_ts) < SWING_ALERT_COOLDOWN_SEC
+                    can_send_swing = (not same_symbol_locked) if SWING_ONE_IDEA_PER_SYMBOL else True
+            
+                    swing_candidate = (
+                        float(sig.get("score", 0) or 0) >= max(4, MIN_SCORE)
+                        or int(sig.get("acc_score", 0) or 0) >= 2
+                        or bool(sig.get("early_pressure_label"))
                     )
+            
+                    if can_send_swing and swing_candidate:
+                        df_h4 = get_tf_candles(instId, tf="4h", limit=200) if SWING_USE_H4 else pd.DataFrame()
+                        df_h1 = get_tf_candles(instId, tf="1h", limit=200) if SWING_USE_H1 else pd.DataFrame()
+                        df_m15 = get_tf_candles(instId, tf="15m", limit=200) if SWING_USE_M15 else pd.DataFrame()
+                        market_phase = detect_market_phase(df_h1)
 
-                    # =====================
-                    # SWING LAYER (H4 / H1 / M15) — ADDON, НЕ ЛОМАЕТ СКАЛЬП
-                    # =====================
-                    if SWING_MODE:
-                        try:
-                            swing_sent = state.get("swing_sent", {})
-                            if not isinstance(swing_sent, dict):
-                                swing_sent = {}
-                    
-                            last_sw_ts = float(swing_sent.get(instId, 0) or 0)
-                            now_sw_ts = time.time()
-                    
-                            same_symbol_locked = (now_sw_ts - last_sw_ts) < SWING_ALERT_COOLDOWN_SEC
-                            can_send_swing = (not same_symbol_locked) if SWING_ONE_IDEA_PER_SYMBOL else True
-                    
-                            swing_candidate = (
-                                float(sig.get("score", 0) or 0) >= max(4, MIN_SCORE)
-                                or int(sig.get("acc_score", 0) or 0) >= 2
-                                or bool(sig.get("early_pressure_label"))
-                            )
-                    
-                            if can_send_swing and swing_candidate:
-                                df_h4 = get_tf_candles(instId, tf="4h", limit=200) if SWING_USE_H4 else pd.DataFrame()
-                                df_h1 = get_tf_candles(instId, tf="1h", limit=200) if SWING_USE_H1 else pd.DataFrame()
-                                df_m15 = get_tf_candles(instId, tf="15m", limit=200) if SWING_USE_M15 else pd.DataFrame()
-                                market_phase = detect_market_phase(df_h1)
-
-                                print(f"[MARKET] {instId} phase={market_phase['phase']} score={market_phase['score']}", flush=True)
-                    
-                                h4_ctx = analyze_h4_context(df_h4) if not df_h4.empty else {"ok": False}
-                                h1_setup = analyze_h1_setup(df_h1, h4_ctx) if not df_h1.empty else {"ok": False}
-                                m15_trigger = analyze_m15_trigger(df_m15, h1_setup, h4_ctx) if not df_m15.empty else {"ok": False}
+                        print(f"[MARKET] {instId} phase={market_phase['phase']} score={market_phase['score']}", flush=True)
+            
+                        h4_ctx = analyze_h4_context(df_h4) if not df_h4.empty else {"ok": False}
+                        h1_setup = analyze_h1_setup(df_h1, h4_ctx) if not df_h1.empty else {"ok": False}
+                        m15_trigger = analyze_m15_trigger(df_m15, h1_setup, h4_ctx) if not df_m15.empty else {"ok": False}
 
                                 # =====================
                                 # CAP + VOLUME BOOST (SWING)
