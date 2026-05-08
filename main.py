@@ -7030,195 +7030,155 @@ if __name__ == "__main__":
                     )
             
             
-                    if can_send_swing and swing_candidate:
+                        if can_send_swing and swing_candidate:
 
-                        df_h4 = get_tf_candles(
-                            instId,
-                            tf="4h",
-                            limit=200
-                        ) if SWING_USE_H4 else pd.DataFrame()
+                            df_h4 = get_tf_candles(
+                                instId,
+                                tf="4h",
+                                limit=200
+                            ) if SWING_USE_H4 else pd.DataFrame()
 
-                        df_h1 = get_tf_candles(
-                            instId,
-                            tf="1h",
-                            limit=200
-                        ) if SWING_USE_H1 else pd.DataFrame()
+                            df_h1 = get_tf_candles(
+                                instId,
+                                tf="1h",
+                                limit=200
+                            ) if SWING_USE_H1 else pd.DataFrame()
 
-                        df_m15 = get_tf_candles(
-                            instId,
-                            tf="15m",
-                            limit=200
-                        ) if SWING_USE_M15 else pd.DataFrame()
+                            df_m15 = get_tf_candles(
+                                instId,
+                                tf="15m",
+                                limit=200
+                            ) if SWING_USE_M15 else pd.DataFrame()
 
-                        market_phase = detect_market_phase(df_h1)
-
-                        print(
-                            f"[MARKET] {instId} "
-                            f"phase={market_phase['phase']} "
-                            f"score={market_phase['score']}",
-                            flush=True
-                        )
-
-                        h4_ctx = analyze_h4_context(df_h4) if not df_h4.empty else {"ok": False}
-
-                        h1_setup = analyze_h1_setup(df_h1, h4_ctx) if not df_h1.empty else {"ok": False}
-
-                        m15_trigger = analyze_m15_trigger(
-                            df_m15,
-                            h1_setup,
-                            h4_ctx
-                        ) if not df_m15.empty else {"ok": False}
-
-                        # =====================
-                        # CAP + VOLUME BOOST
-                        # =====================
-
-                        try:
-
-                            base = get_base_coin(instId)
-
-                            mcap = market_caps.get(base) if (
-                                'market_caps' in locals()
-                                or 'market_caps' in globals()
-                            ) else None
-
-                            sig["market_cap"] = mcap
-
-                            vol = float(
-                                sig.get("volume")
-                                or sig.get("vol")
-                                or 0
-                            )
-
-                            avg = float(
-                                sig.get("avg_volume")
-                                or sig.get("vol_avg")
-                                or 0
-                            )
-
-                            if mcap and vol > 0 and avg > 0:
-
-                                vol_ratio = vol / avg
-
-                                if vol_ratio >= 2.0:
-
-                                    if mcap < 500_000_000:
-
-                                        sig["score"] += 2
-
-                                        sig.setdefault(
-                                            "flags",
-                                            []
-                                        ).append("CAP_VOL_STRONG")
-
-                                        print(
-                                            f"[CAP+VOL BOOST STRONG] {instId}",
-                                            flush=True
-                                        )
-
-                                    elif mcap < 2_000_000_000:
-
-                                        sig["score"] += 1
-
-                                        sig.setdefault(
-                                            "flags",
-                                            []
-                                        ).append("CAP_VOL_MID")
-
-                                        print(
-                                            f"[CAP+VOL BOOST MID] {instId}",
-                                            flush=True
-                                        )
-
-                        except Exception as e:
+                            market_phase = detect_market_phase(df_h1)
 
                             print(
-                                f"[CAP_VOL_ERROR] {instId} {e}",
+                                f"[MARKET] {instId} "
+                                f"phase={market_phase['phase']} "
+                                f"score={market_phase['score']}",
                                 flush=True
                             )
-                                
-                                
+
+                            h4_ctx = analyze_h4_context(df_h4) if not df_h4.empty else {"ok": False}
+
+                            h1_setup = analyze_h1_setup(df_h1, h4_ctx) if not df_h1.empty else {"ok": False}
+
+                            m15_trigger = analyze_m15_trigger(
+                                df_m15,
+                                h1_setup,
+                                h4_ctx
+                            ) if not df_m15.empty else {"ok": False}
+
+                            # =====================
+                            # CAP + VOLUME BOOST
+                            # =====================
+
+                            try:
+
+                                base = get_base_coin(instId)
+
+                                mcap = market_caps.get(base) if (
+                                    'market_caps' in locals()
+                                    or 'market_caps' in globals()
+                                ) else None
+
+                                sig["market_cap"] = mcap
+
+                                vol = float(
+                                    sig.get("volume")
+                                    or sig.get("vol")
+                                    or 0
+                                )
+
+                                avg = float(
+                                    sig.get("avg_volume")
+                                    or sig.get("vol_avg")
+                                    or 0
+                                )
+
+                                if mcap and vol > 0 and avg > 0:
+
+                                    vol_ratio = vol / avg
+
+                                    if vol_ratio >= 2.0:
+
+                                        if mcap < 500_000_000:
+
+                                            sig["score"] += 2
+
+                                            sig.setdefault(
+                                                "flags",
+                                                []
+                                            ).append("CAP_VOL_STRONG")
+
+                                        elif mcap < 2_000_000_000:
+
+                                            sig["score"] += 1
+
+                                            sig.setdefault(
+                                                "flags",
+                                                []
+                                            ).append("CAP_VOL_MID")
+
+                            except Exception as e:
+
+                                print(
+                                    f"[CAP_VOL_ERROR] {instId} {e}",
+                                    flush=True
+                                )
+
                             # =====================
                             # BUILD SWING SIGNAL
                             # =====================
-                            swing_sig = build_swing_signal(instId, h4_ctx, h1_setup, m15_trigger, sig) or {
+
+                            swing_sig = build_swing_signal(
+                                instId,
+                                h4_ctx,
+                                h1_setup,
+                                m15_trigger,
+                                sig
+                            ) or {
                                 "status": "NONE",
                                 "sendable": False,
                                 "late": False,
                                 "rr1": 0.0,
                                 "verdict": "no_signal",
-                                "side": "NEUTRAL",
-                                "h4_bias": "NONE",
-                                "h1_setup_type": "none",
-                                "m15_trigger_type": "none"
+                                "side": "NEUTRAL"
                             }
-                            
+
                             try:
                                 rr = float(swing_sig.get("rr1") or 0)
+
                             except:
                                 rr = 0
-                            
+
                             if rr <= 0:
                                 rr = 2.0
-                                print(f"[RR_FIX_SWING] {instId} fallback rr=2.0", flush=True)
-                            
-                            swing_sig["rr1"] = rr
-                            # =====================
-                            # SWING OVERRIDE (СРЕДНЕСРОК БЕЗ M15)
-                            # =====================
-                            
-                            if not swing_sig.get("sendable"):
-                            
-                                h4_ok = h4_ctx.get("ok")
-                                h1_ok = h1_setup.get("ok")
-                            
-                                if h4_ok and h1_ok:
-                                    print(f"[SWING_OVERRIDE] {instId} HTF strong → allow", flush=True)
-                            
-                                    swing_sig["sendable"] = True
-                                    swing_sig["status"] = "HTF_SWING"
-                                    swing_sig["verdict"] = "htf_override"
 
-                            # =====================
-                            # FIX SIDE FROM H4
-                            # =====================
-                            
-                            if swing_sig.get("side") == "NEUTRAL":
-                            
-                                h4_bias = h4_ctx.get("bias")
-                            
-                                if h4_bias == "LONG":
-                                    swing_sig["side"] = "BUY"
-                            
-                                elif h4_bias == "SHORT":
-                                    swing_sig["side"] = "SELL"
-                
+                            swing_sig["rr1"] = rr
+
                             print(
                                 f"[SWING_DEBUG] {instId} "
-                                f"h4_ok={h4_ctx.get('ok')} "
-                                f"h4_bias={h4_ctx.get('bias')} "
-                                f"h1_ok={h1_setup.get('ok')} "
-                                f"h1_type={h1_setup.get('setup_type')} "
-                                f"m15_ok={m15_trigger.get('ok')} "
-                                f"m15_type={m15_trigger.get('trigger_type')} "
-                                f"status={swing_sig.get('status')} "
                                 f"sendable={swing_sig.get('sendable')} "
-                                f"rr1={swing_sig.get('rr1')} "
-                                f"verdict={swing_sig.get('verdict')}"
+                                f"rr1={swing_sig.get('rr1')}",
+                                flush=True
                             )
-                
+
                             if swing_sig.get("sendable"):
+
                                 swing_candidates.append(swing_sig)
-                            
+
                                 send_telegram(msg_swing(swing_sig))
-                            
+
                                 swing_sent[instId] = now_sw_ts
+
                                 state["swing_sent"] = swing_sent
-                            
+
                                 print(
                                     f"[SWING] {instId} "
                                     f"side={swing_sig.get('side')} "
-                                    f"rr1={swing_sig.get('rr1')}"
+                                    f"rr1={swing_sig.get('rr1')}",
+                                    flush=True
                                 )
                 
                     except Exception as e:
