@@ -6783,32 +6783,32 @@ if __name__ == "__main__":
                        
                
             
-                sym_state["last_oi_change"] = new_oi
+                    sym_state["last_oi_change"] = new_oi
+                
+                    sym_state["last_oi_ts"] = now_ts()
+                
+                    print(
+                        f"[OI_NEW] {instId} fresh OI={new_oi}%",
+                        flush=True
+                    )
             
-                sym_state["last_oi_ts"] = now_ts()
-            
-                print(
-                    f"[OI_NEW] {instId} fresh OI={new_oi}%",
-                    flush=True
-                )
-            
-            elif prev is not None and age is not None and age <= oi_ttl:
-            
-                sig["oi_change"] = prev
-            
-                print(
-                    f"[OI_CACHE] {instId} cached OI={prev}% age={age}s",
-                    flush=True
-                )
-            
-            else:
-            
-                sig["oi_change"] = None
-            
-                print(
-                    f"[OI_NONE] {instId} no fresh OI / cache expired",
-                    flush=True
-                )
+                elif prev is not None and age is not None and age <= oi_ttl:
+                
+                    sig["oi_change"] = prev
+                
+                    print(
+                        f"[OI_CACHE] {instId} cached OI={prev}% age={age}s",
+                        flush=True
+                    )
+                
+                else:
+                
+                    sig["oi_change"] = None
+                
+                    print(
+                        f"[OI_NONE] {instId} no fresh OI / cache expired",
+                        flush=True
+                    )
             
             # =====================
             # LOAD CANDLES FOR TA
