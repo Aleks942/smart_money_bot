@@ -7541,9 +7541,9 @@ if __name__ == "__main__":
                     print(f"[TG_SEND_TRY] {sid}", flush=True)
             
                     send_telegram(choose_detail_message(sig))
-            
-            save_state(state)
-            
+                    
+             
+                save_state(state)
             except Exception as e:
                 err = traceback.format_exc()
                 send_telegram(f"❌ Scan Error:\n{err}")
