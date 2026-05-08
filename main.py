@@ -7169,19 +7169,20 @@ if __name__ == "__main__":
 
                     print(f"[EARLY_SENT] {instId}", flush=True)
 
-            summary_ok = (
-                score >= 1
-                or ep_score >= 5
-                or acc_score >= 2
+           summary_ok = (
+                score >= 0
             )
-
-            if summary_ok:
-                if not any(a.get("instId") == sig.get("instId") for a in alerts):
-                    alerts.append(sig)
-                    print(
-                        f"[SUMMARY_ADD] {instId} score={score} acc={acc_score}",
-                        flush=True
-                    )
+            
+            print(
+                f"[SUMMARY_DEBUG] {instId} "
+                f"score={score} "
+                f"acc={acc_score} "
+                f"tier={sig.get('tier')} "
+                f"flags={sig.get('flags')} "
+                f"entry={sig.get('entry')} "
+                f"stage={sig.get('stage')}",
+                flush=True
+            ) 
 
             if (
                 (not sent_main_now)
