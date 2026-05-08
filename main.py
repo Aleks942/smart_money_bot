@@ -7087,291 +7087,145 @@ if __name__ == "__main__":
             # =====================
             # TIER + SEND LOGIC
             # =====================
-                    
-                    score = sig.get("score", 0)
-                    ep_score = sig.get("early_pressure_score", 0)
-                    acc_score = sig.get("acc_score", 0)
 
-                    # =====================
-                    # DEFINE TIER
-                    # =====================
-                    
-                    ep_score = sig.get("early_pressure_score", 0)
-                    acc_score = sig.get("acc_score", 0)
-                    
-                    if sig.get("sniper"):
-                    
-                        sig["tier"] = "🟢🟢 СИЛЬНЫЙ ВХОД"
-                    
-                    elif score >= 7:
-                    
-                        sig["tier"] = "🟢 СИЛЬНЫЙ СИГНАЛ"
-                    
-                    elif score >= 5:
-                    
-                        sig["tier"] = "🟡 СИГНАЛ"
-                    
-                    elif (
-                        score >= 1
-                        or ep_score >= 5
-                        or acc_score >= 2
-                    ):
-                    
-                        sig["tier"] = "🟠 РАННИЙ"
-                    
-                    else:
-                    
-                        sig["tier"] = "🔴 СЛАБЫЙ"
-                                        
-                  
-                    # =====================
-                    # SAFE ENTRY LOCK
-                    # =====================
-                    
-                    safe_entry_now = (
-                        "SAFE ENTRY" in str(sig.get("entry", ""))
-                        and is_entry_signal(sig)
+            score = float(sig.get("score", 0))
+            ep_score = float(sig.get("early_pressure_score", 0))
+            acc_score = int(sig.get("acc_score", 0))
+
+            if sig.get("sniper"):
+                sig["tier"] = "🟢🟢 СИЛЬНЫЙ ВХОД"
+
+            elif score >= 7:
+                sig["tier"] = "🟢 СИЛЬНЫЙ СИГНАЛ"
+
+            elif score >= 5:
+                sig["tier"] = "🟡 СИГНАЛ"
+
+            elif score >= 1 or ep_score >= 5 or acc_score >= 2:
+                sig["tier"] = "🟠 РАННИЙ"
+
+            else:
+                sig["tier"] = "🔴 СЛАБЫЙ"
+
+            tier = sig.get("tier")
+            entry_ok = is_entry_signal(sig)
+            profit_ok = is_profitable(sig)
+            can_alert_now = should_alert_symbol(state, sig)
+
+            start_ready = is_start_trigger(sig)
+            pre_ready = is_pre_trigger(sig)
+            confirm_ready = is_confirm_trigger(sig)
+            early_ready = is_early_pressure_alert(sig)
+
+            recent_safe_lock = safe_entry_recent(state, instId)
+            recent_start_lock = start_afterglow_recent(state, instId)
+            recent_early_lock = early_alert_recent(state, instId)
+
+            sent_main_now = False
+            sent_pre_now = False
+            sent_start_now = False
+            sent_early_now = False
+
+            if early_ready:
+                if sig.get("early_pressure_side") == "BUY":
+                    early_buy_symbols.append(fmt_symbol(instId))
+                elif sig.get("early_pressure_side") == "SELL":
+                    early_sell_symbols.append(fmt_symbol(instId))
+
+            if tier in ["🟢🟢 СИЛЬНЫЙ ВХОД", "🟢 СИЛЬНЫЙ СИГНАЛ"]:
+                if entry_ok and can_alert_now:
+                    send_telegram(msg_full(sig))
+                    sent_main_now = True
+                    mark_alert_sent(state, sig)
+                    alerts.append(sig)
+
+            elif tier == "🟡 СИГНАЛ":
+                if entry_ok and can_alert_now:
+                    send_telegram(msg_medium(sig))
+                    sent_main_now = True
+                    mark_alert_sent(state, sig)
+                    alerts.append(sig)
+
+            elif tier == "🟠 РАННИЙ":
+                print(
+                    f"[EARLY] {instId} score={score} ep={ep_score} stage={sig.get('stage')}",
+                    flush=True
+                )
+
+                early_ok = (
+                    ep_score >= 5
+                    or acc_score >= 2
+                    or sig.get("stage") in ["🟠 TRANSITION", "🟣 ACCUMULATION"]
+                )
+
+                if early_ok and can_alert_now:
+                    print(f"[TG_SEND_TRY] {instId}", flush=True)
+                    send_telegram(msg_medium(sig))
+                    print(f"[TG_SEND_OK] {instId}", flush=True)
+
+                    sent_main_now = True
+                    mark_alert_sent(state, sig)
+                    alerts.append(sig)
+
+                    print(f"[EARLY_SENT] {instId}", flush=True)
+
+            summary_ok = (
+                score >= 1
+                or ep_score >= 5
+                or acc_score >= 2
+            )
+
+            if summary_ok:
+                if not any(a.get("instId") == sig.get("instId") for a in alerts):
+                    alerts.append(sig)
+                    print(
+                        f"[SUMMARY_ADD] {instId} score={score} acc={acc_score}",
+                        flush=True
                     )
-                    
-                    recent_safe_lock = safe_entry_recent(state, instId)
-                    
-                    if safe_entry_now:
-                    
-                        mark_safe_entry(state, instId)
-                    
-                        recent_safe_lock = True
-                    
-                    
-                    # =====================
-                    # COMMON FLAGS
-                    # =====================
-                    
-                    tier = sig.get("tier")
-                    
-                    entry_ok = is_entry_signal(sig)
 
-                    # допуск сильных сигналов
-                    if (not entry_ok) and score >= 7:
-                        if sig.get("entry") in ["🟡 AGGRESSIVE", "🟢 SAFE", "SAFE ENTRY"]:
-                            entry_ok = True
-                    
-                    profit_ok = is_profitable(sig)
-                    can_alert_now = should_alert_symbol(state, sig)
-                    
-                    start_ready = is_start_trigger(sig)
-                    pre_ready = is_pre_trigger(sig)
-                    confirm_ready = is_confirm_trigger(sig)
-                    early_ready = is_early_pressure_alert(sig)
-                    recent_start_lock = start_afterglow_recent(state, instId)
-                    recent_early_lock = early_alert_recent(state, instId)
-                    
-                    if early_ready:
-                        if sig.get("early_pressure_side") == "BUY":
-                            early_buy_symbols.append(fmt_symbol(instId))
-                        elif sig.get("early_pressure_side") == "SELL":
-                            early_sell_symbols.append(fmt_symbol(instId))
-                    
-                    sent_main_now = False
-                    sent_pre_now = False
-                    sent_start_now = False
-                    sent_early_now = False
-                    
-                    # SEND
-                    
-                    if tier == "🟢🟢 СИЛЬНЫЙ ВХОД":
-                        if entry_ok and can_alert_now:
-                            send_telegram(msg_full(sig))
-                            sent_main_now = True
-                            mark_alert_sent(state, sig)
-                    
-                    elif tier == "🟢 СИЛЬНЫЙ СИГНАЛ":
-                        if entry_ok and can_alert_now:
-                            send_telegram(msg_full(sig))
-                            sent_main_now = True
-                            mark_alert_sent(state, sig)
-                    
-                    elif tier == "🟡 СИГНАЛ":
-                        if entry_ok and can_alert_now:
-                            send_telegram(msg_medium(sig))
-                            sent_main_now = True
-                            mark_alert_sent(state, sig)
+            if (
+                (not sent_main_now)
+                and early_ready
+                and can_alert_now
+                and (not recent_safe_lock)
+                and (not recent_start_lock)
+                and (not recent_early_lock)
+                and (not start_ready)
+            ):
+                print(
+                    f"[EARLY_PRESSURE] {instId} "
+                    f"side={sig.get('early_pressure_side')} "
+                    f"score={sig.get('early_pressure_score')}",
+                    flush=True
+                )
 
-                    
-                    elif tier == "🟠 РАННИЙ":
+                early_count += 1
+                sent_early_now = True
+                mark_alert_sent(state, sig)
+                mark_early_alert(state, instId)
 
-                        print(
-                            f"[EARLY] {instId} "
-                            f"score={score} "
-                            f"ep={sig.get('early_pressure_score')} "
-                            f"stage={sig.get('stage')}",
-                            flush=True
-                        )
-                    
-                        early_ok = (
-                            sig.get("early_pressure_score", 0) >= 5
-                            or sig.get("acc_score", 0) >= 2
-                            or sig.get("stage") in ["🟠 TRANSITION", "🟣 ACCUMULATION"]
-                        )
-                    
-                        if early_ok and can_alert_now:
-                    
-                            print(f"[TG_SEND_TRY] {instId}", flush=True)
-                    
-                            send_telegram(msg_medium(sig))
-                    
-                            print(f"[TG_SEND_OK] {instId}", flush=True)
-                    
-                            sent_main_now = True
-                    
-                            mark_alert_sent(state, sig)
-                    
-                            print(f"[EARLY_SENT] {instId}", flush=True)
-                    
-                    # =====================
-                    # ADD TO ALERTS (для summary)
-                    # =====================
-                    
-                    score = float(sig.get("score", 0))
-                    acc   = int(sig.get("acc_score", 0))
-                    
-                    if score >= 7:
-                        print(
-                            f"[CHECK] {instId} "
-                            f"score={score} "
-                            f"acc={acc} "
-                            f"entry={sig.get('entry')} "
-                            f"stage={sig.get('stage')} "
-                            f"dir={sig.get('direction')} "
-                            f"rsi={sig.get('rsi_state')} "
-                            f"entry_ok={entry_ok} "
-                            f"profit_ok={profit_ok} "
-                            f"can_alert_now={can_alert_now} "
-                            f"sent_main_now={sent_main_now}"
-                        )
-                    
-                    summary_ok = (
-                        score >= 5.5
-                        or (acc >= 2 and score >= 4)
-                        or sig.get("sendable", False)
-                    )
-                        
-                    # =====================
-                    # SUMMARY ADD
-                    # =====================
-                    
-                    summary_ok = (
-                        score >= 1
-                        or sig.get("early_pressure_score", 0) >= 5
-                        or sig.get("acc_score", 0) >= 2
-                    )
-                    
-                    if summary_ok:
-                    
-                        if not any(a.get("instId") == sig.get("instId") for a in alerts):
-                    
-                            alerts.append(sig)
-                    
-                            print(
-                                f"[SUMMARY_ADD] {instId} "
-                                f"score={score} "
-                                f"acc={acc}",
-                                flush=True
-                            )
+            if (
+                (not sent_main_now)
+                and is_priority_signal(sig)
+                and priority_allowed(state, instId)
+            ):
+                if pro_edge_filter(sig, regime) and entry_ok:
+                    send_telegram(msg_priority(sig))
+                    mark_priority(state, instId)
 
-                    # =====================
-                    # LIVE LOGIC
-                    # =====================
-                    
-                    live_ok = (
-                        entry_ok
-                        and profit_ok
-                        and can_alert_now
-                        and (not sent_main_now)
-                    )
-                    
-                    if live_ok:
-                    
-                        print(f"[LIVE_OK] {instId}", flush=True)
+            if (
+                MANIP_ALERT_ENABLED
+                and (not recent_safe_lock)
+                and (not recent_start_lock)
+                and (not sent_pre_now)
+                and (not sent_start_now)
+                and is_pre_move_manip(sig)
+            ):
+                if should_manip_alert(state, sig):
+                    manip_watch.append(sig)
+                    mark_manip_sent(state, sig)
 
-                    
-                    # =====================
-                    # EARLY PRESSURE ALERT
-                    # =====================
-                    if (
-                        (not sent_main_now)
-                        and (not recent_safe_lock)
-                        and (not recent_start_lock)
-                        and (not recent_early_lock)
-                        and (not start_ready)
-                        and early_ready
-                        and can_alert_now
-                    ):
-                        # send_telegram(msg_early_pressure(sig))
-                        print(
-                            f"[EARLY_SENT] {instId} "
-                            f"side={sig.get('early_pressure_side')} "
-                            f"score={sig.get('early_pressure_score')} "
-                            f"stage={sig.get('stage')} "
-                            f"entry={sig.get('entry')}"
-                        )
-                        early_count += 1
-                        sent_early_now = True
-                        mark_alert_sent(state, sig)
-                        mark_early_alert(state, instId)
-
-                    # =====================
-                    # V3 TRIGGERS
-                    # =====================
-
-                    if (not recent_safe_lock) and start_ready and trigger_allowed(state, instId, "last_start_trigger_ts", TRIGGER_START_COOLDOWN):
-                        # send_telegram(msg_start_trigger(sig))
-                        start_count += 1
-                        trigger_mark(state, instId, "last_start_trigger_ts")
-                        sent_start_now = True
-                
-                    elif (not recent_safe_lock) and (not recent_start_lock) and pre_ready and trigger_allowed(state, instId, "last_pre_trigger_ts", TRIGGER_PRE_COOLDOWN):
-                        # send_telegram(msg_pre_trigger(sig))
-                        pre_count += 1
-                        trigger_mark(state, instId, "last_pre_trigger_ts")
-                        sent_pre_now = True
-                    
-                    if (
-                        (not sent_main_now)
-                        and confirm_ready
-                        and entry_ok
-                        and trigger_allowed(state, instId, "last_confirm_trigger_ts", TRIGGER_CONFIRM_COOLDOWN)
-                    ):
-                        # send_telegram(msg_confirm_trigger(sig))
-                        trigger_mark(state, instId, "last_confirm_trigger_ts")
-              
-                    
-                    # =====================
-                    # PRIORITY ALERT
-                    # =====================
-                    
-                    if (not sent_main_now) and is_priority_signal(sig) and priority_allowed(state, instId):
-                        if pro_edge_filter(sig, regime) and entry_ok:
-                            send_telegram(msg_priority(sig))
-                            mark_priority(state, instId)
-                    
-                    
-                    # =====================
-                    # PRE-MOVE WATCH
-                    # =====================
-                    
-                    if (
-                        MANIP_ALERT_ENABLED
-                        and (not recent_safe_lock)
-                        and (not recent_start_lock)
-                        and (not sent_pre_now)
-                        and (not sent_start_now)
-                        and is_pre_move_manip(sig)
-                    ):
-                        if should_manip_alert(state, sig):
-                            manip_watch.append(sig)
-                            mark_manip_sent(state, sig)
-                                        
-                    update_symbol_state(state, sig) 
+            update_symbol_state(state, sig)
 
                 except Exception as e:
                     print("SCAN ERROR:", e)
