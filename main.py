@@ -7017,13 +7017,13 @@ if __name__ == "__main__":
             
                         
             if sig.get("swing_only_candidate"):
-                            print(
-                                f"[SWING_ONLY_SKIP_MAIN] {instId} "
-                                f"score={sig.get('score')} "
-                                f"acc={sig.get('acc_score')} "
-                                f"flags={sig.get('flags')}"
-                            )
-                            continue
+            print(
+                f"[SWING_ONLY_SKIP_MAIN] {instId} "
+                f"score={sig.get('score')} "
+                f"acc={sig.get('acc_score')} "
+                f"flags={sig.get('flags')}"
+            )
+            continue
 
                     if sig.get("early_pressure_label"):
                         flags_set = set(sig.get("flags", []))
