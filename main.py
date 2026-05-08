@@ -6740,7 +6740,10 @@ if __name__ == "__main__":
 
             print(f"Scanning {len(candidates)} symbols this cycle | index={scan_index}/{total_symbols}")
 
-           
+
+            # =====================
+            # SCAN LOOP
+            # =====================  
             for instId, vol_usdt, pct in candidates:
             
                 oi_ttl = int(os.getenv("OI_CACHE_TTL_SEC", "1800"))
@@ -6757,7 +6760,7 @@ if __name__ == "__main__":
                 
                 age = now_ts() - prev_ts if prev_ts else None
             
-            if new_oi is not None:
+                if new_oi is not None:
             
                 sig["oi_change"] = new_oi
             
