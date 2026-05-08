@@ -7227,8 +7227,7 @@ if __name__ == "__main__":
 
             update_symbol_state(state, sig)
 
-                except Exception as e:
-                    print("SCAN ERROR:", e)
+            
 
             # =====================
             # AFTER SCAN
