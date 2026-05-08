@@ -7030,48 +7030,112 @@ if __name__ == "__main__":
                     )
             
             
-             if can_send_swing and swing_candidate:
-                        df_h4 = get_tf_candles(instId, tf="4h", limit=200) if SWING_USE_H4 else pd.DataFrame()
-                        df_h1 = get_tf_candles(instId, tf="1h", limit=200) if SWING_USE_H1 else pd.DataFrame()
-                        df_m15 = get_tf_candles(instId, tf="15m", limit=200) if SWING_USE_M15 else pd.DataFrame()
+                    if can_send_swing and swing_candidate:
+
+                        df_h4 = get_tf_candles(
+                            instId,
+                            tf="4h",
+                            limit=200
+                        ) if SWING_USE_H4 else pd.DataFrame()
+
+                        df_h1 = get_tf_candles(
+                            instId,
+                            tf="1h",
+                            limit=200
+                        ) if SWING_USE_H1 else pd.DataFrame()
+
+                        df_m15 = get_tf_candles(
+                            instId,
+                            tf="15m",
+                            limit=200
+                        ) if SWING_USE_M15 else pd.DataFrame()
+
                         market_phase = detect_market_phase(df_h1)
 
-                        print(f"[MARKET] {instId} phase={market_phase['phase']} score={market_phase['score']}", flush=True)
-            
-                        h4_ctx = analyze_h4_context(df_h4) if not df_h4.empty else {"ok": False}
-                        h1_setup = analyze_h1_setup(df_h1, h4_ctx) if not df_h1.empty else {"ok": False}
-                        m15_trigger = analyze_m15_trigger(df_m15, h1_setup, h4_ctx) if not df_m15.empty else {"ok": False}
+                        print(
+                            f"[MARKET] {instId} "
+                            f"phase={market_phase['phase']} "
+                            f"score={market_phase['score']}",
+                            flush=True
+                        )
 
-                                # =====================
-                                # CAP + VOLUME BOOST (SWING)
-                                # =====================
-                                try:
-                                    base = get_base_coin(instId)
-                                    mcap = market_caps.get(base) if 'market_caps' in locals() or 'market_caps' in globals() else None
-                                
-                                    sig["market_cap"] = mcap
-                                
-                                    vol = float(sig.get("volume") or sig.get("vol") or 0)
-                                    avg = float(sig.get("avg_volume") or sig.get("vol_avg") or 0)
-                                
-                                    if mcap and vol > 0 and avg > 0:
-                                
-                                        vol_ratio = vol / avg
-                                
-                                        if vol_ratio >= 2.0:
-                                
-                                            if mcap < 500_000_000:
-                                                sig["score"] += 2
-                                                sig.setdefault("flags", []).append("CAP_VOL_STRONG")
-                                                print(f"[CAP+VOL BOOST STRONG] {instId}", flush=True)
-                                
-                                            elif mcap < 2_000_000_000:
-                                                sig["score"] += 1
-                                                sig.setdefault("flags", []).append("CAP_VOL_MID")
-                                                print(f"[CAP+VOL BOOST MID] {instId}", flush=True)
-                                
-                                except Exception as e:
-                                    print(f"[CAP_VOL_ERROR] {instId} {e}", flush=True)
+                        h4_ctx = analyze_h4_context(df_h4) if not df_h4.empty else {"ok": False}
+
+                        h1_setup = analyze_h1_setup(df_h1, h4_ctx) if not df_h1.empty else {"ok": False}
+
+                        m15_trigger = analyze_m15_trigger(
+                            df_m15,
+                            h1_setup,
+                            h4_ctx
+                        ) if not df_m15.empty else {"ok": False}
+
+                        # =====================
+                        # CAP + VOLUME BOOST
+                        # =====================
+
+                        try:
+
+                            base = get_base_coin(instId)
+
+                            mcap = market_caps.get(base) if (
+                                'market_caps' in locals()
+                                or 'market_caps' in globals()
+                            ) else None
+
+                            sig["market_cap"] = mcap
+
+                            vol = float(
+                                sig.get("volume")
+                                or sig.get("vol")
+                                or 0
+                            )
+
+                            avg = float(
+                                sig.get("avg_volume")
+                                or sig.get("vol_avg")
+                                or 0
+                            )
+
+                            if mcap and vol > 0 and avg > 0:
+
+                                vol_ratio = vol / avg
+
+                                if vol_ratio >= 2.0:
+
+                                    if mcap < 500_000_000:
+
+                                        sig["score"] += 2
+
+                                        sig.setdefault(
+                                            "flags",
+                                            []
+                                        ).append("CAP_VOL_STRONG")
+
+                                        print(
+                                            f"[CAP+VOL BOOST STRONG] {instId}",
+                                            flush=True
+                                        )
+
+                                    elif mcap < 2_000_000_000:
+
+                                        sig["score"] += 1
+
+                                        sig.setdefault(
+                                            "flags",
+                                            []
+                                        ).append("CAP_VOL_MID")
+
+                                        print(
+                                            f"[CAP+VOL BOOST MID] {instId}",
+                                            flush=True
+                                        )
+
+                        except Exception as e:
+
+                            print(
+                                f"[CAP_VOL_ERROR] {instId} {e}",
+                                flush=True
+                            )
                                 
                                 
                                 # =====================
