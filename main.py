@@ -7120,12 +7120,12 @@ if __name__ == "__main__":
                                             []
                                         ).append("CAP_VOL_MID")
 
-                        except Exception as e:
+                    except Exception as e:
 
-                            print(
-                                f"[CAP_VOL_ERROR] {instId} {e}",
-                                flush=True
-                            )
+                        print(
+                            f"[CAP_VOL_ERROR] {instId} {e}",
+                            flush=True
+                        )
 
                         # =====================
                         # BUILD SWING SIGNAL
@@ -7185,14 +7185,15 @@ if __name__ == "__main__":
                         import traceback
                         print(f"[SWING_ERROR] {instId}: {e}")
                         print(traceback.format_exc())
-                    if sig.get("swing_only_candidate"):
-                        print(
-                            f"[SWING_ONLY_SKIP_MAIN] {instId} "
-                            f"score={sig.get('score')} "
-                            f"acc={sig.get('acc_score')} "
-                            f"flags={sig.get('flags')}"
-                        )
-                        continue
+                        
+                        if sig.get("swing_only_candidate"):
+                            print(
+                                f"[SWING_ONLY_SKIP_MAIN] {instId} "
+                                f"score={sig.get('score')} "
+                                f"acc={sig.get('acc_score')} "
+                                f"flags={sig.get('flags')}"
+                            )
+                            continue
 
                     if sig.get("early_pressure_label"):
                         flags_set = set(sig.get("flags", []))
