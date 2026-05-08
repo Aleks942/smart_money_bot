@@ -7146,48 +7146,59 @@ if __name__ == "__main__":
                     mark_alert_sent(state, sig)
                     alerts.append(sig)
 
+            
             elif tier == "🟠 РАННИЙ":
-                print(
-                    f"[EARLY] {instId} score={score} ep={ep_score} stage={sig.get('stage')}",
-                    flush=True
-             
-                early_ok = (
 
+                print(
+                    f"[EARLY] {instId} "
+                    f"score={score} "
+                    f"ep={ep_score} "
+                    f"stage={sig.get('stage')}",
+                    flush=True
+                )
+            
+                early_ok = (
+            
                     ep_score >= 5
-                
+            
                     or acc_score >= 2
-                
+            
                     or sig.get("stage") in [
                         "🟠 TRANSITION",
                         "🟣 ACCUMULATION"
                     ]
-                
+            
                     or "PRESSURE_UP" in sig.get("flags", [])
-                
+            
                     or "PRESSURE_DOWN" in sig.get("flags", [])
-                
+            
                     or "CONTINUATION_UP" in sig.get("flags", [])
-                
+            
                     or "CONTINUATION_DOWN" in sig.get("flags", [])
-                
+            
                     or "BREAKOUT_CONFIRM_UP" in sig.get("flags", [])
-                
+            
                     or "BREAKOUT_CONFIRM_DOWN" in sig.get("flags", [])
-                
+            
                     or "VOL_SPIKE" in sig.get("flags", [])
-                
+            
                     or "ATR_EXPANSION" in sig.get("flags", [])
                 )
-
+            
                 if early_ok and can_alert_now:
+            
                     print(f"[TG_SEND_TRY] {instId}", flush=True)
+            
                     send_telegram(msg_medium(sig))
+            
                     print(f"[TG_SEND_OK] {instId}", flush=True)
-
+            
                     sent_main_now = True
+            
                     mark_alert_sent(state, sig)
+            
                     alerts.append(sig)
-
+            
                     print(f"[EARLY_SENT] {instId}", flush=True)
 
             summary_ok = (
