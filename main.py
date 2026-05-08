@@ -6909,7 +6909,7 @@ if __name__ == "__main__":
             # =====================
             # SEND SIGNAL
             # =====================
-            ```
+            
 
                     if isinstance(ta, dict) and ta.get("entry") and ta.get("stop") and ta.get("tp1"):
                         send_telegram(
