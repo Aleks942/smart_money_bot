@@ -6911,23 +6911,23 @@ if __name__ == "__main__":
             # =====================
             
 
-                    if isinstance(ta, dict) and ta.get("entry") and ta.get("stop") and ta.get("tp1"):
-                        send_telegram(
-                            f"🎯 <b>TA SNIPER — {ta.get('symbol')}</b>\n\n"
-                            f"🧭 Направление: <b>{ta.get('side')}</b>\n"
-                            f"💵 Вход: <b>{ta.get('entry')}</b>\n"
-                            f"🛑 Стоп: <b>{ta.get('stop')}</b> ({ta.get('stop_pct')}%)\n"
-                            f"🎯 TP1: <b>{ta.get('tp1')}</b>\n"
-                            f"🎯 TP2: <b>{ta.get('tp2')}</b>\n\n"
-                            f"📍 Уровень: <b>{ta.get('level_price')}</b>\n"
-                            f"📏 Дистанция: <b>{ta.get('level_distance_pct')}%</b>\n"
-                            f"📦 Проторговка: <b>{ta.get('range_bars')} свечей</b>\n"
-                            f"🧲 Диапазон: {ta.get('range_low')} → {ta.get('range_high')}\n"
-                            f"💪 Buyer: {ta.get('buyer_power')} | Seller: {ta.get('seller_power')}\n"
-                            f"⚡ Breakout: {ta.get('breakout')}"
-                        )
-                                                        
-                   
+            if isinstance(ta, dict) and ta.get("entry") and ta.get("stop") and ta.get("tp1"):
+                send_telegram(
+                    f"🎯 <b>TA SNIPER — {ta.get('symbol')}</b>\n\n"
+                    f"🧭 Направление: <b>{ta.get('side')}</b>\n"
+                    f"💵 Вход: <b>{ta.get('entry')}</b>\n"
+                    f"🛑 Стоп: <b>{ta.get('stop')}</b> ({ta.get('stop_pct')}%)\n"
+                    f"🎯 TP1: <b>{ta.get('tp1')}</b>\n"
+                    f"🎯 TP2: <b>{ta.get('tp2')}</b>\n\n"
+                    f"📍 Уровень: <b>{ta.get('level_price')}</b>\n"
+                    f"📏 Дистанция: <b>{ta.get('level_distance_pct')}%</b>\n"
+                    f"📦 Проторговка: <b>{ta.get('range_bars')} свечей</b>\n"
+                    f"🧲 Диапазон: {ta.get('range_low')} → {ta.get('range_high')}\n"
+                    f"💪 Buyer: {ta.get('buyer_power')} | Seller: {ta.get('seller_power')}\n"
+                    f"⚡ Breakout: {ta.get('breakout')}"
+                )
+                                                
+           
             
                     # =====================
                     # DEFINE SETUP TYPE
