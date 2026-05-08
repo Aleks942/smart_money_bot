@@ -6741,147 +6741,211 @@ if __name__ == "__main__":
             print(f"Scanning {len(candidates)} symbols this cycle | index={scan_index}/{total_symbols}")
 
            
-
             # =====================
+
             # SCAN LOOP
+            
             # =====================
             
             for instId, vol_usdt, pct in candidates:
-                print(f"[LOOP] {instId} start")
-               
             
-                time.sleep(0.55)
+            ```
+            print(f"[LOOP] {instId} start")
             
-                try:
-                    sig = build_signal(instId)
+            time.sleep(0.55)
             
-                    # 🔴 КРИТИЧЕСКАЯ ЗАЩИТА
-                    if not sig or not isinstance(sig, dict):
-                        print(f"[RAW_SKIP] {instId} build_signal_returned_non_dict", flush=True)
-                        continue
+            try:
             
-                except Exception as e:
-                    print(f"[BUILD_SIGNAL_ERROR] {instId} {e}", flush=True)
+                sig = build_signal(instId)
+            
+                # 🔴 КРИТИЧЕСКАЯ ЗАЩИТА
+                if not sig or not isinstance(sig, dict):
+            
+                    print(
+                        f"[RAW_SKIP] {instId} build_signal_returned_non_dict",
+                        flush=True
+                    )
+            
                     continue
             
-                # =====================
-                # OI BLOCK (FIX)
-                # =====================
-                    
-                oi_ttl = int(os.getenv("OI_CACHE_TTL_SEC", "1800"))
-                
-                new_oi = get_open_interest_change(instId)
-                
-                state["symbols"].setdefault(instId, {})
-                sym_state = state["symbols"][instId]
-                
-                prev = sym_state.get("last_oi_change")
-                prev_ts = int(sym_state.get("last_oi_ts", 0) or 0)
-                age = now_ts() - prev_ts if prev_ts else None
-                
-                if new_oi is not None:
-                    sig["oi_change"] = new_oi
-                    sym_state["last_oi_change"] = new_oi
-                    sym_state["last_oi_ts"] = now_ts()
-                
-                    print(f"[OI_NEW] {instId} fresh OI={new_oi}%", flush=True)
-                
-                elif prev is not None and age is not None and age <= oi_ttl:
-                    sig["oi_change"] = prev
-                    print(f"[OI_CACHE] {instId} cached OI={prev}% age={age}s", flush=True)
-                
-                    else:
-                        sig["oi_change"] = None
-                        print(f"[OI_NONE] {instId} no fresh OI / cache expired", flush=True)
-                
-                
-                    # =====================
-                    # LOAD CANDLES FOR TA
-                    # =====================
-                    
-                    
-                    candles_m15 = get_tf_candles(instId, "15m", 200)
-                    candles_h1 = get_tf_candles(instId, "1h", 200)
-                    candles_day = get_tf_candles(instId, "1d", 200)
-                    candles_month = get_tf_candles(instId, "1M", 120)
-                    
-                    # =====================
-                    # TA SNIPER (SAFE)
-                    # =====================
-                    
-                    try:
-                        if (
-                            is_empty(candles_m15) or
-                            is_empty(candles_h1) or
-                            is_empty(candles_day) or
-                            is_empty(candles_month)
-                        ):
-                            print(f"[TA_SKIP] {instId} empty candles", flush=True)
-                            ta = None
-                        else:
-                            ta = analyze_ta_sniper(
-                                symbol=instId,
-                                candles_month=candles_month,
-                                candles_day=candles_day,
-                                candles_h1=candles_h1,
-                                candles_m15=candles_m15,
-                                max_stop_pct=3.5
-                            )
-                   
-                    except Exception as e:
-                        print(f"[TA_ERROR] {instId} {type(e).__name__}: {e}", flush=True)
-                        print(traceback.format_exc(), flush=True)
-                        ta = None 
-                         
-                    # =====================
-                    # ELITE FILTER
-                    # =====================
-                    
+            except Exception as e:
+            
+                print(f"[BUILD_SIGNAL_ERROR] {instId} {e}", flush=True)
+            
+                continue
+            
+            # =====================
+            # OI BLOCK (FIX)
+            # =====================
+            
+            oi_ttl = int(os.getenv("OI_CACHE_TTL_SEC", "1800"))
+            
+            new_oi = get_open_interest_change(instId)
+            
+            state["symbols"].setdefault(instId, {})
+            
+            sym_state = state["symbols"][instId]
+            
+            prev = sym_state.get("last_oi_change")
+            
+            prev_ts = int(sym_state.get("last_oi_ts", 0) or 0)
+            
+            age = now_ts() - prev_ts if prev_ts else None
+            
+            if new_oi is not None:
+            
+                sig["oi_change"] = new_oi
+            
+                sym_state["last_oi_change"] = new_oi
+            
+                sym_state["last_oi_ts"] = now_ts()
+            
+                print(
+                    f"[OI_NEW] {instId} fresh OI={new_oi}%",
+                    flush=True
+                )
+            
+            elif prev is not None and age is not None and age <= oi_ttl:
+            
+                sig["oi_change"] = prev
+            
+                print(
+                    f"[OI_CACHE] {instId} cached OI={prev}% age={age}s",
+                    flush=True
+                )
+            
+            else:
+            
+                sig["oi_change"] = None
+            
+                print(
+                    f"[OI_NONE] {instId} no fresh OI / cache expired",
+                    flush=True
+                )
+            
+            # =====================
+            # LOAD CANDLES FOR TA
+            # =====================
+            
+            candles_m15 = get_tf_candles(instId, "15m", 200)
+            
+            candles_h1 = get_tf_candles(instId, "1h", 200)
+            
+            candles_day = get_tf_candles(instId, "1d", 200)
+            
+            candles_month = get_tf_candles(instId, "1M", 120)
+            
+            # =====================
+            # TA SNIPER (SAFE)
+            # =====================
+            
+            try:
+            
+                if (
+                    is_empty(candles_m15)
+                    or is_empty(candles_h1)
+                    or is_empty(candles_day)
+                    or is_empty(candles_month)
+                ):
+            
+                    print(f"[TA_SKIP] {instId} empty candles", flush=True)
+            
+                    ta = None
+            
+                else:
+            
+                    ta = analyze_ta_sniper(
+                        symbol=instId,
+                        candles_month=candles_month,
+                        candles_day=candles_day,
+                        candles_h1=candles_h1,
+                        candles_m15=candles_m15,
+                        max_stop_pct=3.5
+                    )
+            
+            except Exception as e:
+            
+                print(
+                    f"[TA_ERROR] {instId} {type(e).__name__}: {e}",
+                    flush=True
+                )
+            
+                print(traceback.format_exc(), flush=True)
+            
+                ta = None
+            
+            # =====================
+            # ELITE FILTER
+            # =====================
+            
+            elite = False
+            
+            reasons = []
+            
+            # 1. есть swing сигнал
+            if sig.get("sendable"):
+            
+                elite = True
+            
+                reasons.append("SWING_OK")
+            
+            # 2. хороший риск/прибыль
+            rr1 = sig.get("rr1", 0)
+            
+            if rr1 >= 2:
+            
+                reasons.append("RR_OK")
+            
+            else:
+            
+                elite = False
+            
+            # 3. подтверждение давления
+            flags = sig.get("flags", [])
+            
+            if "PRESSURE_DOWN" in flags or "PRESSURE_UP" in flags:
+            
+                reasons.append("PRESSURE_OK")
+            
+            else:
+            
+                elite = False
+            
+            # 4. TA совпадает по направлению
+            if (
+                isinstance(ta, dict)
+                and ta.get("entry")
+                and ta.get("stop")
+                and ta.get("tp1")
+            ):
+            
+                if ta.get("side") == sig.get("side"):
+            
+                    reasons.append("TA_CONFIRM")
+            
+                else:
+            
                     elite = False
-                    reasons = []
-                    
-                    # 1. есть swing сигнал
-                    if sig.get("sendable"):
-                        elite = True
-                        reasons.append("SWING_OK")
-                    
-                    # 2. хороший риск/прибыль
-                    rr1 = sig.get("rr1", 0)
-                    if rr1 >= 2:
-                        reasons.append("RR_OK")
-                    else:
-                        elite = False
-                    
-                    # 3. подтверждение давления
-                    flags = sig.get("flags", [])
-                    if "PRESSURE_DOWN" in flags or "PRESSURE_UP" in flags:
-                        reasons.append("PRESSURE_OK")
-                    else:
-                        elite = False
-                    
-                    # 4. TA совпадает по направлению
-                    if isinstance(ta, dict) and ta.get("entry") and ta.get("stop") and ta.get("tp1"):
-                        if ta.get("side") == sig.get("side"):
-                            reasons.append("TA_CONFIRM")
-                        else:
-                            elite = False
-                    else:
-                        elite = False
+            
+            else:
+            
+                elite = False
+            
+            if elite:
+            
+                send_telegram(
+                    f"🔥 <b>ELITE SIGNAL — {instId}</b>\n\n"
+                    f"🧭 Side: {sig.get('side')}\n"
+                    f"💰 Price: {sig.get('price')}\n"
+                    f"📊 RR: {rr1}\n\n"
+                    f"📌 Reasons: {', '.join(reasons)}"
+                )
+            
+            # =====================
+            # SEND SIGNAL
+            # =====================
+            ```
 
-                    if elite:
-                        send_telegram(
-                            f"🔥 <b>ELITE SIGNAL — {instId}</b>\n\n"
-                            f"🧭 Side: {sig.get('side')}\n"
-                            f"💰 Price: {sig.get('price')}\n"
-                            f"📊 RR: {rr1}\n\n"
-                            f"📌 Reasons: {', '.join(reasons)}"
-                        )
-
-                    
-                    # =====================
-                    # SEND SIGNAL
-                    # =====================
-                    
                     if isinstance(ta, dict) and ta.get("entry") and ta.get("stop") and ta.get("tp1"):
                         send_telegram(
                             f"🎯 <b>TA SNIPER — {ta.get('symbol')}</b>\n\n"
