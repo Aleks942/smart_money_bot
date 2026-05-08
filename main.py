@@ -6998,7 +6998,7 @@ if __name__ == "__main__":
             # =====================
             # SAVE SIGNAL
             # =====================
-
+            
             print(
                 f"[SCAN] {instId} "
                 f"price={sig.get('price')} "
@@ -7007,67 +7007,86 @@ if __name__ == "__main__":
                 f"oi={sig.get('oi_change')} "
                 f"flags={sig.get('flags')}"
             )
-
+            
             # =====================
-            # SWING LAYER (H4 / H1 / M15) — ADDON, НЕ ЛОМАЕТ СКАЛЬП
+            # SWING ONLY SKIP
             # =====================
-           
             
-            
-            
-                        
             if sig.get("swing_only_candidate"):
-            print(
-                f"[SWING_ONLY_SKIP_MAIN] {instId} "
-                f"score={sig.get('score')} "
-                f"acc={sig.get('acc_score')} "
-                f"flags={sig.get('flags')}"
-            )
-            continue
-
-                    if sig.get("early_pressure_label"):
-                        flags_set = set(sig.get("flags", []))
-                        stage_txt = str(sig.get("stage", ""))
-
-                        is_late_candidate = (
-                            ("BREAKOUT_CONFIRM_UP" in flags_set)
-                            or ("BREAKOUT_CONFIRM_DOWN" in flags_set)
-                            or ("ATR_EXPANSION" in flags_set)
-                            or ("EXPANSION" in stage_txt)
-                        )
-
-                        if not is_late_candidate:
-                            print(
-                                f"[EARLY_CANDIDATE] {instId} "
-                                f"side={sig.get('early_pressure_side')} "
-                                f"score={sig.get('early_pressure_score')} "
-                                f"label={sig.get('early_pressure_label')} "
-                                f"up={sig.get('early_pressure_up_score')} "
-                                f"down={sig.get('early_pressure_down_score')} "
-                                f"reasons={sig.get('early_pressure_reasons')}"
-                            )
-
-
-                    entry_ok_for_save = is_entry_signal(sig)
-                    same_side_open = has_open_similar_signal(sig)
-                    any_open_same_symbol = has_any_open_signal_for_symbol(instId)
-                    
-                    if entry_ok_for_save:
-                        if same_side_open:
-                            print(f"[SAVE_SKIP] {instId} same-side open signal already exists")
-                    
-                        elif ONE_OPEN_SIGNAL_PER_SYMBOL and any_open_same_symbol:
-                            print(f"[SAVE_SKIP] {instId} open signal already exists for this symbol")
-                    
-                        else:
-                            save_signal(sig)
-                            print(f"[SAVE_OK] {instId} saved")
-
             
-
-                    # =====================
-                    # TIER + SEND LOGIC
-                    # =====================
+                print(
+                    f"[SWING_ONLY_SKIP_MAIN] {instId} "
+                    f"score={sig.get('score')} "
+                    f"acc={sig.get('acc_score')} "
+                    f"flags={sig.get('flags')}"
+                )
+            
+                continue
+            
+            # =====================
+            # EARLY CANDIDATE DEBUG
+            # =====================
+            
+            if sig.get("early_pressure_label"):
+            
+                flags_set = set(sig.get("flags", []))
+            
+                stage_txt = str(sig.get("stage", ""))
+            
+                is_late_candidate = (
+                    ("BREAKOUT_CONFIRM_UP" in flags_set)
+                    or ("BREAKOUT_CONFIRM_DOWN" in flags_set)
+                    or ("ATR_EXPANSION" in flags_set)
+                    or ("EXPANSION" in stage_txt)
+                )
+            
+                if not is_late_candidate:
+            
+                    print(
+                        f"[EARLY_CANDIDATE] {instId} "
+                        f"side={sig.get('early_pressure_side')} "
+                        f"score={sig.get('early_pressure_score')} "
+                        f"label={sig.get('early_pressure_label')} "
+                        f"up={sig.get('early_pressure_up_score')} "
+                        f"down={sig.get('early_pressure_down_score')} "
+                        f"reasons={sig.get('early_pressure_reasons')}"
+                    )
+            
+            # =====================
+            # SAVE ENTRY SIGNAL
+            # =====================
+            
+            entry_ok_for_save = is_entry_signal(sig)
+            
+            same_side_open = has_open_similar_signal(sig)
+            
+            any_open_same_symbol = has_any_open_signal_for_symbol(instId)
+            
+            if entry_ok_for_save:
+            
+                if same_side_open:
+            
+                    print(
+                        f"[SAVE_SKIP] {instId} "
+                        f"same-side open signal already exists"
+                    )
+            
+                elif ONE_OPEN_SIGNAL_PER_SYMBOL and any_open_same_symbol:
+            
+                    print(
+                        f"[SAVE_SKIP] {instId} "
+                        f"open signal already exists for this symbol"
+                    )
+            
+                else:
+            
+                    save_signal(sig)
+            
+                    print(f"[SAVE_OK] {instId} saved")
+            
+            # =====================
+            # TIER + SEND LOGIC
+            # =====================
                     
                     score = sig.get("score", 0)
                     ep_score = sig.get("early_pressure_score", 0)
