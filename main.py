@@ -7007,7 +7007,8 @@ if __name__ == "__main__":
                         or bool(sig.get("early_pressure_label"))
                     )
             
-                    if can_send_swing and swing_candidate:
+            
+            if can_send_swing and swing_candidate:
                         df_h4 = get_tf_candles(instId, tf="4h", limit=200) if SWING_USE_H4 else pd.DataFrame()
                         df_h1 = get_tf_candles(instId, tf="1h", limit=200) if SWING_USE_H1 else pd.DataFrame()
                         df_m15 = get_tf_candles(instId, tf="15m", limit=200) if SWING_USE_M15 else pd.DataFrame()
