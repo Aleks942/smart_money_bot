@@ -6790,9 +6790,9 @@ if __name__ == "__main__":
                     sig["oi_change"] = prev
                     print(f"[OI_CACHE] {instId} cached OI={prev}% age={age}s", flush=True)
                 
-                else:
-                    sig["oi_change"] = None
-                    print(f"[OI_NONE] {instId} no fresh OI / cache expired", flush=True)
+                    else:
+                        sig["oi_change"] = None
+                        print(f"[OI_NONE] {instId} no fresh OI / cache expired", flush=True)
                 
                 
                     # =====================
