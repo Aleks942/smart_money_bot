@@ -7138,93 +7138,93 @@ if __name__ == "__main__":
                             )
                                 
                                 
-                                # =====================
-                                # BUILD SWING SIGNAL
-                                # =====================
-                                swing_sig = build_swing_signal(instId, h4_ctx, h1_setup, m15_trigger, sig) or {
-                                    "status": "NONE",
-                                    "sendable": False,
-                                    "late": False,
-                                    "rr1": 0.0,
-                                    "verdict": "no_signal",
-                                    "side": "NEUTRAL",
-                                    "h4_bias": "NONE",
-                                    "h1_setup_type": "none",
-                                    "m15_trigger_type": "none"
-                                }
-                                
-                                try:
-                                    rr = float(swing_sig.get("rr1") or 0)
-                                except:
-                                    rr = 0
-                                
-                                if rr <= 0:
-                                    rr = 2.0
-                                    print(f"[RR_FIX_SWING] {instId} fallback rr=2.0", flush=True)
-                                
-                                swing_sig["rr1"] = rr
-                                # =====================
-                                # SWING OVERRIDE (СРЕДНЕСРОК БЕЗ M15)
-                                # =====================
-                                
-                                if not swing_sig.get("sendable"):
-                                
-                                    h4_ok = h4_ctx.get("ok")
-                                    h1_ok = h1_setup.get("ok")
-                                
-                                    if h4_ok and h1_ok:
-                                        print(f"[SWING_OVERRIDE] {instId} HTF strong → allow", flush=True)
-                                
-                                        swing_sig["sendable"] = True
-                                        swing_sig["status"] = "HTF_SWING"
-                                        swing_sig["verdict"] = "htf_override"
+                            # =====================
+                            # BUILD SWING SIGNAL
+                            # =====================
+                            swing_sig = build_swing_signal(instId, h4_ctx, h1_setup, m15_trigger, sig) or {
+                                "status": "NONE",
+                                "sendable": False,
+                                "late": False,
+                                "rr1": 0.0,
+                                "verdict": "no_signal",
+                                "side": "NEUTRAL",
+                                "h4_bias": "NONE",
+                                "h1_setup_type": "none",
+                                "m15_trigger_type": "none"
+                            }
+                            
+                            try:
+                                rr = float(swing_sig.get("rr1") or 0)
+                            except:
+                                rr = 0
+                            
+                            if rr <= 0:
+                                rr = 2.0
+                                print(f"[RR_FIX_SWING] {instId} fallback rr=2.0", flush=True)
+                            
+                            swing_sig["rr1"] = rr
+                            # =====================
+                            # SWING OVERRIDE (СРЕДНЕСРОК БЕЗ M15)
+                            # =====================
+                            
+                            if not swing_sig.get("sendable"):
+                            
+                                h4_ok = h4_ctx.get("ok")
+                                h1_ok = h1_setup.get("ok")
+                            
+                                if h4_ok and h1_ok:
+                                    print(f"[SWING_OVERRIDE] {instId} HTF strong → allow", flush=True)
+                            
+                                    swing_sig["sendable"] = True
+                                    swing_sig["status"] = "HTF_SWING"
+                                    swing_sig["verdict"] = "htf_override"
 
-                                # =====================
-                                # FIX SIDE FROM H4
-                                # =====================
-                                
-                                if swing_sig.get("side") == "NEUTRAL":
-                                
-                                    h4_bias = h4_ctx.get("bias")
-                                
-                                    if h4_bias == "LONG":
-                                        swing_sig["side"] = "BUY"
-                                
-                                    elif h4_bias == "SHORT":
-                                        swing_sig["side"] = "SELL"
-                    
+                            # =====================
+                            # FIX SIDE FROM H4
+                            # =====================
+                            
+                            if swing_sig.get("side") == "NEUTRAL":
+                            
+                                h4_bias = h4_ctx.get("bias")
+                            
+                                if h4_bias == "LONG":
+                                    swing_sig["side"] = "BUY"
+                            
+                                elif h4_bias == "SHORT":
+                                    swing_sig["side"] = "SELL"
+                
+                            print(
+                                f"[SWING_DEBUG] {instId} "
+                                f"h4_ok={h4_ctx.get('ok')} "
+                                f"h4_bias={h4_ctx.get('bias')} "
+                                f"h1_ok={h1_setup.get('ok')} "
+                                f"h1_type={h1_setup.get('setup_type')} "
+                                f"m15_ok={m15_trigger.get('ok')} "
+                                f"m15_type={m15_trigger.get('trigger_type')} "
+                                f"status={swing_sig.get('status')} "
+                                f"sendable={swing_sig.get('sendable')} "
+                                f"rr1={swing_sig.get('rr1')} "
+                                f"verdict={swing_sig.get('verdict')}"
+                            )
+                
+                            if swing_sig.get("sendable"):
+                                swing_candidates.append(swing_sig)
+                            
+                                send_telegram(msg_swing(swing_sig))
+                            
+                                swing_sent[instId] = now_sw_ts
+                                state["swing_sent"] = swing_sent
+                            
                                 print(
-                                    f"[SWING_DEBUG] {instId} "
-                                    f"h4_ok={h4_ctx.get('ok')} "
-                                    f"h4_bias={h4_ctx.get('bias')} "
-                                    f"h1_ok={h1_setup.get('ok')} "
-                                    f"h1_type={h1_setup.get('setup_type')} "
-                                    f"m15_ok={m15_trigger.get('ok')} "
-                                    f"m15_type={m15_trigger.get('trigger_type')} "
-                                    f"status={swing_sig.get('status')} "
-                                    f"sendable={swing_sig.get('sendable')} "
-                                    f"rr1={swing_sig.get('rr1')} "
-                                    f"verdict={swing_sig.get('verdict')}"
+                                    f"[SWING] {instId} "
+                                    f"side={swing_sig.get('side')} "
+                                    f"rr1={swing_sig.get('rr1')}"
                                 )
-                    
-                                if swing_sig.get("sendable"):
-                                    swing_candidates.append(swing_sig)
-                                
-                                    send_telegram(msg_swing(swing_sig))
-                                
-                                    swing_sent[instId] = now_sw_ts
-                                    state["swing_sent"] = swing_sent
-                                
-                                    print(
-                                        f"[SWING] {instId} "
-                                        f"side={swing_sig.get('side')} "
-                                        f"rr1={swing_sig.get('rr1')}"
-                                    )
-                    
-                        except Exception as e:
-                            import traceback
-                            print(f"[SWING_ERROR] {instId}: {e}")
-                            print(traceback.format_exc())
+                
+                    except Exception as e:
+                        import traceback
+                        print(f"[SWING_ERROR] {instId}: {e}")
+                        print(traceback.format_exc())
                     if sig.get("swing_only_candidate"):
                         print(
                             f"[SWING_ONLY_SKIP_MAIN] {instId} "
