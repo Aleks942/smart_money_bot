@@ -4169,6 +4169,12 @@ def decide_entry(stage, flags, price, c5):
             stop = recent_high
             reason = "ACCUMULATION_SHORT"
 
+        elif "COMP_5M" in flags or "COMP_15M" in flags:
+
+            entry = "ACC_BUILDUP"
+            stop = recent_low
+            reason = "ACC_BUILDUP"
+
     # =========================
     # MANIPULATION
     # =========================
