@@ -4380,10 +4380,36 @@ def detect_early_pressure(sig):
             add_down(3, "REVERSAL_SHORT")
 
     # EMA
-    if ema_state == "EMA_BULL":
+
+    if "EMA_BULL" in ema_state:
+    
         add_up(1, "EMA_BULL")
-    elif ema_state == "EMA_BEAR":
+    
+        if "STRONG" in ema_state:
+            add_up(2, "EMA_BULL_STRONG")
+    
+        elif "WEAK" in ema_state:
+            add_up(1, "EMA_BULL_WEAK")
+    
+    elif "EMA_BEAR" in ema_state:
+    
         add_down(1, "EMA_BEAR")
+    
+        if "STRONG" in ema_state:
+            add_down(2, "EMA_BEAR_STRONG")
+    
+        elif "WEAK" in ema_state:
+            add_down(1, "EMA_BEAR_WEAK")
+    
+    elif ema_state == "EMA_TRANSITION":
+    
+        add_up(0.5, "EMA_TRANSITION")
+        add_down(0.5, "EMA_TRANSITION")
+    
+    elif ema_state == "EMA_FLAT":
+    
+        add_up(0.25, "EMA_FLAT")
+        add_down(0.25, "EMA_FLAT") 
 
     # RESULT
     result = {
