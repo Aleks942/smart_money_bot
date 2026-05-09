@@ -4818,21 +4818,7 @@ def build_signal(instId):
     # =========================
     acc_score = accumulation_bias(flags)
     
-    # =========================
-    # EMA PRESSURE SUPPORT
-    # =========================
-    
-    if (
-        ema_state in ["EMA_BULL", "EMA_BULL_STRONG"]
-        and acc_score >= 1
-    ):
-        flags.add("PRESSURE_UP")
-    
-    if (
-        ema_state in ["EMA_BEAR", "EMA_BEAR_STRONG"]
-        and acc_score >= 1
-    ):
-        flags.add("PRESSURE_DOWN")
+   
     
     # =========================
     # SMART ACCUMULATION BOOST
