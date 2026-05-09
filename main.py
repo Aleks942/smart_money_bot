@@ -4596,7 +4596,13 @@ def build_signal(instId):
     # =========================
     ema_meta = get_ema_trend(c15) if c15 else {}
     ema_state = (ema_meta or {}).get("state", "EMA_UNKNOWN")
+
+    ema_h1 = get_ema_trend(c1h) if c1h else {}
+    ema_h4 = get_ema_trend(c4h) if c4h else {}
     
+    h1_state = ema_h1.get("state", "EMA_UNKNOWN")
+    h4_state = ema_h4.get("state", "EMA_UNKNOWN")
+        
     if "EMA_BULL" in ema_state:
     
         flags.add("EMA_BULL")
