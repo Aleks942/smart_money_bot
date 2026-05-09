@@ -2144,13 +2144,31 @@ def normalize_symbol(instId: str) -> str:
 
 
 def fetch_candles(instId: str, bar: str, limit: int = 120):
+
     if is_bybit():
+
         sym = normalize_symbol(instId)
+
+        # NORMALIZE
+        bar = str(bar).lower()
+
         if bar == "5m":
             return get_bybit_candles(sym, "5", max(200, limit))
-        if bar == "15m":
+
+        elif bar == "15m":
             return get_bybit_candles(sym, "15", max(200, limit))
+
+        elif bar == "1h":
+            return get_bybit_candles(sym, "60", max(200, limit))
+
+        elif bar == "4h":
+            return get_bybit_candles(sym, "240", max(200, limit))
+
+        elif bar == "1d":
+            return get_bybit_candles(sym, "D", max(200, limit))
+
         raise RuntimeError(f"Bybit bar not supported: {bar}")
+
     return get_okx_candles(instId, bar, limit)
 
 
