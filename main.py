@@ -4119,29 +4119,60 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
     # =========================
     
     confirmed = (
-    "BREAKOUT_CONFIRM_UP" in flags or
-    "BREAKOUT_CONFIRM_DOWN" in flags
+        "BREAKOUT_CONFIRM_UP" in flags or
+        "BREAKOUT_CONFIRM_DOWN" in flags
     )
     
     early_breakout = (
         "BREAKOUT_UP" in flags or
         "BREAKOUT_DOWN" in flags
     )
-        
+    
     impulse_ok = (
         "VOL_SPIKE" in flags or
         "ATR_EXPANSION" in flags
     )
+    
     direction_code = direction_code_from_text(direction_text)
     
+    # =========================
+    # FALLBACK DIRECTION
+    # =========================
+    
+    if not direction_code:
+    
+        if "PRESSURE_UP" in flags:
+            direction_code = "UP"
+    
+        elif "PRESSURE_DOWN" in flags:
+            direction_code = "DOWN"
+    
+        elif "EMA_BULL" in flags:
+            direction_code = "UP"
+    
+        elif "EMA_BEAR" in flags:
+            direction_code = "DOWN"
+    
+    # =========================
+    # FLOW
+    # =========================
+    
     flow_ok = False
-
+    
     if direction_code == "UP":
-        if "PRESSURE_UP" in flags or "CONTINUATION_UP" in flags:
+    
+        if (
+            "PRESSURE_UP" in flags or
+            "CONTINUATION_UP" in flags
+        ):
             flow_ok = True
     
     elif direction_code == "DOWN":
-        if "PRESSURE_DOWN" in flags or "CONTINUATION_DOWN" in flags:
+    
+        if (
+            "PRESSURE_DOWN" in flags or
+            "CONTINUATION_DOWN" in flags
+        ):
             flow_ok = True
     
     safe_cond = (
