@@ -3561,35 +3561,79 @@ def get_ema_trend(candles):
             "state": "EMA_UNKNOWN",
         }
 
-    if price > ema20 > ema50 > ema200:
-
-        if ema20_slope > 0 and spread > 0.15:
+    # =========================
+    # EMA CLASSIFICATION
+    # =========================
+    
+    bull_stack = ema20 > ema50
+    bear_stack = ema20 < ema50
+    
+    bull_full = ema20 > ema50 > ema200
+    bear_full = ema20 < ema50 < ema200
+    
+    # =========================
+    # STRONG BULL
+    # =========================
+    
+    if bull_full and ema20_slope > 0:
+    
+        if spread > 0.15:
             state = "EMA_BULL_STRONG"
-
-        elif ema20_slope > 0:
-            state = "EMA_BULL_WEAK"
-
+    
         else:
-            state = "EMA_TRANSITION"
-
-    elif price < ema20 < ema50 < ema200:
-
-        if ema20_slope < 0 and spread > 0.15:
+            state = "EMA_BULL"
+    
+    # =========================
+    # STRONG BEAR
+    # =========================
+    
+    elif bear_full and ema20_slope < 0:
+    
+        if spread > 0.15:
             state = "EMA_BEAR_STRONG"
-
-        elif ema20_slope < 0:
-            state = "EMA_BEAR_WEAK"
-
+    
         else:
-            state = "EMA_TRANSITION"
-
+            state = "EMA_BEAR"
+    
+    # =========================
+    # EARLY BULL
+    # =========================
+    
+    elif bull_stack and ema20_slope > 0:
+    
+        state = "EMA_BULL"
+    
+    # =========================
+    # EARLY BEAR
+    # =========================
+    
+    elif bear_stack and ema20_slope < 0:
+    
+        state = "EMA_BEAR"
+    
+    # =========================
+    # FLAT
+    # =========================
+    
+    elif spread < 0.08:
+    
+        state = "EMA_FLAT"
+    
+    # =========================
+    # TRANSITION
+    # =========================
+    
+    elif abs(ema20_slope) > 0:
+    
+        state = "EMA_TRANSITION"
+    
+    # =========================
+    # MIXED
+    # =========================
+    
     else:
-
-        if spread < 0.08:
-            state = "EMA_FLAT"
-
-        else:
-            state = "EMA_MIXED"
+    
+        state = "EMA_MIXED"
 
     return {
         "ema20": ema20,
