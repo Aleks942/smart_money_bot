@@ -4669,21 +4669,7 @@ def build_signal(instId):
         flags.add("PRESSURE_DOWN")
         score += 1
 
-    # =========================
-    # EMA PRESSURE SUPPORT
-    # =========================
-    
-    if (
-        ema_state in ["EMA_BULL", "EMA_BULL_STRONG"]
-        and acc_score >= 1
-    ):
-        flags.add("PRESSURE_UP")
-    
-    if (
-        ema_state in ["EMA_BEAR", "EMA_BEAR_STRONG"]
-        and acc_score >= 1
-    ):
-        flags.add("PRESSURE_DOWN")
+   
 
 
     # =========================
@@ -4826,13 +4812,20 @@ def build_signal(instId):
         score += 1
 
     # =========================
-    # ACCUMULATION
+    # EMA PRESSURE SUPPORT
     # =========================
-    acc_score = accumulation_bias(flags)
-
-    # =========================
-    # MARKET ANALYSIS
-    # =========================
+    
+    if (
+        ema_state in ["EMA_BULL", "EMA_BULL_STRONG"]
+        and acc_score >= 1
+    ):
+        flags.add("PRESSURE_UP")
+    
+    if (
+        ema_state in ["EMA_BEAR", "EMA_BEAR_STRONG"]
+        and acc_score >= 1
+    ):
+        flags.add("PRESSURE_DOWN")
     strong_setup = score >= PRO_EDGE_MIN_SCORE
 
     rsi_state = get_rsi_state(c5) or {}
