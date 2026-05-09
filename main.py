@@ -4626,6 +4626,33 @@ def build_signal(instId):
 
     entry_zone = calc_entry_zone(price, pmeta, flags, direction_code)
 
+        
+    # =========================
+    # PRO EARLY EMA BOOST
+    # =========================
+
+    score = float(score)
+
+    ema_boost = 0
+
+    if "EMA_BULL" in flags and acc_score >= 1:
+        ema_boost += 1
+
+    if "EMA_BEAR" in flags and acc_score >= 1:
+        ema_boost += 1
+
+    if "EMA_MIXED" in flags:
+        ema_boost += 0.5
+
+    if ema_boost > 0:
+        print(
+            f"[EMA_BOOST] {instId} boost={ema_boost} score_before={score} "
+            f"acc={acc_score} flags={list(flags)}",
+            flush=True
+        )
+
+    score += ema_boost
+
     stage, stage_reason = smart_money_stage(score, flags)
 
     # =========================
