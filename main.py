@@ -3402,6 +3402,18 @@ def get_ema_trend(candles):
         ema20 = calc_ema(closes, 20)
         ema50 = calc_ema(closes, 50)
         ema200 = calc_ema(closes, 200)
+
+        ema20_prev = calc_ema(closes[:-1], 20)
+        ema50_prev = calc_ema(closes[:-1], 50)
+
+        if ema20_prev is None or ema50_prev is None:
+            raise ValueError("EMA prev is None")
+
+        ema20_slope = ema20 - ema20_prev
+        ema50_slope = ema50 - ema50_prev
+
+        spread = abs(ema20 - ema50) / ema50 * 100
+
     except Exception:
         return {
             "ema20": None,
@@ -3421,17 +3433,43 @@ def get_ema_trend(candles):
         }
 
     if price > ema20 > ema50 > ema200:
-        state = "EMA_BULL"
+
+        if ema20_slope > 0 and spread > 0.15:
+            state = "EMA_BULL_STRONG"
+
+        elif ema20_slope > 0:
+            state = "EMA_BULL_WEAK"
+
+        else:
+            state = "EMA_TRANSITION"
+
     elif price < ema20 < ema50 < ema200:
-        state = "EMA_BEAR"
+
+        if ema20_slope < 0 and spread > 0.15:
+            state = "EMA_BEAR_STRONG"
+
+        elif ema20_slope < 0:
+            state = "EMA_BEAR_WEAK"
+
+        else:
+            state = "EMA_TRANSITION"
+
     else:
-        state = "EMA_MIXED"
+
+        if spread < 0.08:
+            state = "EMA_FLAT"
+
+        else:
+            state = "EMA_MIXED"
 
     return {
         "ema20": ema20,
         "ema50": ema50,
         "ema200": ema200,
         "price": price,
+        "ema20_slope": ema20_slope,
+        "ema50_slope": ema50_slope,
+        "ema_spread": spread,
         "state": state,
     }
 
