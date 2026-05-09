@@ -4696,16 +4696,44 @@ def build_signal(instId):
             or score >= 3
         )
     
-        # --- РАННИЙ ПРОХОД (ВАЖНО ДЛЯ ЛОВЛИ ДВИЖЕНИЯ) ---
+        # --- РАННИЙ ПРОХОД (PRO EARLY SURVIVAL) ---
         early_exception_pass = (
-            score == 1 and (
-                acc_score >= 3
-                or (has_breakout and has_pressure)
-                or (acc_score >= 2 and has_pressure)
-                or (acc_score >= 2 and has_breakout)
+        
+            # обычный ранний проход
+            (
+                score >= 1 and (
+                    acc_score >= 3
+                    or (has_breakout and has_pressure)
+                    or (acc_score >= 2 and has_pressure)
+                    or (acc_score >= 2 and has_breakout)
+                )
+            )
+        
+            # PRESSURE BUILDUP
+            or (
+                acc_score >= 2
+                and has_pressure
+            )
+        
+            # TRANSITION STAGE
+            or (
+                stage in ["🟠 TRANSITION", "🟣 ACCUMULATION"]
+                and acc_score >= 2
+            )
+        
+            # CONTINUATION BUILDUP
+            or (
+                has_continuation
+                and acc_score >= 1
+            )
+        
+            # BREAKOUT BUILDUP
+            or (
+                has_breakout
+                and acc_score >= 1
             )
         )
-    
+            
         can_survive_for_swing = (
             normal_swing_pass or early_exception_pass
         )
