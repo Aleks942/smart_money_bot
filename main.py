@@ -7084,46 +7084,100 @@ if __name__ == "__main__":
                 ta = None
             
             # =====================
-            # ELITE FILTER
+            # ELITE FILTER PRO
             # =====================
             
-            elite = False
+            elite_score = 0
             
             reasons = []
-
+            
             if sig is None:
                 continue
             
-            # 1. есть swing сигнал
+            # =====================
+            # 1. SENDABLE
+            # =====================
+            
             if sig.get("sendable"):
             
-                elite = True
-            
+                elite_score += 2
                 reasons.append("SWING_OK")
             
-            # 2. хороший риск/прибыль
+            # =====================
+            # 2. RR
+            # =====================
+            
             rr1 = float(sig.get("rr1") or 0)
             
             if rr1 >= 2:
             
+                elite_score += 2
                 reasons.append("RR_OK")
             
-            else:
+            elif rr1 >= 1.5:
             
-                elite = False
+                elite_score += 1
+                reasons.append("RR_MID")
             
-            # 3. подтверждение давления
+            # =====================
+            # 3. PRESSURE
+            # =====================
+            
             flags = sig.get("flags", [])
             
-            if "PRESSURE_DOWN" in flags or "PRESSURE_UP" in flags:
+            if "PRESSURE_DOWN" in flags:
             
-                reasons.append("PRESSURE_OK")
+                elite_score += 2
+                reasons.append("PRESSURE_DOWN")
             
-            else:
+            if "PRESSURE_UP" in flags:
             
-                elite = False
+                elite_score += 2
+                reasons.append("PRESSURE_UP")
             
-            # 4. TA совпадает по направлению
+            # =====================
+            # 4. BREAKOUT CONFIRM
+            # =====================
+            
+            if (
+                "BREAKOUT_CONFIRM_UP" in flags
+                or "BREAKOUT_CONFIRM_DOWN" in flags
+            ):
+            
+                elite_score += 2
+                reasons.append("BREAKOUT_CONFIRM")
+            
+            # =====================
+            # 5. EARLY PRESSURE
+            # =====================
+            
+            ep_score = float(sig.get("early_pressure_score") or 0)
+            
+            if ep_score >= 6:
+            
+                elite_score += 2
+                reasons.append("EARLY_PRESSURE")
+            
+            # =====================
+            # 6. STRONG ACCUMULATION
+            # =====================
+            
+            acc = int(sig.get("acc_score") or 0)
+            
+            if acc >= 3:
+            
+                elite_score += 2
+                reasons.append("STRONG_ACC")
+            
+            elif acc >= 2:
+            
+                elite_score += 1
+                reasons.append("ACC_OK")
+            
+            # =====================
+            # 7. TA CONFIRM
+            # =====================
+            
             if (
                 isinstance(ta, dict)
                 and ta.get("entry")
@@ -7132,30 +7186,41 @@ if __name__ == "__main__":
             ):
             
                 sig_side = sig.get("direction_code")
-
+            
                 if (
                     ta.get("side")
                     and sig_side
                     and ta.get("side") == sig_side
                 ):
             
+                    elite_score += 2
                     reasons.append("TA_CONFIRM")
             
-                else:
+            # =====================
+            # 8. OI CONFIRM
+            # =====================
             
-                    elite = False
+            oi_change = float(sig.get("oi_change") or 0)
             
-            else:
+            if abs(oi_change) >= 0.15:
             
-                elite = False
+                elite_score += 1
+                reasons.append("OI_ACTIVE")
+            
+            # =====================
+            # FINAL ELITE DECISION
+            # =====================
+            
+            elite = elite_score >= 6
             
             if elite:
             
                 send_telegram(
                     f"🔥 <b>ELITE SIGNAL — {instId}</b>\n\n"
-                    f"🧭 Side: {sig.get('side')}\n"
+                    f"🧭 Side: {sig.get('direction_code')}\n"
                     f"💰 Price: {sig.get('price')}\n"
-                    f"📊 RR: {rr1}\n\n"
+                    f"📊 RR: {rr1}\n"
+                    f"⭐ Elite Score: {elite_score}\n\n"
                     f"📌 Reasons: {', '.join(reasons)}"
                 )
             
