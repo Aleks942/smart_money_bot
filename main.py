@@ -3886,6 +3886,47 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
         ("BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags)
         and ("ATR_EXPANSION" in flags or "VOL_SPIKE" in flags)
     )
+
+    # =========================
+    # PRE-MOVE EARLY STRUCTURE
+    # =========================
+
+    early_pressure_up = (
+        "PRESSURE_UP" in flags
+        and up_w >= 2
+    )
+
+    early_pressure_down = (
+        "PRESSURE_DOWN" in flags
+        and down_w >= 2
+    )
+
+    accumulation_context = (
+        "COMP_5M" in flags
+        or "COMP_15M" in flags
+    )
+
+    early_transition_long = (
+        early_pressure_up
+        and accumulation_context
+    )
+
+    early_transition_short = (
+        early_pressure_down
+        and accumulation_context
+    )
+
+    if early_transition_long:
+        return (
+            "🟡 EARLY LONG",
+            "PRE-MOVE accumulation + pressure buildup"
+        )
+
+    if early_transition_short:
+        return (
+            "🟡 EARLY SHORT",
+            "PRE-MOVE accumulation + pressure buildup"
+        )
     
     # =========================
     # RSI SAFETY FILTER
