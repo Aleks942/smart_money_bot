@@ -4893,7 +4893,7 @@ def build_signal(instId):
     signal["strength"] = strength
     signal["strength_reasons"] = reasons_strength
 
-
+    
     # =========================
     # FINAL QUALITY FILTER
     # =========================
@@ -4912,6 +4912,29 @@ def build_signal(instId):
         f"reason={reason}",
         flush=True
     )
+
+    # =========================
+    # FINAL STRUCTURE OVERRIDE
+    # =========================
+
+    strong_structure_pass = (
+        score >= 3
+        or "BREAKOUT_CONFIRM_UP" in flags
+        or "BREAKOUT_CONFIRM_DOWN" in flags
+        or "BREAKOUT_UP" in flags
+        or "BREAKOUT_DOWN" in flags
+        or "PRESSURE_UP" in flags
+        or "PRESSURE_DOWN" in flags
+        or acc_score >= 2
+    )
+
+    if strong_structure_pass and reason == "low_score":
+        print(
+            f"[OVERRIDE_LOW_SCORE] {instId} "
+            f"score={score} acc={acc_score}",
+            flush=True
+        )
+        ok = True
 
     if not ok:
         print(f"[FILTER_BLOCK] {instId} reason={reason}", flush=True)
