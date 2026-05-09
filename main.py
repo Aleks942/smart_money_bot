@@ -4363,25 +4363,25 @@ def decide_entry(stage, flags, price, c5):
     # =========================
     if stage == "🟢 EXPANSION":
 
-    if "BREAKOUT_CONFIRM_UP" in flags:
-        entry = "LONG_CONFIRM"
-        stop = recent_low
-        reason = "LONG_CONFIRM"
-
-    elif "BREAKOUT_CONFIRM_DOWN" in flags:
-        entry = "SHORT_CONFIRM"
-        stop = recent_high
-        reason = "SHORT_CONFIRM"
-
-    elif "CONTINUATION_UP" in flags:
-        entry = "CONTINUATION_LONG"
-        stop = recent_low
-        reason = "CONTINUATION_LONG"
-
-    elif "CONTINUATION_DOWN" in flags:
-        entry = "CONTINUATION_SHORT"
-        stop = recent_high
-        reason = "CONTINUATION_SHORT"
+        if "BREAKOUT_CONFIRM_UP" in flags:
+            entry = "LONG_CONFIRM"
+            stop = recent_low
+            reason = "LONG_CONFIRM"
+    
+        elif "BREAKOUT_CONFIRM_DOWN" in flags:
+            entry = "SHORT_CONFIRM"
+            stop = recent_high
+            reason = "SHORT_CONFIRM"
+    
+        elif "CONTINUATION_UP" in flags:
+            entry = "CONTINUATION_LONG"
+            stop = recent_low
+            reason = "CONTINUATION_LONG"
+    
+        elif "CONTINUATION_DOWN" in flags:
+            entry = "CONTINUATION_SHORT"
+            stop = recent_high
+            reason = "CONTINUATION_SHORT"
 
     # =========================
     # EARLY
