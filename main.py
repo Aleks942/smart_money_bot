@@ -4593,12 +4593,37 @@ def build_signal(instId):
     # =========================
     ema_meta = get_ema_trend(c15) if c15 else {}
     ema_state = (ema_meta or {}).get("state", "EMA_UNKNOWN")
-
-    if ema_state == "EMA_BULL":
+    
+    if "EMA_BULL" in ema_state:
+    
         flags.add("EMA_BULL")
-    elif ema_state == "EMA_BEAR":
+    
+        if "STRONG" in ema_state:
+            flags.add("EMA_BULL_STRONG")
+    
+        elif "WEAK" in ema_state:
+            flags.add("EMA_BULL_WEAK")
+    
+    elif "EMA_BEAR" in ema_state:
+    
         flags.add("EMA_BEAR")
-    elif ema_state == "EMA_MIXED":
+    
+        if "STRONG" in ema_state:
+            flags.add("EMA_BEAR_STRONG")
+    
+        elif "WEAK" in ema_state:
+            flags.add("EMA_BEAR_WEAK")
+    
+    elif ema_state == "EMA_TRANSITION":
+    
+        flags.add("EMA_TRANSITION")
+    
+    elif ema_state == "EMA_FLAT":
+    
+        flags.add("EMA_FLAT")
+    
+    else:
+    
         flags.add("EMA_MIXED")
 
     # =========================
