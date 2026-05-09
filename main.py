@@ -4127,10 +4127,11 @@ def decide_entry(stage, flags, price, c5):
             stop = recent_high
             reason = "SHORT_BREAKOUT"
 
-    # =========================
-    # ACCUMULATION — ранний вход до импульса
-    # =========================
-    elif stage == "🟣 ACCUMULATION":
+        elif stage == "🟣 ACCUMULATION":
+
+        # =========================
+        # PRESSURE ACCUMULATION
+        # =========================
 
         if "PRESSURE_UP" in flags:
             entry = last
@@ -4141,6 +4142,25 @@ def decide_entry(stage, flags, price, c5):
             entry = last
             stop = recent_high
             reason = "ACCUMULATION_SHORT"
+
+        # =========================
+        # QUIET SMART MONEY BUILDUP
+        # =========================
+
+        elif (
+            "COMP_5M" in flags
+            or "COMP_15M" in flags
+        ):
+
+            entry = last
+
+            if "EMA_BEAR" in flags:
+                stop = recent_high
+                reason = "SCOUT_ACCUMULATION_SHORT"
+
+            else:
+                stop = recent_low
+                reason = "SCOUT_ACCUMULATION_LONG"
 
     # =========================
     # TRANSITION — начало движения
