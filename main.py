@@ -4574,15 +4574,18 @@ def build_signal(instId):
     # =========================
     c5 = fetch_candles(instId, "5m", 120)
     c15 = fetch_candles(instId, "15m", 240)
-
+    
+    c1h = fetch_candles(instId, "1h", 240)
+    c4h = fetch_candles(instId, "4h", 240)
+    
     if not c5 or len(c5) < 20:
         print(f"[WARN] {instId} c5 not enough", flush=True)
         c5 = []
-
+    
     if not c15 or len(c15) < 200:
         print(f"[WARN] {instId} c15 not enough", flush=True)
         c15 = []
-
+    
     if not c5:
         price = 0
     else:
