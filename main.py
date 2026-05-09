@@ -345,11 +345,15 @@ SWEEP_PIERCE_PCT = float(os.getenv("SWEEP_PIERCE_PCT") or "0.15")  # наско�
 SWEEP_RECLAIM_ZONE = float(os.getenv("SWEEP_RECLAIM_ZONE") or "0.35")  # насколько закрылись обратно в диапазон
 
 # Анти-шум пробоя: минимальная дистанция от уровня (в %)
-MIN_BREAKOUT_DIST_PCT = float(os.getenv("MIN_BREAKOUT_DIST_PCT") or "0.10")
-NEAR_BREAKOUT_PCT = float(os.getenv("NEAR_BREAKOUT_PCT") or "0.25")
-START_MAX_DIST_PCT = float(os.getenv("START_MAX_DIST_PCT") or "0.8")
-PRE_MIN_EXPECTED_MOVE_PCT = float(os.getenv("PRE_MIN_EXPECTED_MOVE_PCT") or "2.3")
-USE_RSI_FILTER = int(os.getenv("USE_RSI_FILTER", "1"))
+MIN_BREAKOUT_DIST_PCT = float(os.getenv("MIN_BREAKOUT_DIST_PCT") or "0.05")
+
+NEAR_BREAKOUT_PCT = float(os.getenv("NEAR_BREAKOUT_PCT") or "0.40")
+
+START_MAX_DIST_PCT = float(os.getenv("START_MAX_DIST_PCT") or "1.5")
+
+PRE_MIN_EXPECTED_MOVE_PCT = float(os.getenv("PRE_MIN_EXPECTED_MOVE_PCT") or "1.2")
+
+USE_RSI_FILTER = int(os.getenv("USE_RSI_FILTER", "0"))
 
 # ==============================
 # 🧨 LIQUIDITY VACUUM SETTINGS
