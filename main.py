@@ -4866,6 +4866,11 @@ def build_signal(instId):
             flush=True
         )
 
+    # =========================
+    # MARKET ANALYSIS
+    # =========================
+    strong_setup = score >= PRO_EDGE_MIN_SCORE
+
     direction_text, reasons, up_w, down_w = direction_hint(flags)
     direction_code = direction_code_from_text(direction_text)
 
