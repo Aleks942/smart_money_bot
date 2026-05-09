@@ -4212,24 +4212,25 @@ def decide_entry(stage, flags, price, c5):
     # ACCUMULATION
     # =========================
     elif stage == "🟣 ACCUMULATION":
-
+    
         if "PRESSURE_UP" in flags:
-
+    
             entry = "ACCUMULATION_LONG"
             stop = recent_low
             reason = "ACCUMULATION_LONG"
-
+    
         elif "PRESSURE_DOWN" in flags:
-
+    
             entry = "ACCUMULATION_SHORT"
             stop = recent_high
             reason = "ACCUMULATION_SHORT"
-
+    
         elif "COMP_5M" in flags or "COMP_15M" in flags:
-
+    
             entry = "ACC_BUILDUP"
             stop = recent_low
             reason = "ACC_BUILDUP"
+
 
     # =========================
     # MANIPULATION
@@ -4811,27 +4812,7 @@ def build_signal(instId):
         flags.add("CONFLUENCE_SHORT")
         score += 1
 
-    # =========================
-    # EMA PRESSURE SUPPORT
-    # =========================
     
-    if (
-        ema_state in ["EMA_BULL", "EMA_BULL_STRONG"]
-        and acc_score >= 1
-    ):
-        flags.add("PRESSURE_UP")
-    
-    if (
-        ema_state in ["EMA_BEAR", "EMA_BEAR_STRONG"]
-        and acc_score >= 1
-    ):
-        flags.add("PRESSURE_DOWN")
-    strong_setup = score >= PRO_EDGE_MIN_SCORE
-
-    rsi_state = get_rsi_state(c5) or {}
-    rsi7 = rsi_state.get("rsi7")
-    rsi14 = rsi_state.get("rsi14")
-
     # =========================
     # SMART ACCUMULATION BOOST
     # =========================
