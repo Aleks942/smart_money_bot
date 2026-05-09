@@ -4931,6 +4931,18 @@ def build_signal(instId):
         flush=True
     )
 
+    # =========================
+    # MTF SCORE BOOST
+    # =========================
+    
+    score += mtf_score
+    
+    if mtf_score > 0:
+        print(
+            f"[MTF_BOOST] {instId} +{mtf_score}",
+            flush=True
+        )
+
     stage, stage_reason = smart_money_stage(score, flags)
 
     # =========================
