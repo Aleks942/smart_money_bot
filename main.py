@@ -4928,7 +4928,7 @@ def build_signal(instId):
         or acc_score >= 2
     )
 
-    if strong_structure_pass and reason == "low_score":
+    if strong_structure_pass:
         print(
             f"[OVERRIDE_LOW_SCORE] {instId} "
             f"score={score} acc={acc_score}",
