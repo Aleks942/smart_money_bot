@@ -5027,6 +5027,8 @@ def build_signal(instId):
         "ema200": (ema_meta or {}).get("ema200"),
     
         "ema_state": ema_state,
+        "h1_state": h1_state,
+        "h4_state": h4_state,
         "rsi7": rsi7,
         "rsi14": rsi14,
         "rsi_state": (rsi_state or {}).get("state"),
