@@ -4932,6 +4932,25 @@ def build_signal(instId):
     )
 
     # =========================
+    # MTF DIRECTION BIAS
+    # =========================
+    
+    mtf_long_bias = False
+    mtf_short_bias = False
+    
+    if (
+        h4_state in ["EMA_BULL_STRONG", "EMA_BULL"]
+        and h1_state in ["EMA_BULL_STRONG", "EMA_BULL", "EMA_BULL_WEAK"]
+    ):
+        mtf_long_bias = True
+    
+    if (
+        h4_state in ["EMA_BEAR_STRONG", "EMA_BEAR"]
+        and h1_state in ["EMA_BEAR_STRONG", "EMA_BEAR", "EMA_BEAR_WEAK"]
+    ):
+        mtf_short_bias = True
+
+    # =========================
     # MTF SCORE BOOST
     # =========================
     
