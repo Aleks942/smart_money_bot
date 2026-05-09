@@ -4089,9 +4089,11 @@ def smart_money_stage(score, flags):
 # =========================
 def decide_entry(stage, flags, price, c5):
 
+    flags = set(flags or [])
+
     last = price
-    highs = [c[2] for c in c5[-10:]] if c5 else []
-    lows = [c[3] for c in c5[-10:]] if c5 else []
+    highs = [float(c[2]) for c in c5[-10:]] if c5 else []
+    lows = [float(c[3]) for c in c5[-10:]] if c5 else []
 
     recent_high = max(highs) if highs else last
     recent_low = min(lows) if lows else last
@@ -4100,41 +4102,81 @@ def decide_entry(stage, flags, price, c5):
     stop = None
     reason = "NO_ENTRY"
 
+    # =========================
+    # EXPANSION — уже подтверждённый импульс
+    # =========================
     if stage == "🟢 EXPANSION":
+
         if "BREAKOUT_CONFIRM_UP" in flags:
             entry = last
             stop = recent_low
-            reason = "LONG"
+            reason = "LONG_CONFIRM"
 
         elif "BREAKOUT_CONFIRM_DOWN" in flags:
             entry = last
             stop = recent_high
-            reason = "SHORT"
+            reason = "SHORT_CONFIRM"
 
+        elif "BREAKOUT_UP" in flags and "PRESSURE_UP" in flags:
+            entry = last
+            stop = recent_low
+            reason = "LONG_BREAKOUT"
+
+        elif "BREAKOUT_DOWN" in flags and "PRESSURE_DOWN" in flags:
+            entry = last
+            stop = recent_high
+            reason = "SHORT_BREAKOUT"
+
+    # =========================
+    # ACCUMULATION — ранний вход до импульса
+    # =========================
+    elif stage == "🟣 ACCUMULATION":
+
+        if "PRESSURE_UP" in flags:
+            entry = last
+            stop = recent_low
+            reason = "ACCUMULATION_LONG"
+
+        elif "PRESSURE_DOWN" in flags:
+            entry = last
+            stop = recent_high
+            reason = "ACCUMULATION_SHORT"
+
+    # =========================
+    # TRANSITION — начало движения
+    # =========================
+    elif stage == "🟠 TRANSITION":
+
+        if "PRESSURE_UP" in flags:
+            entry = last
+            stop = recent_low
+            reason = "TRANSITION_LONG"
+
+        elif "PRESSURE_DOWN" in flags:
+            entry = last
+            stop = recent_high
+            reason = "TRANSITION_SHORT"
+
+    # =========================
+    # EARLY — совсем ранний scout
+    # =========================
     elif stage == "⚪ EARLY":
-    
+
         if "PRESSURE_UP" in flags:
             entry = last
             stop = recent_low
             reason = "EARLY_SCOUT_LONG"
 
-    elif "PRESSURE_DOWN" in flags:
-        entry = last
-        stop = recent_high
-        reason = "EARLY_SCOUT_SHORT"
-
-    elif stage == "🟠 TRANSITION":
-        if "PRESSURE_UP" in flags:
+        elif "PRESSURE_DOWN" in flags:
             entry = last
-            stop = recent_low
-            reason = "EARLY_LONG"
+            stop = recent_high
+            reason = "EARLY_SCOUT_SHORT"
 
-    elif "PRESSURE_DOWN" in flags:
-        entry = last
-        stop = recent_high
-        reason = "EARLY_SHORT"
-
+    # =========================
+    # MANIPULATION — разворот после сбора ликвидности
+    # =========================
     elif stage == "🟡 MANIPULATION":
+
         if "SWEEP_DOWN" in flags:
             entry = last
             stop = recent_low
@@ -4146,7 +4188,6 @@ def decide_entry(stage, flags, price, c5):
             reason = "REVERSAL_SHORT"
 
     return entry, stop, reason
-
 
 # =========================
 # TRADE PLAN
