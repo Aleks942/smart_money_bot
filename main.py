@@ -4868,6 +4868,50 @@ def build_signal(instId):
         )
 
     score += ema_boost
+    # =========================
+    # MTF ALIGNMENT SCORE
+    # =========================
+    
+    mtf_score = 0
+    
+    # LONG ALIGNMENT
+    if (
+        direction_code == "UP"
+        and "BULL" in h1_state
+        and "BULL" in h4_state
+    ):
+        mtf_score += 2
+    
+    # SHORT ALIGNMENT
+    if (
+        direction_code == "DOWN"
+        and "BEAR" in h1_state
+        and "BEAR" in h4_state
+    ):
+        mtf_score += 2
+    
+    # COUNTER TREND PENALTY
+    if (
+        direction_code == "UP"
+        and "BEAR" in h4_state
+    ):
+        mtf_score -= 1.5
+    
+    if (
+        direction_code == "DOWN"
+        and "BULL" in h4_state
+    ):
+        mtf_score -= 1.5
+    
+    score += mtf_score
+    
+    print(
+        f"[MTF] {instId} "
+        f"h1={h1_state} "
+        f"h4={h4_state} "
+        f"mtf_score={mtf_score}",
+        flush=True
+    )
 
     stage, stage_reason = smart_money_stage(score, flags)
 
