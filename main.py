@@ -3839,7 +3839,7 @@ def signal_quality_filter(sig):
     # =====================
     # 🟠 EARLY PRESSURE — ловим заранее
     # =====================
-    if ep_label and ep_score >= 5:
+    if ep_score >= 5:
         return True, "early_pressure"
 
     # =====================
