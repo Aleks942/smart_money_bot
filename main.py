@@ -4749,6 +4749,16 @@ def build_signal(instId):
         signal_type = "NORMAL"
 
     # =========================
+    # SIGNAL TYPE DEBUG
+    # =========================
+    print(
+        f"[SIGNAL_TYPE] {instId} type={signal_type} "
+        f"score={score} acc={acc_score} stage={stage} "
+        f"swing_only={swing_only_candidate}",
+        flush=True
+    )
+
+    # =========================
     # STAGE CALCULATION
     # =========================
     stage, stage_reason = smart_money_stage(score, flags)
