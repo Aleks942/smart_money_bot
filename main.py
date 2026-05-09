@@ -4969,8 +4969,7 @@ def build_signal(instId):
     # =========================
     # MTF SCORE BOOST
     # =========================
-    
-    score += mtf_score
+
     
     if mtf_score > 0:
         print(
