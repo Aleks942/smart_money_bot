@@ -4884,7 +4884,7 @@ def build_signal(instId):
     tier = get_signal_tier(score, acc_score)
     print(f"[FLAGS_RAW] {instId} {flags}", flush=True)
 
-    entry, stop, entry_reason = decide_entry(stage, flags, price, c5)
+    entry_price, stop, entry_reason = decide_entry(stage, flags, price, c5)
     
     signal = {
         "instId": instId,
