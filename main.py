@@ -7102,7 +7102,7 @@ if __name__ == "__main__":
                 reasons.append("SWING_OK")
             
             # 2. хороший риск/прибыль
-            rr1 = sig.get("rr1", 0)
+            rr1 = float(sig.get("rr1") or 0)
             
             if rr1 >= 2:
             
@@ -7131,7 +7131,13 @@ if __name__ == "__main__":
                 and ta.get("tp1")
             ):
             
-                if ta.get("side") == sig.get("side"):
+                sig_side = sig.get("direction_code")
+
+                if (
+                    ta.get("side")
+                    and sig_side
+                    and ta.get("side") == sig_side
+                ):
             
                     reasons.append("TA_CONFIRM")
             
