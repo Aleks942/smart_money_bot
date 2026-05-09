@@ -147,6 +147,8 @@ def money_flow_ok(candles, oi_change, direction):
         print(f"[MF_ERROR] {e}", flush=True)
         return {"ok": False}
 
+
+
 # =========================
 # SIGNAL STRENGTH ANALYZER
 # =========================
@@ -159,13 +161,36 @@ def analyze_signal_strength(sig):
     reasons = []
     strength = 0
 
+    # =========================
+    # BREAKOUT
+    # =========================
+
     if "BREAKOUT_UP" in flags or "BREAKOUT_DOWN" in flags:
         reasons.append("Пробой уровня")
         strength += 2
 
+    if (
+        "BREAKOUT_CONFIRM_UP" in flags
+        or "BREAKOUT_CONFIRM_DOWN" in flags
+    ):
+        reasons.append("Подтверждённый пробой")
+        strength += 3
+
+    # =========================
+    # CONTINUATION
+    # =========================
+
     if "CONTINUATION_UP" in flags:
-        reasons.append("Продолжение движения")
+        reasons.append("Продолжение роста")
         strength += 2
+
+    if "CONTINUATION_DOWN" in flags:
+        reasons.append("Продолжение падения")
+        strength += 2
+
+    # =========================
+    # PRESSURE
+    # =========================
 
     if "PRESSURE_UP" in flags:
         reasons.append("Давление покупателей")
@@ -175,13 +200,61 @@ def analyze_signal_strength(sig):
         reasons.append("Давление продавцов")
         strength += 1
 
+    # =========================
+    # EMA TREND
+    # =========================
+
     if "EMA_BULL" in flags:
         reasons.append("Тренд вверх")
         strength += 1
 
-    if "VOL_SPIKE" in flags:
-        reasons.append("Объем")
+    if "EMA_BEAR" in flags:
+        reasons.append("Тренд вниз")
+        strength += 1
+
+    if "EMA_BULL_STRONG" in flags:
+        reasons.append("Сильный бычий тренд")
         strength += 2
+
+    if "EMA_BEAR_STRONG" in flags:
+        reasons.append("Сильный медвежий тренд")
+        strength += 2
+
+    # =========================
+    # VOLUME
+    # =========================
+
+    if "VOL_SPIKE" in flags:
+        reasons.append("Всплеск объёма")
+        strength += 2
+
+    # =========================
+    # MTF ALIGNMENT
+    # =========================
+
+    if "MTF_LONG_ALIGN" in flags:
+        reasons.append("MTF long alignment")
+        strength += 2
+
+    if "MTF_SHORT_ALIGN" in flags:
+        reasons.append("MTF short alignment")
+        strength += 2
+
+    # =========================
+    # ACCUMULATION
+    # =========================
+
+    if "COMP_5M" in flags:
+        reasons.append("Сжатие 5M")
+        strength += 1
+
+    if "COMP_15M" in flags:
+        reasons.append("Сжатие 15M")
+        strength += 1
+
+    # =========================
+    # ORDERBOOK
+    # =========================
 
     if "OB_WALL_BID" in flags:
         reasons.append("Покупатель в стакане")
@@ -191,23 +264,57 @@ def analyze_signal_strength(sig):
         reasons.append("Продавец в стакане")
         strength += 1
 
+    # =========================
+    # OPEN INTEREST
+    # =========================
+
     if oi is not None:
         try:
-            if float(oi) > 0.2:
+
+            oi = float(oi)
+
+            if oi > 0.2:
                 reasons.append("Рост OI")
                 strength += 2
-            elif float(oi) < -0.2:
+
+            elif oi < -0.2:
                 reasons.append("Падение OI")
                 strength -= 1
+
         except:
             pass
 
-    if strength >= 7:
+    # =========================
+    # RAW SCORE BONUS
+    # =========================
+
+    if score >= 6:
+        strength += 3
+
+    elif score >= 4:
+        strength += 2
+
+    elif score >= 2:
+        strength += 1
+
+    # =========================
+    # FINAL RATING
+    # =========================
+
+    if strength >= 12:
+        rating = "A+"
+
+    elif strength >= 9:
         rating = "A"
-    elif strength >= 4:
+
+    elif strength >= 6:
         rating = "B"
-    else:
+
+    elif strength >= 3:
         rating = "C"
+
+    else:
+        rating = "D"
 
     return rating, reasons, strength
 
