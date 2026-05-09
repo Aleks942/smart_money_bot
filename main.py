@@ -4713,13 +4713,7 @@ def build_signal(instId):
         flags.add("PRESSURE_DOWN")
         score += 1
 
-    if pressure == "UP" and mtf_long_bias:
-        score += 1
-        flags.add("MTF_LONG_ALIGN")
-
-    if pressure == "DOWN" and mtf_short_bias:
-        score += 1
-        flags.add("MTF_SHORT_ALIGN")
+   
 
     # =========================
     # CONTINUATION
@@ -4948,6 +4942,13 @@ def build_signal(instId):
     ):
         mtf_short_bias = True
 
+    if pressure == "UP" and mtf_long_bias:
+        score += 1
+        flags.add("MTF_LONG_ALIGN")
+
+    if pressure == "DOWN" and mtf_short_bias:
+        score += 1
+        flags.add("MTF_SHORT_ALIGN")
 
         
     # =========================
