@@ -4121,6 +4121,7 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
 # STAGE
 # =========================
 def smart_money_stage(score, flags):
+
     flags = set(flags or [])
 
     if score < 1:
@@ -4128,6 +4129,20 @@ def smart_money_stage(score, flags):
 
     if "BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags:
         return "🟢 EXPANSION", "Подтверждённый импульс"
+
+    # =========================
+    # CONTINUATION STAGE
+    # =========================
+    
+    if (
+        "CONTINUATION_UP" in flags
+        or "CONTINUATION_DOWN" in flags
+    ):
+    
+        if score >= 4:
+            return "🟢 EXPANSION", "CONTINUATION"
+    
+        return "🟠 TRANSITION", "CONTINUATION_BUILDUP"
 
     if "SWEEP_DOWN" in flags or "SWEEP_UP" in flags:
         return "🟡 MANIPULATION", "Сбор ликвидности"
