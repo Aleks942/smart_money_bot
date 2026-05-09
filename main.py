@@ -4870,6 +4870,9 @@ def build_signal(instId):
     # MARKET ANALYSIS
     # =========================
     strong_setup = score >= PRO_EDGE_MIN_SCORE
+    rsi_state = get_rsi_state(c5) or {}
+    rsi7 = rsi_state.get("rsi7")
+    rsi14 = rsi_state.get("rsi14")
 
     direction_text, reasons, up_w, down_w = direction_hint(flags)
     direction_code = direction_code_from_text(direction_text)
