@@ -7090,6 +7090,9 @@ if __name__ == "__main__":
             elite = False
             
             reasons = []
+
+            if sig is None:
+                continue
             
             # 1. есть swing сигнал
             if sig.get("sendable"):
