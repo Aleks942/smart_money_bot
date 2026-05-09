@@ -4660,6 +4660,38 @@ def build_signal(instId):
     rsi7 = rsi_state.get("rsi7")
     rsi14 = rsi_state.get("rsi14")
 
+    # =========================
+    # SMART ACCUMULATION BOOST
+    # =========================
+
+    has_compression = (
+        "COMP_5M" in flags
+        or "COMP_15M" in flags
+    )
+
+    has_pressure = (
+        "PRESSURE_UP" in flags
+        or "PRESSURE_DOWN" in flags
+    )
+
+    if has_compression and has_pressure:
+        score += 1
+
+        print(
+            f"[SMART_ACC_BOOST] {instId} "
+            f"score={score} acc={acc_score}",
+            flush=True
+        )
+
+    elif has_compression and acc_score >= 3:
+        score += 0.5
+
+        print(
+            f"[SMART_ACC_LIGHT] {instId} "
+            f"score={score} acc={acc_score}",
+            flush=True
+        )
+
     direction_text, reasons, up_w, down_w = direction_hint(flags)
     direction_code = direction_code_from_text(direction_text)
 
