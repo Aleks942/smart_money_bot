@@ -4320,10 +4320,13 @@ def smart_money_stage(score, flags):
     if score < 1:
         return "⚪ EARLY", "Очень ранний интерес"
 
-    if "BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags:
+    if (
+        "BREAKOUT_CONFIRM_UP" in flags
+        or "BREAKOUT_CONFIRM_DOWN" in flags
+    ):
         return "🟢 EXPANSION", "Подтверждённый импульс"
 
-        strong_bull_expansion = (
+    strong_bull_expansion = (
         "PRESSURE_UP" in flags
         and "EMA_BULL" in flags
         and (
@@ -4348,6 +4351,7 @@ def smart_money_stage(score, flags):
 
     if strong_bear_expansion:
         return "🟢 EXPANSION", "Сильный bearish expansion"
+
 
     # =========================
     # CONTINUATION STAGE
