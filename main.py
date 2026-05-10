@@ -7623,6 +7623,18 @@ if __name__ == "__main__":
             
             if sig is None:
                 continue
+
+            # =====================
+            # RR BLOCK
+            # =====================
+            
+            elite_blocked = False
+            
+            rr = float(sig.get("rr", 0) or 0)
+            
+            if rr <= 0:
+                elite_blocked = True
+                reasons.append("RR_ZERO_BLOCK")
             
             # =====================
             # ELITE HARD BLOCKS
