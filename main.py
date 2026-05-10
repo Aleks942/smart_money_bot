@@ -5301,6 +5301,96 @@ def build_signal(instId):
     
     
     # =========================
+    # STRUCTURE CONFLICT
+    # =========================
+    
+    if (
+        (
+            "PRESSURE_UP" in flags
+            and (
+                "EMA_BEAR" in flags
+                or "EMA_BEAR_STRONG" in flags
+            )
+        )
+    
+        or
+    
+        (
+            "PRESSURE_DOWN" in flags
+            and (
+                "EMA_BULL" in flags
+                or "EMA_BULL_STRONG" in flags
+            )
+        )
+    ):
+        flags.add("STRUCTURE_CONFLICT")
+    
+    
+    # =========================
+    # AUTO CONTINUATION PRO
+    # =========================
+    
+    long_cont_quality = (
+    
+        "PRESSURE_UP" in flags
+    
+        and (
+    
+            "EMA_BULL" in flags
+            or "EMA_BULL_STRONG" in flags
+        )
+    
+        and (
+    
+            "BREAKOUT_CONFIRM_UP" in flags
+            or "BREAKOUT_UP" in flags
+            or "VOL_SPIKE" in flags
+            or "ATR_EXPANSION" in flags
+            or "COMP_5M" in flags
+            or "COMP_15M" in flags
+        )
+    
+        and "OVERHEAT_UP" not in flags
+        and "STRUCTURE_CONFLICT" not in flags
+    )
+    
+    
+    short_cont_quality = (
+    
+        "PRESSURE_DOWN" in flags
+    
+        and (
+    
+            "EMA_BEAR" in flags
+            or "EMA_BEAR_STRONG" in flags
+        )
+    
+        and (
+    
+            "BREAKOUT_CONFIRM_DOWN" in flags
+            or "BREAKOUT_DOWN" in flags
+            or "VOL_SPIKE" in flags
+            or "ATR_EXPANSION" in flags
+            or "COMP_5M" in flags
+            or "COMP_15M" in flags
+        )
+    
+        and "OVERHEAT_DOWN" not in flags
+        and "STRUCTURE_CONFLICT" not in flags
+    )
+    
+    
+    if long_cont_quality:
+        flags.add("CONTINUATION_UP")
+        score += 2
+    
+    
+    if short_cont_quality:
+        flags.add("CONTINUATION_DOWN")
+        score += 2
+    
+    
+    # =========================
     # MTF DIRECTION BIAS
     # =========================
     
@@ -5386,88 +5476,8 @@ def build_signal(instId):
     
         else:
             mtf_score += 1
-
-
-
     
-    # =========================
-    # STRUCTURE CONFLICT
-    # =========================
     
-    if (
-        (
-            "PRESSURE_UP" in flags
-            and (
-                "EMA_BEAR" in flags
-                or "EMA_BEAR_STRONG" in flags
-            )
-        )
-        or
-        (
-            "PRESSURE_DOWN" in flags
-            and (
-                "EMA_BULL" in flags
-                or "EMA_BULL_STRONG" in flags
-            )
-        )
-    ):
-        flags.add("STRUCTURE_CONFLICT")
-
-    # =========================
-    # AUTO CONTINUATION PRO
-    # =========================
-    
-    long_cont_quality = (
-        "PRESSURE_UP" in flags
-       and (
-            "EMA_BULL" in flags
-            or "EMA_BULL_STRONG" in flags
-            or "MTF_LONG_ALIGN" in flags
-        )
-        and (
-            "BREAKOUT_CONFIRM_UP" in flags
-            or "BREAKOUT_UP" in flags
-            or "VOL_SPIKE" in flags
-            or "ATR_EXPANSION" in flags
-            or "COMP_5M" in flags
-            or "COMP_15M" in flags
-            or (
-                "MTF_LONG_ALIGN" in flags
-                and score >= 4
-            )
-        )
-        and "OVERHEAT_UP" not in flags
-        and "STRUCTURE_CONFLICT" not in flags
-    )
-    
-    short_cont_quality = (
-        "PRESSURE_DOWN" in flags
-        and (
-            "EMA_BEAR" in flags
-            or "EMA_BEAR_STRONG" in flags
-            or "MTF_SHORT_ALIGN" in flags
-        )
-        and (
-            "BREAKOUT_CONFIRM_DOWN" in flags
-            or "BREAKOUT_DOWN" in flags
-            or "VOL_SPIKE" in flags
-            or "ATR_EXPANSION" in flags
-            or "COMP_5M" in flags
-            or "COMP_15M" in flags
-        )
-        and "OVERHEAT_DOWN" not in flags
-        and "STRUCTURE_CONFLICT" not in flags
-    )
-    
-    if long_cont_quality:
-        flags.add("CONTINUATION_UP")
-        score += 2
-    
-    if short_cont_quality:
-        flags.add("CONTINUATION_DOWN")
-        score += 2
-
-
     # =========================
     # PULLBACK ENGINE
     # =========================
