@@ -7839,6 +7839,32 @@ if __name__ == "__main__":
             elif "BEAR" in str(regime).upper() or "DOWN" in str(regime).upper():
                 MARKET_MODE = "BEAR"
 
+            # =====================
+            # MARKET REGIME FILTER
+            # =====================
+            
+            if MARKET_MODE == "BULL":
+            
+                if (
+                    "PRESSURE_DOWN" in flags
+                    and "EMA_BEAR_STRONG" not in flags
+                    and "BREAKOUT_CONFIRM_DOWN" not in flags
+                ):
+            
+                    score -= 1.5
+                    flags.add("REGIME_BLOCK_SHORT")
+            
+            if MARKET_MODE == "BEAR":
+            
+                if (
+                    "PRESSURE_UP" in flags
+                    and "EMA_BULL_STRONG" not in flags
+                    and "BREAKOUT_CONFIRM_UP" not in flags
+                ):
+            
+                    score -= 1.5
+                    flags.add("REGIME_BLOCK_LONG")
+
             alerts = []
             manip_watch = []
             early_count = 0
