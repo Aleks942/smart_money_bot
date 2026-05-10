@@ -3619,13 +3619,7 @@ def get_ema_trend(candles):
     
         state = "EMA_FLAT"
     
-    # =========================
-    # TRANSITION
-    # =========================
-    
-    elif abs(ema20_slope) > 0:
-    
-        state = "EMA_TRANSITION"
+
     
     # =========================
     # MIXED
