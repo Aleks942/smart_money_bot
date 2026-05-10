@@ -4791,7 +4791,7 @@ def calc_entry_zone(price, pmeta, flags, direction_code):
                 "zone_type": "RETEST_LONG",
                 "low": round(hi - rng * 0.05, 6),
                 "high": round(hi + rng * 0.10, 6),
-                "stop": round(hi - rng * 0.20, 6),
+                "stop": round(hi - rng * 0.10, 6),
             }
 
         if "SWEEP_DOWN" in flags or "FAKE_DUMP" in flags:
