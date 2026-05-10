@@ -7496,6 +7496,23 @@ if __name__ == "__main__":
                 continue
             
             # =====================
+            # ELITE HARD BLOCKS
+            # =====================
+            
+            elite = True
+            
+            sig_side = sig.get("side") or sig.get("direction_code")
+            rr1 = float(sig.get("rr1") or 0)
+            
+            if sig_side not in ["UP", "DOWN"]:
+                elite = False
+                reasons.append("SIDE_FLAT_BLOCK")
+            
+            if rr1 <= 0:
+                elite = False
+                reasons.append("RR_ZERO_BLOCK")
+            
+            # =====================
             # 1. SENDABLE
             # =====================
             
