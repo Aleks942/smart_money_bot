@@ -5277,39 +5277,52 @@ def build_signal(instId):
     
 
     # =========================
-    # AUTO CONTINUATION
+    # AUTO CONTINUATION PRO
     # =========================
     
-    if (
+    long_cont_quality = (
         "PRESSURE_UP" in flags
-        and "EMA_BULL" in flags
-        and "EMA_BULL_STRONG" in flags
-    ):
-    
-        if (
-            "BREAKOUT_CONFIRM_UP" in flags
-            or "VOL_SPIKE" in flags
-            or "COMP_5M" in flags
-            or "COMP_15M" in flags
+        and (
+            "EMA_BULL_STRONG" in flags
             or "MTF_LONG_ALIGN" in flags
-        ):
-            flags.add("CONTINUATION_UP")
-            score += 2
-    
-    if (
-        "PRESSURE_DOWN" in flags
-        and "EMA_BEAR" in flags
-        and "EMA_BEAR_STRONG" in flags
-    ):
-    
-        if (
-            "BREAKOUT_CONFIRM_DOWN" in flags
+        )
+        and (
+            "BREAKOUT_CONFIRM_UP" in flags
+            or "BREAKOUT_UP" in flags
             or "VOL_SPIKE" in flags
+            or "ATR_EXPANSION" in flags
             or "COMP_5M" in flags
             or "COMP_15M" in flags
-        ):
-            flags.add("CONTINUATION_DOWN")
-            score += 2
+        )
+        and "OVERHEAT_UP" not in flags
+        and "STRUCTURE_CONFLICT" not in flags
+    )
+    
+    short_cont_quality = (
+        "PRESSURE_DOWN" in flags
+        and (
+            "EMA_BEAR_STRONG" in flags
+            or "MTF_SHORT_ALIGN" in flags
+        )
+        and (
+            "BREAKOUT_CONFIRM_DOWN" in flags
+            or "BREAKOUT_DOWN" in flags
+            or "VOL_SPIKE" in flags
+            or "ATR_EXPANSION" in flags
+            or "COMP_5M" in flags
+            or "COMP_15M" in flags
+        )
+        and "OVERHEAT_DOWN" not in flags
+        and "STRUCTURE_CONFLICT" not in flags
+    )
+    
+    if long_cont_quality:
+        flags.add("CONTINUATION_UP")
+        score += 2
+    
+    if short_cont_quality:
+        flags.add("CONTINUATION_DOWN")
+        score += 2
 
 
 
