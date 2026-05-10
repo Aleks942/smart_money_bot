@@ -5032,6 +5032,54 @@ def build_signal(instId):
             flags.add("PRESSURE_DOWN")
             score += 1
 
+    # =========================
+    # AUTO CONTINUATION
+    # =========================
+    
+    if (
+        "PRESSURE_UP" in flags
+        and "EMA_BULL" in flags
+        and "EMA_BULL_STRONG" in flags
+    ):
+    
+        if (
+            "BREAKOUT_CONFIRM_UP" in flags
+            or "VOL_SPIKE" in flags
+            or "COMP_5M" in flags
+            or "COMP_15M" in flags
+            or "MTF_LONG_ALIGN" in flags
+        ):
+            flags.add("CONTINUATION_UP")
+            score += 2
+    
+    if (
+        "PRESSURE_DOWN" in flags
+        and "EMA_BEAR" in flags
+        and "EMA_BEAR_STRONG" in flags
+    ):
+    
+        if (
+            "BREAKOUT_CONFIRM_DOWN" in flags
+            or "VOL_SPIKE" in flags
+            or "COMP_5M" in flags
+            or "COMP_15M" in flags
+        ):
+            flags.add("CONTINUATION_DOWN")
+            score += 2
+
+# =========================
+# CONTINUATION
+# =========================
+
+try:
+    cont = continuation_engine(c15)
+except:
+    cont = None
+
+if cont:
+    flags.add(cont)
+    score += 2
+
    
 
     # =========================
