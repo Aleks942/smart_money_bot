@@ -4914,6 +4914,26 @@ def build_signal(instId):
         flags.add("EMA_MIXED")
 
     # =========================
+    # EMA FLOW SEED
+    # =========================
+    
+    if (
+        "EMA_BULL_STRONG" in flags
+        and "PRESSURE_UP" not in flags
+        and "PRESSURE_DOWN" not in flags
+    ):
+        flags.add("PRESSURE_UP")
+        score += 1
+    
+    if (
+        "EMA_BEAR_STRONG" in flags
+        and "PRESSURE_UP" not in flags
+        and "PRESSURE_DOWN" not in flags
+    ):
+        flags.add("PRESSURE_DOWN")
+        score += 1
+
+    # =========================
     # PRESSURE (пример базовый)
     # =========================
     try:
