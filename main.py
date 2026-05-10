@@ -3577,7 +3577,7 @@ def get_ema_trend(candles):
     
     if bull_full and ema20_slope > 0:
     
-        if spread > 0.08:
+        if spread > 0.15:
             state = "EMA_BULL_STRONG"
     
         else:
