@@ -7652,6 +7652,15 @@ if __name__ == "__main__":
             if rr1 <= 0:
                 elite = False
                 reasons.append("RR_ZERO_BLOCK")
+
+            print(
+                f"[ELITE_FINAL] {instId} "
+                f"elite={elite} "
+                f"score={elite_score} "
+                f"rr={rr1} "
+                f"side={sig_side}",
+                flush=True
+            )
             
             # =====================
             # 1. SENDABLE
