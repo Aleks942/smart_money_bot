@@ -4377,7 +4377,11 @@ def smart_money_stage(score, flags):
         or "BREAKOUT_CONFIRM_DOWN" in flags
     )
     
-    if strong_bull_expansion and bull_impulse_confirm:
+    if (
+        strong_bull_expansion
+        and bull_impulse_confirm
+        and "OVERHEAT_UP" not in flags
+    ):
         return "🟢 EXPANSION", "Сильный bullish expansion"
     
     if strong_bear_expansion and bear_impulse_confirm:
