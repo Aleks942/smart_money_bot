@@ -5067,20 +5067,7 @@ def build_signal(instId):
             flags.add("CONTINUATION_DOWN")
             score += 2
 
-# =========================
-# CONTINUATION
-# =========================
 
-try:
-    cont = continuation_engine(c15)
-except:
-    cont = None
-
-if cont:
-    flags.add(cont)
-    score += 2
-
-   
 
     # =========================
     # CONTINUATION
