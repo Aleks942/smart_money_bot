@@ -5282,8 +5282,9 @@ def build_signal(instId):
     
     long_cont_quality = (
         "PRESSURE_UP" in flags
-        and (
-            "EMA_BULL_STRONG" in flags
+       and (
+            "EMA_BULL" in flags
+            or "EMA_BULL_STRONG" in flags
             or "MTF_LONG_ALIGN" in flags
         )
         and (
