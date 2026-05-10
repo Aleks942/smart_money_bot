@@ -4323,6 +4323,32 @@ def smart_money_stage(score, flags):
     if "BREAKOUT_CONFIRM_UP" in flags or "BREAKOUT_CONFIRM_DOWN" in flags:
         return "🟢 EXPANSION", "Подтверждённый импульс"
 
+        strong_bull_expansion = (
+        "PRESSURE_UP" in flags
+        and "EMA_BULL" in flags
+        and (
+            "EMA_BULL_STRONG" in flags
+            or "MTF_LONG_ALIGN" in flags
+        )
+        and score >= 4
+    )
+
+    strong_bear_expansion = (
+        "PRESSURE_DOWN" in flags
+        and "EMA_BEAR" in flags
+        and (
+            "EMA_BEAR_STRONG" in flags
+            or "MTF_SHORT_ALIGN" in flags
+        )
+        and score >= 4
+    )
+
+    if strong_bull_expansion:
+        return "🟢 EXPANSION", "Сильный bullish expansion"
+
+    if strong_bear_expansion:
+        return "🟢 EXPANSION", "Сильный bearish expansion"
+
     # =========================
     # CONTINUATION STAGE
     # =========================
