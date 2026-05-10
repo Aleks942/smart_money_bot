@@ -7697,7 +7697,7 @@ if __name__ == "__main__":
             
             elite_blocked = False
             
-            rr = float(sig.get("rr", 0) or 0)
+            rr = float(sig.get("rr1", 0) or 0)
             
             if rr <= 0:
                 elite_blocked = True
