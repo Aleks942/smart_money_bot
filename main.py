@@ -5075,7 +5075,38 @@ def build_signal(instId):
     if atr_expansion:
         flags.add("ATR_EXPANSION")
         score += 1
- 
+
+    # =========================
+    # OVERHEAT FILTER
+    # =========================
+    
+    try:
+    
+        last_close = float(c5[-1][4])
+        prev_close = float(c5[-4][4])
+    
+        move_pct_3 = (
+            (last_close - prev_close)
+            / prev_close
+        ) * 100
+    
+    except:
+        move_pct_3 = 0
+    
+    overheat_up = (
+        move_pct_3 >= 4.5
+    )
+    
+    overheat_down = (
+        move_pct_3 <= -4.5
+    )
+    
+    if overheat_up:
+        flags.add("OVERHEAT_UP")
+    
+    if overheat_down:
+        flags.add("OVERHEAT_DOWN")
+     
     pressure, pmeta = liquidity_pressure(c5)
 
     # =========================
