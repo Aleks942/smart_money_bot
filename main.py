@@ -5732,6 +5732,45 @@ def build_signal(instId):
         or acc_score >= 2
     )
 
+    # =========================
+    # QUALITY FILTER
+    # =========================
+    
+    quality_pass = False
+    
+    if (
+        "BREAKOUT_CONFIRM_UP" in flags
+        or "BREAKOUT_CONFIRM_DOWN" in flags
+    ):
+        quality_pass = True
+    
+    elif (
+        "CONTINUATION_UP" in flags
+        or "CONTINUATION_DOWN" in flags
+    ):
+        quality_pass = True
+    
+    elif (
+        "VOL_SPIKE" in flags
+        and "PRESSURE_UP" in flags
+    ):
+        quality_pass = True
+    
+    elif (
+        "VOL_SPIKE" in flags
+        and "PRESSURE_DOWN" in flags
+    ):
+        quality_pass = True
+    
+    elif (
+        "COMP_5M" in flags
+        and (
+            "PRESSURE_UP" in flags
+            or "PRESSURE_DOWN" in flags
+        )
+    ):
+        quality_pass = True
+
     if strong_structure_pass:
         print(
             f"[OVERRIDE_LOW_SCORE] {instId} "
