@@ -4537,25 +4537,27 @@ def decide_entry(stage, flags, price, c5):
     # =========================
     elif stage == "🟠 TRANSITION":
 
-        if "PULLBACK_LONG" in flags:
-    
-            entry = "PULLBACK_LONG"
-            stop = recent_low
-            reason = "PULLBACK_LONG"
-    
-        elif "PULLBACK_SHORT" in flags:
-    
-            entry = "PULLBACK_SHORT"
-            stop = recent_high
-            reason = "PULLBACK_SHORT"
-    
-        elif "PRESSURE_UP" in flags:
+        if (
+            "PRESSURE_UP" in flags
+            and (
+                "EMA_BULL" in flags
+                or "EMA_BULL_STRONG" in flags
+                or "MTF_LONG_ALIGN" in flags
+            )
+        ):
     
             entry = "TRANSITION_LONG"
             stop = recent_low
             reason = "TRANSITION_LONG"
     
-        elif "PRESSURE_DOWN" in flags:
+        elif (
+            "PRESSURE_DOWN" in flags
+            and (
+                "EMA_BEAR" in flags
+                or "EMA_BEAR_STRONG" in flags
+                or "MTF_SHORT_ALIGN" in flags
+            )
+        ):
     
             entry = "TRANSITION_SHORT"
             stop = recent_high
