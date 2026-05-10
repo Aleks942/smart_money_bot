@@ -5329,28 +5329,6 @@ def build_signal(instId):
         score += 2
 
 
-
-    # =========================
-    # CONTINUATION
-    # =========================
-    try:
-        cont = continuation_engine(c15)
-    except:
-        cont = None
-
-    if cont:
-
-        continuation_quality = (
-            vol_spike
-            or atr_expansion
-            or "BREAKOUT_UP" in flags
-            or "BREAKOUT_DOWN" in flags
-        )
-    
-        if continuation_quality:
-            flags.add(cont)
-            score += 2
-
     # =========================
     # PULLBACK ENGINE
     # =========================
