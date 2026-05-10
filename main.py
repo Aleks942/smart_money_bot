@@ -4361,10 +4361,26 @@ def smart_money_stage(score, flags):
         and score >= 5
     )
 
-    if strong_bull_expansion:
+    bull_impulse_confirm = (
+        "VOL_SPIKE" in flags
+        or "ATR_EXPANSION" in flags
+        or "CONTINUATION_UP" in flags
+        or "BREAKOUT_UP" in flags
+        or "BREAKOUT_CONFIRM_UP" in flags
+    )
+    
+    bear_impulse_confirm = (
+        "VOL_SPIKE" in flags
+        or "ATR_EXPANSION" in flags
+        or "CONTINUATION_DOWN" in flags
+        or "BREAKOUT_DOWN" in flags
+        or "BREAKOUT_CONFIRM_DOWN" in flags
+    )
+    
+    if strong_bull_expansion and bull_impulse_confirm:
         return "🟢 EXPANSION", "Сильный bullish expansion"
-
-    if strong_bear_expansion:
+    
+    if strong_bear_expansion and bear_impulse_confirm:
         return "🟢 EXPANSION", "Сильный bearish expansion"
 
     # =========================
