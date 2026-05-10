@@ -2694,15 +2694,66 @@ def liquidity_sweep_ok(candles, lookback=20):
 
     return None
 
-def breakout_confirm_ok(candles, lookback=BREAKOUT_LOOKBACK, confirm_bars=BREAKOUT_CONFIRM_BARS):
+def breakout_confirm_ok(
+    candles,
+    lookback=BREAKOUT_LOOKBACK,
+    confirm_bars=BREAKOUT_CONFIRM_BARS
+):
+
     base = candles[-(lookback + confirm_bars + 1):-(confirm_bars + 1)]
+
     hi = max(x[2] for x in base)
     lo = min(x[3] for x in base)
-    closes = [c[4] for c in candles[-confirm_bars:]]
-    if all(cl > hi * (1.0 + MIN_BREAKOUT_DIST_PCT / 100.0) for cl in closes):
+
+    confirm = candles[-confirm_bars:]
+
+    body_ok_up = True
+    body_ok_down = True
+
+    closes_up = True
+    closes_down = True
+
+    for c in confirm:
+
+        open_p = float(c[1])
+        high_p = float(c[2])
+        low_p = float(c[3])
+        close_p = float(c[4])
+
+        rng = high_p - low_p
+
+        if rng <= 0:
+            return None
+
+        body = abs(close_p - open_p)
+        body_ratio = body / rng
+
+        # BODY FILTER
+        if body_ratio < 0.45:
+            body_ok_up = False
+            body_ok_down = False
+
+        # CLOSE FILTER
+        if close_p <= hi * (1.0 + MIN_BREAKOUT_DIST_PCT / 100.0):
+            closes_up = False
+
+        if close_p >= lo * (1.0 - MIN_BREAKOUT_DIST_PCT / 100.0):
+            closes_down = False
+
+    # =========================
+    # CONFIRMED UP
+    # =========================
+
+    if closes_up and body_ok_up:
         return "UP"
-    if all(cl < lo * (1.0 - MIN_BREAKOUT_DIST_PCT / 100.0) for cl in closes):
+
+    # =========================
+    # CONFIRMED DOWN
+    # =========================
+
+    if closes_down and body_ok_down:
         return "DOWN"
+
     return None
     
 def trap_detector(candles, lookback=12):
