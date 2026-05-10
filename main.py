@@ -4961,14 +4961,7 @@ def build_signal(instId):
     except:
         pmeta = {}
 
-    if (pmeta or {}).get("pressure") == "UP":
-        flags.add("PRESSURE_UP")
-        score += 1
-
-    if (pmeta or {}).get("pressure") == "DOWN":
-        flags.add("PRESSURE_DOWN")
-        score += 1
-
+    pressure_detect = (pmeta or {}).get("pressure")
    
 
 
