@@ -4112,6 +4112,36 @@ def signal_quality_filter(sig):
         return True, "early_pressure"
 
     # =====================
+    # 🌍 MARKET REGIME FILTER
+    # =====================
+    
+    market_mode = str(sig.get("market_mode", "NEUTRAL"))
+    
+    direction_long = (
+        "PRESSURE_UP" in flags
+        or "BREAKOUT_UP" in flags
+        or "BREAKOUT_CONFIRM_UP" in flags
+    )
+    
+    direction_short = (
+        "PRESSURE_DOWN" in flags
+        or "BREAKOUT_DOWN" in flags
+        or "BREAKOUT_CONFIRM_DOWN" in flags
+    )
+    
+    # BULL MARKET
+    if market_mode == "BULL":
+    
+        if direction_short and score < 6:
+            return False, "blocked_by_bull_market"
+    
+    # BEAR MARKET
+    elif market_mode == "BEAR":
+    
+        if direction_long and score < 6:
+            return False, "blocked_by_bear_market"
+
+    # =====================
     # 🟣 ACCUMULATION / TRANSITION
     # =====================
     if acc >= 2 and (
