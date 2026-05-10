@@ -4466,7 +4466,7 @@ def decide_entry(stage, flags, price, c5):
             stop = recent_high
             reason = "REVERSAL_SHORT"
 
-    return entry_price, stop, reasonn
+    return entry_price, stop, reason
 # =========================
 # TRADE PLAN
 # =========================
