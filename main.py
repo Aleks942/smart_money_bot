@@ -5025,12 +5025,6 @@ def build_signal(instId):
         flags.add("PRESSURE_DOWN")
         score += 1
     
-        if pressure == "UP":
-            flags.add("PRESSURE_UP")
-            score += 1
-        elif pressure == "DOWN":
-            flags.add("PRESSURE_DOWN")
-            score += 1
 
     # =========================
     # AUTO CONTINUATION
