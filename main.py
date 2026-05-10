@@ -5805,6 +5805,7 @@ def build_signal(instId):
     
     ema_boost = 0
     
+    
     # =========================
     # STRONG EMA CONTEXT
     # =========================
@@ -5814,6 +5815,7 @@ def build_signal(instId):
     
     if "EMA_BEAR" in flags and acc_score >= 1:
         ema_boost += 1
+    
     
     # =========================
     # MIXED MARKET LOGIC
@@ -5838,13 +5840,15 @@ def build_signal(instId):
         # dead mixed market
         else:
             ema_boost += 0
-
+    
+    
     # =========================
     # EMA FLAT PENALTY
     # =========================
     
     if "EMA_FLAT" in flags:
         ema_boost -= 0.5
+    
     
     # =========================
     # STRUCTURE CONFLICT PENALTY
@@ -5853,11 +5857,13 @@ def build_signal(instId):
     if "STRUCTURE_CONFLICT" in flags:
         ema_boost -= 1
     
+    
     # =========================
     # DEBUG
     # =========================
     
     if ema_boost != 0:
+    
         print(
             f"[EMA_BOOST] {instId} "
             f"boost={ema_boost} "
@@ -5867,29 +5873,48 @@ def build_signal(instId):
             flush=True
         )
     
+    
     # =========================
-    # APPLY
+    # APPLY EMA BOOST
     # =========================
     
     score += ema_boost
     
+    
     # =========================
-    # MTF SCORE BOOST
+    # APPLY MTF SCORE
     # =========================
     
     if mtf_score > 0:
+    
         print(
             f"[MTF_BOOST] {instId} +{mtf_score}",
             flush=True
         )
-
-    stage, stage_reason = smart_money_stage(score, flags)
-
+    
+        score += mtf_score
+    
+    
+    # =========================
+    # STAGE
+    # =========================
+    
+    stage, stage_reason = smart_money_stage(
+        score,
+        flags
+    )
+    
+    
     # =========================
     # EXPECTED MOVE
     # =========================
-    exp_min, exp_max = expected_move_pct(c5, pmeta)
-
+    
+    exp_min, exp_max = expected_move_pct(
+        c5,
+        pmeta
+    )
+    
+    
     # =========================
     # RESULT FILTER (FIXED)
     # =========================
