@@ -5217,6 +5217,36 @@ def build_signal(instId):
             score += 2
 
     # =========================
+    # PULLBACK ENGINE
+    # =========================
+    
+    pullback_long = (
+        "EMA_BULL" in flags
+        and "PRESSURE_UP" in flags
+        and "VOL_SPIKE" not in flags
+        and "BREAKOUT_CONFIRM_UP" not in flags
+        and "OVERHEAT_UP" not in flags
+        and score >= 4
+    )
+    
+    pullback_short = (
+        "EMA_BEAR" in flags
+        and "PRESSURE_DOWN" in flags
+        and "VOL_SPIKE" not in flags
+        and "BREAKOUT_CONFIRM_DOWN" not in flags
+        and "OVERHEAT_DOWN" not in flags
+        and score >= 4
+    )
+    
+    if pullback_long:
+        flags.add("PULLBACK_LONG")
+        score += 1
+    
+    if pullback_short:
+        flags.add("PULLBACK_SHORT")
+        score += 1
+
+    # =========================
     # COMPRESSION
     # =========================
     comp5, _ = compression_ok(c5)
