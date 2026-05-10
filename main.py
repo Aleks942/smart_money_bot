@@ -4544,6 +4544,8 @@ def detect_early_pressure(sig):
     up_reasons = []
     down_reasons = []
 
+    strong_transition = False
+
     def add_up(points, reason):
         nonlocal up_score
         up_score += points
