@@ -3615,7 +3615,7 @@ def get_ema_trend(candles):
     # FLAT
     # =========================
     
-    elif spread < 0.08:
+    elif spread < 0.04:
     
         state = "EMA_FLAT"
     
