@@ -4659,9 +4659,14 @@ def detect_early_pressure(sig):
         or "ATR_EXPANSION" in flags
     )
     
-    if "TRANSITION" in stage and strong_transition:
-        add_up(2, "TRANSITION_STAGE")
-        add_down(2, "TRANSITION_STAGE")
+    if "TRANSITION" in stage:
+
+    add_up(1, "TRANSITION_STAGE")
+    add_down(1, "TRANSITION_STAGE")
+
+    if strong_transition:
+        add_up(2, "STRONG_TRANSITION")
+        add_down(2, "STRONG_TRANSITION")
     
     if "MANIPULATION" in stage:
     
