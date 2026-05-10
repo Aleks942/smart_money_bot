@@ -4492,24 +4492,46 @@ def smart_money_stage(score, flags):
     # =========================
     # TRANSITION
     # =========================
+    
     if (
-        "PRESSURE_UP" in flags
+    
+        (
+            "PRESSURE_UP" in flags
+            or "BREAKOUT_UP" in flags
+            or "BREAKOUT_CONFIRM_UP" in flags
+            or "CONTINUATION_UP" in flags
+        )
+    
         and "STRUCTURE_CONFLICT" not in flags
+    
         and (
+    
             "EMA_BULL" in flags
             or "EMA_BULL_STRONG" in flags
             or "MTF_LONG_ALIGN" in flags
+            or "EMA_MIXED" in flags
         )
     ):
         return "🟠 TRANSITION", "Bullish transition"
     
+    
     if (
-        "PRESSURE_DOWN" in flags
+    
+        (
+            "PRESSURE_DOWN" in flags
+            or "BREAKOUT_DOWN" in flags
+            or "BREAKOUT_CONFIRM_DOWN" in flags
+            or "CONTINUATION_DOWN" in flags
+        )
+    
         and "STRUCTURE_CONFLICT" not in flags
+    
         and (
+    
             "EMA_BEAR" in flags
             or "EMA_BEAR_STRONG" in flags
             or "MTF_SHORT_ALIGN" in flags
+            or "EMA_MIXED" in flags
         )
     ):
         return "🟠 TRANSITION", "Bearish transition"
