@@ -4434,18 +4434,18 @@ def smart_money_stage(score, flags):
     # =========================
     # MANIPULATION
     # =========================
-        if (
-            "FAKE_DUMP" in flags
-            or "FAKE_PUMP" in flags
-            or "SWEEP_DOWN" in flags
-            or "SWEEP_UP" in flags
-        ):
-            return "🟡 MANIPULATION", "Манипуляция ликвидностью"
-    
-        # =========================
-        # DEFAULT
-        # =========================
-        return "⚪ NEUTRAL", "Нейтральная структура"
+    if (
+        "FAKE_DUMP" in flags
+        or "FAKE_PUMP" in flags
+        or "SWEEP_DOWN" in flags
+        or "SWEEP_UP" in flags
+    ):
+        return "🟡 MANIPULATION", "Манипуляция ликвидностью"
+
+    # =========================
+    # DEFAULT
+    # =========================
+    return "⚪ NEUTRAL", "Нейтральная структура"
        
 
 # =========================
