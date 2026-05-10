@@ -5888,7 +5888,8 @@ def build_signal(instId):
     # =========================
     
     signal_type = "NORMAL"
-
+    
+    
     # =========================
     # SWING EARLY
     # =========================
@@ -5921,6 +5922,16 @@ def build_signal(instId):
     
     if swing_only_candidate and not swing_quality:
         swing_only_candidate = False
+    
+    
+    if swing_only_candidate:
+        signal_type = "SWING_EARLY"
+    
+    
+    elif score <= 0:
+        signal_type = "WEAK_SKIP"
+
+    
         
     # =========================
     # SIGNAL TYPE DEBUG
