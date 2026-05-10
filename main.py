@@ -4424,30 +4424,7 @@ def smart_money_stage(score, flags):
     # DEFAULT
     # =========================
     return "⚪ NEUTRAL", "Нейтральная структура"
-    # =========================
-    # CONTINUATION STAGE
-    # =========================
-    
-    if (
-        "CONTINUATION_UP" in flags
-        or "CONTINUATION_DOWN" in flags
-    ):
-    
-        if score >= 4:
-            return "🟢 EXPANSION", "CONTINUATION"
-    
-        return "🟠 TRANSITION", "CONTINUATION_BUILDUP"
-
-    if "SWEEP_DOWN" in flags or "SWEEP_UP" in flags:
-        return "🟡 MANIPULATION", "Сбор ликвидности"
-
-    if "COMP_5M" in flags or "COMP_15M" in flags:
-        return "🟣 ACCUMULATION", "Сжатие"
-
-    if "PRESSURE_UP" in flags or "PRESSURE_DOWN" in flags:
-        return "🟠 TRANSITION", "Начало движения"
-
-    return "⚪ NEUTRAL", "Смешанные сигналы"
+   
 
 # =========================
 # ENTRY
