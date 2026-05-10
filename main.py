@@ -8238,10 +8238,15 @@ if __name__ == "__main__":
             ):
                 elite_side_ok = True
             
+            # conflict block
+            if "STRUCTURE_CONFLICT" in flags:
+                elite_side_ok = False
+                reasons.append("STRUCTURE_CONFLICT")
+            
             if not elite_side_ok:
                 elite = False
                 reasons.append("ELITE_SIDE_CONTEXT_BLOCK")
-            
+                        
             # =====================
             # 1. SENDABLE
             # =====================
