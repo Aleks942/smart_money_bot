@@ -5293,6 +5293,10 @@ def build_signal(instId):
             or "ATR_EXPANSION" in flags
             or "COMP_5M" in flags
             or "COMP_15M" in flags
+            or (
+                "MTF_LONG_ALIGN" in flags
+                and score >= 4
+            )
         )
         and "OVERHEAT_UP" not in flags
         and "STRUCTURE_CONFLICT" not in flags
