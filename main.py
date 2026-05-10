@@ -5882,9 +5882,42 @@ def build_signal(instId):
         else:
             signal_type = "SWING_EARLY"
             swing_only_candidate = True
+
+    # =========================
+    # SWING EARLY
+    # =========================
     
-    else:
-        signal_type = "NORMAL"
+    swing_only_candidate = False
+    
+    if (
+        score <= 2
+        and acc_score >= 2
+    ):
+        swing_only_candidate = True
+    
+    
+    # =========================
+    # SWING QUALITY FILTER
+    # =========================
+    
+    swing_quality = (
+    
+        "COMP_5M" in flags
+        or "COMP_15M" in flags
+        or "VOL_SPIKE" in flags
+        or "BREAKOUT_UP" in flags
+        or "BREAKOUT_DOWN" in flags
+        or "BREAKOUT_CONFIRM_UP" in flags
+        or "BREAKOUT_CONFIRM_DOWN" in flags
+        or "CONTINUATION_UP" in flags
+        or "CONTINUATION_DOWN" in flags
+    )
+    
+    if not swing_quality:
+        swing_only_candidate = False
+       
+        else:
+            signal_type = "NORMAL"
 
     # =========================
     # SIGNAL TYPE DEBUG
