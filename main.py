@@ -5280,13 +5280,23 @@ def build_signal(instId):
     ):
         mtf_short_bias = True
 
-    if pressure == "UP" and mtf_long_bias:
-        score += 1
-        flags.add("MTF_LONG_ALIGN")
+  if mtf_long_bias and (
+    pressure == "UP"
+    or "PRESSURE_UP" in flags
+    or "CONTINUATION_UP" in flags
+    or "BREAKOUT_UP" in flags
+):
+    score += 1
+    flags.add("MTF_LONG_ALIGN")
 
-    if pressure == "DOWN" and mtf_short_bias:
-        score += 1
-        flags.add("MTF_SHORT_ALIGN")
+if mtf_short_bias and (
+    pressure == "DOWN"
+    or "PRESSURE_DOWN" in flags
+    or "CONTINUATION_DOWN" in flags
+    or "BREAKOUT_DOWN" in flags
+):
+    score += 1
+    flags.add("MTF_SHORT_ALIGN")
 
         
     # =========================
