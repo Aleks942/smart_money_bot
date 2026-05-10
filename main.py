@@ -4648,6 +4648,17 @@ def detect_early_pressure(sig):
         add_down(2, "ACC_STAGE")
 
     if "TRANSITION" in stage:
+
+    strong_transition = (
+        "VOL_SPIKE" in flags
+        or "COMP_15M" in flags
+        or "BREAKOUT_UP" in flags
+        or "BREAKOUT_DOWN" in flags
+        or "ATR_EXPANSION" in flags
+    )
+
+    if strong_transition:
+
         add_up(2, "TRANSITION_STAGE")
         add_down(2, "TRANSITION_STAGE")
 
