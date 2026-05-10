@@ -3951,10 +3951,23 @@ def direction_hint(flags):
     if "OB_WALL_ASK" in flags:
         down += 0.5; reasons.append("Стена ASK (+0.5)")
 
+    # STRONG LONG
     if up >= down + 2:
         return "⬆️ ВВЕРХ", reasons, up, down
+    
+    # STRONG SHORT
     if down >= up + 2:
         return "⬇️ ВНИЗ", reasons, up, down
+    
+    # LIGHT LONG BIAS
+    if up > down:
+        return "🟢 LONG BIAS", reasons, up, down
+    
+    # LIGHT SHORT BIAS
+    if down > up:
+        return "🔴 SHORT BIAS", reasons, up, down
+    
+    # BALANCE
     return "⚖️ БАЛАНС", reasons, up, down
 
 def decision_engine(sig):
