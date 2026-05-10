@@ -5747,39 +5747,39 @@ def build_signal(instId):
         else:
             ema_boost += 0
 
-# =========================
-# EMA FLAT PENALTY
-# =========================
-
-if "EMA_FLAT" in flags:
-    ema_boost -= 0.5
-
-# =========================
-# STRUCTURE CONFLICT PENALTY
-# =========================
-
-if "STRUCTURE_CONFLICT" in flags:
-    ema_boost -= 1
-
-# =========================
-# DEBUG
-# =========================
-
-if ema_boost != 0:
-    print(
-        f"[EMA_BOOST] {instId} "
-        f"boost={ema_boost} "
-        f"score_before={score} "
-        f"acc={acc_score} "
-        f"flags={list(flags)}",
-        flush=True
-    )
-
-# =========================
-# APPLY
-# =========================
-
-score += ema_boost
+    # =========================
+    # EMA FLAT PENALTY
+    # =========================
+    
+    if "EMA_FLAT" in flags:
+        ema_boost -= 0.5
+    
+    # =========================
+    # STRUCTURE CONFLICT PENALTY
+    # =========================
+    
+    if "STRUCTURE_CONFLICT" in flags:
+        ema_boost -= 1
+    
+    # =========================
+    # DEBUG
+    # =========================
+    
+    if ema_boost != 0:
+        print(
+            f"[EMA_BOOST] {instId} "
+            f"boost={ema_boost} "
+            f"score_before={score} "
+            f"acc={acc_score} "
+            f"flags={list(flags)}",
+            flush=True
+        )
+    
+    # =========================
+    # APPLY
+    # =========================
+    
+    score += ema_boost
     
     # =========================
     # MTF SCORE BOOST
