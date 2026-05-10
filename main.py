@@ -7770,7 +7770,7 @@ if __name__ == "__main__":
             # FINAL ELITE DECISION
             # =====================
             
-            elite = elite_score >= 6
+            elite = elite and elite_score >= 6
             
             if elite:
             
