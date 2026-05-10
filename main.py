@@ -5865,6 +5865,11 @@ def build_signal(instId):
     
     tier = get_signal_tier(score, acc_score)
     print(f"[FLAGS_RAW] {instId} {flags}", flush=True)
+    if "CONTINUATION_UP" in flags:
+        print(f"[CONTINUATION_UP] {instId}", flush=True)
+    
+    if "CONTINUATION_DOWN" in flags:
+        print(f"[CONTINUATION_DOWN] {instId}", flush=True)
 
     entry_price, stop, entry_reason = decide_entry(stage, flags, price, c5)
 
