@@ -4407,31 +4407,46 @@ def smart_money_stage(score, flags):
     ):
         return "🟣 ACCUMULATION", "Сжатие перед движением"
 
+   
     # =========================
     # TRANSITION
     # =========================
     if (
         "PRESSURE_UP" in flags
-        or "PRESSURE_DOWN" in flags
+        and (
+            "EMA_BULL" in flags
+            or "EMA_BULL_STRONG" in flags
+            or "MTF_LONG_ALIGN" in flags
+        )
     ):
-        return "🟠 TRANSITION", "Начало направленного движения"
-
+        return "🟠 TRANSITION", "Bullish transition"
+    
+    if (
+        "PRESSURE_DOWN" in flags
+        and (
+            "EMA_BEAR" in flags
+            or "EMA_BEAR_STRONG" in flags
+            or "MTF_SHORT_ALIGN" in flags
+        )
+    ):
+        return "🟠 TRANSITION", "Bearish transition"
+    
     # =========================
     # MANIPULATION
     # =========================
-    if (
-        "FAKE_DUMP" in flags
-        or "FAKE_PUMP" in flags
-        or "SWEEP_DOWN" in flags
-        or "SWEEP_UP" in flags
-    ):
-        return "🟡 MANIPULATION", "Манипуляция ликвидностью"
-
-    # =========================
-    # DEFAULT
-    # =========================
-    return "⚪ NEUTRAL", "Нейтральная структура"
-   
+        if (
+            "FAKE_DUMP" in flags
+            or "FAKE_PUMP" in flags
+            or "SWEEP_DOWN" in flags
+            or "SWEEP_UP" in flags
+        ):
+            return "🟡 MANIPULATION", "Манипуляция ликвидностью"
+    
+        # =========================
+        # DEFAULT
+        # =========================
+        return "⚪ NEUTRAL", "Нейтральная структура"
+       
 
 # =========================
 # ENTRY
