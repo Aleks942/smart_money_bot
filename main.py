@@ -4985,12 +4985,52 @@ def build_signal(instId):
  
     pressure, pmeta = liquidity_pressure(c5)
 
+    # =========================
+    # FINAL PRESSURE
+    # =========================
+    
+    final_pressure = None
+    
     if pressure == "UP":
+        final_pressure = "UP"
+    
+    elif pressure == "DOWN":
+        final_pressure = "DOWN"
+    
+    elif pressure_detect == "UP":
+        final_pressure = "UP"
+    
+    elif pressure_detect == "DOWN":
+        final_pressure = "DOWN"
+    
+    if (
+        "EMA_BULL_STRONG" in flags
+        and final_pressure is None
+    ):
+        final_pressure = "UP"
+    
+    elif (
+        "EMA_BEAR_STRONG" in flags
+        and final_pressure is None
+    ):
+        final_pressure = "DOWN"
+    
+    if final_pressure == "UP":
+        flags.discard("PRESSURE_DOWN")
         flags.add("PRESSURE_UP")
         score += 1
-    elif pressure == "DOWN":
+    
+    elif final_pressure == "DOWN":
+        flags.discard("PRESSURE_UP")
         flags.add("PRESSURE_DOWN")
         score += 1
+    
+        if pressure == "UP":
+            flags.add("PRESSURE_UP")
+            score += 1
+        elif pressure == "DOWN":
+            flags.add("PRESSURE_DOWN")
+            score += 1
 
    
 
