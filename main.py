@@ -4323,12 +4323,19 @@ def smart_money_stage(score, flags):
     if score < 1:
         return "⚪ EARLY", "Очень ранний интерес"
 
-    # =========================
+   # =========================
     # CONFIRMED EXPANSION
     # =========================
     if (
-        "BREAKOUT_CONFIRM_UP" in flags
-        or "BREAKOUT_CONFIRM_DOWN" in flags
+        (
+            "BREAKOUT_CONFIRM_UP" in flags
+            and score >= 5
+        )
+        or
+        (
+            "BREAKOUT_CONFIRM_DOWN" in flags
+            and score >= 5
+        )
     ):
         return "🟢 EXPANSION", "Подтверждённый импульс"
 
