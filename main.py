@@ -5306,7 +5306,8 @@ def build_signal(instId):
     short_cont_quality = (
         "PRESSURE_DOWN" in flags
         and (
-            "EMA_BEAR_STRONG" in flags
+            "EMA_BEAR" in flags
+            or "EMA_BEAR_STRONG" in flags
             or "MTF_SHORT_ALIGN" in flags
         )
         and (
