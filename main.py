@@ -4476,6 +4476,30 @@ def decide_entry(stage, flags, price, c5):
             stop = recent_high
             reason = "CONTINUATION_SHORT"
 
+        elif (
+            "PRESSURE_UP" in flags
+            and (
+                "ATR_EXPANSION" in flags
+                or "VOL_SPIKE" in flags
+            )
+        ):
+    
+            entry = "EXPANSION_LONG"
+            stop = recent_low
+            reason = "EXPANSION_LONG"
+    
+        elif (
+            "PRESSURE_DOWN" in flags
+            and (
+                "ATR_EXPANSION" in flags
+                or "VOL_SPIKE" in flags
+            )
+        ):
+    
+            entry = "EXPANSION_SHORT"
+            stop = recent_high
+            reason = "EXPANSION_SHORT"
+
     # =========================
     # EARLY
     # =========================
