@@ -4494,6 +4494,7 @@ def smart_money_stage(score, flags):
     # =========================
     if (
         "PRESSURE_UP" in flags
+        and "STRUCTURE_CONFLICT" not in flags
         and (
             "EMA_BULL" in flags
             or "EMA_BULL_STRONG" in flags
@@ -4504,6 +4505,7 @@ def smart_money_stage(score, flags):
     
     if (
         "PRESSURE_DOWN" in flags
+        and "STRUCTURE_CONFLICT" not in flags
         and (
             "EMA_BEAR" in flags
             or "EMA_BEAR_STRONG" in flags
