@@ -182,11 +182,11 @@ def analyze_signal_strength(sig):
 
     if "CONTINUATION_UP" in flags:
         reasons.append("Продолжение роста")
-        strength += 2
+        strength += 3
 
     if "CONTINUATION_DOWN" in flags:
         reasons.append("Продолжение падения")
-        strength += 2
+        strength += 3
 
     # =========================
     # PRESSURE
