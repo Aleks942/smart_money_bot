@@ -5072,6 +5072,43 @@ def build_signal(instId):
     direction_text, reasons, up_w, down_w = direction_hint(flags)
     direction_code = direction_code_from_text(direction_text)
 
+    # =========================
+    # FLOW DEFAULT
+    # =========================
+    
+    flow_ok = False
+    
+    # =========================
+    # EMA DIRECTION BLOCK
+    # =========================
+    
+    ema_bear = (
+        "EMA_BEAR" in flags
+        or "EMA_BEAR_STRONG" in flags
+    )
+    
+    ema_bull = (
+        "EMA_BULL" in flags
+        or "EMA_BULL_STRONG" in flags
+    )
+    
+    if direction_code == "UP" and ema_bear:
+    
+        print(
+            f"[EMA_BLOCK_LONG] {instId}",
+            flush=True
+        )
+    
+    elif direction_code == "DOWN" and ema_bull:
+    
+        print(
+            f"[EMA_BLOCK_SHORT] {instId}",
+            flush=True
+        )
+    
+    else:
+        flow_ok = True
+
     tgt = liquidity_target(pmeta, flags, price)
 
     entry_zone = calc_entry_zone(price, pmeta, flags, direction_code)
