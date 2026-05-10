@@ -5884,6 +5884,12 @@ def build_signal(instId):
             swing_only_candidate = True
 
     # =========================
+    # DEFAULT SIGNAL TYPE
+    # =========================
+    
+    signal_type = "NORMAL"
+
+    # =========================
     # SWING EARLY
     # =========================
     
