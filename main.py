@@ -5297,6 +5297,32 @@ def build_signal(instId):
         score += 2
 
     # =========================
+    # STRUCTURE CONFLICT
+    # =========================
+    
+    bull_conflict = (
+        "PRESSURE_UP" in flags
+        and (
+            "BREAKOUT_DOWN" in flags
+            or "BREAKOUT_CONFIRM_DOWN" in flags
+        )
+    )
+    
+    bear_conflict = (
+        "PRESSURE_DOWN" in flags
+        and (
+            "BREAKOUT_UP" in flags
+            or "BREAKOUT_CONFIRM_UP" in flags
+        )
+    )
+    
+    if bull_conflict or bear_conflict:
+    
+        flags.add("STRUCTURE_CONFLICT")
+    
+        score -= 2
+
+    # =========================
     # PRE-BREAKOUT PRESSURE
     # =========================
     pre_breakout = detect_pre_breakout_pressure(c5, flags, pmeta, ema_state)
