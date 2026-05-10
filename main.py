@@ -5913,12 +5913,9 @@ def build_signal(instId):
         or "CONTINUATION_DOWN" in flags
     )
     
-    if not swing_quality:
+    if swing_only_candidate and not swing_quality:
         swing_only_candidate = False
-       
-        else:
-            signal_type = "NORMAL"
-
+        
     # =========================
     # SIGNAL TYPE DEBUG
     # =========================
