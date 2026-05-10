@@ -5276,6 +5276,98 @@ def build_signal(instId):
         flags.discard("PRESSURE_UP")
         flags.add("PRESSURE_DOWN")
         score += 1
+    
+    
+    # =========================
+    # MTF DIRECTION BIAS
+    # =========================
+    
+    mtf_long_bias = False
+    mtf_short_bias = False
+    
+    mtf_score = 0
+    
+    
+    # =========================
+    # LONG BIAS
+    # =========================
+    
+    if (
+        h4_state in ["EMA_BULL_STRONG", "EMA_BULL"]
+        and h1_state in [
+            "EMA_BULL_STRONG",
+            "EMA_BULL",
+            "EMA_BULL_WEAK"
+        ]
+    ):
+        mtf_long_bias = True
+    
+    
+    # =========================
+    # SHORT BIAS
+    # =========================
+    
+    if (
+        h4_state in ["EMA_BEAR_STRONG", "EMA_BEAR"]
+        and h1_state in [
+            "EMA_BEAR_STRONG",
+            "EMA_BEAR",
+            "EMA_BEAR_WEAK"
+        ]
+    ):
+        mtf_short_bias = True
+    
+    
+    # =========================
+    # APPLY LONG ALIGN
+    # =========================
+    
+    if mtf_long_bias and (
+    
+        "PRESSURE_UP" in flags
+        or "CONTINUATION_UP" in flags
+        or "BREAKOUT_UP" in flags
+        or "BREAKOUT_CONFIRM_UP" in flags
+    ):
+    
+        flags.add("MTF_LONG_ALIGN")
+    
+        if (
+            h4_state == "EMA_BULL_STRONG"
+            and h1_state == "EMA_BULL_STRONG"
+        ):
+            mtf_score += 2
+    
+        else:
+            mtf_score += 1
+    
+    
+    # =========================
+    # APPLY SHORT ALIGN
+    # =========================
+    
+    if mtf_short_bias and (
+    
+        "PRESSURE_DOWN" in flags
+        or "CONTINUATION_DOWN" in flags
+        or "BREAKOUT_DOWN" in flags
+        or "BREAKOUT_CONFIRM_DOWN" in flags
+    ):
+    
+        flags.add("MTF_SHORT_ALIGN")
+    
+        if (
+            h4_state == "EMA_BEAR_STRONG"
+            and h1_state == "EMA_BEAR_STRONG"
+        ):
+            mtf_score += 2
+    
+        else:
+            mtf_score += 1
+
+
+
+    
     # =========================
     # STRUCTURE CONFLICT
     # =========================
