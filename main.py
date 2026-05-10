@@ -4352,11 +4352,13 @@ def smart_money_stage(score, flags):
         "PRESSURE_DOWN" in flags
         and "EMA_BEAR" in flags
         and (
-            "EMA_BEAR_STRONG" in flags
-            or "MTF_SHORT_ALIGN" in flags
+            "BREAKOUT_DOWN" in flags
+            or "BREAKOUT_CONFIRM_DOWN" in flags
             or "CONTINUATION_DOWN" in flags
+            or "VOL_SPIKE" in flags
+            or "ATR_EXPANSION" in flags
         )
-        and score >= 4
+        and score >= 5
     )
 
     if strong_bull_expansion:
