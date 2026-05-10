@@ -5149,8 +5149,17 @@ def build_signal(instId):
         cont = None
 
     if cont:
-        flags.add(cont)
-        score += 2
+
+        continuation_quality = (
+            vol_spike
+            or atr_expansion
+            or "BREAKOUT_UP" in flags
+            or "BREAKOUT_DOWN" in flags
+        )
+    
+        if continuation_quality:
+            flags.add(cont)
+            score += 2
 
     # =========================
     # COMPRESSION
