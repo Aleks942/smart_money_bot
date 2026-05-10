@@ -5279,29 +5279,29 @@ def build_signal(instId):
         and h1_state in ["EMA_BEAR_STRONG", "EMA_BEAR", "EMA_BEAR_WEAK"]
     ):
         mtf_short_bias = True
+    
+    if mtf_long_bias and (
+        pressure == "UP"
+        or "PRESSURE_UP" in flags
+        or "CONTINUATION_UP" in flags
+        or "BREAKOUT_UP" in flags
+    ):
+        score += 1
+        flags.add("MTF_LONG_ALIGN")
+    
+    if mtf_short_bias and (
+        pressure == "DOWN"
+        or "PRESSURE_DOWN" in flags
+        or "CONTINUATION_DOWN" in flags
+        or "BREAKOUT_DOWN" in flags
+    ):
+        score += 1
+        flags.add("MTF_SHORT_ALIGN")
 
-  if mtf_long_bias and (
-    pressure == "UP"
-    or "PRESSURE_UP" in flags
-    or "CONTINUATION_UP" in flags
-    or "BREAKOUT_UP" in flags
-):
-    score += 1
-    flags.add("MTF_LONG_ALIGN")
 
-if mtf_short_bias and (
-    pressure == "DOWN"
-    or "PRESSURE_DOWN" in flags
-    or "CONTINUATION_DOWN" in flags
-    or "BREAKOUT_DOWN" in flags
-):
-    score += 1
-    flags.add("MTF_SHORT_ALIGN")
-
-        
-    # =========================
-    # PRO EARLY EMA BOOST
-    # =========================
+# =========================
+# PRO EARLY EMA BOOST
+# =========================
 
     score = float(score)
 
