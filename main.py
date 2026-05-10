@@ -5073,6 +5073,28 @@ def build_signal(instId):
     direction_code = direction_code_from_text(direction_text)
 
     # =========================
+    # HARD DIRECTION FIX
+    # =========================
+    
+    if not direction_code:
+    
+        if (
+            "BREAKOUT_UP" in flags
+            or "BREAKOUT_CONFIRM_UP" in flags
+            or "CONTINUATION_UP" in flags
+            or "PRESSURE_UP" in flags
+        ):
+            direction_code = "UP"
+    
+        elif (
+            "BREAKOUT_DOWN" in flags
+            or "BREAKOUT_CONFIRM_DOWN" in flags
+            or "CONTINUATION_DOWN" in flags
+            or "PRESSURE_DOWN" in flags
+        ):
+            direction_code = "DOWN"
+
+    # =========================
     # FLOW DEFAULT
     # =========================
     
