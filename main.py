@@ -4317,21 +4317,31 @@ def smart_money_stage(score, flags):
 
     flags = set(flags or [])
 
+    # =========================
+    # EARLY
+    # =========================
     if score < 1:
         return "⚪ EARLY", "Очень ранний интерес"
 
+    # =========================
+    # CONFIRMED EXPANSION
+    # =========================
     if (
         "BREAKOUT_CONFIRM_UP" in flags
         or "BREAKOUT_CONFIRM_DOWN" in flags
     ):
         return "🟢 EXPANSION", "Подтверждённый импульс"
 
+    # =========================
+    # EARLY EXPANSION
+    # =========================
     strong_bull_expansion = (
         "PRESSURE_UP" in flags
         and "EMA_BULL" in flags
         and (
             "EMA_BULL_STRONG" in flags
             or "MTF_LONG_ALIGN" in flags
+            or "CONTINUATION_UP" in flags
         )
         and score >= 4
     )
@@ -4342,6 +4352,7 @@ def smart_money_stage(score, flags):
         and (
             "EMA_BEAR_STRONG" in flags
             or "MTF_SHORT_ALIGN" in flags
+            or "CONTINUATION_DOWN" in flags
         )
         and score >= 4
     )
@@ -4352,7 +4363,39 @@ def smart_money_stage(score, flags):
     if strong_bear_expansion:
         return "🟢 EXPANSION", "Сильный bearish expansion"
 
+    # =========================
+    # ACCUMULATION
+    # =========================
+    if (
+        "COMP_5M" in flags
+        or "COMP_15M" in flags
+    ):
+        return "🟣 ACCUMULATION", "Сжатие перед движением"
 
+    # =========================
+    # TRANSITION
+    # =========================
+    if (
+        "PRESSURE_UP" in flags
+        or "PRESSURE_DOWN" in flags
+    ):
+        return "🟠 TRANSITION", "Начало направленного движения"
+
+    # =========================
+    # MANIPULATION
+    # =========================
+    if (
+        "FAKE_DUMP" in flags
+        or "FAKE_PUMP" in flags
+        or "SWEEP_DOWN" in flags
+        or "SWEEP_UP" in flags
+    ):
+        return "🟡 MANIPULATION", "Манипуляция ликвидностью"
+
+    # =========================
+    # DEFAULT
+    # =========================
+    return "⚪ NEUTRAL", "Нейтральная структура"
     # =========================
     # CONTINUATION STAGE
     # =========================
