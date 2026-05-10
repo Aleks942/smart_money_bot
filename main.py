@@ -8135,7 +8135,17 @@ if __name__ == "__main__":
             
             ep_score = float(sig.get("early_pressure_score") or 0)
             
-            if ep_score >= 6:
+            strong_ep = (
+            
+                "EMA_BULL_STRONG" in flags
+                or "EMA_BEAR_STRONG" in flags
+                or "MTF_LONG_ALIGN" in flags
+                or "MTF_SHORT_ALIGN" in flags
+                or "BREAKOUT_CONFIRM_UP" in flags
+                or "BREAKOUT_CONFIRM_DOWN" in flags
+            )
+            
+            if ep_score >= 6 and strong_ep:
             
                 elite_score += 2
                 reasons.append("EARLY_PRESSURE")
