@@ -4799,7 +4799,7 @@ def calc_entry_zone(price, pmeta, flags, direction_code):
                 "zone_type": "RECLAIM_LONG",
                 "low": round(lo + rng * 0.10, 6),
                 "high": round(lo + rng * 0.30, 6),
-                "stop": round(lo - rng * 0.12, 6),
+                "stop": round(lo - rng * 0.08, 6),
             }
 
     if direction_code == "DOWN":
