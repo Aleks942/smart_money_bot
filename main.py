@@ -7654,6 +7654,38 @@ if __name__ == "__main__":
                 continue
 
             # =====================
+            # RR CALC
+            # =====================
+            
+            entry_price = float(sig.get("entry_price") or sig.get("price") or 0)
+            stop_price = float(sig.get("stop") or 0)
+            target_price = float(sig.get("target") or 0)
+            
+            rr1 = 0
+            
+            if (
+                entry_price > 0
+                and stop_price > 0
+                and target_price > 0
+            ):
+                risk = abs(entry_price - stop_price)
+                reward = abs(target_price - entry_price)
+            
+                if risk > 0:
+                    rr1 = round(reward / risk, 2)
+            
+            sig["rr1"] = rr1
+            
+            print(
+                f"[RR_CALC] {instId} "
+                f"entry={entry_price} "
+                f"stop={stop_price} "
+                f"target={target_price} "
+                f"rr1={rr1}",
+                flush=True
+            )
+
+            # =====================
             # RR BLOCK
             # =====================
             
