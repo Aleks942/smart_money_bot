@@ -4339,11 +4339,13 @@ def smart_money_stage(score, flags):
         "PRESSURE_UP" in flags
         and "EMA_BULL" in flags
         and (
-            "EMA_BULL_STRONG" in flags
-            or "MTF_LONG_ALIGN" in flags
+            "BREAKOUT_UP" in flags
+            or "BREAKOUT_CONFIRM_UP" in flags
             or "CONTINUATION_UP" in flags
+            or "VOL_SPIKE" in flags
+            or "ATR_EXPANSION" in flags
         )
-        and score >= 4
+        and score >= 5
     )
 
     strong_bear_expansion = (
