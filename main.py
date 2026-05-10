@@ -5463,7 +5463,19 @@ def build_signal(instId):
     print(f"[FLAGS_RAW] {instId} {flags}", flush=True)
 
     entry_price, stop, entry_reason = decide_entry(stage, flags, price, c5)
+
+    # =========================
+    # TEMP TARGET
+    # =========================
     
+    tgt = 0
+    
+    if direction_code == "UP":
+        tgt = round(price * 1.03, 6)
+    
+    elif direction_code == "DOWN":
+        tgt = round(price * 0.97, 6)
+        
     signal = {
         "instId": instId,
         "symbol": instId,
