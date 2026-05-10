@@ -4592,6 +4592,49 @@ def detect_early_pressure(sig):
         if down_score > 0:
             add_down(2, "STRONG_ACCUMULATION")
 
+    # =========================
+    # COMPRESSION + PRESSURE
+    # =========================
+
+    if (
+        (
+            "COMP_5M" in flags
+            or "COMP_15M" in flags
+        )
+        and (
+            "PRESSURE_UP" in flags
+            or "PRESSURE_DOWN" in flags
+        )
+    ):
+
+        if up_score > 0:
+            add_up(2, "COMP_PLUS_PRESSURE")
+
+        if down_score > 0:
+            add_down(2, "COMP_PLUS_PRESSURE")
+
+
+    # =========================
+    # COMPRESSION + CONTINUATION
+    # =========================
+
+    if (
+        (
+            "COMP_5M" in flags
+            or "COMP_15M" in flags
+        )
+        and (
+            "CONTINUATION_UP" in flags
+            or "CONTINUATION_DOWN" in flags
+        )
+    ):
+
+        if up_score > 0:
+            add_up(3, "COMP_PLUS_CONTINUATION")
+
+        if down_score > 0:
+            add_down(3, "COMP_PLUS_CONTINUATION")
+
     # STAGE
     if "ACCUMULATION" in stage:
         add_up(2, "ACC_STAGE")
