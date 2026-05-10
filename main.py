@@ -5713,34 +5713,73 @@ def build_signal(instId):
     
     ema_boost = 0
     
+    # =========================
+    # STRONG EMA CONTEXT
+    # =========================
+    
     if "EMA_BULL" in flags and acc_score >= 1:
         ema_boost += 1
     
     if "EMA_BEAR" in flags and acc_score >= 1:
         ema_boost += 1
     
+    # =========================
+    # MIXED MARKET LOGIC
+    # =========================
+    
     if "EMA_MIXED" in flags:
     
-        # mixed market but real pressure exists
+        # mixed market but higher TF aligned
         if (
-            "PRESSURE_UP" in flags
-            or "PRESSURE_DOWN" in flags
+            "MTF_LONG_ALIGN" in flags
+            or "MTF_SHORT_ALIGN" in flags
         ):
             ema_boost += 1
     
-        # dead mixed market
-        else:
+        # mixed market but pressure exists
+        elif (
+            "PRESSURE_UP" in flags
+            or "PRESSURE_DOWN" in flags
+        ):
             ema_boost += 0.5
     
-    if ema_boost > 0:
-        print(
-            f"[EMA_BOOST] {instId} boost={ema_boost} "
-            f"score_before={score} "
-            f"acc={acc_score} flags={list(flags)}",
-            flush=True
-        )
-    
-    score += ema_boost
+        # dead mixed market
+        else:
+            ema_boost += 0
+
+# =========================
+# EMA FLAT PENALTY
+# =========================
+
+if "EMA_FLAT" in flags:
+    ema_boost -= 0.5
+
+# =========================
+# STRUCTURE CONFLICT PENALTY
+# =========================
+
+if "STRUCTURE_CONFLICT" in flags:
+    ema_boost -= 1
+
+# =========================
+# DEBUG
+# =========================
+
+if ema_boost != 0:
+    print(
+        f"[EMA_BOOST] {instId} "
+        f"boost={ema_boost} "
+        f"score_before={score} "
+        f"acc={acc_score} "
+        f"flags={list(flags)}",
+        flush=True
+    )
+
+# =========================
+# APPLY
+# =========================
+
+score += ema_boost
     
     # =========================
     # MTF SCORE BOOST
