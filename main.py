@@ -5274,7 +5274,28 @@ def build_signal(instId):
         flags.discard("PRESSURE_UP")
         flags.add("PRESSURE_DOWN")
         score += 1
+    # =========================
+    # STRUCTURE CONFLICT
+    # =========================
     
+    if (
+        (
+            "PRESSURE_UP" in flags
+            and (
+                "EMA_BEAR" in flags
+                or "EMA_BEAR_STRONG" in flags
+            )
+        )
+        or
+        (
+            "PRESSURE_DOWN" in flags
+            and (
+                "EMA_BULL" in flags
+                or "EMA_BULL_STRONG" in flags
+            )
+        )
+    ):
+        flags.add("STRUCTURE_CONFLICT")
 
     # =========================
     # AUTO CONTINUATION PRO
