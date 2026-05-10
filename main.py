@@ -5771,7 +5771,7 @@ def build_signal(instId):
     ):
         quality_pass = True
 
-    if strong_structure_pass:
+    if strong_structure_pass and quality_pass:
         print(
             f"[OVERRIDE_LOW_SCORE] {instId} "
             f"score={score} acc={acc_score}",
