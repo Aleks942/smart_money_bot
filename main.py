@@ -8075,6 +8075,30 @@ if __name__ == "__main__":
                 f"side={sig_side}",
                 flush=True
             )
+
+            # =====================
+            # ELITE SIDE CONFIRM
+            # =====================
+            
+            elite_side_ok = False
+            
+            if sig_side == "UP" and (
+                "EMA_BULL" in flags
+                or "EMA_BULL_STRONG" in flags
+                or "MTF_LONG_ALIGN" in flags
+            ):
+                elite_side_ok = True
+            
+            elif sig_side == "DOWN" and (
+                "EMA_BEAR" in flags
+                or "EMA_BEAR_STRONG" in flags
+                or "MTF_SHORT_ALIGN" in flags
+            ):
+                elite_side_ok = True
+            
+            if not elite_side_ok:
+                elite = False
+                reasons.append("ELITE_SIDE_CONTEXT_BLOCK")
             
             # =====================
             # 1. SENDABLE
