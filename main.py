@@ -2744,14 +2744,14 @@ def breakout_confirm_ok(
     # CONFIRMED UP
     # =========================
 
-    if closes_up and body_ok_up:
+    if up_closes >= max(1, confirm_bars - 1) and body_ok_up:
         return "UP"
 
     # =========================
     # CONFIRMED DOWN
     # =========================
 
-    if closes_down and body_ok_down:
+    if down_closes >= max(1, confirm_bars - 1) and body_ok_down:
         return "DOWN"
 
     return None
