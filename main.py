@@ -4884,21 +4884,39 @@ def detect_early_pressure(sig):
         if down_score > 0:
             add_down(2, "COMP_15M")
 
-    # ACC
+    # =========================
+    # ACCUMULATION CONTEXT
+    # =========================
+    
     if acc >= 2:
-        if up_score > 0:
-            add_up(1, "ACC_SCORE")
-
-        if down_score > 0:
-            add_down(1, "ACC_SCORE")
-
-    if acc >= 3:
+    
+        acc_context_ok = (
+    
+            "COMP_5M" in flags
+            or "COMP_15M" in flags
+            or "BREAKOUT_CONFIRM_UP" in flags
+            or "BREAKOUT_CONFIRM_DOWN" in flags
+            or "BREAKOUT_UP" in flags
+            or "BREAKOUT_DOWN" in flags
+        )
+    
+        if acc_context_ok:
+    
+            if up_score > 0:
+                add_up(1, "ACC_SCORE")
+    
+            if down_score > 0:
+                add_down(1, "ACC_SCORE")
+    
+    
+    if acc >= 3 and acc_context_ok:
+    
         if up_score > 0:
             add_up(2, "STRONG_ACCUMULATION")
-
+    
         if down_score > 0:
             add_down(2, "STRONG_ACCUMULATION")
-
+      
     # =========================
     # MTF CONTEXT
     # =========================
