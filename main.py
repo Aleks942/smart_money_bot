@@ -8456,15 +8456,41 @@ if __name__ == "__main__":
             ):
                 elite_side_ok = True
             
+            
             # conflict block
             if "STRUCTURE_CONFLICT" in flags:
-                elite_side_ok = False
-                reasons.append("STRUCTURE_CONFLICT")
+            
+                # allow strong continuation despite conflict
+                if not (
+                    (
+                        "BREAKOUT_CONFIRM_UP" in flags
+                        or "CONTINUATION_UP" in flags
+                    )
+                    and (
+                        "EMA_BULL" in flags
+                        or "EMA_BULL_STRONG" in flags
+                        or "MTF_LONG_ALIGN" in flags
+                    )
+                ) and not (
+                    (
+                        "BREAKOUT_CONFIRM_DOWN" in flags
+                        or "CONTINUATION_DOWN" in flags
+                    )
+                    and (
+                        "EMA_BEAR" in flags
+                        or "EMA_BEAR_STRONG" in flags
+                        or "MTF_SHORT_ALIGN" in flags
+                    )
+                ):
+            
+                    elite_side_ok = False
+                    reasons.append("STRUCTURE_CONFLICT")
+            
             
             if not elite_side_ok:
                 elite = False
                 reasons.append("ELITE_SIDE_CONTEXT_BLOCK")
-                        
+                                                
             # =====================
             # 1. SENDABLE
             # =====================
