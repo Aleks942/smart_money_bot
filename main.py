@@ -4819,6 +4819,22 @@ def detect_early_pressure(sig):
     if "CONTINUATION_DOWN" in flags:
         add_down(2, "CONTINUATION_DOWN")
 
+        # BREAKOUT CONFIRM
+
+    if "BREAKOUT_CONFIRM_UP" in flags:
+        add_up(4, "BREAKOUT_CONFIRM_UP")
+
+    if "BREAKOUT_CONFIRM_DOWN" in flags:
+        add_down(4, "BREAKOUT_CONFIRM_DOWN")
+
+    # NORMAL BREAKOUT
+
+    if "BREAKOUT_UP" in flags:
+        add_up(2, "BREAKOUT_UP")
+
+    if "BREAKOUT_DOWN" in flags:
+        add_down(2, "BREAKOUT_DOWN")
+
     # COMPRESSION
     if "COMP_5M" in flags:
         if up_score > 0:
