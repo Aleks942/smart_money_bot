@@ -4131,10 +4131,40 @@ def signal_quality_filter(sig):
         )
     )
     
+    # =====================
+    # 🟠 EARLY PRESSURE — SMART FILTER
+    # =====================
+    
+    trend_only = (
+        (
+            "PRESSURE_UP" in flags
+            and (
+                "EMA_BULL" in flags
+                or "EMA_BULL_STRONG" in flags
+            )
+        )
+        or
+        (
+            "PRESSURE_DOWN" in flags
+            and (
+                "EMA_BEAR" in flags
+                or "EMA_BEAR_STRONG" in flags
+            )
+        )
+    )
+    
     if ep_score >= 7 and (
         real_impulse
         or compression_context
     ):
+    
+        # если это просто trend+pressure без реального импульса — не пропускаем
+        if trend_only and not (
+            real_impulse
+            or compression_context
+        ):
+            return False, "trend_only_block"
+    
         return True, "early_pressure"
 
     # =====================
