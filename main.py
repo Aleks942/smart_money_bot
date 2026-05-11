@@ -5450,31 +5450,30 @@ def build_signal(instId):
         mtf_short_bias = True
     
     
-    # =========================
-    # APPLY LONG ALIGN
-    # =========================
-    
-    if mtf_long_bias and (
-    
-        "PRESSURE_UP" in flags
-        or "CONTINUATION_UP" in flags
-        or "BREAKOUT_UP" in flags
-        or "BREAKOUT_CONFIRM_UP" in flags
-    ):
-    
-        flags.add("MTF_LONG_ALIGN")
-    
-        # STRONG ALIGN
-        if (
-            h4_state == "EMA_BULL_STRONG"
-            and h1_state == "EMA_BULL_STRONG"
+        # =========================
+        # APPLY LONG ALIGN
+        # =========================
+        
+        if mtf_long_bias and (
+        
+            "PRESSURE_UP" in flags
+            or "CONTINUATION_UP" in flags
+            or "BREAKOUT_UP" in flags
+            or "BREAKOUT_CONFIRM_UP" in flags
         ):
-            mtf_score += 1
-    
-        # NORMAL ALIGN
-        else:
-            mtf_score += 0.5
-
+        
+            flags.add("MTF_LONG_ALIGN")
+        
+            # STRONG ALIGN
+            if (
+                h4_state == "EMA_BULL_STRONG"
+                and h1_state == "EMA_BULL_STRONG"
+            ):
+                mtf_score += 2
+        
+            # NORMAL ALIGN
+            else:
+                mtf_score += 1
 
         # =========================
         # APPLY SHORT ALIGN
