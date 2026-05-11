@@ -4852,48 +4852,50 @@ def detect_early_pressure(sig):
     if acc >= 2:
         if up_score > 0:
             add_up(1, "ACC_SCORE")
+
         if down_score > 0:
             add_down(1, "ACC_SCORE")
 
     if acc >= 3:
         if up_score > 0:
             add_up(2, "STRONG_ACCUMULATION")
+
         if down_score > 0:
             add_down(2, "STRONG_ACCUMULATION")
 
-        # =========================
-        # MTF CONTEXT
-        # =========================
-    
-        if "MTF_LONG_ALIGN" in flags:
-            add_up(2, "MTF_LONG_ALIGN")
-    
-        if "MTF_SHORT_ALIGN" in flags:
-            add_down(2, "MTF_SHORT_ALIGN")
-    
-        # =========================
-        # EMA MIXED CONTEXT
-        # =========================
-    
-        if "EMA_MIXED" in flags:
-    
-            if up_score > 0:
-                add_up(1, "EMA_MIXED_PRESSURE")
-    
-            if down_score > 0:
-                add_down(1, "EMA_MIXED_PRESSURE")
-    
-        # =========================
-        # STRUCTURE CONFLICT
-        # =========================
-    
-        if "STRUCTURE_CONFLICT" in flags:
-    
-            up_score -= 3
-            down_score -= 3
-    
-            up_reasons.append("STRUCTURE_CONFLICT")
-            down_reasons.append("STRUCTURE_CONFLICT")
+    # =========================
+    # MTF CONTEXT
+    # =========================
+
+    if "MTF_LONG_ALIGN" in flags:
+        add_up(2, "MTF_LONG_ALIGN")
+
+    if "MTF_SHORT_ALIGN" in flags:
+        add_down(2, "MTF_SHORT_ALIGN")
+
+    # =========================
+    # EMA MIXED CONTEXT
+    # =========================
+
+    if "EMA_MIXED" in flags:
+
+        if up_score > 0:
+            add_up(1, "EMA_MIXED_PRESSURE")
+
+        if down_score > 0:
+            add_down(1, "EMA_MIXED_PRESSURE")
+
+    # =========================
+    # STRUCTURE CONFLICT
+    # =========================
+
+    if "STRUCTURE_CONFLICT" in flags:
+
+        up_score -= 3
+        down_score -= 3
+
+        up_reasons.append("STRUCTURE_CONFLICT")
+        down_reasons.append("STRUCTURE_CONFLICT") 
 
     # =========================
     # COMPRESSION + PRESSURE
