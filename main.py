@@ -4174,7 +4174,17 @@ def signal_quality_filter(sig):
         "ACCUMULATION" in stage or
         "TRANSITION" in stage
     ):
-        return True, "accumulation_context"
+    
+        if (
+            "COMP_5M" in flags
+            or "COMP_15M" in flags
+            or "BREAKOUT_CONFIRM_UP" in flags
+            or "BREAKOUT_CONFIRM_DOWN" in flags
+            or "CONTINUATION_UP" in flags
+            or "CONTINUATION_DOWN" in flags
+        ):
+    
+            return True, "accumulation_context"
 
     # =====================
     # 📊 STRUCTURE PASS
