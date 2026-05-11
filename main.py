@@ -2734,11 +2734,11 @@ def breakout_confirm_ok(
             body_ok_down = False
 
         # CLOSE FILTER
-        if close_p <= hi * (1.0 + MIN_BREAKOUT_DIST_PCT / 100.0):
-            closes_up = False
-
-        if close_p >= lo * (1.0 - MIN_BREAKOUT_DIST_PCT / 100.0):
-            closes_down = False
+        if close_p > hi * (1.0 + MIN_BREAKOUT_DIST_PCT / 100.0):
+            up_closes += 1
+        
+        if close_p < lo * (1.0 - MIN_BREAKOUT_DIST_PCT / 100.0):
+            down_closes += 1
 
     # =========================
     # CONFIRMED UP
