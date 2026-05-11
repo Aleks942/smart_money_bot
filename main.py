@@ -6185,79 +6185,79 @@ if mtf_short_bias and (
         flush=True
     )
 
-        # =========================
-        # STRUCTURE PASS
-        # =========================
-    
-        strong_structure_pass = False
-    
-        if (
-            acc_score >= 2
-            and (
-                "PRESSURE_UP" in flags
-                or "PRESSURE_DOWN" in flags
-                or "BREAKOUT_CONFIRM_UP" in flags
-                or "BREAKOUT_CONFIRM_DOWN" in flags
-            )
-        ):
-            strong_structure_pass = True
-    
-    
-        # =========================
-        # QUALITY FILTER
-        # =========================
-    
-        quality_pass = False
-    
-        if (
-            "BREAKOUT_CONFIRM_UP" in flags
+    # =========================
+    # STRUCTURE PASS
+    # =========================
+
+    strong_structure_pass = False
+
+    if (
+        acc_score >= 2
+        and (
+            "PRESSURE_UP" in flags
+            or "PRESSURE_DOWN" in flags
+            or "BREAKOUT_CONFIRM_UP" in flags
             or "BREAKOUT_CONFIRM_DOWN" in flags
-        ):
-            quality_pass = True
-    
-        elif (
-            "CONTINUATION_UP" in flags
-            or "CONTINUATION_DOWN" in flags
-        ):
-            quality_pass = True
-    
-        elif (
-            "VOL_SPIKE" in flags
-            and "PRESSURE_UP" in flags
-        ):
-            quality_pass = True
-    
-        elif (
-            "VOL_SPIKE" in flags
-            and "PRESSURE_DOWN" in flags
-        ):
-            quality_pass = True
-    
-        elif (
-            "COMP_5M" in flags
-            and (
-                "PRESSURE_UP" in flags
-                or "PRESSURE_DOWN" in flags
-            )
-        ):
-            quality_pass = True
-    
-    
-        if strong_structure_pass and quality_pass:
-            print(
-                f"[OVERRIDE_LOW_SCORE] {instId} "
-                f"score={score} acc={acc_score}",
-                flush=True
-            )
-            ok = True
-    
-    
-        if not ok:
-            print(f"[FILTER_BLOCK] {instId} reason={reason}", flush=True)
-            return None
-    
-    
-        return signal
+        )
+    ):
+        strong_structure_pass = True
+
+
+    # =========================
+    # QUALITY FILTER
+    # =========================
+
+    quality_pass = False
+
+    if (
+        "BREAKOUT_CONFIRM_UP" in flags
+        or "BREAKOUT_CONFIRM_DOWN" in flags
+    ):
+        quality_pass = True
+
+    elif (
+        "CONTINUATION_UP" in flags
+        or "CONTINUATION_DOWN" in flags
+    ):
+        quality_pass = True
+
+    elif (
+        "VOL_SPIKE" in flags
+        and "PRESSURE_UP" in flags
+    ):
+        quality_pass = True
+
+    elif (
+        "VOL_SPIKE" in flags
+        and "PRESSURE_DOWN" in flags
+    ):
+        quality_pass = True
+
+    elif (
+        "COMP_5M" in flags
+        and (
+            "PRESSURE_UP" in flags
+            or "PRESSURE_DOWN" in flags
+        )
+    ):
+        quality_pass = True
+
+
+    if strong_structure_pass and quality_pass:
+        print(
+            f"[OVERRIDE_LOW_SCORE] {instId} "
+            f"score={score} acc={acc_score}",
+            flush=True
+        )
+        ok = True
+
+
+    if not ok:
+        print(f"[FILTER_BLOCK] {instId} reason={reason}", flush=True)
+        return None
+
+
+    return signal
         
 # ==============================
 # 🎯 SNIPER SIGNAL ENGINE
