@@ -4132,44 +4132,45 @@ def signal_quality_filter(sig):
     )
     
     # =====================
-    # 🟠 EARLY PRESSURE — SMART FILTER
+    # 🟠 EARLY PRESSURE — SMART FILTER V2
     # =====================
     
-    trend_only = (
+    weak_trend_only = (
     
         (
             "PRESSURE_UP" in flags
-            and (
-                "EMA_BULL" in flags
-                or "EMA_BULL_STRONG" in flags
-            )
+            and "EMA_BULL" in flags
+            and "EMA_BULL_STRONG" not in flags
+            and "MTF_LONG_ALIGN" not in flags
+            and not real_impulse
+            and not compression_context
         )
     
         or
     
         (
             "PRESSURE_DOWN" in flags
-            and (
-                "EMA_BEAR" in flags
-                or "EMA_BEAR_STRONG" in flags
-            )
+            and "EMA_BEAR" in flags
+            and "EMA_BEAR_STRONG" not in flags
+            and "MTF_SHORT_ALIGN" not in flags
+            and not real_impulse
+            and not compression_context
         )
     )
     
-    if (
+    if weak_trend_only:
+        return False, "weak_trend_only"
     
-        ep_score >= 7
+    if ep_score >= 7 and (
     
-        and (
-            real_impulse
-            or compression_context
-        )
-    
-        and not trend_only
+        real_impulse
+        or compression_context
+        or "MTF_LONG_ALIGN" in flags
+        or "MTF_SHORT_ALIGN" in flags
+        or "EMA_BULL_STRONG" in flags
+        or "EMA_BEAR_STRONG" in flags
     ):
-    
         return True, "early_pressure"
-
     # =====================
     # 🌍 MARKET REGIME FILTER
     # =====================
