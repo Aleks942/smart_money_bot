@@ -4228,7 +4228,36 @@ def signal_quality_filter(sig):
         "CONTINUATION_DOWN" in flags
     )
 
-    if score >= 3 and has_structure:
+    # =====================
+    # 📊 STRUCTURE PASS
+    # =====================
+    
+    real_structure = (
+    
+        # breakout
+        "BREAKOUT_UP" in flags
+        or "BREAKOUT_DOWN" in flags
+        or "BREAKOUT_CONFIRM_UP" in flags
+        or "BREAKOUT_CONFIRM_DOWN" in flags
+    
+        # compression + pressure
+        or (
+            (
+                "COMP_5M" in flags
+                or "COMP_15M" in flags
+            )
+            and (
+                "PRESSURE_UP" in flags
+                or "PRESSURE_DOWN" in flags
+            )
+        )
+    
+        # continuation
+        or "CONTINUATION_UP" in flags
+        or "CONTINUATION_DOWN" in flags
+    )
+    
+    if score >= 4 and real_structure:
         return True, "structure_pass"
 
     # =====================
