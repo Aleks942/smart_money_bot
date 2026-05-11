@@ -4106,9 +4106,35 @@ def signal_quality_filter(sig):
         return True, "pre_move_entry"
 
     # =====================
-    # 🟠 EARLY PRESSURE — ловим заранее
+    # 🟠 EARLY PRESSURE — SMART FILTER
     # =====================
-    if ep_score >= 5:
+    
+    real_impulse = (
+    
+        "VOL_SPIKE" in flags
+        or "ATR_EXPANSION" in flags
+        or "BREAKOUT_CONFIRM_UP" in flags
+        or "BREAKOUT_CONFIRM_DOWN" in flags
+        or "CONTINUATION_UP" in flags
+        or "CONTINUATION_DOWN" in flags
+    )
+    
+    compression_context = (
+    
+        (
+            "COMP_5M" in flags
+            or "COMP_15M" in flags
+        )
+        and (
+            "PRESSURE_UP" in flags
+            or "PRESSURE_DOWN" in flags
+        )
+    )
+    
+    if ep_score >= 7 and (
+        real_impulse
+        or compression_context
+    ):
         return True, "early_pressure"
 
     # =====================
