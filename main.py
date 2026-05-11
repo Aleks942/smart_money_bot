@@ -5456,17 +5456,17 @@ def build_signal(instId):
             mtf_score += 0.5
 
 
-# =========================
-# APPLY SHORT ALIGN
-# =========================
-
-if mtf_short_bias and (
-
-    "PRESSURE_DOWN" in flags
-    or "CONTINUATION_DOWN" in flags
-    or "BREAKOUT_DOWN" in flags
-    or "BREAKOUT_CONFIRM_DOWN" in flags
-):
+    # =========================
+    # APPLY SHORT ALIGN
+    # =========================
+    
+    if mtf_short_bias and (
+    
+        "PRESSURE_DOWN" in flags
+        or "CONTINUATION_DOWN" in flags
+        or "BREAKOUT_DOWN" in flags
+        or "BREAKOUT_CONFIRM_DOWN" in flags
+    ):
 
     flags.add("MTF_SHORT_ALIGN")
 
