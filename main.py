@@ -6040,11 +6040,17 @@ if mtf_short_bias and (
     elif score <= 0:
         signal_type = "WEAK_SKIP"
 
+    # =========================
+    # STAGE CALCULATION
+    # =========================
     
-        
+    stage, stage_reason = smart_money_stage(score, flags)
+
+
     # =========================
     # SIGNAL TYPE DEBUG
     # =========================
+    
     print(
         f"[SIGNAL_TYPE] {instId} type={signal_type} "
         f"score={score} acc={acc_score} stage={stage} "
@@ -6052,11 +6058,7 @@ if mtf_short_bias and (
         flush=True
     )
 
-    # =========================
-    # STAGE CALCULATION
-    # =========================
-    stage, stage_reason = smart_money_stage(score, flags)
-    
+
     # =========================
     # SIGNAL OBJECT
     # =========================
