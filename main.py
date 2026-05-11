@@ -4838,11 +4838,11 @@ def detect_early_pressure(sig):
 
     # CORE
     if "PRESSURE_UP" in flags:
-        add_up(3, "PRESSURE_UP")
-
+        add_up(2, "PRESSURE_UP")
+    
     if "PRESSURE_DOWN" in flags:
-        add_down(3, "PRESSURE_DOWN")
-
+        add_down(2, "PRESSURE_DOWN")
+        
     if "PRE_BREAKOUT_BUY" in flags:
         add_up(3, "PRE_BREAKOUT_BUY")
 
