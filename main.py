@@ -4136,6 +4136,7 @@ def signal_quality_filter(sig):
     # =====================
     
     trend_only = (
+    
         (
             "PRESSURE_UP" in flags
             and (
@@ -4143,7 +4144,9 @@ def signal_quality_filter(sig):
                 or "EMA_BULL_STRONG" in flags
             )
         )
+    
         or
+    
         (
             "PRESSURE_DOWN" in flags
             and (
@@ -4153,17 +4156,17 @@ def signal_quality_filter(sig):
         )
     )
     
-    if ep_score >= 7 and (
-        real_impulse
-        or compression_context
-    ):
+    if (
     
-        # если это просто trend+pressure без реального импульса — не пропускаем
-        if trend_only and not (
+        ep_score >= 7
+    
+        and (
             real_impulse
             or compression_context
-        ):
-            return False, "trend_only_block"
+        )
+    
+        and not trend_only
+    ):
     
         return True, "early_pressure"
 
