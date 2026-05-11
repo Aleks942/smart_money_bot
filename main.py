@@ -4263,7 +4263,22 @@ def signal_quality_filter(sig):
     # =====================
     # 🟡 WATCH MODE
     # =====================
-    if score >= 2 and acc >= 1:
+    
+    watch_structure = (
+    
+        "COMP_5M" in flags
+        or "COMP_15M" in flags
+        or "PRE_BREAKOUT_BUY" in flags
+        or "PRE_BREAKOUT_SELL" in flags
+        or "BREAKOUT_UP" in flags
+        or "BREAKOUT_DOWN" in flags
+    )
+    
+    if (
+        score >= 3
+        and acc >= 2
+        and watch_structure
+    ):
         return True, "watchlist"
 
     # =====================
