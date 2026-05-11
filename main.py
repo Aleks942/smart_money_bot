@@ -5289,15 +5289,35 @@ def build_signal(instId):
     ):
         final_pressure = "DOWN"
     
+    # =========================
+    # APPLY FINAL PRESSURE
+    # =========================
+    
     if final_pressure == "UP":
-        flags.discard("PRESSURE_DOWN")
-        flags.add("PRESSURE_UP")
-        score += 1
+    
+        # block fake bearish context
+        if (
+            "EMA_BEAR_STRONG" not in flags
+        ):
+    
+            flags.discard("PRESSURE_DOWN")
+            flags.add("PRESSURE_UP")
+            score += 1
+    
     
     elif final_pressure == "DOWN":
-        flags.discard("PRESSURE_UP")
-        flags.add("PRESSURE_DOWN")
-        score += 1
+    
+        # block fake bearish pressure
+        # against strong bullish HTF
+    
+        if not (
+            h4_state in ["EMA_BULL", "EMA_BULL_STRONG"]
+            and h1_state in ["EMA_BULL", "EMA_BULL_STRONG"]
+        ):
+    
+            flags.discard("PRESSURE_UP")
+            flags.add("PRESSURE_DOWN")
+            score += 1
     
     
     # =========================
