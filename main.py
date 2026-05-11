@@ -2709,9 +2709,9 @@ def breakout_confirm_ok(
 
     body_ok_up = True
     body_ok_down = True
-
-    closes_up = True
-    closes_down = True
+    
+    up_closes = 0
+    down_closes = 0
 
     for c in confirm:
 
