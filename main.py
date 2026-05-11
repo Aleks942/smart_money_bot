@@ -4161,7 +4161,7 @@ def signal_quality_filter(sig):
     if weak_trend_only:
         return False, "weak_trend_only"
     
-    if ep_score >= 7 and (
+    if ep_score >= 6 and (
     
         real_impulse
         or compression_context
