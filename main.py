@@ -2729,7 +2729,7 @@ def breakout_confirm_ok(
         body_ratio = body / rng
 
         # BODY FILTER
-        if body_ratio < 0.45:
+        if body_ratio < 0.28:
             body_ok_up = False
             body_ok_down = False
 
