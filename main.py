@@ -6040,28 +6040,28 @@ if mtf_short_bias and (
     elif score <= 0:
         signal_type = "WEAK_SKIP"
 
-    # =========================
-    # STAGE CALCULATION
-    # =========================
+        # =========================
+        # STAGE CALCULATION
+        # =========================
+        
+        stage, stage_reason = smart_money_stage(score, flags)
     
-    stage, stage_reason = smart_money_stage(score, flags)
-
-
-    # =========================
-    # SIGNAL TYPE DEBUG
-    # =========================
     
-    print(
-        f"[SIGNAL_TYPE] {instId} type={signal_type} "
-        f"score={score} acc={acc_score} stage={stage} "
-        f"swing_only={swing_only_candidate}",
-        flush=True
-    )
-
-
-    # =========================
-    # SIGNAL OBJECT
-    # =========================
+        # =========================
+        # SIGNAL TYPE DEBUG
+        # =========================
+        
+        print(
+            f"[SIGNAL_TYPE] {instId} type={signal_type} "
+            f"score={score} acc={acc_score} stage={stage} "
+            f"swing_only={swing_only_candidate}",
+            flush=True
+        )
+    
+    
+        # =========================
+        # SIGNAL OBJECT
+        # =========================
     
     tier = get_signal_tier(score, acc_score)
     print(f"[FLAGS_RAW] {instId} {flags}", flush=True)
