@@ -161,6 +161,61 @@ def analyze_signal_strength(sig):
     reasons = []
     strength = 0
 
+    # =====================
+    # 🟠 EARLY PRESSURE — SMART FILTER
+    # =====================
+
+    ep_score = float(sig.get("early_pressure_score") or 0)
+
+    real_impulse = (
+
+        "VOL_SPIKE" in flags
+        or "ATR_EXPANSION" in flags
+        or "BREAKOUT_CONFIRM_UP" in flags
+        or "BREAKOUT_CONFIRM_DOWN" in flags
+        or "CONTINUATION_UP" in flags
+        or "CONTINUATION_DOWN" in flags
+    )
+
+    compression_context = (
+
+        (
+            "COMP_5M" in flags
+            or "COMP_15M" in flags
+        )
+
+        and (
+
+            "PRESSURE_UP" in flags
+            or "PRESSURE_DOWN" in flags
+        )
+    )
+
+    trend_only = (
+
+        (
+            "PRESSURE_UP" in flags
+
+            and (
+
+                "EMA_BULL" in flags
+                or "EMA_BULL_STRONG" in flags
+            )
+        )
+
+        or
+
+        (
+            "PRESSURE_DOWN" in flags
+
+            and (
+
+                "EMA_BEAR" in flags
+                or "EMA_BEAR_STRONG" in flags
+            )
+        )
+    )
+
     # =========================
     # BREAKOUT
     # =========================
