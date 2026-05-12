@@ -8396,134 +8396,220 @@ if __name__ == "__main__":
     except Exception as e:
         print("START TELEGRAM ERROR:", e)
 
-    while True:
+   while True:
 
-        check_signal_results()
-        t0 = time.time()
+    check_signal_results()
+    t0 = time.time()
 
-        try:
+    try:
 
-            regime, _btc = btc_regime()
-            MARKET_MODE = "NEUTRAL"
+        regime, _btc = btc_regime()
 
-            if "BULL" in str(regime).upper() or "UP" in str(regime).upper():
-                MARKET_MODE = "BULL"
-            
-            elif "BEAR" in str(regime).upper() or "DOWN" in str(regime).upper():
-                MARKET_MODE = "BEAR"
+        MARKET_MODE = "NEUTRAL"
 
-            alerts = []
-            manip_watch = []
-            early_count = 0
-            start_count = 0
-            pre_count = 0
-            early_buy_symbols = []
-            early_sell_symbols = []
-            swing_candidates = []
+        if "BULL" in str(regime).upper() or "UP" in str(regime).upper():
+            MARKET_MODE = "BULL"
 
-            # =====================
-            # SCAN MONETS
-            # =====================
+        elif "BEAR" in str(regime).upper() or "DOWN" in str(regime).upper():
+            MARKET_MODE = "BEAR"
 
-            all_candidates = get_market_candidates()
+        alerts = []
+        manip_watch = []
+        early_count = 0
+        start_count = 0
+        pre_count = 0
+        early_buy_symbols = []
+        early_sell_symbols = []
+        swing_candidates = []
 
-            if not all_candidates:
-                print("NO CANDIDATES FOUND")
-                time.sleep(10)
+        # =====================
+        # SCAN MONETS
+        # =====================
+
+        all_candidates = get_market_candidates()
+
+        if not all_candidates:
+            print("NO CANDIDATES FOUND")
+            time.sleep(10)
+            continue
+
+        total_symbols = len(all_candidates)
+
+        if scan_index >= total_symbols:
+            scan_index = 0
+
+        candidates = all_candidates[
+            scan_index:scan_index + SCAN_BATCH
+        ]
+
+        scan_index += SCAN_BATCH
+
+        print(
+            f"Scanning {len(candidates)} symbols this cycle | "
+            f"index={scan_index}/{total_symbols}"
+        )
+
+        # =====================
+        # SCAN LOOP
+        # =====================
+
+        for instId, vol_usdt, pct in candidates:
+
+            print(f"[LOOP] {instId} start")
+
+            time.sleep(0.55)
+
+            try:
+
+                sig = build_signal(instId)
+
+                if not sig or not isinstance(sig, dict):
+                    print(f"[RAW_SKIP] {instId}", flush=True)
+                    continue
+
+            except Exception as e:
+
+                print(
+                    f"[BUILD_SIGNAL_ERROR] {instId} {e}",
+                    flush=True
+                )
+
                 continue
 
-            total_symbols = len(all_candidates)
+            # =====================
+            # LOCAL SIGNAL DATA
+            # =====================
 
-            if scan_index >= total_symbols:
-                scan_index = 0
+            flags = set(sig.get("flags", []))
 
-            candidates = all_candidates[scan_index:scan_index + SCAN_BATCH]
-            scan_index += SCAN_BATCH
-
-            print(f"Scanning {len(candidates)} symbols this cycle | index={scan_index}/{total_symbols}")
+            score = float(sig.get("score", 0))
 
             # =====================
-            # SCAN LOOP
+            # MARKET REGIME FILTER
             # =====================
-            
-            for instId, vol_usdt, pct in candidates:
-            
-                print(f"[LOOP] {instId} start")
-            
-                time.sleep(0.55)
-            
-                try:
-            
-                    sig = build_signal(instId)
-            
-                    if not sig or not isinstance(sig, dict):
-                        print(f"[RAW_SKIP] {instId}", flush=True)
-                        continue
-            
-                except Exception as e:
-            
-                    print(f"[BUILD_SIGNAL_ERROR] {instId} {e}", flush=True)
-                    continue
-            
-                oi_ttl = int(os.getenv("OI_CACHE_TTL_SEC", "1800"))
-            
-                new_oi = get_open_interest_change(instId)
-            
-                state["symbols"].setdefault(instId, {})
-            
-                sym_state = state["symbols"][instId]
-            
-                prev = sym_state.get("last_oi_change")
-            
-                prev_ts = int(sym_state.get("last_oi_ts", 0) or 0)
-            
-                age = now_ts() - prev_ts if prev_ts else None
-            
-                if new_oi is not None:
-            
-                    sig["oi_change"] = new_oi
-                       
-               
-            
-                    sym_state["last_oi_change"] = new_oi
-                
-                    sym_state["last_oi_ts"] = now_ts()
-                
-                    print(
-                        f"[OI_NEW] {instId} fresh OI={new_oi}%",
-                        flush=True
-                    )
-            
-                elif prev is not None and age is not None and age <= oi_ttl:
-                
-                    sig["oi_change"] = prev
-                
-                    print(
-                        f"[OI_CACHE] {instId} cached OI={prev}% age={age}s",
-                        flush=True
-                    )
-                
-                else:
-                
-                    sig["oi_change"] = None
-                
-                    print(
-                        f"[OI_NONE] {instId} no fresh OI / cache expired",
-                        flush=True
-                    )
-            
+
+            if MARKET_MODE == "BULL":
+
+                if (
+                    "PRESSURE_DOWN" in flags
+                    and "EMA_BEAR_STRONG" not in flags
+                    and "BREAKOUT_CONFIRM_DOWN" not in flags
+                ):
+
+                    score -= 1.5
+
+                    flags.add("REGIME_BLOCK_SHORT")
+
+            if MARKET_MODE == "BEAR":
+
+                if (
+                    "PRESSURE_UP" in flags
+                    and "EMA_BULL_STRONG" not in flags
+                    and "BREAKOUT_CONFIRM_UP" not in flags
+                ):
+
+                    score -= 1.5
+
+                    flags.add("REGIME_BLOCK_LONG")
+
+            # =====================
+            # SAVE UPDATED SIGNAL
+            # =====================
+
+            sig["score"] = round(score, 2)
+
+            sig["flags"] = list(flags)
+
+            # =====================
+            # OPEN INTEREST
+            # =====================
+
+            oi_ttl = int(
+                os.getenv("OI_CACHE_TTL_SEC", "1800")
+            )
+
+            new_oi = get_open_interest_change(instId)
+
+            state["symbols"].setdefault(instId, {})
+
+            sym_state = state["symbols"][instId]
+
+            prev = sym_state.get("last_oi_change")
+
+            prev_ts = int(
+                sym_state.get("last_oi_ts", 0) or 0
+            )
+
+            age = (
+                now_ts() - prev_ts
+                if prev_ts
+                else None
+            )
+
+            if new_oi is not None:
+
+                sig["oi_change"] = new_oi
+
+                sym_state["last_oi_change"] = new_oi
+
+                sym_state["last_oi_ts"] = now_ts()
+
+                print(
+                    f"[OI_NEW] {instId} fresh OI={new_oi}%",
+                    flush=True
+                )
+
+            elif (
+                prev is not None
+                and age is not None
+                and age <= oi_ttl
+            ):
+
+                sig["oi_change"] = prev
+
+                print(
+                    f"[OI_CACHE] {instId} "
+                    f"cached OI={prev}% age={age}s",
+                    flush=True
+                )
+
+            else:
+
+                sig["oi_change"] = None
+
+                print(
+                    f"[OI_NONE] {instId} "
+                    f"no fresh OI / cache expired",
+                    flush=True
+                )
+
             # =====================
             # LOAD CANDLES FOR TA
             # =====================
-            
-            candles_m15 = get_tf_candles(instId, "15m", 200)
-            
-            candles_h1 = get_tf_candles(instId, "1h", 200)
-            
-            candles_day = get_tf_candles(instId, "1d", 200)
-            
-            candles_month = get_tf_candles(instId, "1M", 120)
-            
+
+            candles_m15 = get_tf_candles(
+                instId,
+                "15m",
+                200
+            )
+
+            candles_h1 = get_tf_candles(
+                instId,
+                "1h",
+                200
+            )
+
+            candles_day = get_tf_candles(
+                instId,
+                "1d",
+                200
+            )
+
+            candles_month = get_tf_candles(
+                instId,
+                "1M",
+                120
+            )
             # =====================
             # TA SNIPER (SAFE)
             # =====================
