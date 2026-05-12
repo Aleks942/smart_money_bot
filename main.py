@@ -4214,18 +4214,19 @@ def signal_quality_filter(sig):
     )
     
     if weak_trend_only:
-        return False, "weak_trend_only"
+
+        # allow only if real context exists
+        allow_context = (
     
-    if ep_score >= 6 and (
+            real_impulse
+            or compression_context
+            or "MTF_LONG_ALIGN" in flags
+            or "MTF_SHORT_ALIGN" in flags
+            or acc >= 3
+        )
     
-        real_impulse
-        or compression_context
-        or "MTF_LONG_ALIGN" in flags
-        or "MTF_SHORT_ALIGN" in flags
-        or "EMA_BULL_STRONG" in flags
-        or "EMA_BEAR_STRONG" in flags
-    ):
-        return True, "early_pressure"
+        if not allow_context:
+            return False, "weak_trend_only"
     # =====================
     # 🌍 MARKET REGIME FILTER
     # =====================
