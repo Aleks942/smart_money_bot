@@ -4185,6 +4185,21 @@ def signal_quality_filter(sig):
             or "PRESSURE_DOWN" in flags
         )
     )
+
+    # =====================
+    # 🟠 EARLY PRESSURE PASS
+    # =====================
+
+    if ep_score >= 7 and (
+
+        "MTF_LONG_ALIGN" in flags
+        or "MTF_SHORT_ALIGN" in flags
+        or "EMA_BULL_STRONG" in flags
+        or "EMA_BEAR_STRONG" in flags
+        or real_impulse
+        or compression_context
+    ):
+        return True, "early_pressure"
     
     # =====================
     # 🟠 EARLY PRESSURE — SMART FILTER V2
