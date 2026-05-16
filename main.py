@@ -6187,6 +6187,79 @@ def detect_setup_rank(flags, score=0, acc_score=0):
 
         return "WATCH", 0, []
 
+
+# =========================
+# LAUNCH PROXIMITY ENGINE
+# =========================
+def detect_launch_proximity(flags):
+
+    try:
+
+        # =====================
+        # LONG PROXIMITY
+        # =====================
+
+        if (
+
+            "BULLISH_SHIFT" in flags
+
+            and
+
+            "PRESSURE_UP" in flags
+
+            and
+
+            "ENERGY_BUILDUP" in flags
+
+            and
+
+            (
+                "COMP_PRO_5M" in flags
+                or "COMP_PRO_15M" in flags
+            )
+
+        ):
+
+            return "LAUNCH_PROXIMITY_UP"
+
+        # =====================
+        # SHORT PROXIMITY
+        # =====================
+
+        if (
+
+            "BEARISH_SHIFT" in flags
+
+            and
+
+            "PRESSURE_DOWN" in flags
+
+            and
+
+            "ENERGY_BUILDUP" in flags
+
+            and
+
+            (
+                "COMP_PRO_5M" in flags
+                or "COMP_PRO_15M" in flags
+            )
+
+        ):
+
+            return "LAUNCH_PROXIMITY_DOWN"
+
+        return None
+
+    except Exception as e:
+
+        print(
+            f"[LAUNCH_PROXIMITY_ERROR] {e}",
+            flush=True
+        )
+
+        return None
+
 # =========================
 # MAIN SIGNAL BUILDER
 # =========================
