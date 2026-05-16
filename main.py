@@ -6036,6 +6036,85 @@ def detect_acceleration(flags):
         )
 
         return None
+        
+# =========================
+# EXPLOSIVE MOVE ENGINE
+# =========================
+def detect_explosive_move(flags):
+
+    try:
+
+        # =====================
+        # EXPLOSIVE LONG
+        # =====================
+
+        if (
+
+            "ACCELERATION_UP" in flags
+
+            and
+
+            "ENERGY_BUILDUP" in flags
+
+            and
+
+            (
+                "BULLISH_SHIFT" in flags
+                or "EARLY_LAUNCH_UP" in flags
+            )
+
+            and
+
+            (
+                "MTF_LONG_ALIGN" in flags
+                or "EMA_BULL_STRONG" in flags
+            )
+
+        ):
+
+            return "EXPLOSIVE_UP"
+
+        # =====================
+        # EXPLOSIVE SHORT
+        # =====================
+
+        if (
+
+            "ACCELERATION_DOWN" in flags
+
+            and
+
+            "ENERGY_BUILDUP" in flags
+
+            and
+
+            (
+                "BEARISH_SHIFT" in flags
+                or "EARLY_LAUNCH_DOWN" in flags
+            )
+
+            and
+
+            (
+                "MTF_SHORT_ALIGN" in flags
+                or "EMA_BEAR_STRONG" in flags
+            )
+
+        ):
+
+            return "EXPLOSIVE_DOWN"
+
+        return None
+
+    except Exception as e:
+
+        print(
+            f"[EXPLOSIVE_ENGINE_ERROR] {e}",
+            flush=True
+        )
+
+        return None
+
 # =========================
 # MAIN SIGNAL BUILDER
 # =========================
