@@ -6284,10 +6284,11 @@ def detect_explosion_buildup(flags):
 
             and
 
-            (
-                "VOL_SPIKE" in flags
-                or "ATR_EXPANSION" in flags
-            )
+        (
+            "VOL_SPIKE" in flags
+            or "ATR_EXPANSION" in flags
+            or "COMP_PRO_5M" in flags
+        )
 
             and
 
@@ -6317,6 +6318,7 @@ def detect_explosion_buildup(flags):
             (
                 "VOL_SPIKE" in flags
                 or "ATR_EXPANSION" in flags
+                or "COMP_PRO_5M" in flags
             )
 
             and
