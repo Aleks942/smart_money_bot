@@ -5665,7 +5665,7 @@ def detect_early_imbalance(candles, flags):
 
             and
 
-            last_close > range_high * 1.001
+            last_close >= range_high * 0.998
 
         ):
 
