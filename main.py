@@ -6261,6 +6261,84 @@ def detect_launch_proximity(flags):
         return None
 
 # =========================
+# EXPLOSION BUILDUP ENGINE
+# =========================
+def detect_explosion_buildup(flags):
+
+    try:
+
+        # =====================
+        # EXPLOSION LONG
+        # =====================
+
+        if (
+
+            "LAUNCH_PROXIMITY_UP" in flags
+
+            and
+
+            (
+                "ACCELERATION_UP" in flags
+                or "BULLISH_SHIFT" in flags
+            )
+
+            and
+
+            (
+                "VOL_SPIKE" in flags
+                or "ATR_EXPANSION" in flags
+            )
+
+            and
+
+            "ENERGY_BUILDUP" in flags
+
+        ):
+
+            return "EXPLOSION_READY_UP"
+
+        # =====================
+        # EXPLOSION SHORT
+        # =====================
+
+        if (
+
+            "LAUNCH_PROXIMITY_DOWN" in flags
+
+            and
+
+            (
+                "ACCELERATION_DOWN" in flags
+                or "BEARISH_SHIFT" in flags
+            )
+
+            and
+
+            (
+                "VOL_SPIKE" in flags
+                or "ATR_EXPANSION" in flags
+            )
+
+            and
+
+            "ENERGY_BUILDUP" in flags
+
+        ):
+
+            return "EXPLOSION_READY_DOWN"
+
+        return None
+
+    except Exception as e:
+
+        print(
+            f"[EXPLOSION_BUILDUP_ERROR] {e}",
+            flush=True
+        )
+
+        return None
+
+# =========================
 # MAIN SIGNAL BUILDER
 # =========================
 def build_signal(instId):
