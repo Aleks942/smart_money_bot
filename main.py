@@ -5767,7 +5767,78 @@ def detect_launch_ready(flags):
         )
 
         return None
+        
+# =========================
+# EARLY LAUNCH ENGINE
+# =========================
+def detect_early_launch(flags):
 
+    try:
+
+        # =====================
+        # EARLY LONG LAUNCH
+        # =====================
+
+        if (
+
+            "EARLY_IMBALANCE_UP" in flags
+
+            and
+
+            "BULLISH_SHIFT" in flags
+
+            and
+
+            "ENERGY_BUILDUP" in flags
+
+            and
+
+            (
+                "PRESSURE_UP" in flags
+                or "BREAKOUT_UP" in flags
+            )
+
+        ):
+
+            return "EARLY_LAUNCH_UP"
+
+        # =====================
+        # EARLY SHORT LAUNCH
+        # =====================
+
+        if (
+
+            "EARLY_IMBALANCE_DOWN" in flags
+
+            and
+
+            "BEARISH_SHIFT" in flags
+
+            and
+
+            "ENERGY_BUILDUP" in flags
+
+            and
+
+            (
+                "PRESSURE_DOWN" in flags
+                or "BREAKOUT_DOWN" in flags
+            )
+
+        ):
+
+            return "EARLY_LAUNCH_DOWN"
+
+        return None
+
+    except Exception as e:
+
+        print(
+            f"[EARLY_LAUNCH_ERROR] {e}",
+            flush=True
+        )
+
+        return None
 
 # =========================
 # MAIN SIGNAL BUILDER
