@@ -7401,6 +7401,12 @@ def build_signal(instId):
         "symbol": instId,
         "price": price,
         "score": score,
+
+        "score": score,
+
+        "setup_rank": setup_rank,
+        "rank_score": rank_score,
+        "rank_reasons": rank_reasons,
     
         # уже есть — оставляем
         "swing_only_candidate": swing_only_candidate,
