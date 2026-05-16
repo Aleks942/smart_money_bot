@@ -5354,6 +5354,147 @@ def calc_entry_zone(price, pmeta, flags, direction_code):
 
         if ob_meta.get("wall_removed"):
             flags.add("WALL_REMOVED")
+# =========================
+# COMPRESSION PRO ENGINE v1
+# =========================
+def compression_pro(candles):
+
+    try:
+
+        if not candles or len(candles) < 30:
+            return {
+                "active": False,
+                "score": 0,
+                "reasons": []
+            }
+
+        closes = [float(x[4]) for x in candles[-20:]]
+        highs = [float(x[2]) for x in candles[-20:]]
+        lows  = [float(x[3]) for x in candles[-20:]]
+
+        reasons = []
+        score = 0
+
+        # =====================
+        # RANGE %
+        # =====================
+
+        hi = max(highs)
+        lo = min(lows)
+
+        if lo <= 0:
+            return {
+                "active": False,
+                "score": 0,
+                "reasons": []
+            }
+
+        range_pct = ((hi - lo) / lo) * 100
+
+        # узкий диапазон
+        if range_pct <= 2.5:
+            score += 2
+            reasons.append("tight_range")
+
+        elif range_pct <= 4:
+            score += 1
+            reasons.append("mid_range")
+
+        # =====================
+        # CLOSE CLUSTERING
+        # =====================
+
+        avg_close = sum(closes) / len(closes)
+
+        deviations = []
+
+        for c in closes:
+            dev = abs(c - avg_close) / avg_close * 100
+            deviations.append(dev)
+
+        avg_dev = sum(deviations) / len(deviations)
+
+        if avg_dev <= 0.8:
+            score += 2
+            reasons.append("close_clustering")
+
+        elif avg_dev <= 1.5:
+            score += 1
+            reasons.append("soft_clustering")
+
+        # =====================
+        # SHRINKING SPREAD
+        # =====================
+
+        spreads = []
+
+        for i in range(-10, 0):
+
+            h = float(candles[i][2])
+            l = float(candles[i][3])
+
+            if l <= 0:
+                continue
+
+            spreads.append(
+                ((h - l) / l) * 100
+            )
+
+        if len(spreads) >= 6:
+
+            first_half = sum(spreads[:5]) / 5
+            second_half = sum(spreads[-5:]) / 5
+
+            if second_half < first_half * 0.8:
+                score += 2
+                reasons.append("spread_contraction")
+
+        # =====================
+        # FAILED EXPANSION
+        # =====================
+
+        failed_breaks = 0
+
+        for i in range(-8, -1):
+
+            c = float(candles[i][4])
+
+            if c > hi * 0.995 and c < hi:
+                failed_breaks += 1
+
+            if c < lo * 1.005 and c > lo:
+                failed_breaks += 1
+
+        if failed_breaks >= 3:
+            score += 1
+            reasons.append("failed_expansion")
+
+        # =====================
+        # FINAL
+        # =====================
+
+        active = score >= 4
+
+        return {
+            "active": active,
+            "score": score,
+            "range_pct": round(range_pct, 2),
+            "reasons": reasons
+        }
+
+    except Exception as e:
+
+        print(
+            f"[COMPRESSION_PRO_ERROR] {e}",
+            flush=True
+        )
+
+        return {
+            "active": False,
+            "score": 0,
+            "reasons": []
+        }
+
 
 # =========================
 # MAIN SIGNAL BUILDER
@@ -7684,147 +7825,7 @@ def summary_message(alerts, cycle_info, regime):
 
     return "\n".join(lines)
 
-    # =========================
-    # COMPRESSION PRO ENGINE v1
-    # =========================
-    def compression_pro(candles):
-    
-        try:
-    
-            if not candles or len(candles) < 30:
-                return {
-                    "active": False,
-                    "score": 0,
-                    "reasons": []
-                }
-    
-            closes = [float(x[4]) for x in candles[-20:]]
-            highs = [float(x[2]) for x in candles[-20:]]
-            lows  = [float(x[3]) for x in candles[-20:]]
-    
-            reasons = []
-            score = 0
-    
-            # =====================
-            # RANGE %
-            # =====================
-    
-            hi = max(highs)
-            lo = min(lows)
-    
-            if lo <= 0:
-                return {
-                    "active": False,
-                    "score": 0,
-                    "reasons": []
-                }
-    
-            range_pct = ((hi - lo) / lo) * 100
-    
-            # узкий диапазон
-            if range_pct <= 2.5:
-                score += 2
-                reasons.append("tight_range")
-    
-            elif range_pct <= 4:
-                score += 1
-                reasons.append("mid_range")
-    
-            # =====================
-            # CLOSE CLUSTERING
-            # =====================
-    
-            avg_close = sum(closes) / len(closes)
-    
-            deviations = []
-    
-            for c in closes:
-                dev = abs(c - avg_close) / avg_close * 100
-                deviations.append(dev)
-    
-            avg_dev = sum(deviations) / len(deviations)
-    
-            if avg_dev <= 0.8:
-                score += 2
-                reasons.append("close_clustering")
-    
-            elif avg_dev <= 1.5:
-                score += 1
-                reasons.append("soft_clustering")
-    
-            # =====================
-            # SHRINKING SPREAD
-            # =====================
-    
-            spreads = []
-    
-            for i in range(-10, 0):
-    
-                h = float(candles[i][2])
-                l = float(candles[i][3])
-    
-                if l <= 0:
-                    continue
-    
-                spreads.append(
-                    ((h - l) / l) * 100
-                )
-    
-            if len(spreads) >= 6:
-    
-                first_half = sum(spreads[:5]) / 5
-                second_half = sum(spreads[-5:]) / 5
-    
-                if second_half < first_half * 0.8:
-                    score += 2
-                    reasons.append("spread_contraction")
-    
-            # =====================
-            # FAILED EXPANSION
-            # =====================
-    
-            failed_breaks = 0
-    
-            for i in range(-8, -1):
-    
-                c = float(candles[i][4])
-    
-                if c > hi * 0.995 and c < hi:
-                    failed_breaks += 1
-    
-                if c < lo * 1.005 and c > lo:
-                    failed_breaks += 1
-    
-            if failed_breaks >= 3:
-                score += 1
-                reasons.append("failed_expansion")
-    
-            # =====================
-            # FINAL
-            # =====================
-    
-            active = score >= 4
-    
-            return {
-                "active": active,
-                "score": score,
-                "range_pct": round(range_pct, 2),
-                "reasons": reasons
-            }
-    
-        except Exception as e:
-    
-            print(
-                f"[COMPRESSION_PRO_ERROR] {e}",
-                flush=True
-            )
-    
-            return {
-                "active": False,
-                "score": 0,
-                "reasons": []
-            }
-
+   
 # =========================
 # PRE-MOVE MANIPULATION WATCH (V2)
 # =========================
