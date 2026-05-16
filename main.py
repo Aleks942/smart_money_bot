@@ -6395,6 +6395,67 @@ def detect_trap_risk(flags):
         )
 
         return None
+
+
+# =========================
+# BASIC STRUCTURE ENGINE v1
+# =========================
+def detect_basic_structure(candles):
+
+    try:
+
+        if not candles or len(candles) < 20:
+            return None
+
+        highs = [float(x[2]) for x in candles[-12:]]
+        lows = [float(x[3]) for x in candles[-12:]]
+
+        prev_high = max(highs[:6])
+        last_high = max(highs[6:])
+
+        prev_low = min(lows[:6])
+        last_low = min(lows[6:])
+
+        # =====================
+        # BULLISH STRUCTURE
+        # =====================
+
+        if (
+            last_high > prev_high
+            and last_low > prev_low
+        ):
+            return "STRUCTURE_HH_HL"
+
+        # =====================
+        # BEARISH STRUCTURE
+        # =====================
+
+        if (
+            last_high < prev_high
+            and last_low < prev_low
+        ):
+            return "STRUCTURE_LH_LL"
+
+        # =====================
+        # RANGE STRUCTURE
+        # =====================
+
+        if (
+            abs(last_high - prev_high) / prev_high * 100 <= 0.4
+            and abs(last_low - prev_low) / prev_low * 100 <= 0.4
+        ):
+            return "STRUCTURE_RANGE"
+
+        return None
+
+    except Exception as e:
+
+        print(
+            f"[STRUCTURE_ENGINE_ERROR] {e}",
+            flush=True
+        )
+
+        return None
 # =========================
 # MAIN SIGNAL BUILDER
 # =========================
