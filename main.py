@@ -6079,6 +6079,23 @@ def build_signal(instId):
         )
 
     # =========================
+    # ABSORPTION
+    # =========================
+    
+    absorption = detect_absorption(c5)
+    
+    if absorption:
+    
+        flags.add(absorption)
+    
+        score += 2
+    
+        print(
+            f"[ABSORPTION] {instId} {absorption}",
+            flush=True
+        )
+
+    # =========================
     # FAKE DUMP
     # =========================
     if fake_dump_ok(c5):
