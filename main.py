@@ -6478,6 +6478,23 @@ def build_signal(instId):
         )
 
     # =========================
+    # EARLY LAUNCH
+    # =========================
+    
+    early_launch = detect_early_launch(flags)
+    
+    if early_launch:
+    
+        flags.add(early_launch)
+    
+        score += 4
+    
+        print(
+            f"[EARLY_LAUNCH] {instId} {early_launch}",
+            flush=True
+        )
+
+    # =========================
     # FAKE DUMP
     # =========================
     if fake_dump_ok(c5):
