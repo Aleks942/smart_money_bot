@@ -5698,6 +5698,76 @@ def detect_early_imbalance(candles, flags):
 
         return None
 
+# =========================
+# LAUNCH ENGINE
+# =========================
+def detect_launch_ready(flags):
+
+    try:
+
+        # =====================
+        # LONG LAUNCH
+        # =====================
+
+        if (
+
+            "EARLY_IMBALANCE_UP" in flags
+
+            and
+
+            (
+                "VOL_SPIKE" in flags
+                or "ATR_EXPANSION" in flags
+            )
+
+            and
+
+            (
+                "PRESSURE_UP" in flags
+                or "CONTINUATION_UP" in flags
+            )
+
+        ):
+
+            return "LAUNCH_READY_UP"
+
+        # =====================
+        # SHORT LAUNCH
+        # =====================
+
+        if (
+
+            "EARLY_IMBALANCE_DOWN" in flags
+
+            and
+
+            (
+                "VOL_SPIKE" in flags
+                or "ATR_EXPANSION" in flags
+            )
+
+            and
+
+            (
+                "PRESSURE_DOWN" in flags
+                or "CONTINUATION_DOWN" in flags
+            )
+
+        ):
+
+            return "LAUNCH_READY_DOWN"
+
+        return None
+
+    except Exception as e:
+
+        print(
+            f"[LAUNCH_ENGINE_ERROR] {e}",
+            flush=True
+        )
+
+        return None
+
 
 # =========================
 # MAIN SIGNAL BUILDER
