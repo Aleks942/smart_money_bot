@@ -6309,6 +6309,23 @@ def build_signal(instId):
         )
 
     # =========================
+    # LAUNCH READY
+    # =========================
+    
+    launch = detect_launch_ready(flags)
+    
+    if launch:
+    
+        flags.add(launch)
+    
+        score += 4
+    
+        print(
+            f"[LAUNCH_READY] {instId} {launch}",
+            flush=True
+        )
+
+    # =========================
     # EARLY IMBALANCE
     # =========================
     
