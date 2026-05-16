@@ -5495,6 +5495,83 @@ def compression_pro(candles):
             "reasons": []
         }
 
+# =========================
+# PRESSURE ABSORPTION ENGINE
+# =========================
+def detect_absorption(candles):
+
+    try:
+
+        if not candles or len(candles) < 20:
+            return None
+
+        highs = [float(x[2]) for x in candles[-8:]]
+        lows  = [float(x[3]) for x in candles[-8:]]
+        closes = [float(x[4]) for x in candles[-8:]]
+
+        last_close = closes[-1]
+
+        low_tests = 0
+        high_tests = 0
+
+        # =====================
+        # LOW ABSORPTION
+        # =====================
+
+        zone_low = min(lows)
+
+        for l in lows:
+
+            dist = abs(l - zone_low) / zone_low * 100
+
+            if dist <= 0.35:
+                low_tests += 1
+
+        # price NOT breaking lower
+        low_reclaim = (
+            last_close > zone_low * 1.003
+        )
+
+        if (
+            low_tests >= 3
+            and low_reclaim
+        ):
+            return "SELLER_ABSORPTION"
+
+        # =====================
+        # HIGH ABSORPTION
+        # =====================
+
+        zone_high = max(highs)
+
+        for h in highs:
+
+            dist = abs(h - zone_high) / zone_high * 100
+
+            if dist <= 0.35:
+                high_tests += 1
+
+        high_reject = (
+            last_close < zone_high * 0.997
+        )
+
+        if (
+            high_tests >= 3
+            and high_reject
+        ):
+            return "BUYER_ABSORPTION"
+
+        return None
+
+    except Exception as e:
+
+        print(
+            f"[ABSORPTION_ERROR] {e}",
+            flush=True
+        )
+
+        return None
+
 
 # =========================
 # MAIN SIGNAL BUILDER
