@@ -6962,6 +6962,23 @@ def build_signal(instId):
         )
 
     # =========================
+    # BASIC STRUCTURE
+    # =========================
+    
+    structure = detect_basic_structure(c5)
+    
+    if structure:
+    
+        flags.add(structure)
+    
+        score += 2
+    
+        print(
+            f"[STRUCTURE] {instId} {structure}",
+            flush=True
+        )
+
+    # =========================
     # ABSORPTION
     # =========================
     
