@@ -6981,6 +6981,23 @@ def build_signal(instId):
         )
 
     # =========================
+    # EXPLOSION BUILDUP
+    # =========================
+    
+    explosion_buildup = detect_explosion_buildup(flags)
+    
+    if explosion_buildup:
+    
+        flags.add(explosion_buildup)
+    
+        score += 5
+    
+        print(
+            f"[EXPLOSION_BUILDUP] {instId} {explosion_buildup}",
+            flush=True
+        )
+
+    # =========================
     # FAKE DUMP
     # =========================
     if fake_dump_ok(c5):
