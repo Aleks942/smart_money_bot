@@ -5840,6 +5840,70 @@ def detect_early_launch(flags):
 
         return None
 
+
+# =========================
+# SQUEEZE PRESSURE ENGINE
+# =========================
+def detect_squeeze_pressure(candles):
+
+    try:
+
+        if not candles or len(candles) < 20:
+            return None
+
+        highs = [float(x[2]) for x in candles[-10:]]
+        lows  = [float(x[3]) for x in candles[-10:]]
+        closes = [float(x[4]) for x in candles[-10:]]
+
+        range_high = max(highs)
+        range_low  = min(lows)
+
+        high_hits = 0
+        low_hits = 0
+
+        # =====================
+        # HIGH PRESSURE
+        # =====================
+
+        for c in closes:
+
+            dist = abs(c - range_high) / range_high * 100
+
+            if dist <= 0.35:
+                high_hits += 1
+
+        # =====================
+        # LOW PRESSURE
+        # =====================
+
+        for c in closes:
+
+            dist = abs(c - range_low) / range_low * 100
+
+            if dist <= 0.35:
+                low_hits += 1
+
+        # =====================
+        # DETECT
+        # =====================
+
+        if high_hits >= 4:
+            return "SQUEEZE_UP"
+
+        if low_hits >= 4:
+            return "SQUEEZE_DOWN"
+
+        return None
+
+    except Exception as e:
+
+        print(
+            f"[SQUEEZE_ENGINE_ERROR] {e}",
+            flush=True
+        )
+
+        return None
+
 # =========================
 # MAIN SIGNAL BUILDER
 # =========================
