@@ -6341,6 +6341,61 @@ def detect_explosion_buildup(flags):
         return None
 
 # =========================
+# ANTI-TRAP ENGINE
+# =========================
+def detect_trap_risk(flags):
+
+    try:
+
+        # =====================
+        # LONG TRAP
+        # =====================
+
+        if (
+
+            "EXPLOSION_READY_UP" in flags
+
+            and
+
+            (
+                "STRUCTURE_CONFLICT" in flags
+                or "EMA_BEAR_STRONG" in flags
+            )
+
+        ):
+
+            return "TRAP_RISK_UP"
+
+        # =====================
+        # SHORT TRAP
+        # =====================
+
+        if (
+
+            "EXPLOSION_READY_DOWN" in flags
+
+            and
+
+            (
+                "STRUCTURE_CONFLICT" in flags
+                or "EMA_BULL_STRONG" in flags
+            )
+
+        ):
+
+            return "TRAP_RISK_DOWN"
+
+        return None
+
+    except Exception as e:
+
+        print(
+            f"[TRAP_ENGINE_ERROR] {e}",
+            flush=True
+        )
+
+        return None
+# =========================
 # MAIN SIGNAL BUILDER
 # =========================
 def build_signal(instId):
