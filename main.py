@@ -6116,6 +6116,84 @@ def detect_explosive_move(flags):
         return None
 
 # =========================
+# SETUP RANKING ENGINE
+# =========================
+def detect_setup_rank(flags, score=0, acc_score=0):
+
+    try:
+
+        rank_score = 0
+        reasons = []
+
+        if "ENERGY_BUILDUP" in flags:
+            rank_score += 2
+            reasons.append("energy")
+
+        if "BULLISH_SHIFT" in flags or "BEARISH_SHIFT" in flags:
+            rank_score += 3
+            reasons.append("shift")
+
+        if "ACCELERATION_UP" in flags or "ACCELERATION_DOWN" in flags:
+            rank_score += 4
+            reasons.append("acceleration")
+
+        if "EARLY_LAUNCH_UP" in flags or "EARLY_LAUNCH_DOWN" in flags:
+            rank_score += 4
+            reasons.append("early_launch")
+
+        if "LAUNCH_READY_UP" in flags or "LAUNCH_READY_DOWN" in flags:
+            rank_score += 5
+            reasons.append("launch_ready")
+
+        if "EXPLOSIVE_UP" in flags or "EXPLOSIVE_DOWN" in flags:
+            rank_score += 6
+            reasons.append("explosive")
+
+        if "MTF_LONG_ALIGN" in flags or "MTF_SHORT_ALIGN" in flags:
+            rank_score += 2
+            reasons.append("mtf_align")
+
+        if "EMA_BULL_STRONG" in flags or "EMA_BEAR_STRONG" in flags:
+            rank_score += 2
+            reasons.append("strong_ema")
+
+        if "BUYER_ABSORPTION" in flags or "SELLER_ABSORPTION" in flags:
+            rank_score += 2
+            reasons.append("absorption")
+
+        if acc_score >= 3:
+            rank_score += 2
+            reasons.append("strong_accumulation")
+
+        if score >= 12:
+            rank_score += 2
+            reasons.append("high_score")
+
+        # =====================
+        # FINAL RANK
+        # =====================
+
+        if rank_score >= 14:
+            return "PRIORITY_1", rank_score, reasons
+
+        if rank_score >= 10:
+            return "PRIORITY_2", rank_score, reasons
+
+        if rank_score >= 7:
+            return "PRIORITY_3", rank_score, reasons
+
+        return "WATCH", rank_score, reasons
+
+    except Exception as e:
+
+        print(
+            f"[SETUP_RANK_ERROR] {e}",
+            flush=True
+        )
+
+        return "WATCH", 0, []
+
+# =========================
 # MAIN SIGNAL BUILDER
 # =========================
 def build_signal(instId):
