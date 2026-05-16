@@ -5799,66 +5799,66 @@ def build_signal(instId):
         score += 1
 
 
-# =========================
-# COMPRESSION PRO ENGINE
-# =========================
-
-comp_pro_5m = compression_pro(c5)
-comp_pro_15m = compression_pro(c15)
-
-compression_score = 0
-
-# 5M
-if comp_pro_5m.get("active"):
-
-    flags.add("COMP_PRO_5M")
-
-    cs = comp_pro_5m.get("score", 0)
-
-    compression_score += cs
-
-    score += min(cs * 0.5, 2)
-
-    print(
-        f"[COMP_PRO_5M] {instId} "
-        f"score={cs} "
-        f"reasons={comp_pro_5m.get('reasons')}",
-        flush=True
-    )
-
-# 15M
-if comp_pro_15m.get("active"):
-
-    flags.add("COMP_PRO_15M")
-
-    cs = comp_pro_15m.get("score", 0)
-
-    compression_score += cs
-
-    score += min(cs * 0.5, 2)
-
-    print(
-        f"[COMP_PRO_15M] {instId} "
-        f"score={cs} "
-        f"reasons={comp_pro_15m.get('reasons')}",
-        flush=True
-    )
-
-# =========================
-# ENERGY BUILDUP
-# =========================
-
-if compression_score >= 6:
-
-    flags.add("ENERGY_BUILDUP")
-
-    score += 1
-
-    print(
-        f"[ENERGY_BUILDUP] {instId} "
-        f"compression_score={compression_score}",
-        flush=True
-    )
+    # =========================
+    # COMPRESSION PRO ENGINE
+    # =========================
+    
+    comp_pro_5m = compression_pro(c5)
+    comp_pro_15m = compression_pro(c15)
+    
+    compression_score = 0
+    
+    # 5M
+    if comp_pro_5m.get("active"):
+    
+        flags.add("COMP_PRO_5M")
+    
+        cs = comp_pro_5m.get("score", 0)
+    
+        compression_score += cs
+    
+        score += min(cs * 0.5, 2)
+    
+        print(
+            f"[COMP_PRO_5M] {instId} "
+            f"score={cs} "
+            f"reasons={comp_pro_5m.get('reasons')}",
+            flush=True
+        )
+    
+    # 15M
+    if comp_pro_15m.get("active"):
+    
+        flags.add("COMP_PRO_15M")
+    
+        cs = comp_pro_15m.get("score", 0)
+    
+        compression_score += cs
+    
+        score += min(cs * 0.5, 2)
+    
+        print(
+            f"[COMP_PRO_15M] {instId} "
+            f"score={cs} "
+            f"reasons={comp_pro_15m.get('reasons')}",
+            flush=True
+        )
+    
+    # =========================
+    # ENERGY BUILDUP
+    # =========================
+    
+    if compression_score >= 6:
+    
+        flags.add("ENERGY_BUILDUP")
+    
+        score += 1
+    
+        print(
+            f"[ENERGY_BUILDUP] {instId} "
+            f"compression_score={compression_score}",
+            flush=True
+        )
 
     # =========================
     # FAKE DUMP
