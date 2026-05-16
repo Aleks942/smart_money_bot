@@ -5636,6 +5636,68 @@ def detect_pressure_shift(flags):
 
         return None
 
+# =========================
+# EARLY IMBALANCE ENGINE
+# =========================
+def detect_early_imbalance(candles, flags):
+
+    try:
+
+        if not candles or len(candles) < 20:
+            return None
+
+        closes = [float(x[4]) for x in candles[-10:]]
+        highs  = [float(x[2]) for x in candles[-10:]]
+        lows   = [float(x[3]) for x in candles[-10:]]
+
+        last_close = closes[-1]
+
+        range_high = max(highs[:-1])
+        range_low  = min(lows[:-1])
+
+        # =====================
+        # BULLISH IMBALANCE
+        # =====================
+
+        if (
+
+            "BULLISH_SHIFT" in flags
+
+            and
+
+            last_close > range_high * 1.001
+
+        ):
+
+            return "EARLY_IMBALANCE_UP"
+
+        # =====================
+        # BEARISH IMBALANCE
+        # =====================
+
+        if (
+
+            "BEARISH_SHIFT" in flags
+
+            and
+
+            last_close < range_low * 0.999
+
+        ):
+
+            return "EARLY_IMBALANCE_DOWN"
+
+        return None
+
+    except Exception as e:
+
+        print(
+            f"[EARLY_IMBALANCE_ERROR] {e}",
+            flush=True
+        )
+
+        return None
+
 
 # =========================
 # MAIN SIGNAL BUILDER
