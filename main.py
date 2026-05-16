@@ -6239,6 +6239,23 @@ def build_signal(instId):
         )
 
     # =========================
+    # EARLY IMBALANCE
+    # =========================
+    
+    imbalance = detect_early_imbalance(c5, flags)
+    
+    if imbalance:
+    
+        flags.add(imbalance)
+    
+        score += 3
+    
+        print(
+            f"[EARLY_IMBALANCE] {instId} {imbalance}",
+            flush=True
+        )
+
+    # =========================
     # FAKE DUMP
     # =========================
     if fake_dump_ok(c5):
