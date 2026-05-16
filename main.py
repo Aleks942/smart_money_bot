@@ -6559,6 +6559,23 @@ def build_signal(instId):
         )
 
     # =========================
+    # SQUEEZE MATURITY
+    # =========================
+    
+    squeeze_maturity = detect_squeeze_maturity(flags)
+    
+    if squeeze_maturity:
+    
+        flags.add(squeeze_maturity)
+    
+        score += 3
+    
+        print(
+            f"[SQUEEZE_MATURITY] {instId} {squeeze_maturity}",
+            flush=True
+        )
+
+    # =========================
     # FAKE DUMP
     # =========================
     if fake_dump_ok(c5):
