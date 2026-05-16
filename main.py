@@ -5967,7 +5967,75 @@ def detect_squeeze_maturity(flags):
         )
 
         return None
+# =========================
+# ACCELERATION PRESSURE ENGINE
+# =========================
+def detect_acceleration(flags):
 
+    try:
+
+        # =====================
+        # BULLISH ACCELERATION
+        # =====================
+
+        if (
+
+            "PRESSURE_UP" in flags
+
+            and
+
+            (
+                "BULLISH_SHIFT" in flags
+                or "EARLY_LAUNCH_UP" in flags
+            )
+
+            and
+
+            (
+                "EMA_BULL_STRONG" in flags
+                or "MTF_LONG_ALIGN" in flags
+            )
+
+        ):
+
+            return "ACCELERATION_UP"
+
+        # =====================
+        # BEARISH ACCELERATION
+        # =====================
+
+        if (
+
+            "PRESSURE_DOWN" in flags
+
+            and
+
+            (
+                "BEARISH_SHIFT" in flags
+                or "EARLY_LAUNCH_DOWN" in flags
+            )
+
+            and
+
+            (
+                "EMA_BEAR_STRONG" in flags
+                or "MTF_SHORT_ALIGN" in flags
+            )
+
+        ):
+
+            return "ACCELERATION_DOWN"
+
+        return None
+
+    except Exception as e:
+
+        print(
+            f"[ACCELERATION_ENGINE_ERROR] {e}",
+            flush=True
+        )
+
+        return None
 # =========================
 # MAIN SIGNAL BUILDER
 # =========================
