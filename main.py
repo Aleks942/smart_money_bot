@@ -7377,6 +7377,24 @@ def build_signal(instId):
     
     elif direction_code == "DOWN":
         tgt = round(price * 0.97, 6)
+
+    # =========================
+    # SETUP RANKING
+    # =========================
+    
+    setup_rank, rank_score, rank_reasons = detect_setup_rank(
+        flags,
+        score,
+        acc_score
+    )
+    
+    print(
+        f"[SETUP_RANK] {instId} "
+        f"{setup_rank} "
+        f"score={rank_score} "
+        f"reasons={rank_reasons}",
+        flush=True
+    )
         
     signal = {
         "instId": instId,
