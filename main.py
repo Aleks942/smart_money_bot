@@ -6173,13 +6173,13 @@ def detect_setup_rank(flags, score=0, acc_score=0):
         # FINAL RANK
         # =====================
 
-        if rank_score >= 14:
+        if rank_score >= 11:
             return "PRIORITY_1", rank_score, reasons
-
-        if rank_score >= 10:
+    
+        if rank_score >= 8:
             return "PRIORITY_2", rank_score, reasons
-
-        if rank_score >= 7:
+        
+        if rank_score >= 5:
             return "PRIORITY_3", rank_score, reasons
 
         return "WATCH", rank_score, reasons
