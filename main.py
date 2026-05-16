@@ -6720,22 +6720,50 @@ def build_signal(instId):
     ):
         quality_pass = True
 
-
-    if strong_structure_pass and quality_pass:
+    # =========================
+    # PRE-MOVE ENERGY PASS
+    # =========================
+    
+    elif (
+    
+        "ENERGY_BUILDUP" in flags
+    
+        and (
+    
+            "PRESSURE_UP" in flags
+            or "PRESSURE_DOWN" in flags
+        )
+    
+        and (
+            "COMP_PRO_5M" in flags
+            or "COMP_PRO_15M" in flags
+        )
+    
+    ):
+    
+        quality_pass = True
+    
         print(
-            f"[OVERRIDE_LOW_SCORE] {instId} "
-            f"score={score} acc={acc_score}",
+            f"[PREMOVE_PASS] {instId}",
             flush=True
         )
-        ok = True
-
-
-    if not ok:
-        print(f"[FILTER_BLOCK] {instId} reason={reason}", flush=True)
-        return None
-
-
-    return signal
+    
+    
+        if strong_structure_pass and quality_pass:
+            print(
+                f"[OVERRIDE_LOW_SCORE] {instId} "
+                f"score={score} acc={acc_score}",
+                flush=True
+            )
+            ok = True
+    
+    
+        if not ok:
+            print(f"[FILTER_BLOCK] {instId} reason={reason}", flush=True)
+            return None
+    
+    
+        return signal
         
 # ==============================
 # 🎯 SNIPER SIGNAL ENGINE
