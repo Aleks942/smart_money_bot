@@ -6160,6 +6160,23 @@ def build_signal(instId):
         )
 
     # =========================
+    # PRESSURE SHIFT
+    # =========================
+    
+    shift = detect_pressure_shift(flags)
+    
+    if shift:
+    
+        flags.add(shift)
+    
+        score += 3
+    
+        print(
+            f"[PRESSURE_SHIFT] {instId} {shift}",
+            flush=True
+        )
+
+    # =========================
     # FAKE DUMP
     # =========================
     if fake_dump_ok(c5):
