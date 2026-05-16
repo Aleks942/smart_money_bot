@@ -5606,18 +5606,15 @@ def detect_pressure_shift(flags):
         if (
 
             "BUYER_ABSORPTION" in flags
-
+        
             and
-
+        
             (
                 "PRESSURE_DOWN" in flags
                 or "BREAKOUT_DOWN" in flags
+                or "MTF_SHORT_ALIGN" in flags
             )
-
-            and
-
-            "ENERGY_BUILDUP" in flags
-
+        
         ):
 
             return "BEARISH_SHIFT"
