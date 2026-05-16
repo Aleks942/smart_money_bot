@@ -5789,7 +5789,7 @@ def build_signal(instId):
     if comp5:
         flags.add("COMP_5M")
         score += 1
-
+    
     comp15, _ = compression_ok(c15)
     if comp15:
         flags.add("COMP_15M")
