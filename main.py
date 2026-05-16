@@ -5583,19 +5583,19 @@ def detect_pressure_shift(flags):
         # BULLISH SHIFT
         # =====================
 
-    if (
-
-        "SELLER_ABSORPTION" in flags
+        if (
     
-        and
-    
-        (
-            "PRESSURE_UP" in flags
-            or "BREAKOUT_UP" in flags
-            or "MTF_LONG_ALIGN" in flags
-        )
-    
-    ):
+            "SELLER_ABSORPTION" in flags
+        
+            and
+        
+            (
+                "PRESSURE_UP" in flags
+                or "BREAKOUT_UP" in flags
+                or "MTF_LONG_ALIGN" in flags
+            )
+        
+        ):
 
             return "BULLISH_SHIFT"
 
