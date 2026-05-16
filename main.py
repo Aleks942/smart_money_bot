@@ -5572,6 +5572,70 @@ def detect_absorption(candles):
 
         return None
 
+# =========================
+# PRESSURE SHIFT ENGINE
+# =========================
+def detect_pressure_shift(flags):
+
+    try:
+
+        # =====================
+        # BULLISH SHIFT
+        # =====================
+
+        if (
+
+            "SELLER_ABSORPTION" in flags
+
+            and
+
+            (
+                "PRESSURE_UP" in flags
+                or "BREAKOUT_UP" in flags
+            )
+
+            and
+
+            "ENERGY_BUILDUP" in flags
+
+        ):
+
+            return "BULLISH_SHIFT"
+
+        # =====================
+        # BEARISH SHIFT
+        # =====================
+
+        if (
+
+            "BUYER_ABSORPTION" in flags
+
+            and
+
+            (
+                "PRESSURE_DOWN" in flags
+                or "BREAKOUT_DOWN" in flags
+            )
+
+            and
+
+            "ENERGY_BUILDUP" in flags
+
+        ):
+
+            return "BEARISH_SHIFT"
+
+        return None
+
+    except Exception as e:
+
+        print(
+            f"[SHIFT_ERROR] {e}",
+            flush=True
+        )
+
+        return None
+
 
 # =========================
 # MAIN SIGNAL BUILDER
