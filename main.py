@@ -5905,6 +5905,70 @@ def detect_squeeze_pressure(candles):
         return None
 
 # =========================
+# SQUEEZE MATURITY ENGINE
+# =========================
+def detect_squeeze_maturity(flags):
+
+    try:
+
+        # =====================
+        # BULLISH MATURE SQUEEZE
+        # =====================
+
+        if (
+
+            "SQUEEZE_UP" in flags
+
+            and
+
+            "ENERGY_BUILDUP" in flags
+
+            and
+
+            (
+                "BULLISH_SHIFT" in flags
+                or "PRESSURE_UP" in flags
+            )
+
+        ):
+
+            return "MATURE_SQUEEZE_UP"
+
+        # =====================
+        # BEARISH MATURE SQUEEZE
+        # =====================
+
+        if (
+
+            "SQUEEZE_DOWN" in flags
+
+            and
+
+            "ENERGY_BUILDUP" in flags
+
+            and
+
+            (
+                "BEARISH_SHIFT" in flags
+                or "PRESSURE_DOWN" in flags
+            )
+
+        ):
+
+            return "MATURE_SQUEEZE_DOWN"
+
+        return None
+
+    except Exception as e:
+
+        print(
+            f"[SQUEEZE_MATURITY_ERROR] {e}",
+            flush=True
+        )
+
+        return None
+
+# =========================
 # MAIN SIGNAL BUILDER
 # =========================
 def build_signal(instId):
