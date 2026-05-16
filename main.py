@@ -6625,6 +6625,24 @@ def build_signal(instId):
             f"[EARLY_LAUNCH] {instId} {early_launch}",
             flush=True
         )
+    # =========================
+    # ACCELERATION
+    # =========================
+    
+    acceleration = detect_acceleration(flags)
+    
+    if acceleration:
+    
+        flags.add(acceleration)
+    
+        score += 4
+    
+        print(
+            f"[ACCELERATION] {instId} {acceleration}",
+            flush=True
+        )
+    
+        
 
     # =========================
     # SQUEEZE MATURITY
