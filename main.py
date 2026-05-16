@@ -6886,6 +6886,23 @@ def build_signal(instId):
         )
 
     # =========================
+    # LAUNCH PROXIMITY
+    # =========================
+    
+    launch_proximity = detect_launch_proximity(flags)
+    
+    if launch_proximity:
+    
+        flags.add(launch_proximity)
+    
+        score += 4
+    
+        print(
+            f"[LAUNCH_PROXIMITY] {instId} {launch_proximity}",
+            flush=True
+        )
+
+    # =========================
     # FAKE DUMP
     # =========================
     if fake_dump_ok(c5):
