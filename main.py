@@ -4971,8 +4971,7 @@ def decide_entry(stage, flags, price, c5):
     ):
 
         long_premove = (
-            "BUYER_ABSORPTION" in flags
-            or "BULLISH_SHIFT" in flags
+            "BULLISH_SHIFT" in flags
             or (
                 "PRESSURE_UP" in flags
                 and (
@@ -4984,8 +4983,7 @@ def decide_entry(stage, flags, price, c5):
         )
 
         short_premove = (
-            "SELLER_ABSORPTION" in flags
-            or "BEARISH_SHIFT" in flags
+            "BEARISH_SHIFT" in flags
             or (
                 "PRESSURE_DOWN" in flags
                 and (
