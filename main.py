@@ -445,6 +445,7 @@ SWING_USE_M15 = (os.getenv("SWING_USE_M15") or "1").strip() != "0"
 
 SWING_ALERT_COOLDOWN_SEC = int(os.getenv("SWING_ALERT_COOLDOWN_SEC") or "14400")
 SWING_ONE_IDEA_PER_SYMBOL = (os.getenv("SWING_ONE_IDEA_PER_SYMBOL") or "1").strip() != "0"
+PREMOVE_COOLDOWN_SEC = int(os.getenv("PREMOVE_COOLDOWN_SEC") or "2700")
 
 H4_EMA_FAST = int(os.getenv("H4_EMA_FAST") or "20")
 H4_EMA_SLOW = int(os.getenv("H4_EMA_SLOW") or "50")
