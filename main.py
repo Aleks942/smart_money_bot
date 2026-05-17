@@ -10843,10 +10843,22 @@ if __name__ == "__main__":
                 sid = sig.get("instId")
             
                 if sid in sent_ids:
+                continue
+            
+                if not can_send(
+                    sid + "_PREMOVE",
+                    PREMOVE_COOLDOWN_SEC
+                ):
+                
+                    print(
+                        f"[PREMOVE_COOLDOWN] {sid}",
+                        flush=True
+                    )
+                
                     continue
-            
+                
                 sent_ids.add(sid)
-            
+                        
                 print(f"[PREMOVE_SEND] {sid}", flush=True)
             
                 send_telegram(
