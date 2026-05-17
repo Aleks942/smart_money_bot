@@ -9826,6 +9826,86 @@ def choose_detail_message(sig):
 
     return msg
 
+
+# =========================
+# SCALP MESSAGE FORMATTER
+# =========================
+def msg_scalp(sig):
+
+    side = sig.get("direction") or "UNKNOWN"
+    score = sig.get("score", 0)
+    stage = sig.get("stage", "UNKNOWN")
+    entry = sig.get("entry", "UNKNOWN")
+
+    flags = set(sig.get("flags", []))
+
+    symbol = sig.get("symbol") or sig.get("instId")
+
+    story = []
+
+    # =====================
+    # PRESSURE
+    # =====================
+    if "PRESSURE_UP" in flags:
+        story.append("покупатели усиливают давление")
+
+    if "PRESSURE_DOWN" in flags:
+        story.append("продавцы усиливают давление")
+
+    # =====================
+    # ENERGY
+    # =====================
+    if "ENERGY_BUILDUP" in flags:
+        story.append("рынок сжимается перед движением")
+
+    # =====================
+    # SHIFT
+    # =====================
+    if "BULLISH_SHIFT" in flags:
+        story.append("покупатели перехватывают контроль")
+
+    if "BEARISH_SHIFT" in flags:
+        story.append("продавцы перехватывают контроль")
+
+    # =====================
+    # EXPLOSION
+    # =====================
+    if "EXPLOSION_READY_UP" in flags:
+        story.append("обнаружена готовность к импульсу вверх")
+
+    if "EXPLOSION_READY_DOWN" in flags:
+        story.append("обнаружена готовность к импульсу вниз")
+
+    # =====================
+    # LAUNCH
+    # =====================
+    if "LAUNCH_PROXIMITY_UP" in flags:
+        story.append("цена близка к запуску движения вверх")
+
+    if "LAUNCH_PROXIMITY_DOWN" in flags:
+        story.append("цена близка к запуску движения вниз")
+
+    story_text = "\n".join([f"— {x}" for x in story])
+
+    msg = f"""
+🔥 <b>РАННИЙ SCALP СИГНАЛ — {symbol}</b>
+
+🧭 Направление: {side}
+
+⚡ Тип входа:
+{entry}
+
+🧠 Что происходит:
+{story_text}
+
+📊 Score: {round(score, 1)}
+📍 Стадия: {stage}
+
+⚠️ Ранний сигнал ДО сильного движения.
+""".strip()
+
+    return msg
+
 def summary_message(alerts, cycle_info, regime):
 
     if not alerts:
