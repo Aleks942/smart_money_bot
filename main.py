@@ -11286,8 +11286,6 @@ if __name__ == "__main__":
                     f"[SCALP_SIGNAL_READY] {instId}",
                     flush=True
                 )
-
-                continue
             
             if not sig:
                 print(f"[RAW_SKIP] {instId} no_signal_from_analyzer")
