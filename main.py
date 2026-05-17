@@ -4912,6 +4912,37 @@ def decide_entry(stage, flags, price, c5):
             reason = "EARLY_SCOUT_SHORT"
 
     # =========================
+    # PREMOVE BUILDUP
+    # =========================
+    elif (
+        "ENERGY_BUILDUP" in flags
+        and (
+            "COMP_PRO_5M" in flags
+            or "COMP_PRO_15M" in flags
+        )
+    ):
+
+        # LONG PREMOVE
+        if (
+            "SELLER_ABSORPTION" in flags
+            or "BULLISH_SHIFT" in flags
+        ):
+
+            entry = "PREMOVE_LONG"
+            stop = recent_low
+            reason = "PREMOVE_LONG"
+
+        # SHORT PREMOVE
+        elif (
+            "BUYER_ABSORPTION" in flags
+            or "BEARISH_SHIFT" in flags
+        ):
+
+            entry = "PREMOVE_SHORT"
+            stop = recent_high
+            reason = "PREMOVE_SHORT"
+
+    # =========================
     # TRANSITION
     # =========================
     elif stage == "🟠 TRANSITION":
