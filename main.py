@@ -1938,6 +1938,21 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
                 return empty
 
         # =====================
+        # PREMOVE IMPULSE BYPASS
+        # =====================
+        signal_mode = classify_signal_mode(sig)
+
+        premove_impulse_bypass = (
+            signal_mode == "PREMOVE"
+        )
+
+        if premove_impulse_bypass:
+            print(
+                f"[PREMOVE_IMPULSE_BYPASS] {instId}",
+                flush=True
+            )
+
+        # =====================
         # IMPULSE 2.0 (STRONG MOVE FILTER)
         # =====================
         atr = float(m15_trigger.get("atr") or 0)
