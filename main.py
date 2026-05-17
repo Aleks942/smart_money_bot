@@ -8598,6 +8598,21 @@ def build_signal(instId):
     # =========================
     signal["decision"] = decision_engine(signal)
 
+    # =========================
+    # SCALP PIPELINE
+    # =========================
+    scalp_ok, scalp_reason = is_scalp_candidate(signal)
+
+    signal["scalp_candidate"] = scalp_ok
+    signal["scalp_reason"] = scalp_reason
+
+    print(
+        f"[SCALP_PIPELINE] {instId} "
+        f"ok={scalp_ok} "
+        f"reason={scalp_reason}",
+        flush=True
+    )
+
     # =====================
     # SIGNAL STRENGTH
     # =====================
