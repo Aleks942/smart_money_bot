@@ -7022,13 +7022,48 @@ def build_signal(instId):
     if bos:
     
         flags.add(bos)
+
+
+    # =========================
+    # BOS BOOST
+    # =========================
     
-        score += 3
+    if (
+        bos == "BOS_UP"
+        and (
+            "PRESSURE_UP" in flags
+            or "BULLISH_SHIFT" in flags
+        )
+    ):
+    
+        score += 2
     
         print(
-            f"[BOS] {instId} {bos}",
+            f"[BOS_BOOST_UP] {instId}",
             flush=True
         )
+    
+    if (
+        bos == "BOS_DOWN"
+        and (
+            "PRESSURE_DOWN" in flags
+            or "BEARISH_SHIFT" in flags
+        )
+    ):
+    
+        score += 2
+    
+        print(
+            f"[BOS_BOOST_DOWN] {instId}",
+            flush=True
+        )
+        
+            score += 3
+        
+            print(
+                f"[BOS] {instId} {bos}",
+                flush=True
+            )
         
         if structure:
         
