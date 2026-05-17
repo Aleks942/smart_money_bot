@@ -6456,6 +6456,51 @@ def detect_basic_structure(candles):
         )
 
         return None
+
+
+# =========================
+# BOS ENGINE v1
+# =========================
+def detect_bos(candles):
+
+    try:
+
+        if not candles or len(candles) < 20:
+            return None
+
+        highs = [float(x[2]) for x in candles[-10:]]
+        lows = [float(x[3]) for x in candles[-10:]]
+
+        prev_high = max(highs[:5])
+        last_high = max(highs[5:])
+
+        prev_low = min(lows[:5])
+        last_low = min(lows[5:])
+
+        # =====================
+        # BOS UP
+        # =====================
+
+        if last_high > prev_high * 1.003:
+            return "BOS_UP"
+
+        # =====================
+        # BOS DOWN
+        # =====================
+
+        if last_low < prev_low * 0.997:
+            return "BOS_DOWN"
+
+        return None
+
+    except Exception as e:
+
+        print(
+            f"[BOS_ENGINE_ERROR] {e}",
+            flush=True
+        )
+
+        return None
 # =========================
 # MAIN SIGNAL BUILDER
 # =========================
