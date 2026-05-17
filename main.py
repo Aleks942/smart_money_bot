@@ -6816,6 +6816,70 @@ def detect_market_regime(flags):
         )
 
         return "UNKNOWN_MARKET"
+
+# =========================
+# ENTRY QUALITY ENGINE v1
+# =========================
+def detect_entry_quality(flags):
+
+    try:
+
+        # =====================
+        # HIGH QUALITY LONG ENTRY
+        # =====================
+
+        if (
+
+            (
+                "LAUNCH_PROXIMITY_UP" in flags
+                or "BULLISH_SHIFT" in flags
+            )
+
+            and
+
+            "EXPLOSION_READY_UP" not in flags
+
+            and
+
+            "BULL_EXHAUSTION" not in flags
+
+        ):
+
+            return "HIGH_QUALITY_LONG_ENTRY"
+
+        # =====================
+        # HIGH QUALITY SHORT ENTRY
+        # =====================
+
+        if (
+
+            (
+                "LAUNCH_PROXIMITY_DOWN" in flags
+                or "BEARISH_SHIFT" in flags
+            )
+
+            and
+
+            "EXPLOSION_READY_DOWN" not in flags
+
+            and
+
+            "BEAR_EXHAUSTION" not in flags
+
+        ):
+
+            return "HIGH_QUALITY_SHORT_ENTRY"
+
+        return None
+
+    except Exception as e:
+
+        print(
+            f"[ENTRY_QUALITY_ENGINE_ERROR] {e}",
+            flush=True
+        )
+
+        return None
 # =========================
 # MAIN SIGNAL BUILDER
 # =========================
