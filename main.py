@@ -11507,6 +11507,9 @@ if __name__ == "__main__":
             # =====================
             if sig.get("signal_group") == "SCALP":
 
+                if not should_alert_symbol(state, sig):
+                    continue
+
                 scalp_msg = msg_scalp(sig)
 
                 send_telegram(scalp_msg)
