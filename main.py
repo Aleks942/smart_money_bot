@@ -6740,6 +6740,82 @@ def detect_liquidity_sweep(flags):
         )
 
         return None
+
+
+# =========================
+# MARKET REGIME ENGINE v1
+# =========================
+def detect_market_regime(flags):
+
+    try:
+
+        # =====================
+        # TREND MARKET
+        # рынок трендовый
+        # =====================
+
+        if (
+            (
+                "EMA_BULL_STRONG" in flags
+                or "EMA_BEAR_STRONG" in flags
+            )
+            and
+            (
+                "MTF_LONG_ALIGN" in flags
+                or "MTF_SHORT_ALIGN" in flags
+            )
+        ):
+
+            return "TREND_MARKET"
+
+        # =====================
+        # VOLATILE MARKET
+        # рынок резкий / нервный
+        # =====================
+
+        if (
+            "VOL_SPIKE" in flags
+            or "ATR_EXPANSION" in flags
+        ):
+
+            return "VOLATILE_MARKET"
+
+        # =====================
+        # RANGE MARKET
+        # рынок в боковике
+        # =====================
+
+        if (
+            "STRUCTURE_RANGE" in flags
+            or "COMP_PRO_5M" in flags
+            or "COMP_PRO_15M" in flags
+        ):
+
+            return "RANGE_MARKET"
+
+        # =====================
+        # DEAD MARKET
+        # рынок слабый / тухлый
+        # =====================
+
+        if (
+            "EMA_FLAT" in flags
+            and "PRESSURE_UP" not in flags
+            and "PRESSURE_DOWN" not in flags
+        ):
+
+            return "DEAD_MARKET"
+
+        return "UNKNOWN_MARKET"
+
+    except Exception as e:
+
+        print(
+            f"[MARKET_REGIME_ENGINE_ERROR] {e}",
+            flush=True
+        )
+
+        return "UNKNOWN_MARKET"
 # =========================
 # MAIN SIGNAL BUILDER
 # =========================
