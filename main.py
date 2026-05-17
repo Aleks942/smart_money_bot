@@ -11305,26 +11305,36 @@ if __name__ == "__main__":
                     f"⚡ Breakout: {ta.get('breakout')}"
                 )
                                                 
-            # =====================
-            # PREMOVE TELEGRAM
-            # =====================
+                # =====================
+                # PREMOVE TELEGRAM
+                # =====================
+                #
+                # premove_send = False
+                #
+                # if (
+                #     sig.get("setup_rank") in ["PRIORITY_1", "PRIORITY_2"]
+                # ):
+                #
+                #     if (
+                #         "LAUNCH_PROXIMITY_UP" in flags
+                #         or "LAUNCH_PROXIMITY_DOWN" in flags
+                #         or "EXPLOSION_READY_UP" in flags
+                #         or "EXPLOSION_READY_DOWN" in flags
+                #     ):
+                #
+                #         premove_send = True
+                #
+                # if premove_send:
+                #
+                #     scalp_msg = msg_scalp(sig)
+                #
+                #     send_telegram(scalp_msg)
+                #
+                #     print(
+                #         f"[PREMOVE_SENT] {instId}",
+                #         flush=True
+                #     )
             
-            premove_send = False
-            
-            if (
-                sig.get("setup_rank") in ["PRIORITY_1", "PRIORITY_2"]
-            ):
-            
-                if (
-                    "LAUNCH_PROXIMITY_UP" in flags
-                    or "LAUNCH_PROXIMITY_DOWN" in flags
-                    or "EXPLOSION_READY_UP" in flags
-                    or "EXPLOSION_READY_DOWN" in flags
-                ):
-            
-                    premove_send = True
-            
-            if premove_send:
             
                 # =====================
                 # SCALP MESSAGE
