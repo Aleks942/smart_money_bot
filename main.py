@@ -8495,6 +8495,28 @@ def build_signal(instId):
         flush=True
     )
 
+    # =====================
+    # PREMOVE OVERRIDE
+    # =====================
+    if signal_mode == "PREMOVE":
+    
+        premove_score = float(signal.get("score") or 0)
+    
+        if premove_score >= 8:
+    
+            print(
+                f"[PREMOVE_OVERRIDE] {instId} "
+                f"score={premove_score}",
+                flush=True
+            )
+    
+        else:
+            print(
+                f"[PREMOVE_WEAK] {instId}",
+                flush=True
+            )
+            return empty
+
     # =========================
     # STRUCTURE PASS
     # =========================
