@@ -1762,7 +1762,10 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             prev_rsi = None
         
         # LONG дивергенция (плохо для лонга)
-        if sig.get("side") in ("LONG", "BUY"):
+        if (
+            not premove_bypass
+            and sig.get("side") in ("LONG", "BUY")
+        ):
             if prev_price and prev_rsi and rsi:
                 if price_now > prev_price and rsi < prev_rsi:
                     print(f"[DIV_SKIP] {instId} bearish divergence", flush=True)
