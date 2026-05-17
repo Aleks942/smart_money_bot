@@ -7075,10 +7075,27 @@ def build_signal(instId):
     # =========================
     
     bos = detect_bos(c5)
+
+    # =========================
+    # RECLAIM
+    # =========================
     
-    if bos:
+    reclaim = detect_reclaim(flags)
     
-        flags.add(bos)
+    if reclaim:
+    
+        flags.add(reclaim)
+    
+        score += 3
+    
+        print(
+            f"[RECLAIM] {instId} {reclaim}",
+            flush=True
+        )
+        
+        if bos:
+        
+            flags.add(bos)
 
 
     # =========================
