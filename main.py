@@ -8537,7 +8537,7 @@ def build_signal(instId):
                 f"[PREMOVE_WEAK] {instId}",
                 flush=True
             )
-            return empty
+            return {}
 
     # =========================
     # STRUCTURE PASS
