@@ -8383,6 +8383,16 @@ def build_signal(instId):
     ep = detect_early_pressure(signal)
     signal.update(ep)
 
+    # =====================
+    # SIGNAL MODE
+    # =====================
+    signal_mode = classify_signal_mode(sig)
+    
+    print(
+        f"[SIGNAL_MODE] {instId} mode={signal_mode}",
+        flush=True
+    )
+
     print(
         f"[EARLY_DEBUG] {instId} "
         f"flags={signal.get('flags')} "
