@@ -10820,6 +10820,8 @@ if __name__ == "__main__":
             # PREMOVE ALERTS
             # =====================
             
+            sent_ids = set()
+
             premove_alerts = [
             
                 s for s in alerts
