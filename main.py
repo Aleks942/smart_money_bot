@@ -9899,6 +9899,8 @@ def msg_scalp(sig):
 🧠 Что происходит:
 {story_text}
 
+💰 Цена: {price}
+
 📊 Score: {round(score, 1)}
 📍 Стадия: {stage}
 
