@@ -1983,7 +1983,10 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         # =====================
         
         # ❌ слабое движение
-        if atr_pct < 0.2:
+        if (
+            not premove_impulse_bypass
+            and atr_pct < 0.2
+        ):
             print(f"[IMPULSE_SKIP] {instId} weak move {round(atr_pct,3)}%", flush=True)
             return empty
         
