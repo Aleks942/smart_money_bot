@@ -11493,6 +11493,26 @@ if __name__ == "__main__":
                     save_signal(sig)
             
                     print(f"[SAVE_OK] {instId} saved")
+
+            # =====================
+            # SCALP TELEGRAM
+            # =====================
+            if sig.get("signal_group") == "SCALP":
+
+                scalp_msg = msg_scalp(sig)
+
+                send_telegram(scalp_msg)
+
+                print(
+                    f"[SCALP_SENT] {instId}",
+                    flush=True
+                )
+
+                alerts.append(sig)
+
+                mark_alert_sent(state, sig)
+
+                continue
             
             # =====================
             # TIER + SEND LOGIC
