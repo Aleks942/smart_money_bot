@@ -1999,7 +1999,10 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             return empty
         
         # ❌ перегрев (вход в конец движения)
-        if ema_dist > 1.2:
+        if (
+            not premove_impulse_bypass
+            and ema_dist > 1.2
+        ):
             print(f"[IMPULSE_SKIP] {instId} overextended {round(ema_dist,2)}%", flush=True)
             return empty
 
