@@ -4941,29 +4941,72 @@ def decide_entry(stage, flags, price, c5):
         and (
             "COMP_PRO_5M" in flags
             or "COMP_PRO_15M" in flags
+            or "COMP_5M" in flags
+            or "COMP_15M" in flags
         )
     ):
 
-       
-        # LONG PREMOVE
-        if (
+        long_premove = (
             "BUYER_ABSORPTION" in flags
             or "BULLISH_SHIFT" in flags
-        ):
+            or (
+                "PRESSURE_UP" in flags
+                and (
+                    "EMA_BULL" in flags
+                    or "EMA_BULL_STRONG" in flags
+                    or "MTF_LONG_ALIGN" in flags
+                )
+            )
+        )
+
+        short_premove = (
+            "SELLER_ABSORPTION" in flags
+            or "BEARISH_SHIFT" in flags
+            or (
+                "PRESSURE_DOWN" in flags
+                and (
+                    "EMA_BEAR" in flags
+                    or "EMA_BEAR_STRONG" in flags
+                    or "MTF_SHORT_ALIGN" in flags
+                )
+            )
+        )
+
+        # =====================
+        # LONG PREMOVE
+        # =====================
+        if long_premove and not short_premove:
 
             entry = "PREMOVE_LONG"
             stop = recent_low
             reason = "PREMOVE_LONG"
 
+        # =====================
         # SHORT PREMOVE
-        elif (
-            "SELLER_ABSORPTION" in flags
-            or "BEARISH_SHIFT" in flags
-        ):
+        # =====================
+        elif short_premove and not long_premove:
 
             entry = "PREMOVE_SHORT"
             stop = recent_high
             reason = "PREMOVE_SHORT"
+
+        # =====================
+        # CONFLICT
+        # =====================
+        else:
+
+            entry = "NO_ENTRY"
+            stop = None
+            reason = "PREMOVE_CONFLICT"
+
+            print(
+                f"[PREMOVE_CONFLICT] {stage} flags={flags}",
+                flush=True
+            )
+
+    # =========================
+    # TRANSITION
+    # =========================
 
     # =========================
     # TRANSITION
