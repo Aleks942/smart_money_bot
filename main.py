@@ -8773,6 +8773,15 @@ def build_signal(instId):
                 flush=True
             )
             ok = True
+
+        print(
+            f"[BEFORE_SCALP_OVERRIDE] "
+            f"{instId} "
+            f"scalp={signal.get('scalp_candidate')} "
+            f"entry={signal.get('entry')} "
+            f"stage={signal.get('stage')}",
+            flush=True
+        )
     
 
         # =========================
