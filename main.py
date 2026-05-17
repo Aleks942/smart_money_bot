@@ -10402,7 +10402,45 @@ if __name__ == "__main__":
                     f"⚡ Breakout: {ta.get('breakout')}"
                 )
                                                 
-           
+            # =====================
+            # PREMOVE TELEGRAM
+            # =====================
+            
+            premove_send = False
+            
+            if (
+                sig.get("setup_rank") in ["PRIORITY_1", "PRIORITY_2"]
+            ):
+            
+                if (
+                    "LAUNCH_PROXIMITY_UP" in flags
+                    or "LAUNCH_PROXIMITY_DOWN" in flags
+                    or "EXPLOSION_READY_UP" in flags
+                    or "EXPLOSION_READY_DOWN" in flags
+                ):
+            
+                    premove_send = True
+            
+            if premove_send:
+            
+                send_telegram(
+            
+                    f"⚠️ <b>PREMOVE — {instId}</b>\n\n"
+            
+                    f"🧭 Side: {sig.get('direction_code')}\n"
+                    f"💰 Price: {sig.get('price')}\n"
+                    f"⭐ Rank: {sig.get('setup_rank')}\n"
+                    f"📊 Score: {sig.get('score')}\n\n"
+            
+                    f"📌 Flags:\n"
+                    f"{', '.join(flags)}"
+            
+                )
+            
+                print(
+                    f"[PREMOVE_SENT] {instId}",
+                    flush=True
+                )
             
             # =====================
             # DEFINE SETUP TYPE
