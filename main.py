@@ -10826,7 +10826,7 @@ if __name__ == "__main__":
                 time.sleep(0.55)
     
                 try:
-    
+
                     sig = build_signal(instId)
 
                     print(
@@ -10837,18 +10837,49 @@ if __name__ == "__main__":
                         f"scalp={sig.get('scalp_candidate') if isinstance(sig, dict) else None}",
                         flush=True
                     )
-    
+
+                    # =====================
+                    # SCALP INSTANT DISPATCH
+                    # =====================
+                    if (
+                        sig
+                        and isinstance(sig, dict)
+                        and sig.get("signal_group") == "SCALP"
+                    ):
+
+                        if not should_alert_symbol(state, sig):
+                            print(
+                                f"[SCALP_COOLDOWN_SKIP] {instId}",
+                                flush=True
+                            )
+                            continue
+
+                        scalp_msg = msg_scalp(sig)
+
+                        send_telegram(scalp_msg)
+
+                        print(
+                            f"[SCALP_SENT] {instId}",
+                            flush=True
+                        )
+
+                        alerts.append(sig)
+
+                        mark_alert_sent(state, sig)
+
+                        continue
+
                     if not sig or not isinstance(sig, dict):
                         print(f"[RAW_SKIP] {instId}", flush=True)
                         continue
-    
+
                 except Exception as e:
-    
+
                     print(
                         f"[BUILD_SIGNAL_ERROR] {instId} {e}",
                         flush=True
                     )
-    
+
                     continue
     
                 # =====================
