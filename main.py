@@ -51,13 +51,33 @@ def classify_signal_mode(sig):
         stage = str(sig.get("stage") or "")
 
         # 1. PREMOVE — рынок сжат, энергия есть, но пробой ещё не обязан быть
+        # =====================
+        # PREMOVE
+        # =====================
+        compression_present = (
+            "COMP_PRO_5M" in flags
+            or "COMP_PRO_15M" in flags
+            or "COMP_5M" in flags
+            or "COMP_15M" in flags
+        )
+        
+        absorption_present = (
+            "BUYER_ABSORPTION" in flags
+            or "SELLER_ABSORPTION" in flags
+        )
+        
+        launch_present = (
+            "LAUNCH_PROXIMITY_UP" in flags
+            or "LAUNCH_PROXIMITY_DOWN" in flags
+            or "EXPLOSION_READY_UP" in flags
+            or "EXPLOSION_READY_DOWN" in flags
+        )
+        
         if (
             "ENERGY_BUILDUP" in flags
             and (
-                "LAUNCH_PROXIMITY_UP" in flags
-                or "LAUNCH_PROXIMITY_DOWN" in flags
-                or "EXPLOSION_READY_UP" in flags
-                or "EXPLOSION_READY_DOWN" in flags
+                launch_present
+                or (compression_present and absorption_present)
             )
         ):
             return "PREMOVE"
