@@ -1991,7 +1991,10 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             return empty
         
         # ❌ нет объёма
-        if not vol_ok:
+        if (
+            not premove_impulse_bypass
+            and not vol_ok
+        ):
             print(f"[IMPULSE_SKIP] {instId} weak volume", flush=True)
             return empty
         
