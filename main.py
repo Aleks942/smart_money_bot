@@ -6559,6 +6559,71 @@ def detect_reclaim(flags):
         )
 
         return None
+
+
+# =========================
+# CONTINUATION ENGINE v1
+# =========================
+def detect_continuation_quality(flags):
+
+    try:
+
+        # =====================
+        # STRONG LONG CONTINUATION
+        # =====================
+
+        if (
+
+            "BREAKOUT_CONFIRM_UP" in flags
+
+            and
+
+            "PRESSURE_UP" in flags
+
+            and
+
+            (
+                "STRUCTURE_HH_HL" in flags
+                or "BOS_UP" in flags
+            )
+
+        ):
+
+            return "STRONG_CONTINUATION_UP"
+
+        # =====================
+        # STRONG SHORT CONTINUATION
+        # =====================
+
+        if (
+
+            "BREAKOUT_CONFIRM_DOWN" in flags
+
+            and
+
+            "PRESSURE_DOWN" in flags
+
+            and
+
+            (
+                "STRUCTURE_LH_LL" in flags
+                or "BOS_DOWN" in flags
+            )
+
+        ):
+
+            return "STRONG_CONTINUATION_DOWN"
+
+        return None
+
+    except Exception as e:
+
+        print(
+            f"[CONTINUATION_ENGINE_ERROR] {e}",
+            flush=True
+        )
+
+        return None
 # =========================
 # MAIN SIGNAL BUILDER
 # =========================
