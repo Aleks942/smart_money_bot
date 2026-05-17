@@ -11494,6 +11494,14 @@ if __name__ == "__main__":
             
                     print(f"[SAVE_OK] {instId} saved")
 
+            print(
+                f"[SCALP_GROUP_DEBUG] "
+                f"{instId} "
+                f"group={sig.get('signal_group')} "
+                f"scalp={sig.get('scalp_candidate')}",
+                flush=True
+            )
+
             # =====================
             # SCALP TELEGRAM
             # =====================
