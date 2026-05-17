@@ -11323,24 +11323,17 @@ if __name__ == "__main__":
             
             if premove_send:
             
-                send_telegram(
-            
-                    f"⚠️ <b>PREMOVE — {instId}</b>\n\n"
-            
-                    f"🧭 Side: {sig.get('direction_code')}\n"
-                    f"💰 Price: {sig.get('price')}\n"
-                    f"⭐ Rank: {sig.get('setup_rank')}\n"
-                    f"📊 Score: {sig.get('score')}\n\n"
-            
-                    f"📌 Flags:\n"
-                    f"{', '.join(flags)}"
-            
-                )
-            
+                # =====================
+                # SCALP MESSAGE
+                # =====================
+                scalp_msg = msg_scalp(sig)
+
+                send_telegram(scalp_msg)
+
                 print(
                     f"[PREMOVE_SENT] {instId}",
                     flush=True
-                )
+                )   
             
             # =====================
             # DEFINE SETUP TYPE
