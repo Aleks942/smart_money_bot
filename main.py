@@ -7226,6 +7226,24 @@ def build_signal(instId):
     # =========================
     
     continuation = detect_continuation_quality(flags)
+
+    # =========================
+    # EXHAUSTION
+    # =========================
+    
+    exhaustion = detect_exhaustion(flags)
+    
+    if exhaustion:
+    
+        flags.add(exhaustion)
+    
+        score -= 3
+    
+        print(
+            f"[EXHAUSTION] "
+            f"{instId} {exhaustion}",
+            flush=True
+        )
     
     if continuation:
     
