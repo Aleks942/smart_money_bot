@@ -7429,6 +7429,24 @@ def build_signal(instId):
     # =========================
     
     exhaustion = detect_exhaustion(flags)
+
+    # =========================
+    # ENTRY QUALITY
+    # =========================
+    
+    entry_quality = detect_entry_quality(flags)
+    
+    if entry_quality:
+    
+        flags.add(entry_quality)
+    
+        score += 2
+    
+        print(
+            f"[ENTRY_QUALITY] "
+            f"{instId} {entry_quality}",
+            flush=True
+        )
     
     if exhaustion:
     
