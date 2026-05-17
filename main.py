@@ -267,8 +267,20 @@ def is_scalp_candidate(signal):
             return True, "scalp_premove"
 
         # TRANSITION
-        if mode == "TRANSITION" and ep_score >= 6 and score >= 6:
+        if (
+            mode == "TRANSITION"
+            and score >= 6
+            and (
+                ep_score >= 6
+                or "PRESSURE_UP" in flags
+                or "PRESSURE_DOWN" in flags
+                or "BULLISH_SHIFT" in flags
+                or "BEARISH_SHIFT" in flags
+            )
+        ):
+
             return True, "scalp_transition"
+        
 
         # ACCUMULATION с давлением
         if (
