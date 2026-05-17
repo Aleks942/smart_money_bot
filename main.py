@@ -9834,6 +9834,7 @@ def msg_scalp(sig):
 
     side = sig.get("direction") or "UNKNOWN"
     score = sig.get("score", 0)
+    price = sig.get("price")
     stage = sig.get("stage", "UNKNOWN")
     entry = sig.get("entry", "UNKNOWN")
 
