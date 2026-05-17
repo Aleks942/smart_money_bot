@@ -7058,23 +7058,23 @@ def build_signal(instId):
             flush=True
         )
         
-            score += 3
-        
-            print(
-                f"[BOS] {instId} {bos}",
-                flush=True
-            )
-        
-        if structure:
-        
-            flags.add(structure)
-        
-            score += 2
-        
-            print(
-                f"[STRUCTURE] {instId} {structure}",
-                flush=True
-            )
+        score += 3
+    
+        print(
+            f"[BOS] {instId} {bos}",
+            flush=True
+        )
+    
+    if structure:
+    
+        flags.add(structure)
+    
+        score += 2
+    
+        print(
+            f"[STRUCTURE] {instId} {structure}",
+            flush=True
+        )
 
     # =========================
     # ABSORPTION
