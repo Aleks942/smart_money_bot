@@ -4944,9 +4944,10 @@ def decide_entry(stage, flags, price, c5):
         )
     ):
 
+       
         # LONG PREMOVE
         if (
-            "SELLER_ABSORPTION" in flags
+            "BUYER_ABSORPTION" in flags
             or "BULLISH_SHIFT" in flags
         ):
 
@@ -4956,7 +4957,7 @@ def decide_entry(stage, flags, price, c5):
 
         # SHORT PREMOVE
         elif (
-            "BUYER_ABSORPTION" in flags
+            "SELLER_ABSORPTION" in flags
             or "BEARISH_SHIFT" in flags
         ):
 
