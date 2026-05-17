@@ -8762,7 +8762,22 @@ def build_signal(instId):
             )
             ok = True
     
+
+        # =========================
+        # SCALP FINAL OVERRIDE
+        # =========================
+        if signal.get("scalp_candidate"):
     
+            signal["sendable"] = True
+            signal["signal_group"] = "SCALP"
+    
+            print(
+                f"[SCALP_FINAL_OVERRIDE] {instId}",
+                flush=True
+            )
+    
+            return signal
+            
         if not ok:
             print(f"[FILTER_BLOCK] {instId} reason={reason}", flush=True)
             return None
