@@ -8386,7 +8386,7 @@ def build_signal(instId):
     # =====================
     # SIGNAL MODE
     # =====================
-    signal_mode = classify_signal_mode(sig)
+    signal_mode = classify_signal_mode(signal)
     
     print(
         f"[SIGNAL_MODE] {instId} mode={signal_mode}",
