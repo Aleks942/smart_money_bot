@@ -7162,6 +7162,24 @@ def build_signal(instId):
         
             flags.add(bos)
 
+    # =========================
+    # CONTINUATION QUALITY
+    # =========================
+    
+    continuation = detect_continuation_quality(flags)
+    
+    if continuation:
+    
+        flags.add(continuation)
+    
+        score += 3
+    
+        print(
+            f"[CONTINUATION_QUALITY] "
+            f"{instId} {continuation}",
+            flush=True
+        )
+
 
     # =========================
     # BOS BOOST
