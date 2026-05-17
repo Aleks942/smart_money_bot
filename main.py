@@ -6502,6 +6502,63 @@ def detect_bos(candles):
         )
 
         return None
+
+
+# =========================
+# RECLAIM ENGINE v1
+# =========================
+def detect_reclaim(flags):
+
+    try:
+
+        # =====================
+        # RECLAIM UP
+        # =====================
+
+        if (
+
+            "BOS_DOWN" in flags
+
+            and
+
+            (
+                "PRESSURE_UP" in flags
+                or "BULLISH_SHIFT" in flags
+            )
+
+        ):
+
+            return "RECLAIM_UP"
+
+        # =====================
+        # RECLAIM DOWN
+        # =====================
+
+        if (
+
+            "BOS_UP" in flags
+
+            and
+
+            (
+                "PRESSURE_DOWN" in flags
+                or "BEARISH_SHIFT" in flags
+            )
+
+        ):
+
+            return "RECLAIM_DOWN"
+
+        return None
+
+    except Exception as e:
+
+        print(
+            f"[RECLAIM_ENGINE_ERROR] {e}",
+            flush=True
+        )
+
+        return None
 # =========================
 # MAIN SIGNAL BUILDER
 # =========================
