@@ -10815,6 +10815,50 @@ if __name__ == "__main__":
             # msg = summary_message(alerts, cycle_info, regime)
             # if msg and msg.strip() and should_send_summary(state, msg):
             #     send_telegram(msg)
+
+            # =====================
+            # PREMOVE ALERTS
+            # =====================
+            
+            premove_alerts = [
+            
+                s for s in alerts
+            
+                if (
+                    s.get("setup_rank") in ["PRIORITY_1", "PRIORITY_2"]
+                    and (
+                        "LAUNCH_PROXIMITY_UP" in s.get("flags", [])
+                        or "LAUNCH_PROXIMITY_DOWN" in s.get("flags", [])
+                        or "EXPLOSION_READY_UP" in s.get("flags", [])
+                        or "EXPLOSION_READY_DOWN" in s.get("flags", [])
+                    )
+                )
+            ][:3]
+            
+            for sig in premove_alerts:
+            
+                sid = sig.get("instId")
+            
+                if sid in sent_ids:
+                    continue
+            
+                sent_ids.add(sid)
+            
+                print(f"[PREMOVE_SEND] {sid}", flush=True)
+            
+                send_telegram(
+            
+                    f"⚠️ <b>PREMOVE — {sid}</b>\n\n"
+            
+                    f"🧭 Side: {sig.get('direction_code')}\n"
+                    f"💰 Price: {sig.get('price')}\n"
+                    f"⭐ Rank: {sig.get('setup_rank')}\n"
+                    f"📊 Score: {sig.get('score')}\n\n"
+            
+                    f"📌 Flags:\n"
+                    f"{', '.join(sig.get('flags', []))}"
+            
+                )
             
             # =====================
             # TOP ALERTS
