@@ -6624,6 +6624,65 @@ def detect_continuation_quality(flags):
         )
 
         return None
+
+
+# =========================
+# EXHAUSTION ENGINE v1
+# =========================
+def detect_exhaustion(flags):
+
+    try:
+
+        # =====================
+        # BULL EXHAUSTION
+        # =====================
+
+        if (
+
+            "BREAKOUT_CONFIRM_UP" in flags
+
+            and
+
+            "PRESSURE_UP" not in flags
+
+            and
+
+            "STRUCTURE_HH_HL" not in flags
+
+        ):
+
+            return "BULL_EXHAUSTION"
+
+        # =====================
+        # BEAR EXHAUSTION
+        # =====================
+
+        if (
+
+            "BREAKOUT_CONFIRM_DOWN" in flags
+
+            and
+
+            "PRESSURE_DOWN" not in flags
+
+            and
+
+            "STRUCTURE_LH_LL" not in flags
+
+        ):
+
+            return "BEAR_EXHAUSTION"
+
+        return None
+
+    except Exception as e:
+
+        print(
+            f"[EXHAUSTION_ENGINE_ERROR] {e}",
+            flush=True
+        )
+
+        return None
 # =========================
 # MAIN SIGNAL BUILDER
 # =========================
