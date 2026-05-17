@@ -31,6 +31,74 @@ def log(msg, symbol=None, level="INFO"):
         prefix += f" [{symbol}]"
     print(f"{prefix} {msg}", flush=True)
 
+# =========================
+# SIGNAL MODE CLASSIFIER
+# =========================
+def classify_signal_mode(sig):
+    """
+    Определяет тип сигнала:
+    PREMOVE      — подготовка движения
+    TRANSITION   — смена контроля
+    CONFIRMED    — подтверждённое движение
+    CONTINUATION — продолжение уже начатого движения
+    WATCH        — просто наблюдение
+    """
+
+    try:
+        flags = set(sig.get("flags", []))
+        score = float(sig.get("score") or 0)
+        ep_score = float(sig.get("early_pressure_score") or 0)
+        stage = str(sig.get("stage") or "")
+
+        # 1. PREMOVE — рынок сжат, энергия есть, но пробой ещё не обязан быть
+        if (
+            "ENERGY_BUILDUP" in flags
+            and (
+                "LAUNCH_PROXIMITY_UP" in flags
+                or "LAUNCH_PROXIMITY_DOWN" in flags
+                or "EXPLOSION_READY_UP" in flags
+                or "EXPLOSION_READY_DOWN" in flags
+            )
+        ):
+            return "PREMOVE"
+
+        # 2. TRANSITION — смена контроля
+        if (
+            "BULLISH_SHIFT" in flags
+            or "BEARISH_SHIFT" in flags
+            or "🟠 TRANSITION" in stage
+            or ep_score >= 6
+        ):
+            return "TRANSITION"
+
+        # 3. CONFIRMED — уже есть подтверждённый пробой
+        if (
+            "BREAKOUT_CONFIRM_UP" in flags
+            or "BREAKOUT_CONFIRM_DOWN" in flags
+            or "BOS_UP" in flags
+            or "BOS_DOWN" in flags
+        ):
+            return "CONFIRMED"
+
+        # 4. CONTINUATION — движение уже продолжается
+        if (
+            "CONTINUATION_UP" in flags
+            or "CONTINUATION_DOWN" in flags
+            or "STRONG_CONTINUATION_UP" in flags
+            or "STRONG_CONTINUATION_DOWN" in flags
+        ):
+            return "CONTINUATION"
+
+        # 5. Если просто высокий score, но нет направления — watch
+        if score >= 6:
+            return "WATCH"
+
+        return "NO_MODE"
+
+    except Exception as e:
+        print(f"[SIGNAL_MODE_ERROR] {e}", flush=True)
+        return "NO_MODE"
+
 
 # =========================
 # BTC MARKET REGIME (V2 FIXED + LOG)
