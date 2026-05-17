@@ -6683,6 +6683,63 @@ def detect_exhaustion(flags):
         )
 
         return None
+
+
+# =========================
+# LIQUIDITY SWEEP ENGINE v1
+# =========================
+def detect_liquidity_sweep(flags):
+
+    try:
+
+        # =====================
+        # SWEEP LOW
+        # =====================
+
+        if (
+
+            "BOS_DOWN" in flags
+
+            and
+
+            (
+                "RECLAIM_UP" in flags
+                or "BULLISH_SHIFT" in flags
+            )
+
+        ):
+
+            return "SWEEP_LOW"
+
+        # =====================
+        # SWEEP HIGH
+        # =====================
+
+        if (
+
+            "BOS_UP" in flags
+
+            and
+
+            (
+                "RECLAIM_DOWN" in flags
+                or "BEARISH_SHIFT" in flags
+            )
+
+        ):
+
+            return "SWEEP_HIGH"
+
+        return None
+
+    except Exception as e:
+
+        print(
+            f"[LIQUIDITY_SWEEP_ERROR] {e}",
+            flush=True
+        )
+
+        return None
 # =========================
 # MAIN SIGNAL BUILDER
 # =========================
