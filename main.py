@@ -11575,6 +11575,7 @@ if __name__ == "__main__":
             
             
             # conflict block
+            flags = set(sig.get("flags", []))
             if "STRUCTURE_CONFLICT" in flags:
             
                 # allow strong continuation despite conflict
