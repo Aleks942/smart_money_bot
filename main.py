@@ -11343,44 +11343,44 @@ if __name__ == "__main__":
                     "1M",
                     120
                 )
-            # =====================
-            # TA SNIPER (SAFE)
-            # =====================
-            
-            try:
-            
-                if (
-                    is_empty(candles_m15)
-                    or is_empty(candles_h1)
-                    or is_empty(candles_day)
-                    or is_empty(candles_month)
-                ):
-            
-                    print(f"[TA_SKIP] {instId} empty candles", flush=True)
-            
-                    ta = None
-            
-                else:
-            
-                    ta = analyze_ta_sniper(
-                        symbol=instId,
-                        candles_month=candles_month,
-                        candles_day=candles_day,
-                        candles_h1=candles_h1,
-                        candles_m15=candles_m15,
-                        max_stop_pct=3.5
+                # =====================
+                # TA SNIPER (SAFE)
+                # =====================
+                
+                try:
+                
+                    if (
+                        is_empty(candles_m15)
+                        or is_empty(candles_h1)
+                        or is_empty(candles_day)
+                        or is_empty(candles_month)
+                    ):
+                
+                        print(f"[TA_SKIP] {instId} empty candles", flush=True)
+                
+                        ta = None
+                
+                    else:
+                
+                        ta = analyze_ta_sniper(
+                            symbol=instId,
+                            candles_month=candles_month,
+                            candles_day=candles_day,
+                            candles_h1=candles_h1,
+                            candles_m15=candles_m15,
+                            max_stop_pct=3.5
+                        )
+                
+                except Exception as e:
+                
+                    print(
+                        f"[TA_ERROR] {instId} {type(e).__name__}: {e}",
+                        flush=True
                     )
-            
-            except Exception as e:
-            
-                print(
-                    f"[TA_ERROR] {instId} {type(e).__name__}: {e}",
-                    flush=True
-                )
-            
-                print(traceback.format_exc(), flush=True)
-            
-                ta = None
+                
+                    print(traceback.format_exc(), flush=True)
+                
+                    ta = None
             
             # =====================
             # ELITE FILTER PRO
