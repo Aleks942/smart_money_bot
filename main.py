@@ -11649,18 +11649,13 @@ if __name__ == "__main__":
                 # =====================
 
                 scalp_score = sig.get("score", 0)
-                scalp_rank = sig.get("setup_rank", "")
 
-                if (
-                    scalp_score < 25
-                    and scalp_rank != "PRIORITY_1"
-                ):
+                if scalp_score < 18:
 
                     print(
                         f"[SCALP_LOW_QUALITY_SKIP] "
                         f"{instId} "
-                        f"score={scalp_score} "
-                        f"rank={scalp_rank}",
+                        f"score={scalp_score}",
                         flush=True
                     )
 
