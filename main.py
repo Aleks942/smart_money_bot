@@ -2632,29 +2632,75 @@ def is_market_cap_ok(symbol: str, market_caps: dict) -> bool:
     return mcap >= MARKET_CAP_MIN_USD
 
 
-def bybit_get(url, params, retries=3):
+def bybit_get(url, params, retries=5):
+
     for attempt in range(retries):
+
         try:
-            r = requests.get(url, params=params, timeout=10)
+
+            r = requests.get(
+                url,
+                params=params,
+                timeout=10
+            )
+
             data = r.json()
+
+            # =====================
+            # SUCCESS
+            # =====================
 
             if data.get("retCode") == 0:
                 return data
 
+            # =====================
             # RATE LIMIT
-            if data.get("retCode") == 10006:
-                print("⚠️ BYBIT RATE LIMIT — sleeping 1.5 sec")
-                time.sleep(1.5)
+            # =====================
+
+            error_text = str(data).lower()
+
+            if (
+                data.get("retCode") == 10006
+                or "too frequent" in error_text
+                or "rate limit" in error_text
+                or "access too frequent" in error_text
+            ):
+
+                sleep_sec = min(
+                    5 + attempt * 3,
+                    20
+                )
+
+                print(
+                    f"⚠️ BYBIT RATE LIMIT "
+                    f"sleep={sleep_sec}s "
+                    f"attempt={attempt+1}",
+                    flush=True
+                )
+
+                time.sleep(sleep_sec)
+
                 continue
 
-            raise RuntimeError(f"BYBIT bad response: {str(data)[:250]}")
+            raise RuntimeError(
+                f"BYBIT bad response: {str(data)[:250]}"
+            )
 
         except Exception as e:
+
+            print(
+                f"[BYBIT_GET_ERROR] {e}",
+                flush=True
+            )
+
             if attempt == retries - 1:
                 raise
-            time.sleep(1.0)
 
-    raise RuntimeError("BYBIT failed after retries")
+            time.sleep(2 + attempt)
+
+    raise RuntimeError(
+        "BYBIT failed after retries"
+    )
 
 
 def get_bybit_tickers_linear():
