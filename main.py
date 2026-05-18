@@ -816,7 +816,7 @@ SWING_MODE = (os.getenv("SWING_MODE") or "AUTO").upper()
 OI_GOOD = float(os.getenv("OI_GOOD") or "0.15")
 OI_STRONG = float(os.getenv("OI_STRONG") or "0.30")
 OI_BAD = float(os.getenv("OI_BAD") or "-0.10")
-TIMEOUT = int(os.getenv("TIMEOUT") or "8")
+
 
 # =========================
 # SWING MODE (H4 / H1 / M15)
