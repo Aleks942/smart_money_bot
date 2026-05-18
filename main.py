@@ -8551,7 +8551,7 @@ def build_signal(instId):
     if "EMA_FLAT" in flags:
         ema_boost -= 0.5
     
-    
+    flags = set(sig.get("flags", []))
     # =========================
     # STRUCTURE CONFLICT PENALTY
     # =========================
