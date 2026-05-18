@@ -9220,46 +9220,45 @@ def build_signal(instId):
     # =========================
     # TRANSITION PASS
     # =========================
-
+    
     elif (
-
+    
         signal.get("scalp_candidate")
-
+    
         and (
             "BULLISH_SHIFT" in flags
             or "BEARISH_SHIFT" in flags
             or "ACCELERATION_UP" in flags
             or "ACCELERATION_DOWN" in flags
         )
-
+    
     ):
-
+    
         quality_pass = True
-
+    
         print(
             f"[TRANSITION_PASS] {instId}",
             flush=True
         )
-
-        
-        return signal
-        
-        # =========================
-        # FINAL FILTER
-        # =========================
-
-        if not ok:
-
-            print(
-                f"[FILTER_BLOCK] "
-                f"{instId} reason={reason}",
-                flush=True
-            )
-
-            return None
-
-        return signal
-        
+    
+        ok = True
+    
+    # =========================
+    # FINAL FILTER
+    # =========================
+    
+    if not ok:
+    
+        print(
+            f"[FILTER_BLOCK] "
+            f"{instId} reason={reason}",
+            flush=True
+        )
+    
+        return None
+    
+    return signal
+            
         
 # ==============================
 # 🎯 SNIPER SIGNAL ENGINE
