@@ -9256,6 +9256,10 @@ def build_signal(instId):
         )
     
         return None
+
+    if not signal.get("signal_group"):
+
+        signal["signal_group"] = "SCALP"
     
     return signal
             
