@@ -482,7 +482,11 @@ def is_elite_swing(sig):
             and acc >= 3
             and ep >= 10
             and has_absorption
-            and has_structure
+            and (
+                has_structure
+                or has_pressure
+                or has_mtf
+            )
         ):
 
             return True, "elite_swing_accumulation"
