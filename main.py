@@ -8936,6 +8936,9 @@ def build_signal(instId):
     # SIGNAL MODE
     # =====================
     signal_mode = classify_signal_mode(signal)
+    ep = float(
+        signal.get("early_pressure_score") or 0
+    )
     
     print(
         f"[SIGNAL_MODE] {instId} mode={signal_mode}",
