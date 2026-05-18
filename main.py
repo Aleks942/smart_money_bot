@@ -11025,7 +11025,7 @@ if __name__ == "__main__":
     # SCAN SETTINGS
     # =====================
 
-    SCAN_BATCH = int(os.getenv("SCAN_BATCH") or "75")
+    SCAN_BATCH = int(os.getenv("SCAN_BATCH") or "26")
     TOP_ALERTS_LIMIT = int(os.getenv("TOP_ALERTS_LIMIT") or "3")
     scan_index = 0
 
