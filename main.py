@@ -8785,6 +8785,19 @@ def build_signal(instId):
                 flush=True
             )
 
+            print(
+                f"[ENTER_FORCE_BLOCK] {instId}",
+                flush=True
+            )
+
+            print(
+                f"[CHECK_SCALP_CANDIDATE] "
+                f"{instId} "
+                f"value={signal.get('scalp_candidate')}",
+                flush=True
+            )
+            
+
     # =========================
     # TRANSITION PASS
     # =========================
