@@ -11553,15 +11553,39 @@ if __name__ == "__main__":
             elite_score = 0
             
             reasons = []
-        
-
+            
+            # =====================
+            # INVALID SIGNAL PROTECTION
+            # =====================
+            
+            if not sig or not isinstance(sig, dict):
+            
+                print(
+                    f"[ELITE_SKIP] {instId}",
+                    flush=True
+                )
+            
+                continue
+            
             # =====================
             # RR CALC
             # =====================
             
-            entry_price = float(sig.get("entry_price") or sig.get("price") or 0)
-            stop_price = float(sig.get("stop") or 0)
-            target_price = float(sig.get("target") or 0)
+            entry_price = float(
+                sig.get("entry_price")
+                or sig.get("price")
+                or 0
+            )
+            
+            stop_price = float(
+                sig.get("stop")
+                or 0
+            )
+            
+            target_price = float(
+                sig.get("target")
+                or 0
+            )
             
             rr1 = 0
             
@@ -11570,6 +11594,7 @@ if __name__ == "__main__":
                 and stop_price > 0
                 and target_price > 0
             ):
+            
                 risk = abs(entry_price - stop_price)
                 reward = abs(target_price - entry_price)
             
@@ -11586,21 +11611,9 @@ if __name__ == "__main__":
                 f"rr1={rr1}",
                 flush=True
             )
-
+            
             # =====================
             # RR BLOCK
-            # =====================
-            
-            elite_blocked = False
-            
-            rr = float(sig.get("rr1", 0) or 0)
-            
-            if rr <= 0:
-                elite_blocked = True
-                reasons.append("RR_ZERO_BLOCK")
-            
-            # =====================
-            # ELITE HARD BLOCKS
             # =====================
             
             elite = True
