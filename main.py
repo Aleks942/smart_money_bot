@@ -8741,72 +8741,75 @@ def build_signal(instId):
     # =========================
     # PRE-MOVE ENERGY PASS
     # =========================
-    
+
     elif (
-    
+
         "ENERGY_BUILDUP" in flags
-    
+
         and (
-    
+
             "PRESSURE_UP" in flags
             or "PRESSURE_DOWN" in flags
         )
-    
+
         and (
             "COMP_PRO_5M" in flags
             or "COMP_PRO_15M" in flags
         )
-    
+
     ):
-    
+
         quality_pass = True
-    
+
         print(
             f"[PREMOVE_PASS] {instId}",
             flush=True
         )
-    
-    
+
         if strong_structure_pass and quality_pass:
+
             print(
                 f"[OVERRIDE_LOW_SCORE] {instId} "
                 f"score={score} acc={acc_score}",
                 flush=True
             )
+
             ok = True
 
-        print(
-            f"[BEFORE_SCALP_OVERRIDE] "
-            f"{instId} "
-            f"scalp={signal.get('scalp_candidate')} "
-            f"entry={signal.get('entry')} "
-            f"stage={signal.get('stage')}",
-            flush=True
-        )
-        # =========================
-        # TRANSITION PASS
-        # =========================
-        elif (
-    
-            signal.get("scalp_candidate")
-    
-            and (
-                "BULLISH_SHIFT" in flags
-                or "BEARISH_SHIFT" in flags
-                or "ACCELERATION_UP" in flags
-                or "ACCELERATION_DOWN" in flags
-            )
-    
-        ):
-    
-            quality_pass = True
-    
             print(
-                f"[TRANSITION_PASS] {instId}",
+                f"[BEFORE_SCALP_OVERRIDE] "
+                f"{instId} "
+                f"scalp={signal.get('scalp_candidate')} "
+                f"entry={signal.get('entry')} "
+                f"stage={signal.get('stage')}",
                 flush=True
             )
-    
-            ok = True
+
+    # =========================
+    # TRANSITION PASS
+    # =========================
+
+    elif (
+
+        signal.get("scalp_candidate")
+
+        and (
+            "BULLISH_SHIFT" in flags
+            or "BEARISH_SHIFT" in flags
+            or "ACCELERATION_UP" in flags
+            or "ACCELERATION_DOWN" in flags
+        )
+
+    ):
+
+        quality_pass = True
+
+        print(
+            f"[TRANSITION_PASS] {instId}",
+            flush=True
+        )
+
+        ok = True
 
         # =========================
         # SCALP FINAL OVERRIDE
