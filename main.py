@@ -9036,7 +9036,7 @@ def build_signal(instId):
         )
     
         if (
-            premove_score >= 30
+            premove_score >= 28
             and ep >= 8
             and has_acceleration
             and has_absorption
