@@ -8768,34 +8768,8 @@ def build_signal(instId):
 
         if strong_structure_pass and quality_pass:
 
-            print(
-                f"[OVERRIDE_LOW_SCORE] {instId} "
-                f"score={score} acc={acc_score}",
-                flush=True
-            )
-
             ok = True
-
-            print(
-                f"[BEFORE_SCALP_OVERRIDE] "
-                f"{instId} "
-                f"scalp={signal.get('scalp_candidate')} "
-                f"entry={signal.get('entry')} "
-                f"stage={signal.get('stage')}",
-                flush=True
-            )
-
-            print(
-                f"[ENTER_FORCE_BLOCK] {instId}",
-                flush=True
-            )
-
-            print(
-                f"[CHECK_SCALP_CANDIDATE] "
-                f"{instId} "
-                f"value={signal.get('scalp_candidate')}",
-                flush=True
-            )
+         
             
 
     # =========================
