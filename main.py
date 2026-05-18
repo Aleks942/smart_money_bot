@@ -9048,7 +9048,9 @@ def build_signal(instId):
                 f"score={premove_score} ep={ep}",
                 flush=True
             )
-    
+            signal["signal_group"] = "PRE_SWING"
+            signal["premove_confirmed"] = True
+            signal["sendable"] = True
             ok = True
     
         else:
