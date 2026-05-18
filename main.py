@@ -11330,43 +11330,49 @@ if __name__ == "__main__":
                         continue
             
                     # =====================
-                    # SCALP / PRE_SWING / SWING DISPATCH
+                    # SIGNAL DISPATCH
                     # =====================
-            
-                    if (
-                        sig.get("signal_group") in (
-                            "SCALP",
-                            "PRE_SWING",
-                            "SWING",
-                        )
+                    
+                    group = sig.get("signal_group")
+                    
+                    if group in (
+                        "SCALP",
+                        "PRE_SWING",
+                        "SWING",
                     ):
-            
-                        # if not should_alert_symbol(state, sig):
-                        #
-                        #     print(
-                        #         f"[SCALP_COOLDOWN_SKIP] {instId}",
-                        #         flush=True
-                        #     )
-                        #
-                        #     continue
-                                    
-                        scalp_msg = msg_scalp(sig)
-            
-                        send_telegram(scalp_msg)
-            
+                    
+                        # =====================
+                        # MESSAGE TYPE
+                        # =====================
+                    
+                        if group == "SWING":
+                    
+                            msg = msg_swing(sig)
+                    
+                        elif group == "PRE_SWING":
+                    
+                            msg = msg_pre_swing(sig)
+                    
+                        else:
+                    
+                            msg = msg_scalp(sig)
+                    
+                        send_telegram(msg)
+                    
                         scalp_sent_this_cycle += 1
-            
+                    
                         print(
-                            f"[SCALP_SENT] {instId}",
+                            f"[SIGNAL_SENT] "
+                            f"{instId} "
+                            f"group={group}",
                             flush=True
                         )
-            
+                    
                         alerts.append(sig)
-            
+                    
                         mark_alert_sent(state, sig)
-            
+                    
                         continue
-            
                 except Exception as e:
             
                     print(
