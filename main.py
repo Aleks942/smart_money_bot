@@ -9262,9 +9262,24 @@ def build_signal(instId):
 
     if not signal.get("signal_group"):
 
-        signal["signal_group"] = "SCALP"
+        if (
+            signal_mode == "TRANSITION"
+            and ep >= 8
+            and signal.get("entry") not in (
+                "NO_ENTRY",
+                "PREMOVE_CONFLICT",
+            )
+            and (
+                "ACCELERATION_UP" in flags
+                or "ACCELERATION_DOWN" in flags
+                or "BREAKOUT_CONFIRM_UP" in flags
+                or "BREAKOUT_CONFIRM_DOWN" in flags
+            )
+        ):
+            signal["signal_group"] = "SCALP"
     
-    return signal
+        else:
+            return None
             
         
 # ==============================
