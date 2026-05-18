@@ -765,6 +765,59 @@ def analyze_signal_strength(sig):
 
 LAST_SENT = {}
 
+# =========================
+# MISSED SETUP TRACKING
+# =========================
+
+MISSED_SETUPS_FILE = "missed_setups.jsonl"
+
+def track_missed_setup(
+    symbol,
+    reason,
+    sig=None,
+):
+
+    try:
+
+        sig = sig or {}
+
+        row = {
+            "time": int(time.time()),
+            "symbol": str(symbol),
+            "reason": str(reason),
+
+            "score": float(sig.get("score") or 0),
+            "acc_score": float(sig.get("acc_score") or 0),
+            "ep_score": float(sig.get("early_pressure_score") or 0),
+
+            "stage": str(sig.get("stage") or ""),
+            "entry": str(sig.get("entry") or ""),
+
+            "price": float(sig.get("price") or 0),
+
+            "flags": list(sig.get("flags") or []),
+        }
+
+        with open(
+            MISSED_SETUPS_FILE,
+            "a",
+            encoding="utf-8"
+        ) as f:
+
+            f.write(
+                json.dumps(row, ensure_ascii=False)
+                + "\n"
+            )
+
+    except Exception as e:
+
+        print(
+            f"[TRACK_MISSED_ERROR] {e}",
+            flush=True
+        )
+
+
+
 def can_send(symbol, sec=300):
     now = time.time()
     last = LAST_SENT.get(symbol, 0)
