@@ -330,6 +330,104 @@ def is_scalp_candidate(signal):
 
         return False, "scalp_error"
 
+# =========================
+# ELITE SCALP FILTER
+# =========================
+def is_elite_scalp(sig):
+
+    try:
+
+        flags = set(sig.get("flags", []))
+
+        score = float(sig.get("score") or 0)
+        acc = float(sig.get("acc_score") or 0)
+        ep = float(sig.get("early_pressure_score") or 0)
+
+        entry = (
+            str(sig.get("entry") or sig.get("entry_type") or "")
+        )
+
+        has_launch = (
+            "LAUNCH_PROXIMITY_UP" in flags
+            or "LAUNCH_PROXIMITY_DOWN" in flags
+            or "EXPLOSION_READY_UP" in flags
+            or "EXPLOSION_READY_DOWN" in flags
+        )
+
+        has_acceleration = (
+            "ACCELERATION_UP" in flags
+            or "ACCELERATION_DOWN" in flags
+        )
+
+        has_shift = (
+            "BULLISH_SHIFT" in flags
+            or "BEARISH_SHIFT" in flags
+        )
+
+        has_mtf = (
+            "MTF_LONG_ALIGN" in flags
+            or "MTF_SHORT_ALIGN" in flags
+        )
+
+        has_absorption = (
+            "BUYER_ABSORPTION" in flags
+            or "SELLER_ABSORPTION" in flags
+        )
+
+        # =========================
+        # ELITE PREMOVE
+        # =========================
+
+        if (
+            "PREMOVE" in entry
+            and score >= 28
+            and ep >= 7
+            and has_launch
+            and has_acceleration
+            and has_shift
+            and has_mtf
+        ):
+
+            return True, "elite_premove"
+
+        # =========================
+        # ELITE ACCUMULATION
+        # =========================
+
+        if (
+            "ACCUMULATION" in entry
+            and score >= 24
+            and acc >= 3
+            and ep >= 10
+            and has_absorption
+        ):
+
+            return True, "elite_accumulation"
+
+        # =========================
+        # ELITE CONFIRM
+        # =========================
+
+        if (
+            "CONFIRM" in entry
+            and score >= 26
+            and has_acceleration
+            and has_mtf
+        ):
+
+            return True, "elite_confirm"
+
+        return False, "not_elite_scalp"
+
+    except Exception as e:
+
+        print(
+            f"[ELITE_SCALP_ERROR] {e}",
+            flush=True
+        )
+
+        return False, "elite_error"
+
 
 # =========================
 # SIGNAL STRENGTH ANALYZER
