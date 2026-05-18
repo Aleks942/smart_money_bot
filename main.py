@@ -8830,21 +8830,6 @@ def build_signal(instId):
         # FORCE SCALP PASS
         # =========================
         if signal.get("scalp_candidate"):
-    
-            signal["sendable"] = True
-            signal["signal_group"] = "SCALP"
-    
-            print(
-                f"[FORCE_SCALP_PASS] {instId}",
-                flush=True
-            )
-    
-            return signal
-
-        # =========================
-        # FORCE SCALP PASS
-        # =========================
-        if signal.get("scalp_candidate"):
         
             signal["sendable"] = True
             signal["signal_group"] = "SCALP"
