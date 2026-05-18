@@ -239,62 +239,96 @@ def money_flow_ok(candles, oi_change, direction):
 # SCALP CANDIDATE DETECTOR
 # =========================
 def is_scalp_candidate(signal):
-    """
-    SCALP candidate:
-    ранний сигнал до большого движения.
-    Использует PREMOVE / TRANSITION / ACCUMULATION.
-    Не требует swing-confirmation.
-    """
 
     try:
+
         flags = set(signal.get("flags", []))
+
         score = float(signal.get("score") or 0)
         acc = float(signal.get("acc_score") or 0)
         ep_score = float(signal.get("early_pressure_score") or 0)
-        entry = signal.get("entry") or signal.get("entry_type") or "NO_ENTRY"
+
+        entry = (
+            signal.get("entry")
+            or signal.get("entry_type")
+            or "NO_ENTRY"
+        )
+
         mode = classify_signal_mode(signal)
 
-        # мусор сразу отсекаем
-        if score < 6:
+        # =========================
+        # HARD FILTER
+        # =========================
+
+        if score < 12:
             return False, "scalp_low_score"
 
-        # если вообще нет entry
         if entry in ("NO_ENTRY", "PREMOVE_CONFLICT", None):
             return False, "scalp_no_entry"
 
+        # =========================
         # PREMOVE
-        if mode == "PREMOVE" and score >= 8:
+        # =========================
+
+        if (
+            mode == "PREMOVE"
+            and score >= 20
+            and ep_score >= 7
+            and (
+                "LAUNCH_PROXIMITY_UP" in flags
+                or "LAUNCH_PROXIMITY_DOWN" in flags
+                or "EXPLOSION_READY_UP" in flags
+                or "EXPLOSION_READY_DOWN" in flags
+            )
+        ):
+
             return True, "scalp_premove"
 
+        # =========================
         # TRANSITION
+        # =========================
+
         if (
             mode == "TRANSITION"
-            and score >= 6
+            and score >= 18
+            and ep_score >= 7
             and (
-                ep_score >= 6
-                or "PRESSURE_UP" in flags
-                or "PRESSURE_DOWN" in flags
-                or "BULLISH_SHIFT" in flags
+                "BULLISH_SHIFT" in flags
                 or "BEARISH_SHIFT" in flags
+            )
+            and (
+                "ACCELERATION_UP" in flags
+                or "ACCELERATION_DOWN" in flags
             )
         ):
 
             return True, "scalp_transition"
-        
 
-        # ACCUMULATION с давлением
+        # =========================
+        # ACCUMULATION
+        # =========================
+
         if (
-            "ACCUMULATION_LONG" in str(entry)
-            or "ACCUMULATION_SHORT" in str(entry)
-        ) and acc >= 2:
+            (
+                "ACCUMULATION_LONG" in str(entry)
+                or "ACCUMULATION_SHORT" in str(entry)
+            )
+            and acc >= 3
+            and score >= 18
+        ):
+
             return True, "scalp_accumulation"
 
         return False, "scalp_no_match"
 
     except Exception as e:
-        print(f"[SCALP_CANDIDATE_ERROR] {e}", flush=True)
-        return False, "scalp_error"
 
+        print(
+            f"[SCALP_CANDIDATE_ERROR] {e}",
+            flush=True
+        )
+
+        return False, "scalp_error"
 
 
 # =========================
