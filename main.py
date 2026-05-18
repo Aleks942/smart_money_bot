@@ -7151,6 +7151,7 @@ def detect_entry_quality(flags):
 # MAIN SIGNAL BUILDER
 # =========================
 def build_signal(instId):
+    print(f"[BUILD_SIGNAL_ENTER] {instId}", flush=True)
     
     print(f"[STEP1] {instId} before_fetch", flush=True)
 
