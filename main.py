@@ -9076,13 +9076,13 @@ def build_signal(instId):
             or "EXPLOSION_READY_DOWN" in flags
         )
     
-        if (
-            premove_score >= 28
+       if (
+            premove_score >= 14
             and (
                 ep >= 7
                 or (
                     has_launch
-                    and has_absorption
+                    and premove_score >= 20
                 )
             )
             and (
@@ -9091,7 +9091,7 @@ def build_signal(instId):
             )
             and has_absorption
         ):
-    
+            
             print(
                 f"[PREMOVE_OVERRIDE] {instId} "
                 f"score={premove_score} ep={ep}",
