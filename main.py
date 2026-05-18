@@ -11338,15 +11338,15 @@ if __name__ == "__main__":
                         )
                     ):
             
-                        if not should_alert_symbol(state, sig):
-            
-                            print(
-                                f"[SCALP_COOLDOWN_SKIP] {instId}",
-                                flush=True
-                            )
-            
-                            continue
-            
+                        # if not should_alert_symbol(state, sig):
+                        #
+                        #     print(
+                        #         f"[SCALP_COOLDOWN_SKIP] {instId}",
+                        #         flush=True
+                        #     )
+                        #
+                        #     continue
+                                    
                         scalp_msg = msg_scalp(sig)
             
                         send_telegram(scalp_msg)
