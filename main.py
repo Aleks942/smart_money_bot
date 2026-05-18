@@ -8801,6 +8801,21 @@ def build_signal(instId):
             )
     
             return signal
+
+        # =========================
+        # FORCE SCALP PASS
+        # =========================
+        if signal.get("scalp_candidate"):
+    
+            signal["sendable"] = True
+            signal["signal_group"] = "SCALP"
+    
+            print(
+                f"[FORCE_SCALP_PASS] {instId}",
+                flush=True
+            )
+    
+            return signal
             
         if not ok:
             print(f"[FILTER_BLOCK] {instId} reason={reason}", flush=True)
