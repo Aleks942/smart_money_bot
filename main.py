@@ -8787,7 +8787,10 @@ def build_signal(instId):
         # =========================
         # SCALP FINAL OVERRIDE
         # =========================
-        if signal.get("scalp_candidate"):
+        if (
+            signal.get("scalp_candidate")
+            and signal.get("score", 0) >= 20
+        ):
     
             signal["sendable"] = True
             signal["signal_group"] = "SCALP"
