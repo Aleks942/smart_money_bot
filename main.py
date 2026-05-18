@@ -9051,6 +9051,7 @@ def build_signal(instId):
             signal["signal_group"] = "PRE_SWING"
             signal["premove_confirmed"] = True
             signal["sendable"] = True
+            signal["scalp_candidate"] = False
             ok = True
     
         else:
