@@ -11449,19 +11449,33 @@ if __name__ == "__main__":
 
             print(f"[STEP2] {instId} after_build_signal")
 
+
+
             # =====================
             # MARKET CONTEXT
             # =====================
 
             print(f"[STEP3] {instId} before_market_context")
+
             sig = apply_market_context(sig)
-            
+
             print(
-                f"[SCALP_CHECK_AFTER_CONTEXT] "
+                f"[AFTER_MARKET_CONTEXT] "
                 f"{instId} "
-                f"scalp={sig.get('scalp_candidate')}",
+                f"sig={bool(sig)}",
                 flush=True
             )
+
+            if sig and isinstance(sig, dict):
+
+                print(
+                    f"[SCALP_CHECK_AFTER_CONTEXT] "
+                    f"{instId} "
+                    f"scalp={sig.get('scalp_candidate')} "
+                    f"group={sig.get('signal_group')}",
+                    flush=True
+                )
+
             print(f"[SIG_RAW] {instId} sig_exists={bool(sig)}")
             # =========================
             # SCALP OVERRIDE
