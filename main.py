@@ -9088,9 +9088,8 @@ def build_signal(instId):
             and (
                 has_acceleration
                 or has_launch
+                or ep >= 10
             )
-            and has_absorption
-        ):
             
             print(
                 f"[PREMOVE_OVERRIDE] {instId} "
