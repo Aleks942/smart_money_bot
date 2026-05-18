@@ -9180,9 +9180,8 @@ def build_signal(instId):
 
         ok = True
 
+        return signal
         
-   
-
         # =========================
         # FINAL FILTER
         # =========================
