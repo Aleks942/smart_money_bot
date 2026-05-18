@@ -797,7 +797,7 @@ STATE_FILE = os.getenv("STATE_FILE") or "state.json"
 RESULT_CHECK_SEC = int(os.getenv("RESULT_CHECK_SEC") or "1200")
 
 SCAN_TOP_N = int(os.getenv("SCAN_TOP_N") or "300")
-SCAN_MIN_VOL_USDT = float(os.getenv("SCAN_MIN_VOL_USDT") or "800000")
+SCAN_MIN_VOL_USDT = float(os.getenv("SCAN_MIN_VOL_USDT") or "3000000")
 SCAN_MIN_PCT_24H = float(os.getenv("SCAN_MIN_PCT_24H") or "2")
 PREBREAK_SCAN_MAX_PCT_24H = float(os.getenv("PREBREAK_SCAN_MAX_PCT_24H") or "1.2")
 PREBREAK_SCAN_MIN_PCT_24H = float(os.getenv("PREBREAK_SCAN_MIN_PCT_24H") or "0.2")
