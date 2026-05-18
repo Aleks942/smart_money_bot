@@ -8893,10 +8893,12 @@ def build_signal(instId):
 
         quality_pass = True
 
-        print(
-            f"[PREMOVE_PASS] {instId}",
-            flush=True
-        )
+        if signal.get("scalp_candidate"):
+
+            print(
+                f"[PREMOVE_PASS] {instId}",
+                flush=True
+            )
 
         if strong_structure_pass and quality_pass:
 
