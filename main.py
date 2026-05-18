@@ -10936,6 +10936,8 @@ if __name__ == "__main__":
 
                         send_telegram(scalp_msg)
 
+                        scalp_sent_this_cycle += 1
+
                         print(
                             f"[SCALP_SENT] {instId}",
                             flush=True
