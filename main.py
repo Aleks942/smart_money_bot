@@ -9065,7 +9065,7 @@ def build_signal(instId):
             print(
                 f"[PREMOVE_BLOCK] {instId} "
                 f"score={premove_score} "
-                f"ep={ep}",
+                f"ep={ep_data}",
                 flush=True
             )
     
