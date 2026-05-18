@@ -9007,34 +9007,34 @@ def build_signal(instId):
     # =====================
     # PREMOVE OVERRIDE
     # =====================
-
+    
     if signal_mode == "PREMOVE":
-
+    
         premove_score = float(signal.get("score") or 0)
-
+    
         ep = float(
             signal.get("early_pressure_score") or 0
         )
-
+    
         flags = set(signal.get("flags", []))
-
+    
         has_acceleration = (
             "ACCELERATION_UP" in flags
             or "ACCELERATION_DOWN" in flags
         )
-
+    
         has_absorption = (
             "BUYER_ABSORPTION" in flags
             or "SELLER_ABSORPTION" in flags
         )
-
+    
         has_launch = (
             "LAUNCH_PROXIMITY_UP" in flags
             or "LAUNCH_PROXIMITY_DOWN" in flags
             or "EXPLOSION_READY_UP" in flags
             or "EXPLOSION_READY_DOWN" in flags
         )
-
+    
         if (
             premove_score >= 30
             and ep >= 8
@@ -9042,25 +9042,25 @@ def build_signal(instId):
             and has_absorption
             and has_launch
         ):
-
+    
             print(
                 f"[PREMOVE_OVERRIDE] {instId} "
-                f"score={premove_score}",
+                f"score={premove_score} ep={ep}",
                 flush=True
             )
-
+    
+            ok = True
+    
         else:
-
+    
             print(
                 f"[PREMOVE_BLOCK] {instId} "
                 f"score={premove_score} "
                 f"ep={ep}",
                 flush=True
             )
-            
-
+    
             return {}
-
     # =========================
     # STRUCTURE PASS
     # =========================
