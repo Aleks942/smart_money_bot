@@ -11660,7 +11660,7 @@ if __name__ == "__main__":
             # =====================
             # SCALP TELEGRAM
             # =====================
-            if sig.get("signal_group") == "SCALP":
+            if sig.get("signal_group") == "SCALP":   
                 symbol = sig.get("instId")
 
                 now_ts = time.time()
@@ -11679,6 +11679,19 @@ if __name__ == "__main__":
 
                         continue
 
+                # =====================
+                # SCALP LIMITER
+                # =====================
+
+                if scalp_sent_this_cycle >= 3:
+
+                    print(
+                        f"[SCALP_LIMIT_BLOCK] {instId}",
+                        flush=True
+                    )
+
+                    continue
+                
 
                 # =====================
                 # SCALP QUALITY FILTER
