@@ -11303,7 +11303,7 @@ if __name__ == "__main__":
                     )
 
                     # =====================
-                    # SCALP INSTANT DISPATCH
+                    # SCALP / PRE_SWING / SWING DISPATCH
                     # =====================
                     if (
                         sig
@@ -11311,6 +11311,7 @@ if __name__ == "__main__":
                         and sig.get("signal_group") in (
                             "SCALP",
                             "PRE_SWING",
+                            "SWING",
                         )
                     ):
 
