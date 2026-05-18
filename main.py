@@ -9064,6 +9064,13 @@ def build_signal(instId):
             signal["premove_confirmed"] = True
             signal["sendable"] = True
             signal["scalp_candidate"] = False
+            
+            PRE_SWING_STATE[instId] = {
+                "time": time.time(),
+                "side": signal.get("side"),
+                "score": signal.get("score"),
+            }
+            
             ok = True
     
         else:
