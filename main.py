@@ -11761,6 +11761,8 @@ if __name__ == "__main__":
             # 7. TA CONFIRM
             # =====================
             
+            ta = {}
+            
             if (
                 isinstance(ta, dict)
                 and ta.get("entry")
