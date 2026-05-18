@@ -1994,26 +1994,30 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         
         
         # =====================
-        # RSI FILTER (СЮДА)
+        # RSI FILTER (TEMP DISABLED)
         # =====================
-        rsi = sig.get("rsi") or sig.get("rsi14")
         
-        try:
-            rsi = float(rsi)
-        except:
-            rsi = None
+        # rsi = sig.get("rsi") or sig.get("rsi14")
+        #
+        # try:
+        #     rsi = float(rsi)
+        # except:
+        #     rsi = None
+        #
+        # side = str(sig.get("side") or "").upper()
+        #
+        # if rsi is not None:
+        #
+        #     if side in ("LONG", "BUY") and rsi > 80:
+        #         print(f"[RSI_SKIP] {instId} перегрев LONG rsi={rsi}", flush=True)
+        #         return empty
+        #
+        #     if side in ("SHORT", "SELL") and rsi < 20:
+        #         print(f"[RSI_SKIP] {instId} перепроданность SHORT rsi={rsi}", flush=True)
+        #         return empty
+                
         
-        side = str(sig.get("side") or "").upper()
-
-        if rsi is not None:
         
-            if side in ("LONG", "BUY") and rsi > 80:
-                print(f"[RSI_SKIP] {instId} перегрев LONG rsi={rsi}", flush=True)
-                return empty
-        
-            if side in ("SHORT", "SELL") and rsi < 20:
-                print(f"[RSI_SKIP] {instId} перепроданность SHORT rsi={rsi}", flush=True)
-                return empty
                 
         
         # =====================
