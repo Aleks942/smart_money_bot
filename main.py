@@ -8825,7 +8825,46 @@ def build_signal(instId):
         ok = True
 
         
+    # =========================
+    # FINAL SCALP CHECK
+    # =========================
 
+    scalp_value = signal.get("scalp_candidate")
+
+    print(
+        f"[FINAL_SCALP_CHECK] "
+        f"{instId} "
+        f"value={scalp_value}",
+        flush=True
+    )
+
+    if scalp_value is True:
+
+        signal["sendable"] = True
+        signal["signal_group"] = "SCALP"
+
+        print(
+            f"[FORCE_SCALP_PASS] {instId}",
+            flush=True
+        )
+
+        return signal
+
+        # =========================
+        # FINAL FILTER
+        # =========================
+
+        if not ok:
+
+            print(
+                f"[FILTER_BLOCK] "
+                f"{instId} reason={reason}",
+                flush=True
+            )
+
+            return None
+
+        return signal
         
         
 # ==============================
