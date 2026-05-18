@@ -11539,9 +11539,7 @@ if __name__ == "__main__":
             
             reasons = []
             
-            if sig is None:
-                continue
-
+        
             print(
                 f"[ELITE_ENTER] {instId} sig_exists={sig is not None}",
                 flush=True
