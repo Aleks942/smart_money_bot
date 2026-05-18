@@ -8829,7 +8829,7 @@ def build_signal(instId):
     # =========================
     
     tier = get_signal_tier(score, acc_score)
-    print(f"[FLAGS_RAW] {instId} {flags}", flush=True)
+    
     if "CONTINUATION_UP" in flags:
         print(f"[CONTINUATION_UP] {instId}", flush=True)
     
