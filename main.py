@@ -11951,6 +11951,55 @@ if __name__ == "__main__":
                 mark_alert_sent(state, sig)
 
                 continue
+
+            # =====================
+            # SWING ELITE TELEGRAM
+            # =====================
+
+            elite_swing_ok, elite_swing_reason = is_elite_swing(sig)
+
+            print(
+                f"[SWING_ELITE_CHECK] "
+                f"{instId} "
+                f"ok={elite_swing_ok} "
+                f"reason={elite_swing_reason}",
+                flush=True
+            )
+
+            if elite_swing_ok:
+
+                if not should_alert_symbol(state, sig):
+
+                    print(
+                        f"[SWING_COOLDOWN_SKIP] {instId}",
+                        flush=True
+                    )
+
+                    continue
+
+                swing_msg = (
+                    f"📈 <b>ELITE SWING — {instId}</b>\n\n"
+                    f"🧭 Direction: {sig.get('direction')}\n"
+                    f"💰 Price: {sig.get('price')}\n"
+                    f"📊 Score: {sig.get('score')}\n"
+                    f"📍 Stage: {sig.get('stage')}\n"
+                    f"⚡ Entry: {sig.get('entry')}\n\n"
+                    f"🧠 Swing setup detected.\n"
+                    f"Reason: {elite_swing_reason}"
+                )
+
+                send_telegram(swing_msg)
+
+                print(
+                    f"[SWING_SENT] {instId}",
+                    flush=True
+                )
+
+                alerts.append(sig)
+
+                mark_alert_sent(state, sig)
+
+                continue
             # =====================
             # TIER + SEND LOGIC
             # =====================
