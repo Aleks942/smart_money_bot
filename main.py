@@ -11676,14 +11676,27 @@ if __name__ == "__main__":
 
                         continue
 
-                scalp_sent_cache[symbol] = now_ts
 
-                # quality filter
-                if sig.get("score", 0) < 20:
+                # =====================
+                # SCALP QUALITY FILTER
+                # =====================
+
+                scalp_score = sig.get("score", 0)
+                scalp_rank = sig.get("setup_rank", "")
+
+                if (
+                    scalp_score < 25
+                    and scalp_rank != "PRIORITY_1"
+                ):
+
                     print(
-                        f"[SCALP_LOW_SCORE_SKIP] {instId}",
+                        f"[SCALP_LOW_QUALITY_SKIP] "
+                        f"{instId} "
+                        f"score={scalp_score} "
+                        f"rank={scalp_rank}",
                         flush=True
                     )
+
                     continue
 
                 # cooldown
@@ -11697,6 +11710,8 @@ if __name__ == "__main__":
                 scalp_msg = msg_scalp(sig)
 
                 send_telegram(scalp_msg)
+                
+                scalp_sent_cache[symbol] = now_ts
 
                 print(
                     f"[SCALP_SENT] {instId}",
