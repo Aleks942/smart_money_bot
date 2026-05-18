@@ -9099,6 +9099,7 @@ def build_signal(instId):
             signal["sendable"] = True
             signal["scalp_candidate"] = False
             
+            
             PRE_SWING_STATE[instId] = {
                 "time": time.time(),
                 "side": signal.get("side"),
@@ -9106,6 +9107,7 @@ def build_signal(instId):
             }
             
             ok = True
+            return signal
     
         else:
     
