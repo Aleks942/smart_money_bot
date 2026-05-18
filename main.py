@@ -5639,7 +5639,7 @@ def detect_early_pressure(sig):
     # STRUCTURE CONFLICT
     # =========================
 
-    if "STRUCTURE_CONFLICT" in flags:
+    if "STRUCTURE_CONFLICT" in sig.get("flags", []):
 
         up_score -= 3
         down_score -= 3
