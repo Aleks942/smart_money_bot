@@ -11596,6 +11596,25 @@ if __name__ == "__main__":
             # SCALP TELEGRAM
             # =====================
             if sig.get("signal_group") == "SCALP":
+                symbol = sig.get("instId")
+
+                now_ts = time.time()
+
+                if symbol in scalp_sent_cache:
+
+                    age = now_ts - scalp_sent_cache[symbol]
+
+                    if age < 3600:
+
+                        print(
+                            f"[SCALP_CACHE_BLOCK] "
+                            f"{symbol} age={round(age)}s",
+                            flush=True
+                        )
+
+                        continue
+
+                scalp_sent_cache[symbol] = now_ts
 
                 # quality filter
                 if sig.get("score", 0) < 20:
