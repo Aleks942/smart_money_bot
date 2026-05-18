@@ -10789,6 +10789,11 @@ if __name__ == "__main__":
     except Exception as e:
         print("START TELEGRAM ERROR:", e)
 
+    # =====================
+    # SCALP CACHE
+    # =====================
+    scalp_sent_cache = {}
+
     while True:
 
         check_signal_results()
