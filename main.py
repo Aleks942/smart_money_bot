@@ -10894,6 +10894,8 @@ if __name__ == "__main__":
             # =====================
             # SCAN LOOP
             # =====================
+            
+            scalp_sent_this_cycle = 0
     
             for instId, vol_usdt, pct in candidates:
     
