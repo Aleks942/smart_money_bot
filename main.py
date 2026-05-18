@@ -2057,6 +2057,7 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             prev_rsi = None
         
         # LONG дивергенция (плохо для лонга)
+        premove_bypass = bool(sig.get("premove_bypass"))
         if (
             not premove_bypass
             and sig.get("side") in ("LONG", "BUY")
