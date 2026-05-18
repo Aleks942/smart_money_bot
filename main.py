@@ -11242,14 +11242,16 @@ if __name__ == "__main__":
 
                     sig = build_signal(instId)
 
-                    print(
-                        f"[POST_BUILD] "
-                        f"{instId} "
-                        f"sig={bool(sig)} "
-                        f"group={sig.get('signal_group') if isinstance(sig, dict) else None} "
-                        f"scalp={sig.get('scalp_candidate') if isinstance(sig, dict) else None}",
-                        flush=True
-                    )
+                print(
+                    f"[POST_BUILD] "
+                    f"{instId} "
+                    f"sig={bool(sig)} "
+                    f"group={sig.get('signal_group') if isinstance(sig, dict) else None} "
+                    f"mode={sig.get('signal_mode') if isinstance(sig, dict) else None} "
+                    f"premove={sig.get('premove_confirmed') if isinstance(sig, dict) else None} "
+                    f"scalp={sig.get('scalp_candidate') if isinstance(sig, dict) else None}",
+                    flush=True
+                )
 
                     # =====================
                     # SCALP INSTANT DISPATCH
