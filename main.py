@@ -11284,22 +11284,24 @@ if __name__ == "__main__":
                 f"index={scan_index}/{total_symbols}"
             )
     
+           
+    
             # =====================
             # SCAN LOOP
             # =====================
             
             scalp_sent_this_cycle = 0
-    
+            
             for instId, vol_usdt, pct in candidates:
-    
+            
                 print(f"[LOOP] {instId} start")
-    
+            
                 time.sleep(0.55)
-    
+            
                 try:
-
+            
                     sig = build_signal(instId)
-
+            
                     print(
                         f"[POST_BUILD] "
                         f"{instId} "
@@ -11310,57 +11312,67 @@ if __name__ == "__main__":
                         f"scalp={sig.get('scalp_candidate') if isinstance(sig, dict) else None}",
                         flush=True
                     )
-
+            
+                    # =====================
+                    # INVALID SIGNAL PROTECTION
+                    # =====================
+            
+                    if not sig or not isinstance(sig, dict):
+            
+                        print(
+                            f"[RAW_SKIP] {instId}",
+                            flush=True
+                        )
+            
+                        continue
+            
                     # =====================
                     # SCALP / PRE_SWING / SWING DISPATCH
                     # =====================
+            
                     if (
-                        sig
-                        and isinstance(sig, dict)
-                        and sig.get("signal_group") in (
+                        sig.get("signal_group") in (
                             "SCALP",
                             "PRE_SWING",
                             "SWING",
                         )
                     ):
-
+            
                         if not should_alert_symbol(state, sig):
+            
                             print(
                                 f"[SCALP_COOLDOWN_SKIP] {instId}",
                                 flush=True
                             )
+            
                             continue
-
+            
                         scalp_msg = msg_scalp(sig)
-
+            
                         send_telegram(scalp_msg)
-
+            
                         scalp_sent_this_cycle += 1
-
+            
                         print(
                             f"[SCALP_SENT] {instId}",
                             flush=True
                         )
-
+            
                         alerts.append(sig)
-
+            
                         mark_alert_sent(state, sig)
-
+            
                         continue
-
-                    if not sig or not isinstance(sig, dict):
-                        print(f"[RAW_SKIP] {instId}", flush=True)
-                        continue
-
+            
                 except Exception as e:
-
+            
                     print(
                         f"[BUILD_SIGNAL_ERROR] {instId} {e}",
                         flush=True
                     )
-
+            
                     continue
-    
+            
                 # =====================
                 # LOCAL SIGNAL DATA
                 # =====================
