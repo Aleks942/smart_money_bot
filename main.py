@@ -11749,7 +11749,19 @@ if __name__ == "__main__":
             # DEFINE SETUP TYPE
             # =====================
 
-            sig["setup"] = get_signal_tier(sig["score"], sig["acc_score"])
+            if not sig:
+                continue
+            
+            if "score" not in sig:
+                continue
+            
+            if "acc_score" not in sig:
+                continue
+            
+            sig["setup"] = get_signal_tier(
+                sig.get("score", 0),
+                sig.get("acc_score", 0)
+            )
 
             # =====================
             # AI SCORE MULTIPLIER
