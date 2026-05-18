@@ -821,8 +821,6 @@ OI_BAD = float(os.getenv("OI_BAD") or "-0.10")
 # =========================
 # SWING MODE (H4 / H1 / M15)
 # =========================
-SWING_MODE = (os.getenv("SWING_MODE") or "1").strip() != "0"
-
 
 SWING_USE_H4 = (os.getenv("SWING_USE_H4") or "1").strip() != "0"
 SWING_USE_H1 = (os.getenv("SWING_USE_H1") or "1").strip() != "0"
