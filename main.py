@@ -11265,7 +11265,10 @@ if __name__ == "__main__":
                     if (
                         sig
                         and isinstance(sig, dict)
-                        and sig.get("signal_group") == "SCALP"
+                        and sig.get("signal_group") in (
+                            "SCALP",
+                            "PRE_SWING",
+                        )
                     ):
 
                         if not should_alert_symbol(state, sig):
