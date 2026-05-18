@@ -428,6 +428,98 @@ def is_elite_scalp(sig):
 
         return False, "elite_error"
 
+# =========================
+# ELITE SWING FILTER
+# =========================
+def is_elite_swing(sig):
+
+    try:
+
+        flags = set(sig.get("flags", []))
+
+        score = float(sig.get("score") or 0)
+        acc = float(sig.get("acc_score") or 0)
+        ep = float(sig.get("early_pressure_score") or 0)
+
+        stage = str(sig.get("stage") or "")
+        entry = str(sig.get("entry") or "")
+
+        has_absorption = (
+            "BUYER_ABSORPTION" in flags
+            or "SELLER_ABSORPTION" in flags
+        )
+
+        has_structure = (
+            "STRUCTURE_HH_HL" in flags
+            or "STRUCTURE_LH_LL" in flags
+        )
+
+        has_mtf = (
+            "MTF_LONG_ALIGN" in flags
+            or "MTF_SHORT_ALIGN" in flags
+        )
+
+        has_pressure = (
+            "PRESSURE_UP" in flags
+            or "PRESSURE_DOWN" in flags
+        )
+
+        # =========================
+        # ELITE ACCUMULATION SWING
+        # =========================
+
+        if (
+            "ACCUMULATION" in entry
+            and acc >= 3
+            and ep >= 10
+            and has_absorption
+            and has_structure
+        ):
+
+            return True, "elite_swing_accumulation"
+
+        # =========================
+        # ELITE TREND SWING
+        # =========================
+
+        if (
+            score >= 18
+            and has_structure
+            and has_mtf
+            and has_pressure
+            and (
+                "EMA_BULL_STRONG" in flags
+                or "EMA_BEAR_STRONG" in flags
+            )
+        ):
+
+            return True, "elite_swing_trend"
+
+        # =========================
+        # ELITE TRANSITION SWING
+        # =========================
+
+        if (
+            "TRANSITION" in stage
+            and acc >= 3
+            and ep >= 10
+            and has_structure
+            and has_absorption
+        ):
+
+            return True, "elite_swing_transition"
+
+        return False, "not_elite_swing"
+
+    except Exception as e:
+
+        print(
+            f"[ELITE_SWING_ERROR] {e}",
+            flush=True
+        )
+
+        return False, "elite_swing_error"
+
 
 # =========================
 # SIGNAL STRENGTH ANALYZER
