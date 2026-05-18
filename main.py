@@ -8805,13 +8805,6 @@ def build_signal(instId):
 
     scalp_value = signal.get("scalp_candidate")
 
-    print(
-        f"[FINAL_SCALP_CHECK] "
-        f"{instId} "
-        f"value={scalp_value}",
-        flush=True
-    )
-
     if scalp_value is True:
 
         signal["sendable"] = True
