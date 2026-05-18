@@ -9214,9 +9214,40 @@ def build_signal(instId):
 
         if strong_structure_pass and quality_pass:
 
-            
+            # =========================
+            # AUTO GROUP ASSIGN
+            # =========================
+        
+            ep = float(
+                signal.get("early_pressure_score") or 0
+            )
+        
+            score = float(
+                signal.get("score") or 0
+            )
+        
+            if (
+                signal_mode == "TRANSITION"
+                and ep >= 8
+                and score >= 14
+            ):
+        
+                signal["signal_group"] = "PRE_SWING"
+        
+            elif (
+                signal_mode == "TRANSITION"
+                and ep >= 6
+                and score >= 10
+            ):
+        
+                signal["signal_group"] = "SCALP"
+        
+            else:
+        
+                return None
+        
             return signal
-         
+                 
          
             
 
