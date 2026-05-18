@@ -11576,12 +11576,26 @@ if __name__ == "__main__":
                 flush=True
             )
 
+
             # =====================
             # SCALP TELEGRAM
             # =====================
             if sig.get("signal_group") == "SCALP":
 
+                # quality filter
+                if sig.get("score", 0) < 20:
+                    print(
+                        f"[SCALP_LOW_SCORE_SKIP] {instId}",
+                        flush=True
+                    )
+                    continue
+
+                # cooldown
                 if not should_alert_symbol(state, sig):
+                    print(
+                        f"[SCALP_COOLDOWN_SKIP] {instId}",
+                        flush=True
+                    )
                     continue
 
                 scalp_msg = msg_scalp(sig)
@@ -11598,7 +11612,6 @@ if __name__ == "__main__":
                 mark_alert_sent(state, sig)
 
                 continue
-            
             # =====================
             # TIER + SEND LOGIC
             # =====================
