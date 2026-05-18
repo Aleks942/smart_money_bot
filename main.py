@@ -11779,6 +11779,29 @@ if __name__ == "__main__":
 
                         continue
 
+            # =====================
+            # ELITE SCALP FILTER
+            # =====================
+
+            elite_ok, elite_reason = is_elite_scalp(sig)
+
+            print(
+                f"[ELITE_CHECK] "
+                f"{instId} "
+                f"ok={elite_ok} "
+                f"reason={elite_reason}",
+                flush=True
+            )
+
+            if not elite_ok:
+
+                print(
+                    f"[ELITE_BLOCK] {instId}",
+                    flush=True
+                )
+
+                continue
+
                 # =====================
                 # SCALP LIMITER
                 # =====================
