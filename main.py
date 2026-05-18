@@ -8596,7 +8596,7 @@ def build_signal(instId):
         else:
             ema_boost += 0
     
-    flags = set(sig.get("flags", []))
+    
     # =========================
     # EMA FLAT PENALTY
     # =========================
