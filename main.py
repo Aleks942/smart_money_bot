@@ -378,14 +378,23 @@ def is_elite_scalp(sig):
         # ELITE PREMOVE
         # =========================
 
+        has_imbalance = (
+            "EARLY_IMBALANCE_UP" in flags
+            or "EARLY_IMBALANCE_DOWN" in flags
+        )
+
         if (
             "PREMOVE" in entry
-            and score >= 28
-            and ep >= 7
+            and score >= 30
+            and ep >= 10
             and has_launch
             and has_acceleration
             and has_shift
             and has_mtf
+            and (
+                has_absorption
+                or has_imbalance
+            )
         ):
 
             return True, "elite_premove"
