@@ -8923,8 +8923,8 @@ def build_signal(instId):
         "created_at": time.time(),
     }
 
-    ep = detect_early_pressure(signal)
-    signal.update(ep)
+    ep_data = detect_early_pressure(signal)
+    signal.update(ep_data)
 
     # =====================
     # SIGNAL MODE
