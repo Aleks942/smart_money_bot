@@ -1950,15 +1950,18 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         except:
             rsi = None
         
+        side = str(sig.get("side") or "").upper()
+
         if rsi is not None:
-            if sig.get("side") in ("LONG", "BUY") and rsi > 80:
+        
+            if side in ("LONG", "BUY") and rsi > 80:
                 print(f"[RSI_SKIP] {instId} перегрев LONG rsi={rsi}", flush=True)
                 return empty
         
-            if sig.get("side") in ("SHORT", "SELL") and rsi < 20:
+            if side in ("SHORT", "SELL") and rsi < 20:
                 print(f"[RSI_SKIP] {instId} перепроданность SHORT rsi={rsi}", flush=True)
                 return empty
-        
+                
         
         # =====================
         # OI INTELLIGENCE
