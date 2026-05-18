@@ -9181,7 +9181,7 @@ def build_signal(instId):
             flush=True
         )
 
-        ok = True
+        
         return signal
         
         # =========================
