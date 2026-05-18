@@ -10748,7 +10748,7 @@ if __name__ == "__main__":
 
     init_db()
 
-    print("PROGRAM STARTED")
+    print("PROGRAM STARTED V2")
 
     if not BOT_TOKEN or not CHAT_ID:
         raise RuntimeError("Missing BOT_TOKEN / CHAT_ID")
