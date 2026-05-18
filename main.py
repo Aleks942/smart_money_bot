@@ -8991,6 +8991,7 @@ def build_signal(instId):
                 f"ep={ep}",
                 flush=True
             )
+            ok = True
 
             return {}
 
