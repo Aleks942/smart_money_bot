@@ -9076,7 +9076,7 @@ def build_signal(instId):
             or "EXPLOSION_READY_DOWN" in flags
         )
     
-       if (
+        if (
             premove_score >= 14
             and (
                 ep >= 7
