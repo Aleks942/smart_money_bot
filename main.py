@@ -8977,13 +8977,17 @@ def build_signal(instId):
             promote = True
     
         if promote:
-    
+
             signal["signal_group"] = "SWING"
-    
+            signal["sendable"] = True
+            signal["swing_candidate"] = True
+        
             print(
                 f"[SWING_PROMOTION] {instId}",
                 flush=True
             )
+        
+            return signal
   
     # =========================
     # FINAL DECISION
