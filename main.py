@@ -8954,6 +8954,36 @@ def build_signal(instId):
     )
 
     signal["sniper"] = sniper_signal(signal)
+
+    # =====================
+    # PRE-SWING PROMOTION
+    # =====================
+    
+    pre_state = PRE_SWING_STATE.get(instId)
+    
+    if pre_state:
+    
+        flags = set(signal.get("flags", []))
+    
+        promote = False
+    
+        if (
+            "BREAKOUT_CONFIRM_UP" in flags
+            or "BREAKOUT_CONFIRM_DOWN" in flags
+            or "CONTINUATION_UP" in flags
+            or "CONTINUATION_DOWN" in flags
+        ):
+    
+            promote = True
+    
+        if promote:
+    
+            signal["signal_group"] = "SWING"
+    
+            print(
+                f"[SWING_PROMOTION] {instId}",
+                flush=True
+            )
   
     # =========================
     # FINAL DECISION
