@@ -9041,7 +9041,7 @@ def build_signal(instId):
                 or has_launch
             )
             and has_absorption
-            and has_launch
+            
         ):
     
             print(
