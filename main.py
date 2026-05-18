@@ -11538,12 +11538,7 @@ if __name__ == "__main__":
             elite_score = 0
             
             reasons = []
-            
         
-            print(
-                f"[ELITE_ENTER] {instId} sig_exists={sig is not None}",
-                flush=True
-            )
 
             # =====================
             # RR CALC
