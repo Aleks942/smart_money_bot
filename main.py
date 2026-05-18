@@ -2075,7 +2075,7 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         
     
         # SHORT дивергенция (плохо для шорта)
-        if sig.get("side") in ("SHORT", "SELL"):
+        if side in ("SHORT", "SELL")
             if prev_price and prev_rsi and rsi:
                 if price_now < prev_price and rsi > prev_rsi:
                     print(f"[DIV_SKIP] {instId} bullish divergence", flush=True)
