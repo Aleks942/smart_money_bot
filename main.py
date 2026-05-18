@@ -9151,9 +9151,8 @@ def build_signal(instId):
         if strong_structure_pass and quality_pass:
 
             ok = True
-
-    
-     return signal
+            
+            return signal
          
          
             
