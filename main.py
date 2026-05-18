@@ -9079,7 +9079,7 @@ def build_signal(instId):
         if (
             premove_score >= 28
             and (
-                ep >= 8
+                ep >= 7
                 or (
                     has_launch
                     and has_absorption
