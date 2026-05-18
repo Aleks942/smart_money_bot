@@ -8943,7 +8943,7 @@ def build_signal(instId):
         f"score={signal.get('score')} "
         f"acc={signal.get('acc_score')} "
         f"stage={signal.get('stage')} "
-        f"ep={ep_data}"
+        f"ep={ep_data}",
         flush=True
     )
 
