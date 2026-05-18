@@ -9082,7 +9082,7 @@ def build_signal(instId):
                 ep >= 7
                 or (
                     has_launch
-                    and premove_score >= 20
+            and premove_score >= 20
                 )
             )
             and (
