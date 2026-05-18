@@ -8783,7 +8783,30 @@ def build_signal(instId):
             f"stage={signal.get('stage')}",
             flush=True
         )
+        # =========================
+        # TRANSITION PASS
+        # =========================
+        elif (
     
+            signal.get("scalp_candidate")
+    
+            and (
+                "BULLISH_SHIFT" in flags
+                or "BEARISH_SHIFT" in flags
+                or "ACCELERATION_UP" in flags
+                or "ACCELERATION_DOWN" in flags
+            )
+    
+        ):
+    
+            quality_pass = True
+    
+            print(
+                f"[TRANSITION_PASS] {instId}",
+                flush=True
+            )
+    
+            ok = True
 
         # =========================
         # SCALP FINAL OVERRIDE
