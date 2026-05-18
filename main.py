@@ -766,6 +766,12 @@ def analyze_signal_strength(sig):
 LAST_SENT = {}
 
 # =========================
+# PRE-SWING MEMORY
+# =========================
+
+PRE_SWING_STATE = {}
+
+# =========================
 # MISSED SETUP TRACKING
 # =========================
 
