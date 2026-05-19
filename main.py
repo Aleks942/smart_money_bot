@@ -10458,22 +10458,39 @@ def swing_grade(sig):
             risk_label, _ = coin_risk_label(sig)
         except:
             risk_label = "unknown"
-
-        # уровни
+        # =====================
+        # SWING LEVELS
+        # =====================
+        
         if total >= 9:
-            title = "🔥 ТОП СДЕЛКА"
+        
+            title = "🟢 СИЛЬНЫЙ SWING"
+        
         elif total >= 7:
-            title = "🟢 GOOD SETUP"
+        
+            title = "🟡 SWING SETUP"
+        
         else:
-            title = "🟡 WATCH"
-
-        # понижение из-за риска
-        if isinstance(risk_label, str) and "высокий" in risk_label.lower():
-            if title == "🔥 ТОП СДЕЛКА":
-                title = "🟢 GOOD SETUP"
-            elif title == "🟢 GOOD SETUP":
-                title = "🟡 WATCH"
-
+        
+            title = "⚪ НАБЛЮДЕНИЕ"
+        
+        # =====================
+        # RISK DOWNGRADE
+        # =====================
+        
+        if (
+            isinstance(risk_label, str)
+            and "высокий" in risk_label.lower()
+        ):
+        
+            if title == "🟢 СИЛЬНЫЙ SWING":
+        
+                title = "🟡 SWING SETUP"
+        
+            elif title == "🟡 SWING SETUP":
+        
+                title = "⚪ НАБЛЮДЕНИЕ"
+        
         return total, title
 
     except Exception:
