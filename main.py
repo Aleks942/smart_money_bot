@@ -12288,27 +12288,7 @@ if __name__ == "__main__":
 
             print(f"[SIG_RAW] {instId} sig_exists={bool(sig)}")
 
-            # =========================
-            # SCALP OVERRIDE
-            # =========================
-            if (
-                sig
-                and isinstance(sig, dict)
-                and sig.get("scalp_candidate")
-            ):
             
-                sig["sendable"] = True
-                sig["signal_group"] = "SCALP"
-            
-                print(
-                    f"[SCALP_SIGNAL_READY] {instId}",
-                    flush=True
-                )
-            
-            if not sig:
-                print(f"[RAW_SKIP] {instId} no_signal_from_analyzer")
-                continue
-
             # =====================
             # REGIME BIAS
             # =====================
