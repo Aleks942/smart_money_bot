@@ -10804,6 +10804,7 @@ def msg_scalp(sig):
         story.append("цена близка к запуску движения вниз")
 
     story_text = "\n".join([f"— {x}" for x in story])
+    interpretation = build_market_interpretation(sig)
 
     msg = f"""
 🔥 <b>РАННИЙ SCALP СИГНАЛ — {symbol}</b>
