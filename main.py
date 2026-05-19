@@ -10802,6 +10802,7 @@ def msg_pre_swing(sig):
     )
 
     symbol = sig.get("symbol") or sig.get("instId") or "UNKNOWN"
+    level_icon, level_text = get_signal_level(sig)
 
     side = (
         sig.get("direction")
@@ -10833,7 +10834,7 @@ def msg_pre_swing(sig):
     
     interpretation = build_market_interpretation(sig)
     return f"""
-🟠 <b>PRE_SWING — {symbol}</b>
+{level_icon} <b>{level_text} — {symbol}</b>
 
 🧭 Направление: {side}
 
