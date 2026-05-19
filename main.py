@@ -12130,7 +12130,33 @@ if __name__ == "__main__":
                                 sig,
                                 "SCALP"
                             )
-                
+                        # =========================
+                        # ELITE PRE-SWING FILTER
+                        # =========================
+                        
+                        if group == "PRE_SWING":
+                        
+                            elite_ok, elite_reason = (
+                                is_elite_pre_swing(sig)
+                            )
+                        
+                            print(
+                                f"[ELITE_PRE_SWING] "
+                                f"{instId} "
+                                f"ok={elite_ok} "
+                                f"reason={elite_reason}",
+                                flush=True
+                            )
+                        
+                            if not elite_ok:
+                        
+                                print(
+                                    f"[SKIP_WEAK_PRE_SWING] "
+                                    f"{instId}",
+                                    flush=True
+                                )
+                        
+                                continue
                         send_telegram(msg)
                 
                         scalp_sent_this_cycle += 1
