@@ -10814,7 +10814,7 @@ def msg_pre_swing(sig):
     stage = sig.get("stage", "UNKNOWN")
     entry = sig.get("entry", "UNKNOWN")
     acc = sig.get("acc_score", 0)
-    oi = sig.get("oi_change", 0)
+    oi = sig.get("oi_change")
 
     flags = sig.get("flags", [])
 
