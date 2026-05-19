@@ -11818,7 +11818,7 @@ def is_elite_pre_swing(sig):
         if score < 16:
             return False, "elite_low_score"
 
-        if ep < 10:
+        if ep < 12:
             return False, "elite_low_ep"
 
         if acc < 3:
