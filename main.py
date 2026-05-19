@@ -12332,30 +12332,30 @@ def build_market_interpretation(sig):
                 "рынок удерживает накопление"
             )
 
-# =====================
-# FINAL INTERPRETATION
-# =====================
-
-if not thoughts:
-
-    return (
-        "рынок пока не показывает "
-        "сильной подготовки к движению"
-    )
-
-return ". ".join(thoughts) + "."
-
-except Exception as e:
-
-    print(
-        f"[MARKET_INTERPRETATION_ERROR] {e}",
-        flush=True
-    )
-
-    return (
-        "не удалось построить "
-        "интерпретацию рынка"
-    )
+        # =====================
+        # FINAL INTERPRETATION
+        # =====================
+        
+        if not thoughts:
+        
+            return (
+                "рынок пока не показывает "
+                "сильной подготовки к движению"
+            )
+        
+        return ". ".join(thoughts) + "."
+        
+        except Exception as e:
+        
+            print(
+                f"[MARKET_INTERPRETATION_ERROR] {e}",
+                flush=True
+            )
+        
+            return (
+                "не удалось построить "
+                "интерпретацию рынка"
+            )
 
 
 # =========================
