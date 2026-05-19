@@ -1200,6 +1200,7 @@ MIN_SCORE = int(os.getenv("MIN_SCORE") or "1")
 ONE_OPEN_SIGNAL_PER_SYMBOL = (os.getenv("ONE_OPEN_SIGNAL_PER_SYMBOL") or "1").strip() != "0"
 MIN_STOP_PCT = float(os.getenv("MIN_STOP_PCT") or "0.25")
 SWING_MODE = (os.getenv("SWING_MODE") or "AUTO").upper()
+ENABLE_SCALP_ALERTS = (os.getenv("ENABLE_SCALP_ALERTS") or "0") == "1"   
 OI_GOOD = float(os.getenv("OI_GOOD") or "0.15")
 OI_STRONG = float(os.getenv("OI_STRONG") or "0.30")
 OI_BAD = float(os.getenv("OI_BAD") or "-0.10")
