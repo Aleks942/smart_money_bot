@@ -12743,16 +12743,21 @@ if __name__ == "__main__":
                     # =====================
                     
                     if new_oi is not None:
-
+                    
                         new_oi = float(new_oi)
                     
                         sig["oi_change"] = new_oi
                         sig["oi_available"] = True
                     
+                        print(
+                            f"[OI_OK] "
+                            f"{instId} "
+                            f"oi={new_oi}",
+                            flush=True
+                        )
+                    
                         try:
-                    
-                            new_oi = float(new_oi)
-                    
+                                      
                             # =====================
                             # OI NOISE FILTER
                             # =====================
