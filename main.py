@@ -10699,6 +10699,81 @@ def msg_scalp(sig):
 
     return msg
 
+# =========================
+# PRE SWING MESSAGE
+# =========================
+def msg_pre_swing(sig):
+
+    symbol = sig.get("symbol") or sig.get("instId") or "UNKNOWN"
+
+    side = (
+        sig.get("direction")
+        or sig.get("side")
+        or "NEUTRAL"
+    )
+
+    score = sig.get("score", 0)
+    ep = sig.get("early_pressure_score", 0)
+    stage = sig.get("stage", "UNKNOWN")
+    entry = sig.get("entry", "UNKNOWN")
+    acc = sig.get("acc_score", 0)
+
+    flags = sig.get("flags", [])
+
+    story = []
+
+    if "ENERGY_BUILDUP" in flags:
+        story.append("идёт накопление энергии")
+
+    if "BULLISH_SHIFT" in flags:
+        story.append("покупатели начинают перехватывать контроль")
+
+    if "BEARISH_SHIFT" in flags:
+        story.append("продавцы начинают перехватывать контроль")
+
+    if "ACCELERATION_UP" in flags:
+        story.append("появляется ускорение вверх")
+
+    if "ACCELERATION_DOWN" in flags:
+        story.append("появляется ускорение вниз")
+
+    if "MTF_LONG_ALIGN" in flags:
+        story.append("таймфреймы поддерживают LONG")
+
+    if "MTF_SHORT_ALIGN" in flags:
+        story.append("таймфреймы поддерживают SHORT")
+
+    if "LAUNCH_PROXIMITY_UP" in flags:
+        story.append("цена близка к запуску вверх")
+
+    if "LAUNCH_PROXIMITY_DOWN" in flags:
+        story.append("цена близка к запуску вниз")
+
+    story_text = "\n".join(
+        [f"• {x}" for x in story]
+    )
+
+    return f"""
+🟠 <b>PRE_SWING — {symbol}</b>
+
+🧭 Направление: {side}
+
+📊 Score: {round(score, 1)}
+⚡ EP: {ep}
+🧱 Accumulation: {acc}
+
+🎯 Entry:
+{entry}
+
+🧬 Stage:
+{stage}
+
+🧠 Что происходит:
+{story_text}
+
+⚠️ Это ранняя swing-фаза ДО полноценного импульса.
+""".strip()
+
 def summary_message(alerts, cycle_info, regime):
 
     if not alerts:
