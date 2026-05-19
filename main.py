@@ -10859,33 +10859,6 @@ def msg_pre_swing(sig):
 
     story = build_smart_story(sig)
 
-    if "ENERGY_BUILDUP" in flags:
-        story.append("идёт накопление энергии")
-
-    if "BULLISH_SHIFT" in flags:
-        story.append("покупатели начинают перехватывать контроль")
-
-    if "BEARISH_SHIFT" in flags:
-        story.append("продавцы начинают перехватывать контроль")
-
-    if "ACCELERATION_UP" in flags:
-        story.append("появляется ускорение вверх")
-
-    if "ACCELERATION_DOWN" in flags:
-        story.append("появляется ускорение вниз")
-
-    if "MTF_LONG_ALIGN" in flags:
-        story.append("таймфреймы поддерживают LONG")
-
-    if "MTF_SHORT_ALIGN" in flags:
-        story.append("таймфреймы поддерживают SHORT")
-
-    if "LAUNCH_PROXIMITY_UP" in flags:
-        story.append("цена близка к запуску вверх")
-
-    if "LAUNCH_PROXIMITY_DOWN" in flags:
-        story.append("цена близка к запуску вниз")
-
     story_text = "\n".join(
         [f"• {x}" for x in story]
     )
