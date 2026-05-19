@@ -10761,49 +10761,8 @@ def msg_scalp(sig):
 
     story = []
 
-    # =====================
-    # PRESSURE
-    # =====================
-    if "PRESSURE_UP" in flags:
-        story.append("покупатели усиливают давление")
-
-    if "PRESSURE_DOWN" in flags:
-        story.append("продавцы усиливают давление")
-
-    # =====================
-    # ENERGY
-    # =====================
-    if "ENERGY_BUILDUP" in flags:
-        story.append("рынок сжимается перед движением")
-
-    # =====================
-    # SHIFT
-    # =====================
-    if "BULLISH_SHIFT" in flags:
-        story.append("покупатели перехватывают контроль")
-
-    if "BEARISH_SHIFT" in flags:
-        story.append("продавцы перехватывают контроль")
-
-    # =====================
-    # EXPLOSION
-    # =====================
-    if "EXPLOSION_READY_UP" in flags:
-        story.append("обнаружена готовность к импульсу вверх")
-
-    if "EXPLOSION_READY_DOWN" in flags:
-        story.append("обнаружена готовность к импульсу вниз")
-
-    # =====================
-    # LAUNCH
-    # =====================
-    if "LAUNCH_PROXIMITY_UP" in flags:
-        story.append("цена близка к запуску движения вверх")
-
-    if "LAUNCH_PROXIMITY_DOWN" in flags:
-        story.append("цена близка к запуску движения вниз")
-
-    story_text = "\n".join([f"— {x}" for x in story])
+    
+    story_text = "\n".join(story)
     interpretation = build_market_interpretation(sig)
 
     msg = f"""
