@@ -11901,6 +11901,22 @@ def calc_elite_score(sig):
         )
 
         # =====================
+        # STAGE PRIORITY
+        # =====================
+        
+        stage = str(sig.get("stage") or "")
+        
+        if "EXPANSION" in stage:
+        
+            elite_score += 4
+            reasons.append("expansion")
+        
+        elif "TRANSITION" in stage:
+        
+            elite_score += 1
+            reasons.append("transition")
+
+        # =====================
         # EP
         # =====================
 
