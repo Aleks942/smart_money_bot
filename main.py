@@ -765,6 +765,124 @@ def analyze_signal_strength(sig):
 
 LAST_SENT = {}
 
+LAST_ALERT_SIGNATURE = {}
+
+def telegram_firewall(sig, group="GENERAL"):
+    """
+    Центральный фильтр перед Telegram.
+    Режет:
+    - None сигналы
+    - PREMOVE_CONFLICT
+    - NO_ENTRY
+    - одинаковые повторы
+    - слабые score/ep
+    - повтор без изменения цены
+    """
+
+    try:
+        if not sig:
+            return False, "empty_signal"
+
+        symbol = (
+            sig.get("instId")
+            or sig.get("symbol")
+            or sig.get("sym")
+            or ""
+        )
+
+        if not symbol:
+            return False, "no_symbol"
+
+        entry = str(
+            sig.get("entry")
+            or sig.get("entry_type")
+            or ""
+        )
+
+        if entry in ("", "None", "NO_ENTRY", "PREMOVE_CONFLICT"):
+            return False, f"bad_entry_{entry}"
+
+        direction = str(
+            sig.get("direction_code")
+            or sig.get("direction")
+            or sig.get("side")
+            or ""
+        )
+
+        if direction in ("", "None", "NEUTRAL"):
+            return False, "bad_direction"
+
+        score = float(sig.get("score") or 0)
+        ep = float(sig.get("early_pressure_score") or 0)
+        price = float(sig.get("price") or sig.get("entry_price") or 0)
+
+        # =====================
+        # MINIMUM QUALITY
+        # =====================
+        if group == "SCALP":
+            if score < 16:
+                return False, f"scalp_score_low_{score}"
+            if ep < 7:
+                return False, f"scalp_ep_low_{ep}"
+
+        elif group == "PREMOVE":
+            if score < 20:
+                return False, f"premove_score_low_{score}"
+            if ep < 8:
+                return False, f"premove_ep_low_{ep}"
+
+        elif group == "SWING":
+            if score < 14:
+                return False, f"swing_score_low_{score}"
+
+        else:
+            if score < 14:
+                return False, f"general_score_low_{score}"
+
+        # =====================
+        # SAME SIGNAL ANTI-REPEAT
+        # =====================
+        key = f"{symbol}_{group}"
+        now = time.time()
+
+        prev = LAST_ALERT_SIGNATURE.get(key)
+
+        signature = {
+            "entry": entry,
+            "direction": direction,
+            "score": round(score, 1),
+            "price": price,
+            "time": now,
+        }
+
+        if prev:
+            last_time = float(prev.get("time") or 0)
+            last_price = float(prev.get("price") or 0)
+
+            # cooldown 15 минут
+            if now - last_time < 900:
+                return False, "cooldown_15m"
+
+            # если почти тот же сигнал и цена почти не изменилась
+            if last_price > 0 and price > 0:
+                price_change_pct = abs(price - last_price) / last_price * 100
+
+                if (
+                    prev.get("entry") == entry
+                    and prev.get("direction") == direction
+                    and prev.get("score") == round(score, 1)
+                    and price_change_pct < 0.35
+                ):
+                    return False, f"same_signal_price_change_{price_change_pct:.2f}%"
+
+        LAST_ALERT_SIGNATURE[key] = signature
+
+        return True, "ok"
+
+    except Exception as e:
+        print(f"[TELEGRAM_FIREWALL_ERROR] {e}", flush=True)
+        return False, "firewall_error"
+
 # =========================
 # PRE-SWING MEMORY
 # =========================
