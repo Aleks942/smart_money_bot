@@ -10857,6 +10857,8 @@ def msg_pre_swing(sig):
 
     story = []
 
+    story = build_smart_story(sig)
+
     if "ENERGY_BUILDUP" in flags:
         story.append("идёт накопление энергии")
 
