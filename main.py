@@ -11796,11 +11796,11 @@ def is_elite_pre_swing(sig):
                 and has_shift
             ):
 
-        print(
-            f"[FAST_EXPANSION_ACC_EXCEPTION] "
-            f"{sig.get('symbol')}",
-            flush=True
-        )
+                print(
+                    f"[FAST_EXPANSION_ACC_EXCEPTION] "
+                    f"{sig.get('symbol')}",
+                    flush=True
+                )
 
     else:
 
