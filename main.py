@@ -12066,14 +12066,20 @@ def get_signal_level(sig):
         # =====================
         # VERY STRONG
         # =====================
-
-        if elite_score >= 15:
-
+        
+        stage = str(sig.get("stage") or "")
+        
+        if (
+            elite_score >= 15
+            and acc >= 3
+            and ep >= 10
+            and "EXPANSION" in stage
+        ):
+        
             return (
                 "🟢",
                 "ОЧЕНЬ СИЛЬНЫЙ СИГНАЛ"
             )
-
         # =====================
         # STRONG
         # =====================
