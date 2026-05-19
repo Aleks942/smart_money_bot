@@ -10860,6 +10860,7 @@ def msg_pre_swing(sig):
 📊 Score: {round(score, 1)}
 ⚡ EP: {ep}
 🧱 Accumulation: {acc}
+🟡 OI: {oi}%
 
 🎯 Entry:
 {entry}
