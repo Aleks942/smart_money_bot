@@ -10822,6 +10822,9 @@ def msg_scalp(sig):
 📊 Score: {round(score, 1)}
 📍 Стадия: {stage}
 
+🧠 Вывод:
+{interpretation}
+
 ⚠️ Ранний сигнал ДО сильного движения.
 """.strip()
 
@@ -10863,7 +10866,7 @@ def msg_pre_swing(sig):
     story_text = "\n".join(
         [f"• {x}" for x in story]
     )
-
+    interpretation = build_market_interpretation(sig)
     return f"""
 🟠 <b>PRE_SWING — {symbol}</b>
 
