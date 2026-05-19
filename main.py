@@ -10863,8 +10863,7 @@ def msg_pre_swing(sig):
 
     story = build_smart_story(sig)
 
-    story_text = "\n".join(
-        [f"• {x}" for x in story]
+    story_text = "\n".join(story)
     )
     interpretation = build_market_interpretation(sig)
     return f"""
