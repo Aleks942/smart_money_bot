@@ -12285,6 +12285,7 @@ if __name__ == "__main__":
                 )
 
             print(f"[SIG_RAW] {instId} sig_exists={bool(sig)}")
+
             # =========================
             # SCALP OVERRIDE
             # =========================
@@ -12293,10 +12294,10 @@ if __name__ == "__main__":
                 and isinstance(sig, dict)
                 and sig.get("scalp_candidate")
             ):
-
+            
                 sig["sendable"] = True
                 sig["signal_group"] = "SCALP"
-
+            
                 print(
                     f"[SCALP_SIGNAL_READY] {instId}",
                     flush=True
