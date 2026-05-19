@@ -11854,6 +11854,155 @@ def is_elite_pre_swing(sig):
         )
 
         return False, "elite_error"
+
+# =========================
+# ELITE SCORE ENGINE
+# =========================
+def calc_elite_score(sig):
+
+    try:
+
+        flags = set(sig.get("flags", []))
+
+        elite_score = 0
+        reasons = []
+
+        ep = float(
+            sig.get("early_pressure_score") or 0
+        )
+
+        acc = float(
+            sig.get("acc_score") or 0
+        )
+
+        oi = float(
+            sig.get("oi_change") or 0
+        )
+
+        score = float(
+            sig.get("score") or 0
+        )
+
+        # =====================
+        # EP
+        # =====================
+
+        if ep >= 10:
+
+            elite_score += 2
+            reasons.append("ep")
+
+        if ep >= 15:
+
+            elite_score += 2
+            reasons.append("ep_strong")
+
+        # =====================
+        # ACCUMULATION
+        # =====================
+
+        if acc >= 3:
+
+            elite_score += 2
+            reasons.append("acc")
+
+        if acc >= 4:
+
+            elite_score += 2
+            reasons.append("acc_strong")
+
+        # =====================
+        # OI
+        # =====================
+
+        if abs(oi) >= 0.20:
+
+            elite_score += 2
+            reasons.append("oi")
+
+        # =====================
+        # MTF
+        # =====================
+
+        if (
+            "MTF_LONG_ALIGN" in flags
+            or "MTF_SHORT_ALIGN" in flags
+        ):
+
+            elite_score += 2
+            reasons.append("mtf")
+
+        # =====================
+        # ACCELERATION
+        # =====================
+
+        if (
+            "ACCELERATION_UP" in flags
+            or "ACCELERATION_DOWN" in flags
+        ):
+
+            elite_score += 2
+            reasons.append("acceleration")
+
+        # =====================
+        # LAUNCH
+        # =====================
+
+        if (
+            "LAUNCH_PROXIMITY_UP" in flags
+            or "LAUNCH_PROXIMITY_DOWN" in flags
+            or "EXPLOSION_READY_UP" in flags
+            or "EXPLOSION_READY_DOWN" in flags
+        ):
+
+            elite_score += 2
+            reasons.append("launch")
+
+        # =====================
+        # ABSORPTION
+        # =====================
+
+        if (
+            "BUYER_ABSORPTION" in flags
+            or "SELLER_ABSORPTION" in flags
+        ):
+
+            elite_score += 2
+            reasons.append("absorption")
+
+        # =====================
+        # VOLUME
+        # =====================
+
+        if "VOL_SPIKE" in flags:
+
+            elite_score += 1
+            reasons.append("volume")
+
+        # =====================
+        # BIG SCORE BONUS
+        # =====================
+
+        if score >= 30:
+
+            elite_score += 2
+            reasons.append("big_score")
+
+        elif score >= 20:
+
+            elite_score += 1
+            reasons.append("score")
+
+        return elite_score, reasons
+
+    except Exception as e:
+
+        print(
+            f"[ELITE_SCORE_ERROR] {e}",
+            flush=True
+        )
+
+        return 0, []
                            
 # =========================
 # MAIN LOOP (STABLE VERSION)
