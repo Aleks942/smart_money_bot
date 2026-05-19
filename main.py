@@ -12700,6 +12700,14 @@ if __name__ == "__main__":
                 sent_ids.add(sid)
                         
                 print(f"[PREMOVE_SEND] {sid}", flush=True)
+
+                ok, fw_reason = telegram_firewall(sig, group="PREMOVE")
+
+                if not ok:
+                    print(f"[FIREWALL_SKIP] {sid} PREMOVE {fw_reason}", flush=True)
+                    continue
+
+                
             
                 send_telegram(
             
