@@ -12003,6 +12003,150 @@ def calc_elite_score(sig):
         )
 
         return 0, []
+
+# =========================
+# SMART STORY ENGINE
+# =========================
+def build_smart_story(sig):
+
+    try:
+
+        flags = set(sig.get("flags", []))
+
+        story = []
+
+        # =====================
+        # ENERGY
+        # =====================
+
+        if "ENERGY_BUILDUP" in flags:
+
+            story.append(
+                "• рынок накапливает энергию перед движением"
+            )
+
+        # =====================
+        # PRESSURE
+        # =====================
+
+        if "PRESSURE_UP" in flags:
+
+            story.append(
+                "• покупатели начинают усиливать давление"
+            )
+
+        if "PRESSURE_DOWN" in flags:
+
+            story.append(
+                "• продавцы начинают усиливать давление"
+            )
+
+        # =====================
+        # SHIFT
+        # =====================
+
+        if "BULLISH_SHIFT" in flags:
+
+            story.append(
+                "• рынок начинает смещаться в LONG"
+            )
+
+        if "BEARISH_SHIFT" in flags:
+
+            story.append(
+                "• рынок начинает смещаться в SHORT"
+            )
+
+        # =====================
+        # ACCELERATION
+        # =====================
+
+        if "ACCELERATION_UP" in flags:
+
+            story.append(
+                "• движение вверх начинает ускоряться"
+            )
+
+        if "ACCELERATION_DOWN" in flags:
+
+            story.append(
+                "• движение вниз начинает ускоряться"
+            )
+
+        # =====================
+        # ABSORPTION
+        # =====================
+
+        if "BUYER_ABSORPTION" in flags:
+
+            story.append(
+                "• крупный покупатель удерживает цену"
+            )
+
+        if "SELLER_ABSORPTION" in flags:
+
+            story.append(
+                "• крупный продавец удерживает цену"
+            )
+
+        # =====================
+        # MTF
+        # =====================
+
+        if "MTF_LONG_ALIGN" in flags:
+
+            story.append(
+                "• таймфреймы поддерживают LONG"
+            )
+
+        if "MTF_SHORT_ALIGN" in flags:
+
+            story.append(
+                "• таймфреймы поддерживают SHORT"
+            )
+
+        # =====================
+        # LAUNCH
+        # =====================
+
+        if (
+            "LAUNCH_PROXIMITY_UP" in flags
+            or "EXPLOSION_READY_UP" in flags
+        ):
+
+            story.append(
+                "• рынок близок к запуску движения вверх"
+            )
+
+        if (
+            "LAUNCH_PROXIMITY_DOWN" in flags
+            or "EXPLOSION_READY_DOWN" in flags
+        ):
+
+            story.append(
+                "• рынок близок к запуску движения вниз"
+            )
+
+        # =====================
+        # VOLUME
+        # =====================
+
+        if "VOL_SPIKE" in flags:
+
+            story.append(
+                "• в рынок начинает заходить объём"
+            )
+
+        return story
+
+    except Exception as e:
+
+        print(
+            f"[SMART_STORY_ERROR] {e}",
+            flush=True
+        )
+
+        return []
                            
 # =========================
 # MAIN LOOP (STABLE VERSION)
