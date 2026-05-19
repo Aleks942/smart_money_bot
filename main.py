@@ -11702,13 +11702,22 @@ if __name__ == "__main__":
                     
                         alerts.append(sig)
                     
-                        mark_alert_sent(state, sig)
+                    mark_alert_sent(state, sig)
+
+                    continue
+                    
+                    except Exception as e:
+                    
+                        print(
+                            f"[BUILD_SIGNAL_ERROR] {instId} {e}",
+                            flush=True
+                        )
                     
                         continue
-
-                # =====================
-                # LOCAL SIGNAL DATA
-                # =====================
+                    
+                    # =====================
+                    # LOCAL SIGNAL DATA
+                    # =====================
     
                 flags = set(sig.get("flags", []))
     
