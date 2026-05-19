@@ -11622,9 +11622,9 @@ if __name__ == "__main__":
                 time.sleep(0.55)
             
                 try:
-            
+
                     sig = build_signal(instId)
-            
+                
                     print(
                         f"[POST_BUILD] "
                         f"{instId} "
@@ -11635,89 +11635,89 @@ if __name__ == "__main__":
                         f"scalp={sig.get('scalp_candidate') if isinstance(sig, dict) else None}",
                         flush=True
                     )
-            
+                
                     # =====================
                     # INVALID SIGNAL PROTECTION
                     # =====================
-                    
+                
                     if not sig or not isinstance(sig, dict):
-                    
+                
                         print(
                             f"[RAW_SKIP] {instId}",
                             flush=True
                         )
-                    
+                
                         continue
-                    
+                
                     # =====================
                     # SIGNAL DISPATCH
                     # =====================
-                    
+                
                     group = sig.get("signal_group")
-                    
+                
                     if group in (
                         "SCALP",
                         "PRE_SWING",
                         "SWING",
                     ):
-                    
+                
                         # =====================
                         # MESSAGE TYPE
                         # =====================
-                    
+                
                         if group == "SWING":
-                    
+                
                             msg = safe_msg_builder(
                                 globals().get("msg_swing"),
                                 sig,
                                 "SWING"
                             )
-                    
+                
                         elif group == "PRE_SWING":
-                    
+                
                             msg = safe_msg_builder(
                                 globals().get("msg_pre_swing"),
                                 sig,
                                 "PRE_SWING"
                             )
-                    
+                
                         else:
-                    
+                
                             msg = safe_msg_builder(
                                 globals().get("msg_scalp"),
                                 sig,
                                 "SCALP"
                             )
-                    
+                
                         send_telegram(msg)
-                    
+                
                         scalp_sent_this_cycle += 1
-                    
+                
                         print(
                             f"[SIGNAL_SENT] "
                             f"{instId} "
                             f"group={group}",
                             flush=True
                         )
-                    
+                
                         alerts.append(sig)
-                    
-                    mark_alert_sent(state, sig)
-
-                    continue
-                    
-                    except Exception as e:
-                    
-                        print(
-                            f"[BUILD_SIGNAL_ERROR] {instId} {e}",
-                            flush=True
-                        )
-                    
+                
+                        mark_alert_sent(state, sig)
+                
                         continue
-                    
-                    # =====================
-                    # LOCAL SIGNAL DATA
-                    # =====================
+                
+                except Exception as e:
+                
+                    print(
+                        f"[BUILD_SIGNAL_ERROR] {instId} {e}",
+                        flush=True
+                    )
+                
+                    continue
+                
+                # =====================
+                # LOCAL SIGNAL DATA
+                # =====================
     
                 flags = set(sig.get("flags", []))
     
