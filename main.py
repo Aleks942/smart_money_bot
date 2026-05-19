@@ -9494,10 +9494,9 @@ def build_signal(instId):
                 signal_mode in (
                     "TRANSITION",
                     "CONFIRMED",
-                    "PREMOVE",
                 )
-                and ep >= 6
-                and score >= 10
+                and ep >= 7
+                and score >= 12
             ):
     
                 signal["signal_group"] = "SCALP"
