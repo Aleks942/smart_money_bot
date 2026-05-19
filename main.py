@@ -12743,6 +12743,11 @@ if __name__ == "__main__":
                     # =====================
                     
                     if new_oi is not None:
+
+                        new_oi = float(new_oi)
+                    
+                        sig["oi_change"] = new_oi
+                        sig["oi_available"] = True
                     
                         try:
                     
