@@ -11743,6 +11743,14 @@ if __name__ == "__main__":
                 try:
 
                     sig = build_signal(instId)
+                    if not sig or not isinstance(sig, dict):
+
+                        print(
+                            f"[RAW_SKIP] {instId}",
+                            flush=True
+                        )
+                    
+                        continue
 
                     # =====================
                     # OPEN INTEREST
