@@ -12001,11 +12001,16 @@ if __name__ == "__main__":
                 
                     group = sig.get("signal_group")
                 
-                    if group in (
-                        "SCALP",
+                    allowed_groups = [
                         "PRE_SWING",
                         "SWING",
-                    ):
+                    ]
+                    
+                    if ENABLE_SCALP_ALERTS:
+                    
+                        allowed_groups.append("SCALP")
+                    
+                    if group in allowed_groups:
                 
                         # =====================
                         # MESSAGE TYPE
