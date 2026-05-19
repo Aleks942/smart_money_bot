@@ -11542,18 +11542,18 @@ if __name__ == "__main__":
                     
                             return f"⚠️ {fallback_name}"
                                 
-                                        # =====================
-                                        # SIGNAL DISPATCH
-                                        # =====================
-                                        
-                                        group = sig.get("signal_group")
-                                        
-                                        if group in (
-                                            "SCALP",
-                                            "PRE_SWING",
-                                            "SWING",
-                                        ):
-                    
+                        # =====================
+                        # SIGNAL DISPATCH
+                        # =====================
+                        
+                        group = sig.get("signal_group")
+                        
+                        if group in (
+                            "SCALP",
+                            "PRE_SWING",
+                            "SWING",
+                        ):
+
                         # =====================
                         # MESSAGE TYPE
                         # =====================
