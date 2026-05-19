@@ -10825,7 +10825,7 @@ def msg_pre_swing(sig):
     story_text = "\n".join(story)
     if oi is None:
 
-    oi_text = "нет данных"
+        oi_text = "нет данных"
 
     else:
     
