@@ -9302,7 +9302,7 @@ def build_signal(instId):
         )
     
         if (
-            premove_score >= 14
+            premove_score >= 12
             and (
                 ep >= 7
                 or (
@@ -9317,7 +9317,7 @@ def build_signal(instId):
             )
             and (
                 has_absorption
-                or ep >= 10
+                or ep >= 8
             )
         ):
             print(
