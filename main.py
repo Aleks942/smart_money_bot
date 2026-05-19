@@ -5747,9 +5747,67 @@ def decide_entry(stage, flags, price, c5):
         # SHORT PREMOVE
         # =====================
         elif short_premove and not long_premove:
-
+        
+            # =====================
+            # PREMOVE QUALITY FILTER
+            # =====================
+        
+            ep = float(
+                sig.get("early_pressure_score") or 0
+            )
+        
+            acc = float(
+                sig.get("acc_score") or 0
+            )
+        
+            stage = str(
+                sig.get("stage") or ""
+            )
+        
+            # =====================
+            # BLOCK WEAK PREMOVE
+            # =====================
+        
+            if ep < 10:
+        
+                print(
+                    f"[BLOCK_PREMOVE_EP] "
+                    f"{sig.get('symbol')} "
+                    f"ep={ep}",
+                    flush=True
+                )
+        
+                return None
+        
+            if acc < 3:
+        
+                print(
+                    f"[BLOCK_PREMOVE_ACC] "
+                    f"{sig.get('symbol')} "
+                    f"acc={acc}",
+                    flush=True
+                )
+        
+                return None
+        
+            if "TRANSITION" in stage:
+        
+                print(
+                    f"[BLOCK_PREMOVE_TRANSITION] "
+                    f"{sig.get('symbol')}",
+                    flush=True
+                )
+        
+                return None
+        
+            # =====================
+            # VALID PREMOVE
+            # =====================
+        
             entry = "PREMOVE_SHORT"
+        
             stop = recent_high
+        
             reason = "PREMOVE_SHORT"
 
         # =====================
