@@ -11649,63 +11649,64 @@ if __name__ == "__main__":
                     
                             return f"⚠️ {fallback_name}"
                                 
-                    # =====================
-                    # SIGNAL DISPATCH
-                    # =====================
-                    
-                    group = sig.get("signal_group")
-                    
-                    if group in (
-                        "SCALP",
-                        "PRE_SWING",
-                        "SWING",
-                    ):
-
+                # =====================
+                # SIGNAL DISPATCH
+                # =====================
+                
+                group = sig.get("signal_group")
+                
+                if group in (
+                    "SCALP",
+                    "PRE_SWING",
+                    "SWING",
+                ):
+                
                     # =====================
                     # MESSAGE TYPE
                     # =====================
-                    
+                
                     if group == "SWING":
-                    
+                
                         msg = safe_msg_builder(
                             globals().get("msg_swing"),
                             sig,
                             "SWING"
                         )
-                    
+                
                     elif group == "PRE_SWING":
-                    
+                
                         msg = safe_msg_builder(
                             globals().get("msg_pre_swing"),
                             sig,
                             "PRE_SWING"
                         )
-                    
+                
                     else:
-                    
+                
                         msg = safe_msg_builder(
                             globals().get("msg_scalp"),
                             sig,
                             "SCALP"
                         )
-                    
+                
                     send_telegram(msg)
-                    
+                
                     scalp_sent_this_cycle += 1
-                    
+                
                     print(
                         f"[SIGNAL_SENT] "
                         f"{instId} "
                         f"group={group}",
                         flush=True
                     )
-                    
+                
                     alerts.append(sig)
-                    
+                
                     mark_alert_sent(state, sig)
-                    
+                
                     continue
-            
+                
+                
                 # =====================
                 # LOCAL SIGNAL DATA
                 # =====================
