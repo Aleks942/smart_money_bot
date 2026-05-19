@@ -11766,27 +11766,35 @@ def is_elite_pre_swing(sig):
         if score < 16:
             return False, "elite_low_score"
 
+        # =====================
+        # EP FILTER
+        # =====================
+
         if ep < 12:
 
             # =====================
             # FAST IMPULSE EXCEPTION
             # =====================
-        
+
             if (
                 has_launch
                 and has_acceleration
                 and has_shift
             ):
-        
+
                 print(
                     f"[FAST_IMPULSE_EXCEPTION] "
                     f"{sig.get('symbol')}",
                     flush=True
                 )
-        
+
             else:
-        
+
                 return False, "elite_low_ep"
+
+        # =====================
+        # ACC FILTER
+        # =====================
 
         if acc < 3:
 
@@ -11802,12 +11810,20 @@ def is_elite_pre_swing(sig):
                     flush=True
                 )
 
-    else:
+            else:
 
-        return False, "elite_low_acc"
+                return False, "elite_low_acc"
+
+        # =====================
+        # MTF FILTER
+        # =====================
 
         if not has_mtf:
             return False, "elite_no_mtf"
+
+        # =====================
+        # PRESSURE FILTER
+        # =====================
 
         if not has_pressure:
             return False, "elite_no_pressure"
@@ -11821,22 +11837,26 @@ def is_elite_pre_swing(sig):
             or has_acceleration
             or has_shift
         ):
-        
+
             # =====================
             # STRONG ACC EXCEPTION
             # =====================
-        
+
             if ep >= 15 and acc >= 3:
-        
+
                 print(
                     f"[ELITE_ACC_EXCEPTION] "
                     f"{sig.get('symbol')}",
                     flush=True
                 )
-        
+
             else:
-        
+
                 return False, "elite_no_launch_or_shift"
+
+        # =====================
+        # ABSORPTION FILTER
+        # =====================
 
         if not has_absorption:
             return False, "elite_no_absorption"
