@@ -11469,6 +11469,52 @@ def is_best_only_signal(sig):
 
     except:
         return False
+
+# =====================
+# SAFE MESSAGE BUILDERS
+# =====================
+
+def safe_msg_builder(builder, sig, fallback_name="SIGNAL"):
+
+    try:
+
+        if callable(builder):
+            return builder(sig)
+
+    except Exception as e:
+
+        print(
+            f"[MSG_BUILDER_ERROR] "
+            f"{fallback_name} {e}",
+            flush=True
+        )
+
+    try:
+
+        symbol = (
+            sig.get("instId")
+            or sig.get("symbol")
+            or "UNKNOWN"
+        )
+
+        side = (
+            sig.get("side")
+            or sig.get("direction")
+            or "NEUTRAL"
+        )
+
+        score = sig.get("score", 0)
+
+        return (
+            f"⚠️ <b>{fallback_name}</b>\n\n"
+            f"🪙 {symbol}\n"
+            f"🧭 {side}\n"
+            f"⭐ Score: {score}"
+        )
+
+    except:
+
+        return f"⚠️ {fallback_name}"
                            
 # =========================
 # MAIN LOOP (STABLE VERSION)
@@ -11593,120 +11639,73 @@ if __name__ == "__main__":
                     # =====================
                     # INVALID SIGNAL PROTECTION
                     # =====================
-            
+                    
                     if not sig or not isinstance(sig, dict):
-            
+                    
                         print(
                             f"[RAW_SKIP] {instId}",
                             flush=True
                         )
-            
+                    
+                        continue
+                    
+                    # =====================
+                    # SIGNAL DISPATCH
+                    # =====================
+                    
+                    group = sig.get("signal_group")
+                    
+                    if group in (
+                        "SCALP",
+                        "PRE_SWING",
+                        "SWING",
+                    ):
+                    
+                        # =====================
+                        # MESSAGE TYPE
+                        # =====================
+                    
+                        if group == "SWING":
+                    
+                            msg = safe_msg_builder(
+                                globals().get("msg_swing"),
+                                sig,
+                                "SWING"
+                            )
+                    
+                        elif group == "PRE_SWING":
+                    
+                            msg = safe_msg_builder(
+                                globals().get("msg_pre_swing"),
+                                sig,
+                                "PRE_SWING"
+                            )
+                    
+                        else:
+                    
+                            msg = safe_msg_builder(
+                                globals().get("msg_scalp"),
+                                sig,
+                                "SCALP"
+                            )
+                    
+                        send_telegram(msg)
+                    
+                        scalp_sent_this_cycle += 1
+                    
+                        print(
+                            f"[SIGNAL_SENT] "
+                            f"{instId} "
+                            f"group={group}",
+                            flush=True
+                        )
+                    
+                        alerts.append(sig)
+                    
+                        mark_alert_sent(state, sig)
+                    
                         continue
 
-                    # =====================
-                    # SAFE MESSAGE BUILDERS
-                    # =====================
-                    
-                    def safe_msg_builder(builder, sig, fallback_name="SIGNAL"):
-                    
-                        try:
-                    
-                            if callable(builder):
-                                return builder(sig)
-                    
-                        except Exception as e:
-                    
-                            print(
-                                f"[MSG_BUILDER_ERROR] "
-                                f"{fallback_name} {e}",
-                                flush=True
-                            )
-                    
-                        try:
-                    
-                            symbol = (
-                                sig.get("instId")
-                                or sig.get("symbol")
-                                or "UNKNOWN"
-                            )
-                    
-                            side = (
-                                sig.get("side")
-                                or sig.get("direction")
-                                or "NEUTRAL"
-                            )
-                    
-                            score = sig.get("score", 0)
-                    
-                            return (
-                                f"⚠️ <b>{fallback_name}</b>\n\n"
-                                f"🪙 {symbol}\n"
-                                f"🧭 {side}\n"
-                                f"⭐ Score: {score}"
-                            )
-                    
-                        except:
-                    
-                            return f"⚠️ {fallback_name}"
-                                
-                # =====================
-                # SIGNAL DISPATCH
-                # =====================
-                
-                group = sig.get("signal_group")
-                
-                if group in (
-                    "SCALP",
-                    "PRE_SWING",
-                    "SWING",
-                ):
-                
-                    # =====================
-                    # MESSAGE TYPE
-                    # =====================
-                
-                    if group == "SWING":
-                
-                        msg = safe_msg_builder(
-                            globals().get("msg_swing"),
-                            sig,
-                            "SWING"
-                        )
-                
-                    elif group == "PRE_SWING":
-                
-                        msg = safe_msg_builder(
-                            globals().get("msg_pre_swing"),
-                            sig,
-                            "PRE_SWING"
-                        )
-                
-                    else:
-                
-                        msg = safe_msg_builder(
-                            globals().get("msg_scalp"),
-                            sig,
-                            "SCALP"
-                        )
-                
-                    send_telegram(msg)
-                
-                    scalp_sent_this_cycle += 1
-                
-                    print(
-                        f"[SIGNAL_SENT] "
-                        f"{instId} "
-                        f"group={group}",
-                        flush=True
-                    )
-                
-                    alerts.append(sig)
-                
-                    mark_alert_sent(state, sig)
-                
-                    continue
-                
-                
                 # =====================
                 # LOCAL SIGNAL DATA
                 # =====================
