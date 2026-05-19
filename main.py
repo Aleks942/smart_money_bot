@@ -11789,7 +11789,22 @@ def is_elite_pre_swing(sig):
                 return False, "elite_low_ep"
 
         if acc < 3:
-            return False, "elite_low_acc"
+
+            if (
+                has_launch
+                and has_acceleration
+                and has_shift
+            ):
+
+        print(
+            f"[FAST_EXPANSION_ACC_EXCEPTION] "
+            f"{sig.get('symbol')}",
+            flush=True
+        )
+
+    else:
+
+        return False, "elite_low_acc"
 
         if not has_mtf:
             return False, "elite_no_mtf"
