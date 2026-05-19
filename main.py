@@ -331,6 +331,113 @@ def is_scalp_candidate(signal):
         return False, "scalp_error"
 
 # =========================
+# CENTRAL SIGNAL ROUTER
+# =========================
+def route_signal(sig):
+
+    try:
+
+        flags = set(sig.get("flags", []))
+
+        score = float(sig.get("score") or 0)
+        ep = float(sig.get("early_pressure_score") or 0)
+        acc = float(sig.get("acc_score") or 0)
+
+        entry = str(
+            sig.get("entry")
+            or sig.get("entry_type")
+            or ""
+        )
+
+        stage = str(sig.get("stage") or "")
+
+        # =====================
+        # INVALID
+        # =====================
+
+        if entry in (
+            "",
+            "NO_ENTRY",
+            "PREMOVE_CONFLICT",
+            "None",
+        ):
+            return None, "invalid_entry"
+
+        # =====================
+        # SWING
+        # =====================
+
+        has_structure = (
+            "STRUCTURE_HH_HL" in flags
+            or "STRUCTURE_LH_LL" in flags
+        )
+
+        has_mtf = (
+            "MTF_LONG_ALIGN" in flags
+            or "MTF_SHORT_ALIGN" in flags
+        )
+
+        has_acceleration = (
+            "ACCELERATION_UP" in flags
+            or "ACCELERATION_DOWN" in flags
+        )
+
+        if (
+            score >= 18
+            and ep >= 8
+            and has_structure
+            and has_mtf
+            and has_acceleration
+        ):
+
+            return "SWING", "swing_confirmed"
+
+        # =====================
+        # PRE_SWING
+        # =====================
+
+        if (
+            (
+                "TRANSITION" in stage
+                or "ACCUMULATION" in stage
+            )
+            and score >= 16
+            and ep >= 7
+            and (
+                has_structure
+                or has_mtf
+                or has_acceleration
+            )
+        ):
+
+            return "PRE_SWING", "pre_swing"
+
+        # =====================
+        # SCALP
+        # =====================
+
+        scalp_ok, scalp_reason = is_scalp_candidate(sig)
+
+        if scalp_ok:
+
+            return "SCALP", scalp_reason
+
+        # =====================
+        # NO ROUTE
+        # =====================
+
+        return None, "no_route"
+
+    except Exception as e:
+
+        print(
+            f"[ROUTE_SIGNAL_ERROR] {e}",
+            flush=True
+        )
+
+        return None, "route_error"
+
+# =========================
 # ELITE SCALP FILTER
 # =========================
 def is_elite_scalp(sig):
