@@ -12345,17 +12345,17 @@ def build_market_interpretation(sig):
         
         return ". ".join(thoughts) + "."
         
-        except Exception as e:
+    except Exception as e:
         
-            print(
-                f"[MARKET_INTERPRETATION_ERROR] {e}",
-                flush=True
-            )
+        print(
+            f"[MARKET_INTERPRETATION_ERROR] {e}",
+            flush=True
+        )
         
-            return (
-                "не удалось построить "
-                "интерпретацию рынка"
-            )
+        return (
+            "не удалось построить "
+            "интерпретацию рынка"
+        )
 
 
 # =========================
