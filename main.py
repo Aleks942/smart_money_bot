@@ -9410,72 +9410,110 @@ def build_signal(instId):
     # =========================
     # PRE-MOVE ENERGY PASS
     # =========================
-
+    
     elif (
-
+    
         "ENERGY_BUILDUP" in flags
-
+    
         and (
-
+    
             "PRESSURE_UP" in flags
             or "PRESSURE_DOWN" in flags
         )
-
+    
         and (
             "COMP_PRO_5M" in flags
             or "COMP_PRO_15M" in flags
         )
-
+    
     ):
-
+    
         quality_pass = True
-
+    
         if signal.get("scalp_candidate"):
-
+    
             print(
                 f"[PREMOVE_PASS] {instId}",
                 flush=True
             )
-
+    
         if strong_structure_pass and quality_pass:
-
+    
             # =========================
             # AUTO GROUP ASSIGN
             # =========================
-        
+    
             ep = float(
                 signal.get("early_pressure_score") or 0
             )
-        
+    
             score = float(
                 signal.get("score") or 0
             )
-        
+    
+            flags = set(signal.get("flags", []))
+    
+            # =====================
+            # SWING
+            # =====================
+    
             if (
+                score >= 18
+                and ep >= 8
+                and (
+                    "BREAKOUT_CONFIRM_UP" in flags
+                    or "BREAKOUT_CONFIRM_DOWN" in flags
+                    or "CONTINUATION_UP" in flags
+                    or "CONTINUATION_DOWN" in flags
+                )
+                and (
+                    "MTF_LONG_ALIGN" in flags
+                    or "MTF_SHORT_ALIGN" in flags
+                )
+            ):
+    
+                signal["signal_group"] = "SWING"
+    
+            # =====================
+            # PRE SWING
+            # =====================
+    
+            elif (
                 signal_mode == "TRANSITION"
                 and ep >= 8
                 and score >= 14
             ):
-        
+    
                 signal["signal_group"] = "PRE_SWING"
-        
+    
+            # =====================
+            # SCALP
+            # =====================
+    
             elif (
-                signal_mode == "TRANSITION"
+                signal_mode in (
+                    "TRANSITION",
+                    "CONFIRMED",
+                    "PREMOVE",
+                )
                 and ep >= 6
                 and score >= 10
             ):
-        
+    
                 signal["signal_group"] = "SCALP"
-        
+    
+            # =====================
+            # NO GROUP
+            # =====================
+    
             else:
-        
-                return None
-        
+    
+                signal["signal_group"] = None
+    
             return signal
-                 
-         
-            
 
+
+        
     # =========================
     # TRANSITION PASS
     # =========================
