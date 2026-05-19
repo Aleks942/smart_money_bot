@@ -11495,18 +11495,64 @@ if __name__ == "__main__":
                         )
             
                         continue
-            
+
                     # =====================
-                    # SIGNAL DISPATCH
+                    # SAFE MESSAGE BUILDERS
                     # =====================
                     
-                    group = sig.get("signal_group")
+                    def safe_msg_builder(builder, sig, fallback_name="SIGNAL"):
                     
-                    if group in (
-                        "SCALP",
-                        "PRE_SWING",
-                        "SWING",
-                    ):
+                        try:
+                    
+                            if callable(builder):
+                                return builder(sig)
+                    
+                        except Exception as e:
+                    
+                            print(
+                                f"[MSG_BUILDER_ERROR] "
+                                f"{fallback_name} {e}",
+                                flush=True
+                            )
+                    
+                        try:
+                    
+                            symbol = (
+                                sig.get("instId")
+                                or sig.get("symbol")
+                                or "UNKNOWN"
+                            )
+                    
+                            side = (
+                                sig.get("side")
+                                or sig.get("direction")
+                                or "NEUTRAL"
+                            )
+                    
+                            score = sig.get("score", 0)
+                    
+                            return (
+                                f"⚠️ <b>{fallback_name}</b>\n\n"
+                                f"🪙 {symbol}\n"
+                                f"🧭 {side}\n"
+                                f"⭐ Score: {score}"
+                            )
+                    
+                        except:
+                    
+                            return f"⚠️ {fallback_name}"
+                                
+                                        # =====================
+                                        # SIGNAL DISPATCH
+                                        # =====================
+                                        
+                                        group = sig.get("signal_group")
+                                        
+                                        if group in (
+                                            "SCALP",
+                                            "PRE_SWING",
+                                            "SWING",
+                                        ):
                     
                         # =====================
                         # MESSAGE TYPE
