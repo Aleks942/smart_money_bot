@@ -5709,7 +5709,7 @@ def decide_entry(stage, flags, price, c5):
             or "COMP_15M" in flags
         )
     ):
-
+    
         long_premove = (
             "BULLISH_SHIFT" in flags
             or (
@@ -5721,7 +5721,7 @@ def decide_entry(stage, flags, price, c5):
                 )
             )
         )
-
+    
         short_premove = (
             "BEARISH_SHIFT" in flags
             or (
@@ -5733,140 +5733,124 @@ def decide_entry(stage, flags, price, c5):
                 )
             )
         )
-
+    
+        ep = float(
+            sig.get("early_pressure_score") or 0
+        )
+    
+        acc = float(
+            sig.get("acc_score") or 0
+        )
+    
+        stage = str(
+            sig.get("stage") or ""
+        )
+    
         # =====================
         # LONG PREMOVE
         # =====================
-        elif long_premove and not short_premove:
-        
-            # =====================
-            # PREMOVE QUALITY FILTER
-            # =====================
-        
-            ep = float(
-                sig.get("early_pressure_score") or 0
-            )
-        
-            acc = float(
-                sig.get("acc_score") or 0
-            )
-        
-            stage = str(
-                sig.get("stage") or ""
-            )
-        
+        if long_premove and not short_premove:
+    
             # =====================
             # BLOCK WEAK PREMOVE
             # =====================
-        
+    
             if ep < 10:
-        
+    
                 print(
                     f"[BLOCK_PREMOVE_EP] "
                     f"{sig.get('symbol')} "
                     f"ep={ep}",
                     flush=True
                 )
-        
-                return None
-        
+    
+                long_premove = False
+    
             if acc < 3:
-        
+    
                 print(
                     f"[BLOCK_PREMOVE_ACC] "
                     f"{sig.get('symbol')} "
                     f"acc={acc}",
                     flush=True
                 )
-        
-                return None
-        
+    
+                long_premove = False
+    
             if "TRANSITION" in stage:
-        
+    
                 print(
                     f"[BLOCK_PREMOVE_TRANSITION] "
                     f"{sig.get('symbol')}",
                     flush=True
                 )
-        
-                return None
-        
+    
+                long_premove = False
+    
             # =====================
-            # VALID PREMOVE
+            # VALID LONG PREMOVE
             # =====================
-        
-            entry = "PREMOVE_LONG"
-        
-            stop = recent_low
-        
-            reason = "PREMOVE_LONG"
-
+    
+            if long_premove:
+    
+                entry = "PREMOVE_LONG"
+    
+                stop = recent_low
+    
+                reason = "PREMOVE_LONG"
+    
         # =====================
         # SHORT PREMOVE
         # =====================
         elif short_premove and not long_premove:
-        
-            # =====================
-            # PREMOVE QUALITY FILTER
-            # =====================
-        
-            ep = float(
-                sig.get("early_pressure_score") or 0
-            )
-        
-            acc = float(
-                sig.get("acc_score") or 0
-            )
-        
-            stage = str(
-                sig.get("stage") or ""
-            )
-        
+    
             # =====================
             # BLOCK WEAK PREMOVE
             # =====================
-        
+    
             if ep < 10:
-        
+    
                 print(
                     f"[BLOCK_PREMOVE_EP] "
                     f"{sig.get('symbol')} "
                     f"ep={ep}",
                     flush=True
                 )
-        
-                return None
-        
+    
+                short_premove = False
+    
             if acc < 3:
-        
+    
                 print(
                     f"[BLOCK_PREMOVE_ACC] "
                     f"{sig.get('symbol')} "
                     f"acc={acc}",
                     flush=True
                 )
-        
-                return None
-        
+    
+                short_premove = False
+    
             if "TRANSITION" in stage:
-        
+    
                 print(
                     f"[BLOCK_PREMOVE_TRANSITION] "
                     f"{sig.get('symbol')}",
                     flush=True
                 )
-        
-                return None
-        
+    
+                short_premove = False
+    
             # =====================
-            # VALID PREMOVE
+            # VALID SHORT PREMOVE
             # =====================
-        
-            entry = "PREMOVE_SHORT"
-        
-            stop = recent_high
-        
-            reason = "PREMOVE_SHORT"
+    
+            if short_premove:
+    
+                entry = "PREMOVE_SHORT"
+    
+                stop = recent_high
+    
+                reason = "PREMOVE_SHORT"
 
         # =====================
         # CONFLICT
@@ -12811,6 +12795,7 @@ if __name__ == "__main__":
                     ):
                     
                         sig["oi_change"] = prev
+                        sig["oi_available"] = True
                     
                         print(
                             f"[OI_CACHE] {instId} "
