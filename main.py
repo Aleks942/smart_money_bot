@@ -10823,6 +10823,13 @@ def msg_pre_swing(sig):
     story = build_smart_story(sig)
 
     story_text = "\n".join(story)
+    if oi is None:
+
+    oi_text = "нет данных"
+
+    else:
+    
+        oi_text = f"{oi}%"
     
     interpretation = build_market_interpretation(sig)
     return f"""
