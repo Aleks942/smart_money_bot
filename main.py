@@ -1088,6 +1088,18 @@ def telegram_firewall(sig, group="GENERAL"):
 PRE_SWING_STATE = {}
 
 # =========================
+# ALERT MEMORY
+# =========================
+
+LAST_ALERTS = {}
+
+# =========================
+# MISSED SETUP TRACKING
+# =========================
+
+MISSED_SETUPS_FILE = "missed_setups.jsonl"
+
+# =========================
 # MISSED SETUP TRACKING
 # =========================
 
