@@ -10886,6 +10886,9 @@ def msg_pre_swing(sig):
 🧠 Что происходит:
 {story_text}
 
+🧠 Вывод:
+{interpretation}
+
 ⚠️ Это ранняя swing-фаза ДО полноценного импульса.
 """.strip()
 
