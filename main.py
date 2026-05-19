@@ -11661,45 +11661,49 @@ if __name__ == "__main__":
                         "SWING",
                     ):
 
-                        # =====================
-                        # MESSAGE TYPE
-                        # =====================
+                    # =====================
+                    # MESSAGE TYPE
+                    # =====================
                     
-                        if group == "SWING":
+                    if group == "SWING":
                     
-                            msg = msg_swing(sig)
-                    
-                        elif group == "PRE_SWING":
-                    
-                            msg = msg_pre_swing(sig)
-                    
-                        else:
-                    
-                            msg = msg_scalp(sig)
-                    
-                        send_telegram(msg)
-                    
-                        scalp_sent_this_cycle += 1
-                    
-                        print(
-                            f"[SIGNAL_SENT] "
-                            f"{instId} "
-                            f"group={group}",
-                            flush=True
+                        msg = safe_msg_builder(
+                            globals().get("msg_swing"),
+                            sig,
+                            "SWING"
                         )
                     
-                        alerts.append(sig)
+                    elif group == "PRE_SWING":
                     
-                        mark_alert_sent(state, sig)
+                        msg = safe_msg_builder(
+                            globals().get("msg_pre_swing"),
+                            sig,
+                            "PRE_SWING"
+                        )
                     
-                        continue
-                except Exception as e:
-            
+                    else:
+                    
+                        msg = safe_msg_builder(
+                            globals().get("msg_scalp"),
+                            sig,
+                            "SCALP"
+                        )
+                    
+                    send_telegram(msg)
+                    
+                    scalp_sent_this_cycle += 1
+                    
                     print(
-                        f"[BUILD_SIGNAL_ERROR] {instId} {e}",
+                        f"[SIGNAL_SENT] "
+                        f"{instId} "
+                        f"group={group}",
                         flush=True
                     )
-            
+                    
+                    alerts.append(sig)
+                    
+                    mark_alert_sent(state, sig)
+                    
                     continue
             
                 # =====================
