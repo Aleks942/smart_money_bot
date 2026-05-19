@@ -12122,6 +12122,146 @@ def build_smart_story(sig):
         )
 
         return []
+
+# =========================
+# MARKET INTERPRETATION ENGINE
+# =========================
+def build_market_interpretation(sig):
+
+    try:
+
+        flags = set(sig.get("flags", []))
+
+        ep = float(
+            sig.get("early_pressure_score") or 0
+        )
+
+        acc = float(
+            sig.get("acc_score") or 0
+        )
+
+        oi = float(
+            sig.get("oi_change") or 0
+        )
+
+        thoughts = []
+
+        # =====================
+        # DIRECTION
+        # =====================
+
+        if (
+            "PRESSURE_UP" in flags
+            or "BULLISH_SHIFT" in flags
+        ):
+
+            thoughts.append(
+                "покупатели начинают усиливать контроль"
+            )
+
+        elif (
+            "PRESSURE_DOWN" in flags
+            or "BEARISH_SHIFT" in flags
+        ):
+
+            thoughts.append(
+                "продавцы начинают усиливать контроль"
+            )
+
+        # =====================
+        # MTF
+        # =====================
+
+        if "MTF_LONG_ALIGN" in flags:
+
+            thoughts.append(
+                "таймфреймы поддерживают LONG"
+            )
+
+        elif "MTF_SHORT_ALIGN" in flags:
+
+            thoughts.append(
+                "таймфреймы поддерживают SHORT"
+            )
+
+        else:
+
+            thoughts.append(
+                "между таймфреймами есть конфликт"
+            )
+
+        # =====================
+        # OI
+        # =====================
+
+        if oi >= 0.25:
+
+            thoughts.append(
+                "в рынок заходят новые деньги"
+            )
+
+        elif oi <= -0.25:
+
+            thoughts.append(
+                "участники начинают выходить из позиции"
+            )
+
+        # =====================
+        # ENERGY
+        # =====================
+
+        if ep >= 15:
+
+            thoughts.append(
+                "рынок выглядит сильно напряжённым перед импульсом"
+            )
+
+        elif ep >= 10:
+
+            thoughts.append(
+                "рынок постепенно готовится к движению"
+            )
+
+        # =====================
+        # ACCUMULATION
+        # =====================
+
+        if acc >= 4:
+
+            thoughts.append(
+                "идёт сильное накопление позиции"
+            )
+
+        elif acc >= 3:
+
+            thoughts.append(
+                "рынок удерживает накопление"
+            )
+
+        # =====================
+        # FINAL INTERPRETATION
+        # =====================
+
+        if not thoughts:
+
+            return (
+                "рынок пока не показывает "
+                "сильной подготовки к движению"
+            )
+
+        return ". ".join(thoughts) + "."
+
+    except Exception as e:
+
+        print(
+            f"[MARKET_INTERPRETATION_ERROR] {e}",
+            flush=True
+        )
+
+        return (
+            "не удалось построить "
+            "интерпретацию рынка"
+        )
                            
 # =========================
 # MAIN LOOP (STABLE VERSION)
