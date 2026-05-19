@@ -812,24 +812,115 @@ def analyze_signal_strength(sig):
         strength += 1
 
     # =========================
-    # OPEN INTEREST
+    # OPEN INTEREST ANALYSIS
     # =========================
-
+    
     if oi is not None:
+    
         try:
-
+    
             oi = float(oi)
-
-            if oi > 0.2:
+    
+            flags_set = set(flags)
+    
+            # =====================
+            # STRONG OI BUILDUP
+            # =====================
+    
+            if oi >= 3:
+    
+                reasons.append("Сильный рост OI")
+                strength += 4
+    
+                flags_set.add("OI_STRONG_BUILDUP")
+    
+            elif oi >= 1:
+    
                 reasons.append("Рост OI")
                 strength += 2
-
-            elif oi < -0.2:
+    
+                flags_set.add("OI_BUILDUP")
+    
+            # =====================
+            # OI DROP
+            # =====================
+    
+            elif oi <= -3:
+    
+                reasons.append("Сильное падение OI")
+                strength -= 3
+    
+                flags_set.add("OI_STRONG_DROP")
+    
+            elif oi <= -1:
+    
                 reasons.append("Падение OI")
                 strength -= 1
-
-        except:
-            pass
+    
+                flags_set.add("OI_DROP")
+    
+            # =====================
+            # LONG CONFIRMATION
+            # =====================
+    
+            if (
+                oi > 0
+                and (
+                    "PRESSURE_UP" in flags_set
+                    or "BREAKOUT_CONFIRM_UP" in flags_set
+                )
+            ):
+    
+                strength += 2
+    
+                reasons.append("LONG подтверждается OI")
+    
+                flags_set.add("OI_LONG_CONFIRM")
+    
+            # =====================
+            # SHORT CONFIRMATION
+            # =====================
+    
+            if (
+                oi > 0
+                and (
+                    "PRESSURE_DOWN" in flags_set
+                    or "BREAKOUT_CONFIRM_DOWN" in flags_set
+                )
+            ):
+    
+                strength += 2
+    
+                reasons.append("SHORT подтверждается OI")
+    
+                flags_set.add("OI_SHORT_CONFIRM")
+    
+            # =====================
+            # EXHAUSTION
+            # =====================
+    
+            if (
+                oi < 0
+                and (
+                    "BREAKOUT_CONFIRM_UP" in flags_set
+                    or "BREAKOUT_CONFIRM_DOWN" in flags_set
+                )
+            ):
+    
+                reasons.append("Движение без поддержки OI")
+    
+                strength -= 2
+    
+                flags_set.add("OI_EXHAUSTION")
+    
+            flags = list(flags_set)
+    
+        except Exception as e:
+    
+            print(
+                f"[OI_ANALYSIS_ERROR] {e}",
+                flush=True
+            )
 
     # =========================
     # RAW SCORE BONUS
