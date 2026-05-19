@@ -9341,15 +9341,15 @@ def build_signal(instId):
             return signal
     
         else:
-    
+
             print(
                 f"[PREMOVE_BLOCK] {instId} "
                 f"score={premove_score} "
                 f"ep={ep}",
                 flush=True
             )
-    
-            return {}
+        
+            signal["premove_confirmed"] = False
     # =========================
     # STRUCTURE PASS
     # =========================
