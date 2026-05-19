@@ -10704,6 +10704,13 @@ def msg_scalp(sig):
 # =========================
 def msg_pre_swing(sig):
 
+    print(
+        f"[PRE_SWING_DEBUG] "
+        f"oi={sig.get('oi_change')} "
+        f"flags={sig.get('flags')}",
+        flush=True
+    )
+
     symbol = sig.get("symbol") or sig.get("instId") or "UNKNOWN"
 
     side = (
