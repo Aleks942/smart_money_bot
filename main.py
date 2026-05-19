@@ -11763,6 +11763,97 @@ def safe_msg_builder(builder, sig, fallback_name="SIGNAL"):
     except:
 
         return f"⚠️ {fallback_name}"
+
+# =========================
+# ELITE PRE-SWING FILTER
+# =========================
+def is_elite_pre_swing(sig):
+
+    try:
+
+        flags = set(sig.get("flags", []))
+
+        score = float(sig.get("score") or 0)
+        ep = float(sig.get("early_pressure_score") or 0)
+        acc = float(sig.get("acc_score") or 0)
+
+        has_mtf = (
+            "MTF_LONG_ALIGN" in flags
+            or "MTF_SHORT_ALIGN" in flags
+        )
+
+        has_pressure = (
+            "PRESSURE_UP" in flags
+            or "PRESSURE_DOWN" in flags
+        )
+
+        has_launch = (
+            "LAUNCH_PROXIMITY_UP" in flags
+            or "LAUNCH_PROXIMITY_DOWN" in flags
+            or "EXPLOSION_READY_UP" in flags
+            or "EXPLOSION_READY_DOWN" in flags
+            or "EARLY_LAUNCH_UP" in flags
+            or "EARLY_LAUNCH_DOWN" in flags
+        )
+
+        has_shift = (
+            "BULLISH_SHIFT" in flags
+            or "BEARISH_SHIFT" in flags
+        )
+
+        has_acceleration = (
+            "ACCELERATION_UP" in flags
+            or "ACCELERATION_DOWN" in flags
+        )
+
+        has_absorption = (
+            "BUYER_ABSORPTION" in flags
+            or "SELLER_ABSORPTION" in flags
+        )
+
+        # =====================
+        # HARD MINIMUM
+        # =====================
+
+        if score < 16:
+            return False, "elite_low_score"
+
+        if ep < 10:
+            return False, "elite_low_ep"
+
+        if acc < 3:
+            return False, "elite_low_acc"
+
+        if not has_mtf:
+            return False, "elite_no_mtf"
+
+        if not has_pressure:
+            return False, "elite_no_pressure"
+
+        # =====================
+        # QUALITY CONFIRMATION
+        # =====================
+
+        if not (
+            has_launch
+            or has_acceleration
+            or has_shift
+        ):
+            return False, "elite_no_launch_or_shift"
+
+        if not has_absorption:
+            return False, "elite_no_absorption"
+
+        return True, "elite_pre_swing"
+
+    except Exception as e:
+
+        print(
+            f"[ELITE_PRE_SWING_ERROR] {e}",
+            flush=True
+        )
+
+        return False, "elite_error"
                            
 # =========================
 # MAIN LOOP (STABLE VERSION)
