@@ -9609,7 +9609,7 @@ def build_signal(instId):
     # =========================
     
     elif (
-    
+
         signal.get("scalp_candidate")
     
         and (
@@ -9628,8 +9628,31 @@ def build_signal(instId):
             flush=True
         )
     
-        ok = True
+        # =========================
+        # TRANSITION GROUP ASSIGN
+        # =========================
     
+        signal["sendable"] = True
+    
+        if (
+            score >= 18
+            and ep >= 8
+        ):
+    
+            signal["signal_group"] = "PRE_SWING"
+    
+        else:
+    
+            signal["signal_group"] = "SCALP"
+    
+        print(
+            f"[TRANSITION_GROUP] "
+            f"{instId} "
+            f"group={signal.get('signal_group')}",
+            flush=True
+        )
+    
+        return signal
     # =========================
     # FINAL FILTER
     # =========================
