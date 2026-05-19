@@ -9610,7 +9610,7 @@ def build_signal(instId):
     
     elif (
 
-        signal.get("scalp_candidate")
+        signal_mode == "TRANSITION"
     
         and (
             "BULLISH_SHIFT" in flags
