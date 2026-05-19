@@ -12067,7 +12067,7 @@ def get_signal_level(sig):
         # VERY STRONG
         # =====================
 
-        if elite_score >= 11:
+        if elite_score >= 15:
 
             return (
                 "🟢",
@@ -12078,7 +12078,7 @@ def get_signal_level(sig):
         # STRONG
         # =====================
 
-        if elite_score >= 7:
+        if elite_score >= 8:
 
             return (
                 "🟡",
