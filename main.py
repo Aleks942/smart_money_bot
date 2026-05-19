@@ -11554,46 +11554,46 @@ if __name__ == "__main__":
                         "SWING",
                     ):
 
-                    # =====================
-                    # MESSAGE TYPE
-                    # =====================
-                
-                    if group == "SWING":
-                
-                        msg = msg_swing(sig)
-                
-                    elif group == "PRE_SWING":
-                
-                        msg = msg_pre_swing(sig)
-                
-                    else:
-                
-                        msg = msg_scalp(sig)
-                
-                    send_telegram(msg)
-                
-                    scalp_sent_this_cycle += 1
-                
+                        # =====================
+                        # MESSAGE TYPE
+                        # =====================
+                    
+                        if group == "SWING":
+                    
+                            msg = msg_swing(sig)
+                    
+                        elif group == "PRE_SWING":
+                    
+                            msg = msg_pre_swing(sig)
+                    
+                        else:
+                    
+                            msg = msg_scalp(sig)
+                    
+                        send_telegram(msg)
+                    
+                        scalp_sent_this_cycle += 1
+                    
+                        print(
+                            f"[SIGNAL_SENT] "
+                            f"{instId} "
+                            f"group={group}",
+                            flush=True
+                        )
+                    
+                        alerts.append(sig)
+                    
+                        mark_alert_sent(state, sig)
+                    
+                        continue
+                except Exception as e:
+            
                     print(
-                        f"[SIGNAL_SENT] "
-                        f"{instId} "
-                        f"group={group}",
+                        f"[BUILD_SIGNAL_ERROR] {instId} {e}",
                         flush=True
                     )
-                
-                    alerts.append(sig)
-                
-                    mark_alert_sent(state, sig)
-                
+            
                     continue
-            except Exception as e:
-        
-                print(
-                    f"[BUILD_SIGNAL_ERROR] {instId} {e}",
-                    flush=True
-                )
-        
-                continue
             
                 # =====================
                 # LOCAL SIGNAL DATA
