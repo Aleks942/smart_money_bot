@@ -11779,7 +11779,22 @@ def is_elite_pre_swing(sig):
             or has_acceleration
             or has_shift
         ):
-            return False, "elite_no_launch_or_shift"
+        
+            # =====================
+            # STRONG ACC EXCEPTION
+            # =====================
+        
+            if ep >= 15 and acc >= 3:
+        
+                print(
+                    f"[ELITE_ACC_EXCEPTION] "
+                    f"{sig.get('symbol')}",
+                    flush=True
+                )
+        
+            else:
+        
+                return False, "elite_no_launch_or_shift"
 
         if not has_absorption:
             return False, "elite_no_absorption"
