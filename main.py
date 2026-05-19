@@ -12230,17 +12230,6 @@ if __name__ == "__main__":
                 #     )
             
             
-                # =====================
-                # SCALP MESSAGE
-                # =====================
-                scalp_msg = msg_scalp(sig)
-
-                send_telegram(scalp_msg)
-
-                print(
-                    f"[PREMOVE_SENT] {instId}",
-                    flush=True
-                )   
             
             # =====================
             # DEFINE SETUP TYPE
