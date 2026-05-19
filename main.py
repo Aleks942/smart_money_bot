@@ -12730,6 +12730,13 @@ if __name__ == "__main__":
                     )
                     
                     new_oi = get_open_interest_change(instId)
+                    print(
+                        f"[OI_DEBUG_RAW] "
+                        f"{instId} "
+                        f"new_oi={new_oi} "
+                        f"type={type(new_oi)}",
+                        flush=True
+                    )
 
                     # =====================
                     # OI NORMALIZATION
