@@ -12312,35 +12312,127 @@ def build_market_interpretation(sig):
                 "рынок удерживает накопление"
             )
 
+# =====================
+# FINAL INTERPRETATION
+# =====================
+
+if not thoughts:
+
+    return (
+        "рынок пока не показывает "
+        "сильной подготовки к движению"
+    )
+
+return ". ".join(thoughts) + "."
+
+except Exception as e:
+
+    print(
+        f"[MARKET_INTERPRETATION_ERROR] {e}",
+        flush=True
+    )
+
+    return (
+        "не удалось построить "
+        "интерпретацию рынка"
+    )
+
+
+# =========================
+# SIGNAL REPEAT FILTER
+# =========================
+LAST_SIGNAL_STATE = {}
+
+def is_repeat_signal(sig):
+
+    try:
+
+        symbol = (
+            sig.get("symbol")
+            or sig.get("instId")
+            or "UNKNOWN"
+        )
+
+        side = (
+            sig.get("direction")
+            or sig.get("side")
+            or "NEUTRAL"
+        )
+
+        stage = sig.get("stage", "")
+
+        score = float(
+            sig.get("score") or 0
+        )
+
+        old = LAST_SIGNAL_STATE.get(symbol)
+
+        if not old:
+
+            LAST_SIGNAL_STATE[symbol] = {
+                "side": side,
+                "stage": stage,
+                "score": score,
+            }
+
+            return False
+
+        same_side = (
+            old.get("side") == side
+        )
+
+        same_stage = (
+            old.get("stage") == stage
+        )
+
+        score_diff = abs(
+            old.get("score", 0) - score
+        )
+
         # =====================
-        # FINAL INTERPRETATION
+        # REPEAT DETECTED
         # =====================
 
-        if not thoughts:
+        if (
+            same_side
+            and same_stage
+            and score_diff <= 2
+        ):
 
-            return (
-                "рынок пока не показывает "
-                "сильной подготовки к движению"
+            print(
+                f"[REPEAT_SIGNAL_BLOCK] "
+                f"{symbol}",
+                flush=True
             )
 
-        return ". ".join(thoughts) + "."
+            return True
+
+        # =====================
+        # UPDATE STATE
+        # =====================
+
+        LAST_SIGNAL_STATE[symbol] = {
+            "side": side,
+            "stage": stage,
+            "score": score,
+        }
+
+        return False
 
     except Exception as e:
 
         print(
-            f"[MARKET_INTERPRETATION_ERROR] {e}",
+            f"[REPEAT_FILTER_ERROR] {e}",
             flush=True
         )
 
-        return (
-            "не удалось построить "
-            "интерпретацию рынка"
-        )
-                           
+        return False
+
+
 # =========================
 # MAIN LOOP (STABLE VERSION)
 # =========================
-if __name__ == "__main__":
+if __name__ == "__main__": 
 
     init_db()
 
