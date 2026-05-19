@@ -11852,6 +11852,33 @@ if __name__ == "__main__":
                     )
                     
                     new_oi = get_open_interest_change(instId)
+
+                    # =====================
+                    # OI NORMALIZATION
+                    # =====================
+                    
+                    if new_oi is not None:
+                    
+                        try:
+                    
+                            new_oi = float(new_oi)
+                    
+                            # =====================
+                            # OI NOISE FILTER
+                            # =====================
+                    
+                            if abs(new_oi) < 0.3:
+                    
+                                new_oi = 0
+                    
+                        except Exception as e:
+                    
+                            print(
+                                f"[OI_PARSE_ERROR] {instId} {e}",
+                                flush=True
+                            )
+                    
+                            new_oi = None
                     
                     state["symbols"].setdefault(instId, {})
                     
