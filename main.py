@@ -11986,6 +11986,58 @@ def calc_elite_score(sig):
         return 0, []
 
 # =========================
+# SIGNAL LEVEL ENGINE
+# =========================
+def get_signal_level(sig):
+
+    try:
+
+        elite_score, _ = calc_elite_score(sig)
+
+        # =====================
+        # VERY STRONG
+        # =====================
+
+        if elite_score >= 11:
+
+            return (
+                "🟢",
+                "ОЧЕНЬ СИЛЬНЫЙ СИГНАЛ"
+            )
+
+        # =====================
+        # STRONG
+        # =====================
+
+        if elite_score >= 7:
+
+            return (
+                "🟡",
+                "СИЛЬНЫЙ СИГНАЛ"
+            )
+
+        # =====================
+        # EARLY / WEAK
+        # =====================
+
+        return (
+            "🔴",
+            "РАННИЙ СИГНАЛ"
+        )
+
+    except Exception as e:
+
+        print(
+            f"[SIGNAL_LEVEL_ERROR] {e}",
+            flush=True
+        )
+
+        return (
+            "⚪",
+            "СИГНАЛ"
+        )
+
+# =========================
 # SMART STORY ENGINE
 # =========================
 def build_smart_story(sig):
