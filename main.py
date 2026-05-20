@@ -242,6 +242,15 @@ def is_scalp_candidate(signal):
 
     try:
 
+        if not signal or not isinstance(signal, dict):
+
+            print(
+                "[SCALP_SIGNAL_NONE]",
+                flush=True
+            )
+
+            return False, "signal_none"
+
         flags = set(signal.get("flags", []))
 
         score = float(signal.get("score") or 0)
@@ -255,6 +264,7 @@ def is_scalp_candidate(signal):
         )
 
         mode = classify_signal_mode(signal)
+
 
         # =========================
         # HARD FILTER
