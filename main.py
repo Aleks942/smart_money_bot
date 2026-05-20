@@ -9376,6 +9376,18 @@ def build_signal(instId):
     }
 
     ep_data = detect_early_pressure(signal)
+
+    if not ep_data or not isinstance(ep_data, dict):
+    
+        print(
+            f"[EP_DATA_INVALID] "
+            f"{instId} "
+            f"ep_data={ep_data}",
+            flush=True
+        )
+    
+        ep_data = {}
+    
     signal.update(ep_data)
 
     # =====================
