@@ -10898,6 +10898,14 @@ def stop_risk_text(sig):
         return None
     
 def msg_swing(sig):
+    if not sig or not isinstance(sig, dict):
+
+        print(
+            "[MSG_SIG_NONE]",
+            flush=True
+        )
+    
+        return None
     side = str(sig.get("side", "")).upper()
 
     if side == "LONG":
