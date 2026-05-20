@@ -2471,11 +2471,14 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         # LONG дивергенция (плохо для лонга)
 
         premove_bypass = bool(sig.get("premove_bypass"))
-        side = str(sig.get("side") or "").upper()
-        
+        side = str(
+            sig.get("direction_code")
+            or sig.get("side")
+            or ""
+        ).upper()
         if (
             not premove_bypass
-            and side in ("LONG", "BUY")
+            side in ("LONG", "BUY", "UP")
         ):
             if prev_price and prev_rsi and rsi:
                 if price_now > prev_price and rsi < prev_rsi:
@@ -2484,7 +2487,7 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         
     
         # SHORT дивергенция (плохо для шорта)
-        if side in ("SHORT", "SELL"):
+        if side in ("SHORT", "DOWN", "SELL"):
             if prev_price and prev_rsi and rsi:
                 if price_now < prev_price and rsi > prev_rsi:
                     print(f"[DIV_SKIP] {instId} bullish divergence", flush=True)
