@@ -2036,7 +2036,7 @@ def analyze_m15_trigger(df_m15: pd.DataFrame, h1_setup: dict, h4_ctx: dict) -> d
         # =====================
         # LONG
         # =====================
-        if side == "LONG":
+        if side in ["LONG", "UP", "BUY"]:
             in_zone = (last_close >= zone_low - zone_buf) and (last_close <= zone_high + zone_buf)
             above_ema = last_close >= last_ema20
             above_vwap = last_close >= last_vwap
