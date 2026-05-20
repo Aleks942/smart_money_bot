@@ -11088,10 +11088,23 @@ def choose_detail_message(sig):
 # =========================
 def msg_scalp(sig):
 
+    if not sig or not isinstance(sig, dict):
+
+        print(
+            "[MSG_SCALP_SIG_NONE]",
+            flush=True
+        )
+
+        return None
+
     side = sig.get("direction") or "UNKNOWN"
+
     score = sig.get("score", 0)
+
     price = sig.get("price")
+
     stage = sig.get("stage", "UNKNOWN")
+
     entry = sig.get("entry", "UNKNOWN")
 
     flags = set(sig.get("flags", []))
@@ -11100,8 +11113,8 @@ def msg_scalp(sig):
 
     story = []
 
-    
     story_text = "\n".join(story)
+
     interpretation = build_market_interpretation(sig)
 
     msg = f"""
