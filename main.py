@@ -10915,7 +10915,7 @@ def msg_swing(sig):
         or sig.get("side")
         or ""
     ).upper()
-    if side == "LONG":
+    if side in ["LONG", "UP", "BUY"]:
         icon = "🟢"
         side_ru = "ЛОНГ / вверх"
     else:
