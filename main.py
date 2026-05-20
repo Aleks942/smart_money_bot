@@ -1238,6 +1238,9 @@ ENABLE_SCALP_ALERTS = (os.getenv("ENABLE_SCALP_ALERTS") or "0") == "1"
 OI_GOOD = float(os.getenv("OI_GOOD") or "0.15")
 OI_STRONG = float(os.getenv("OI_STRONG") or "0.30")
 OI_BAD = float(os.getenv("OI_BAD") or "-0.10")
+DEBUG_VERBOSE = (
+    os.getenv("DEBUG_VERBOSE") or "0"
+) == "1"
 
 
 # =========================
@@ -8598,12 +8601,13 @@ def build_signal(instId):
     
         score += min(cs * 0.5, 2)
     
-        print(
-            f"[COMP_PRO_5M] {instId} "
-            f"score={cs} "
-            f"reasons={comp_pro_5m.get('reasons')}",
-            flush=True
-        )
+        if DEBUG_VERBOSE:
+
+            print(
+                f"[COMP_PRO_5M] {instId} "
+                f"score={cs} "
+                f"reasons={comp_pro_5m.get('reasons')}"
+            )
     
     # 15M
     if comp_pro_15m.get("active"):
@@ -8616,12 +8620,13 @@ def build_signal(instId):
     
         score += min(cs * 0.5, 2)
     
-        print(
-            f"[COMP_PRO_15M] {instId} "
-            f"score={cs} "
-            f"reasons={comp_pro_15m.get('reasons')}",
-            flush=True
-        )
+        if DEBUG_VERBOSE:
+
+            print(
+                f"[COMP_PRO_15M] {instId} "
+                f"score={cs} "
+                f"reasons={comp_pro_15m.get('reasons')}"
+            )
     
     # =========================
     # ENERGY BUILDUP
@@ -8633,11 +8638,12 @@ def build_signal(instId):
     
         score += 1
     
-        print(
-            f"[ENERGY_BUILDUP] {instId} "
-            f"compression_score={compression_score}",
-            flush=True
-        )
+        if DEBUG_VERBOSE:
+
+            print(
+                f"[ENERGY_BUILDUP] {instId} "
+                f"compression_score={compression_score}"
+            )
 
     # =========================
     # BASIC STRUCTURE
