@@ -9458,11 +9458,21 @@ def build_signal(instId):
     # =========================
     # FINAL QUALITY FILTER
     # =========================
+    
+    if not signal or not isinstance(signal, dict):
+    
+        print(
+            f"[SIGNAL_NONE_AFTER_BUILD] {instId}",
+            flush=True
+        )
+    
+        return None
+    
     ok, reason = signal_quality_filter(signal)
-
+    
     signal["filter_pass"] = ok
     signal["filter_reason"] = reason
-
+    
     print(
         f"[FILTER_DEBUG] {instId} "
         f"score={signal.get('score')} "
