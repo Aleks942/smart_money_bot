@@ -9809,40 +9809,63 @@ def build_signal(instId):
     acc = float(
         signal.get("acc_score") or 0
     )
+    
     # =====================
     # HARD BLOCK
     # =====================
-    
+
     if "TRANSITION" in stage:
-    
+
+        elite_transition_ok = (
+
+            score >= 28
+
+            and (
+                "EXPLOSION_READY_UP" in flags
+                or "EXPLOSION_READY_DOWN" in flags
+                or "LAUNCH_PROXIMITY_UP" in flags
+                or "LAUNCH_PROXIMITY_DOWN" in flags
+            )
+
+            and signal.get("retest_ok") is True
+        )
+
+        if not elite_transition_ok:
+
+            print(
+                f"[OVERRIDE_BLOCK_TRANSITION] "
+                f"{symbol}",
+                flush=True
+            )
+
+            return False
+
         print(
-            f"[OVERRIDE_BLOCK_TRANSITION] "
+            f"[ELITE_TRANSITION_PASS] "
             f"{symbol}",
             flush=True
         )
-    
-        return False
-    
+
     if ep < 10:
-    
+
         print(
             f"[OVERRIDE_BLOCK_EP] "
             f"{symbol} "
             f"ep={ep}",
             flush=True
         )
-    
+
         return False
-    
+
     if acc < 3:
-    
+
         print(
             f"[OVERRIDE_BLOCK_ACC] "
             f"{symbol} "
             f"acc={acc}",
             flush=True
         )
-    
+
         return False
     
     # =====================
