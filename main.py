@@ -9505,16 +9505,26 @@ def build_signal(instId):
     # PREMOVE OVERRIDE
     # =====================
     
+    if not signal or not isinstance(signal, dict):
+    
+        print(
+            f"[OVERRIDE_SIGNAL_NONE] "
+            f"{instId}",
+            flush=True
+        )
+    
+        return None
+    
     stage = str(
-        sig.get("stage") or ""
+        signal.get("stage") or ""
     )
     
     ep = float(
-        sig.get("early_pressure_score") or 0
+        signal.get("early_pressure_score") or 0
     )
     
     acc = float(
-        sig.get("acc_score") or 0
+        signal.get("acc_score") or 0
     )
     
     # =====================
