@@ -9468,7 +9468,24 @@ def build_signal(instId):
     
         return None
     
-    ok, reason = signal_quality_filter(signal)
+    filter_result = signal_quality_filter(signal)
+
+    if (
+        not filter_result
+        or not isinstance(filter_result, tuple)
+        or len(filter_result) != 2
+    ):
+    
+        print(
+            f"[FILTER_RESULT_INVALID] "
+            f"{instId} "
+            f"result={filter_result}",
+            flush=True
+        )
+    
+        return None
+    
+    ok, reason = filter_result
     
     signal["filter_pass"] = ok
     signal["filter_reason"] = reason
