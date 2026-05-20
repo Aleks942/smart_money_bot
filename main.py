@@ -9517,8 +9517,6 @@ def build_signal(instId):
         "price": price,
         "score": score,
 
-        "score": score,
-
         "setup_rank": setup_rank,
         "rank_score": rank_score,
         "rank_reasons": rank_reasons,
@@ -9580,6 +9578,11 @@ def build_signal(instId):
         ep_data = {}
     
     signal.update(ep_data)
+    
+    signal.setdefault(
+        "early_pressure_score",
+        0
+    )
 
     # =====================
     # SIGNAL MODE
