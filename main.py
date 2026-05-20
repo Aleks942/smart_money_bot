@@ -11145,6 +11145,14 @@ def msg_scalp(sig):
 # PRE SWING MESSAGE
 # =========================
 def msg_pre_swing(sig):
+    if not sig or not isinstance(sig, dict):
+
+    print(
+        "[MSG_SIG_NONE]",
+        flush=True
+    )
+
+    return None
 
     print(
         f"[PRE_SWING_DEBUG] "
