@@ -5796,7 +5796,7 @@ def decide_entry(stage, flags, price, c5, sig=None):
             # BLOCK WEAK PREMOVE
             # =====================
     
-            if ep < 10:
+            if ep < 6:
     
                 print(
                     f"[BLOCK_PREMOVE_EP] "
@@ -5807,7 +5807,7 @@ def decide_entry(stage, flags, price, c5, sig=None):
     
                 long_premove = False
     
-            if acc < 3:
+            if acc < 2:
     
                 print(
                     f"[BLOCK_PREMOVE_ACC] "
