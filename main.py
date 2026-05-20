@@ -9478,82 +9478,82 @@ def build_signal(instId):
     # PREMOVE OVERRIDE
     # =====================
     
-    if signal_mode == "PREMOVE":
+    stage = str(
+        sig.get("stage") or ""
+    )
     
-        premove_score = float(signal.get("score") or 0)
+    ep = float(
+        sig.get("early_pressure_score") or 0
+    )
     
-        ep = float(
-            signal.get("early_pressure_score") or 0
+    acc = float(
+        sig.get("acc_score") or 0
+    )
+    
+    # =====================
+    # HARD BLOCK
+    # =====================
+    
+    if "TRANSITION" in stage:
+    
+        print(
+            f"[OVERRIDE_BLOCK_TRANSITION] "
+            f"{sig.get('symbol')}",
+            flush=True
         )
     
-        flags = set(signal.get("flags", []))
+        premove_override = False
     
-        has_acceleration = (
-            "ACCELERATION_UP" in flags
-            or "ACCELERATION_DOWN" in flags
+    elif ep < 10:
+    
+        print(
+            f"[OVERRIDE_BLOCK_EP] "
+            f"{sig.get('symbol')} "
+            f"ep={ep}",
+            flush=True
         )
     
-        has_absorption = (
-            "BUYER_ABSORPTION" in flags
-            or "SELLER_ABSORPTION" in flags
+        premove_override = False
+    
+    elif acc < 3:
+    
+        print(
+            f"[OVERRIDE_BLOCK_ACC] "
+            f"{sig.get('symbol')} "
+            f"acc={acc}",
+            flush=True
         )
     
-        has_launch = (
-            "LAUNCH_PROXIMITY_UP" in flags
-            or "LAUNCH_PROXIMITY_DOWN" in flags
-            or "EXPLOSION_READY_UP" in flags
+        premove_override = False
+    
+    # =====================
+    # ALLOW OVERRIDE
+    # =====================
+    
+    elif (
+        score >= 28
+        and (
+            "EXPLOSION_READY_UP" in flags
             or "EXPLOSION_READY_DOWN" in flags
+            or "LAUNCH_PROXIMITY_UP" in flags
+            or "LAUNCH_PROXIMITY_DOWN" in flags
+        )
+    ):
+    
+        premove_override = True
+    
+        print(
+            f"[PREMOVE_OVERRIDE_OK] "
+            f"{sig.get('symbol')} "
+            f"score={score} "
+            f"ep={ep} "
+            f"acc={acc}",
+            flush=True
         )
     
-        if (
-            premove_score >= 11
-            and (
-                ep >= 7
-                or (
-                    has_launch
-            and premove_score >= 20
-                )
-            )
-            and (
-                has_acceleration
-                or has_launch
-                or ep >= 8
-            )
-            and (
-                has_absorption
-                or ep >= 6
-            )
-        ):
-            print(
-                f"[PREMOVE_OVERRIDE] {instId} "
-                f"score={premove_score} ep={ep}",
-                flush=True
-            )
-            signal["signal_group"] = "PRE_SWING"
-            signal["premove_confirmed"] = True
-            signal["sendable"] = True
-            signal["scalp_candidate"] = False
-            
-            
-            PRE_SWING_STATE[instId] = {
-                "time": time.time(),
-                "side": signal.get("side"),
-                "score": signal.get("score"),
-            }
-            
-            ok = True
-            return signal
-    
-        else:
+    else:
 
-            print(
-                f"[PREMOVE_BLOCK] {instId} "
-                f"score={premove_score} "
-                f"ep={ep}",
-                flush=True
-            )
-        
-            signal["premove_confirmed"] = False
+        premove_override = False
     # =========================
     # STRUCTURE PASS
     # =========================
