@@ -10872,7 +10872,11 @@ def stop_risk_text(sig):
     try:
         entry = sig.get("entry_price")
         stop = sig.get("stop")
-        side = str(sig.get("side", "")).upper()
+        side = str(
+            sig.get("direction_code")
+            or sig.get("side")
+            or ""
+        ).upper()
 
         if entry is None or stop is None:
             return None
@@ -10906,8 +10910,11 @@ def msg_swing(sig):
         )
     
         return None
-    side = str(sig.get("side", "")).upper()
-
+    side = str(
+        sig.get("direction_code")
+        or sig.get("side")
+        or ""
+    ).upper()
     if side == "LONG":
         icon = "🟢"
         side_ru = "ЛОНГ / вверх"
