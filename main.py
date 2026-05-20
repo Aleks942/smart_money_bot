@@ -5653,7 +5653,7 @@ def smart_money_stage(score, flags):
 # =========================
 # ENTRY
 # =========================
-def decide_entry(stage, flags, price, c5):
+def decide_entry(stage, flags, price, c5, sig=None):
 
     last = price
 
@@ -5770,7 +5770,8 @@ def decide_entry(stage, flags, price, c5):
                 )
             )
         )
-    
+        if not sig:
+            sig = {}
         ep = float(
             sig.get("early_pressure_score") or 0
         )
