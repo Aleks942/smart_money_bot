@@ -9539,9 +9539,9 @@ def build_signal(instId):
             flush=True
         )
     
-        premove_override = False
+        return False
     
-    elif ep < 10:
+    if ep < 10:
     
         print(
             f"[OVERRIDE_BLOCK_EP] "
@@ -9550,9 +9550,9 @@ def build_signal(instId):
             flush=True
         )
     
-        premove_override = False
+        return False
     
-    elif acc < 3:
+    if acc < 3:
     
         print(
             f"[OVERRIDE_BLOCK_ACC] "
@@ -9561,13 +9561,13 @@ def build_signal(instId):
             flush=True
         )
     
-        premove_override = False
+        return False
     
     # =====================
     # ALLOW OVERRIDE
     # =====================
     
-    elif (
+    if (
         score >= 28
         and (
             "EXPLOSION_READY_UP" in flags
@@ -9576,8 +9576,6 @@ def build_signal(instId):
             or "LAUNCH_PROXIMITY_DOWN" in flags
         )
     ):
-    
-        premove_override = True
     
         print(
             f"[PREMOVE_OVERRIDE_OK] "
@@ -9588,8 +9586,10 @@ def build_signal(instId):
             flush=True
         )
     
+        premove_override = True
+    
     else:
-
+    
         premove_override = False
     # =========================
     # STRUCTURE PASS
