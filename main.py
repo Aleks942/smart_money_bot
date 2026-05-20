@@ -13215,9 +13215,17 @@ if __name__ == "__main__":
                         continue
                 
                 except Exception as e:
+
+                    import traceback
                 
                     print(
-                        f"[BUILD_SIGNAL_ERROR] {instId} {e}",
+                        traceback.format_exc(),
+                        flush=True
+                    )
+                
+                    print(
+                        f"[BUILD_SIGNAL_ERROR] "
+                        f"{instId} {e}",
                         flush=True
                     )
                 
