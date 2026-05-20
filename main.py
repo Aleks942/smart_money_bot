@@ -7982,6 +7982,76 @@ def detect_late_entry(sig):
         )
 
         return False, "late_entry_error"
+
+# =========================
+# RETEST DETECTOR
+# =========================
+def detect_retest_entry(sig):
+
+    try:
+
+        price = float(sig.get("price") or 0)
+
+        ema20 = float(sig.get("ema20") or 0)
+
+        stage = str(sig.get("stage") or "")
+
+        flags = set(sig.get("flags", []))
+
+        if price <= 0 or ema20 <= 0:
+
+            return False, "no_price"
+
+        distance_pct = (
+            abs(price - ema20) / ema20 * 100
+        )
+
+        # =====================
+        # LONG RETEST
+        # =====================
+
+        if (
+            (
+                "PRESSURE_UP" in flags
+                or "BULLISH_SHIFT" in flags
+            )
+            and distance_pct <= 1.2
+            and (
+                "ACCUMULATION" in stage
+                or "TRANSITION" in stage
+            )
+        ):
+
+            return True, "long_retest_ready"
+
+        # =====================
+        # SHORT RETEST
+        # =====================
+
+        if (
+            (
+                "PRESSURE_DOWN" in flags
+                or "BEARISH_SHIFT" in flags
+            )
+            and distance_pct <= 1.2
+            and (
+                "ACCUMULATION" in stage
+                or "TRANSITION" in stage
+            )
+        ):
+
+            return True, "short_retest_ready"
+
+        return False, "no_retest"
+
+    except Exception as e:
+
+        print(
+            f"[RETEST_ERROR] {e}",
+            flush=True
+        )
+
+        return False, "retest_error"
 # =========================
 # MAIN SIGNAL BUILDER
 # =========================
