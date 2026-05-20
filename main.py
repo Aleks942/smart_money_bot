@@ -7944,6 +7944,44 @@ def detect_entry_quality(flags):
         )
 
         return None
+
+# =========================
+# LATE ENTRY FILTER
+# =========================
+def detect_late_entry(sig):
+
+    try:
+
+        price = float(sig.get("price") or 0)
+        ema20 = float(sig.get("ema20") or 0)
+        stage = str(sig.get("stage") or "")
+        entry = str(sig.get("entry") or "")
+
+        if price <= 0 or ema20 <= 0:
+            return False, "no_ema_data"
+
+        distance_pct = abs(price - ema20) / ema20 * 100
+
+        if (
+            distance_pct >= 2.5
+            and (
+                "EXPANSION" in stage
+                or "CONFIRM" in entry
+            )
+        ):
+
+            return True, f"late_entry_distance_{round(distance_pct, 2)}%"
+
+        return False, f"entry_ok_distance_{round(distance_pct, 2)}%"
+
+    except Exception as e:
+
+        print(
+            f"[LATE_ENTRY_ERROR] {e}",
+            flush=True
+        )
+
+        return False, "late_entry_error"
 # =========================
 # MAIN SIGNAL BUILDER
 # =========================
