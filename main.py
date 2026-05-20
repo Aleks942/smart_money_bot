@@ -12429,6 +12429,15 @@ def build_market_interpretation(sig):
 
     try:
 
+        if not sig or not isinstance(sig, dict):
+
+            print(
+                "[INTERPRETATION_SIG_NONE]",
+                flush=True
+            )
+
+            return "нет данных"
+
         flags = set(sig.get("flags", []))
 
         ep = float(
@@ -12540,23 +12549,23 @@ def build_market_interpretation(sig):
         # =====================
         # FINAL INTERPRETATION
         # =====================
-        
+
         if not thoughts:
-        
+
             return (
                 "рынок пока не показывает "
                 "сильной подготовки к движению"
             )
-        
+
         return ". ".join(thoughts) + "."
-        
+
     except Exception as e:
-        
+
         print(
             f"[MARKET_INTERPRETATION_ERROR] {e}",
             flush=True
         )
-        
+
         return (
             "не удалось построить "
             "интерпретацию рынка"
