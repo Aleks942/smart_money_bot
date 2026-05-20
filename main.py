@@ -12692,18 +12692,20 @@ if __name__ == "__main__":
                 print(f"[LOOP] {instId} start")
             
                 time.sleep(0.55)
-            
-                try:
+                    sig = None
 
-                    sig = build_signal(instId)
-                    if not sig or not isinstance(sig, dict):
-
-                        print(
-                            f"[RAW_SKIP] {instId}",
-                            flush=True
-                        )
+                    try:
                     
-                        continue
+                        sig = build_signal(instId)
+                    
+                        if not sig or not isinstance(sig, dict):
+                    
+                            print(
+                                f"[INVALID_SIGNAL] {instId}",
+                                flush=True
+                            )
+                    
+                            continue
 
                     # =====================
                     # OPEN INTEREST
