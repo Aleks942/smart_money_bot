@@ -9687,6 +9687,12 @@ def build_signal(instId):
         )
     
         return None
+
+    symbol = (
+        signal.get("symbol")
+        or signal.get("instId")
+        or instId
+    )
     
     filter_result = signal_quality_filter(signal)
 
@@ -9774,19 +9780,25 @@ def build_signal(instId):
     # =====================
     
     if not signal or not isinstance(signal, dict):
-    
+
         print(
             f"[OVERRIDE_SIGNAL_NONE] "
             f"{instId}",
             flush=True
         )
-    
+
         return None
-    
+
+    symbol = (
+        signal.get("symbol")
+        or signal.get("instId")
+        or instId
+    )
+
     stage = str(
         signal.get("stage") or ""
     )
-    
+
     ep = float(
         signal.get("early_pressure_score") or 0
     )
@@ -9794,7 +9806,6 @@ def build_signal(instId):
     acc = float(
         signal.get("acc_score") or 0
     )
-    
     # =====================
     # HARD BLOCK
     # =====================
@@ -9803,7 +9814,7 @@ def build_signal(instId):
     
         print(
             f"[OVERRIDE_BLOCK_TRANSITION] "
-            f"{sig.get('symbol')}",
+            f"{symbol}",
             flush=True
         )
     
@@ -9813,7 +9824,7 @@ def build_signal(instId):
     
         print(
             f"[OVERRIDE_BLOCK_EP] "
-            f"{sig.get('symbol')} "
+            f"{symbol} "
             f"ep={ep}",
             flush=True
         )
@@ -9824,7 +9835,7 @@ def build_signal(instId):
     
         print(
             f"[OVERRIDE_BLOCK_ACC] "
-            f"{sig.get('symbol')} "
+            f"{symbol} "
             f"acc={acc}",
             flush=True
         )
@@ -9847,7 +9858,7 @@ def build_signal(instId):
     
         print(
             f"[PREMOVE_OVERRIDE_OK] "
-            f"{sig.get('symbol')} "
+            f"{symbol} "
             f"score={score} "
             f"ep={ep} "
             f"acc={acc}",
