@@ -354,6 +354,15 @@ def route_signal(sig):
 
     try:
 
+        if not sig or not isinstance(sig, dict):
+
+            print(
+                "[ROUTE_SIGNAL_NONE]",
+                flush=True
+            )
+
+            return None, "signal_none"
+
         flags = set(sig.get("flags", []))
 
         score = float(sig.get("score") or 0)
@@ -2475,9 +2484,9 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         except:
             prev_price = None
             prev_rsi = None
+
         
         # LONG дивергенция (плохо для лонга)
-
         premove_bypass = bool(sig.get("premove_bypass"))
         side = str(
             sig.get("direction_code")
@@ -2486,7 +2495,7 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         ).upper()
         if (
             not premove_bypass
-            side in ("LONG", "BUY", "UP")
+            and side in ("LONG", "BUY", "UP")
         ):
             if prev_price and prev_rsi and rsi:
                 if price_now > prev_price and rsi < prev_rsi:
