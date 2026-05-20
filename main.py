@@ -9670,6 +9670,23 @@ def build_signal(instId):
         return None
 
     # =====================
+    # RETEST CHECK
+    # =====================
+    
+    retest_ok, retest_reason = detect_retest_entry(signal)
+    
+    signal["retest_ok"] = retest_ok
+    signal["retest_reason"] = retest_reason
+    
+    print(
+        f"[RETEST_CHECK] "
+        f"{instId} "
+        f"ok={retest_ok} "
+        f"reason={retest_reason}",
+        flush=True
+    )
+
+    # =====================
     # PREMOVE OVERRIDE
     # =====================
     
