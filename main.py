@@ -8148,6 +8148,68 @@ def build_signal(instId):
     
         flags.add("EMA_MIXED")
 
+        # =========================
+        # HTF STRETCH FILTER
+        # =========================
+    
+        h4_ema200 = (ema_h4 or {}).get("ema200")
+    
+        htf_stretched_long = False
+        htf_stretched_short = False
+    
+        try:
+    
+            if h4_ema200:
+    
+                h4_distance_pct = (
+                    abs(price - h4_ema200)
+                    / h4_ema200
+                ) * 100
+    
+                # =====================
+                # OVEREXTENDED UP
+                # =====================
+    
+                if (
+                    price > h4_ema200
+                    and h4_distance_pct >= 12
+                ):
+    
+                    htf_stretched_long = True
+    
+                    print(
+                        f"[HTF_STRETCH_LONG] "
+                        f"{instId} "
+                        f"dist={round(h4_distance_pct, 2)}%",
+                        flush=True
+                    )
+    
+                # =====================
+                # OVEREXTENDED DOWN
+                # =====================
+    
+                elif (
+                    price < h4_ema200
+                    and h4_distance_pct >= 12
+                ):
+    
+                    htf_stretched_short = True
+    
+                    print(
+                        f"[HTF_STRETCH_SHORT] "
+                        f"{instId} "
+                        f"dist={round(h4_distance_pct, 2)}%",
+                        flush=True
+                    )
+    
+        except Exception as e:
+    
+            print(
+                f"[HTF_STRETCH_ERROR] "
+                f"{instId} {e}",
+                flush=True
+            )
+
     # =========================
     # EMA FLOW SEED
     # =========================
