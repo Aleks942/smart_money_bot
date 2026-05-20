@@ -264,7 +264,14 @@ def is_scalp_candidate(signal):
         )
 
         mode = classify_signal_mode(signal)
+        if mode is None:
 
+            print(
+                "[MODE_NONE]",
+                flush=True
+            )
+
+            return False, "mode_none"
 
         # =========================
         # HARD FILTER
