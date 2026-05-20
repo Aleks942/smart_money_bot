@@ -9569,6 +9569,37 @@ def build_signal(instId):
     )
 
     # =====================
+    # LATE ENTRY CHECK
+    # =====================
+    
+    late_entry, late_reason = detect_late_entry(signal)
+    
+    signal["late_entry"] = late_entry
+    signal["late_reason"] = late_reason
+    
+    print(
+        f"[LATE_ENTRY] "
+        f"{instId} "
+        f"late={late_entry} "
+        f"reason={late_reason}",
+        flush=True
+    )
+    
+    if late_entry:
+    
+        signal["filter_pass"] = False
+        signal["filter_reason"] = late_reason
+    
+        print(
+            f"[SKIP_LATE_ENTRY] "
+            f"{instId} "
+            f"{late_reason}",
+            flush=True
+        )
+    
+        return None
+
+    # =====================
     # PREMOVE OVERRIDE
     # =====================
     
