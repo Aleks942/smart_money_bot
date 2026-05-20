@@ -662,6 +662,14 @@ def is_elite_swing(sig):
 # SIGNAL STRENGTH ANALYZER
 # =========================
 def analyze_signal_strength(sig):
+    if not sig or not isinstance(sig, dict):
+
+        print(
+            "[SIGNAL_STRENGTH_NONE]",
+            flush=True
+        )
+
+        return "D", [], 0
 
     flags = set(sig.get("flags", []))
     score = sig.get("score", 0)
