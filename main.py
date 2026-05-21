@@ -9751,7 +9751,7 @@ def build_signal(instId):
 
             and (
                 signal.get("retest_ok") is True
-                or score >= 25
+                or score >= 20
             )
         )
 
