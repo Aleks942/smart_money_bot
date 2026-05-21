@@ -5918,52 +5918,167 @@ def build_trade_plan(signal):
 # =========================
 def detect_early_pressure(sig):
 
-    flags = set(sig.get("flags", []))
-    acc = int(sig.get("acc_score", 0) or 0)
+    try:
 
-    up_score = 0
-    down_score = 0
+        flags = set(sig.get("flags", []))
+        acc = int(sig.get("acc_score", 0) or 0)
 
-    if "PRESSURE_UP" in flags:
-        up_score += 3
+        up_score = 0
+        down_score = 0
 
-    if "PRESSURE_DOWN" in flags:
-        down_score += 3
+        # =====================
+        # PRESSURE
+        # =====================
 
-    if "PRE_BREAKOUT_BUY" in flags:
-        up_score += 3
+        if "PRESSURE_UP" in flags:
+            up_score += 3
 
-    if "PRE_BREAKOUT_SELL" in flags:
-        down_score += 3
+        if "PRESSURE_DOWN" in flags:
+            down_score += 3
 
-    if "CONTINUATION_UP" in flags:
-        up_score += 2
+        # =====================
+        # SHIFT
+        # =====================
 
-    if "CONTINUATION_DOWN" in flags:
-        down_score += 2
+        if "BULLISH_SHIFT" in flags:
+            up_score += 2
 
-    if "COMP_5M" in flags:
-        up_score += 1
-        down_score += 1
+        if "BEARISH_SHIFT" in flags:
+            down_score += 2
 
-    if acc >= 2:
-        up_score += 1
-        down_score += 1
+        # =====================
+        # ACCELERATION
+        # =====================
 
-    result = {
-        "early_pressure_side": None,
-        "early_pressure_score": 0
-    }
+        if "ACCELERATION_UP" in flags:
+            up_score += 2
 
-    if up_score > down_score and up_score >= 4:
-        result["early_pressure_side"] = "BUY"
-        result["early_pressure_score"] = up_score
+        if "ACCELERATION_DOWN" in flags:
+            down_score += 2
 
-    elif down_score > up_score and down_score >= 4:
-        result["early_pressure_side"] = "SELL"
-        result["early_pressure_score"] = down_score
+        # =====================
+        # BREAKOUT BUILDUP
+        # =====================
 
-    return result
+        if "PRE_BREAKOUT_BUY" in flags:
+            up_score += 3
+
+        if "PRE_BREAKOUT_SELL" in flags:
+            down_score += 3
+
+        # =====================
+        # CONTINUATION
+        # =====================
+
+        if "CONTINUATION_UP" in flags:
+            up_score += 2
+
+        if "CONTINUATION_DOWN" in flags:
+            down_score += 2
+
+        # =====================
+        # ENERGY BUILDUP
+        # =====================
+
+        if "ENERGY_BUILDUP" in flags:
+            up_score += 2
+            down_score += 2
+
+        # =====================
+        # EXPLOSION READY
+        # =====================
+
+        if "EXPLOSION_READY_UP" in flags:
+            up_score += 3
+
+        if "EXPLOSION_READY_DOWN" in flags:
+            down_score += 3
+
+        # =====================
+        # LAUNCH PROXIMITY
+        # =====================
+
+        if "LAUNCH_PROXIMITY_UP" in flags:
+            up_score += 2
+
+        if "LAUNCH_PROXIMITY_DOWN" in flags:
+            down_score += 2
+
+        # =====================
+        # EMA STRONG
+        # =====================
+
+        if "EMA_BULL_STRONG" in flags:
+            up_score += 2
+
+        if "EMA_BEAR_STRONG" in flags:
+            down_score += 2
+
+        # =====================
+        # MTF ALIGN
+        # =====================
+
+        if "MTF_LONG_ALIGN" in flags:
+            up_score += 2
+
+        if "MTF_SHORT_ALIGN" in flags:
+            down_score += 2
+
+        # =====================
+        # COMPRESSION
+        # =====================
+
+        if (
+            "COMP_5M" in flags
+            or "COMP_PRO_5M" in flags
+        ):
+            up_score += 1
+            down_score += 1
+
+        # =====================
+        # ACCUMULATION
+        # =====================
+
+        if acc >= 2:
+            up_score += 1
+            down_score += 1
+
+        if acc >= 3:
+            up_score += 1
+            down_score += 1
+
+        result = {
+            "early_pressure_side": None,
+            "early_pressure_score": 0
+        }
+
+        # =====================
+        # FINAL SIDE
+        # =====================
+
+        if up_score > down_score and up_score >= 5:
+
+            result["early_pressure_side"] = "BUY"
+            result["early_pressure_score"] = up_score
+
+        elif down_score > up_score and down_score >= 5:
+
+            result["early_pressure_side"] = "SELL"
+            result["early_pressure_score"] = down_score
+
+        return result
+
+    except Exception as e:
+
+        print(
+            f"[EARLY_PRESSURE_ERROR] {e}",
+            flush=True
+        )
+
+        return {
+            "early_pressure_side": None,
+            "early_pressure_score": 0
+        }
 
     
 def detect_early_pressure(sig):
