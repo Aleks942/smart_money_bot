@@ -9615,6 +9615,13 @@ def build_signal(instId):
         ep_data = {}
     
     signal.update(ep_data)
+
+    print(
+        f"[EP_DATA_DEBUG] "
+        f"{instId} "
+        f"ep_data={ep_data}",
+        flush=True
+    )
     
     signal.setdefault(
         "early_pressure_score",
