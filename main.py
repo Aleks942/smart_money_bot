@@ -9849,7 +9849,7 @@ def build_signal(instId):
 
         return False
 
-    if acc < 2:
+    if acc < 0:
 
         print(
             f"[OVERRIDE_BLOCK_ACC] "
