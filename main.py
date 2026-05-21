@@ -5795,7 +5795,7 @@ def decide_entry(stage, flags, price, c5, sig=None):
 
                 long_premove = False
 
-            if acc < 2:
+            if acc < 0:
 
                 print(
                     f"[BLOCK_PREMOVE_ACC] "
