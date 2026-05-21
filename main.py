@@ -13312,6 +13312,20 @@ if __name__ == "__main__":
                     # =====================
                 
                     group = sig.get("signal_group")
+                    if (
+                        sig.get("signal_mode") == "PREMOVE"
+                        and not group
+                    ):
+                    
+                        group = "PRE_SWING"
+                    
+                        sig["signal_group"] = group
+                    
+                        print(
+                            f"[AUTO_PREMOVE_ROUTE] "
+                            f"{instId} -> PRE_SWING",
+                            flush=True
+                        )
                 
                     allowed_groups = [
                         "PRE_SWING",
