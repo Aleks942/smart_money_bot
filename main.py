@@ -10117,16 +10117,24 @@ def build_signal(instId):
     # =========================
     # FINAL FILTER
     # =========================
-    
-    if not ok:
-    
+
+    if not ok and not premove_override:
+
         print(
             f"[FILTER_BLOCK] "
             f"{instId} reason={reason}",
             flush=True
         )
-    
+
         return None
+
+    if premove_override:
+
+        print(
+            f"[OVERRIDE_FINAL_PASS] "
+            f"{instId}",
+            flush=True
+        )
 
     if not signal.get("signal_group"):
 
