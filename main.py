@@ -10015,7 +10015,23 @@ def build_signal(instId):
     
         quality_pass = True
     
-        if signal.get("scalp_candidate"):
+        if strong_structure_pass and quality_pass:
+
+            print(
+                f"[PREMOVE_PASS] {instId}",
+                flush=True
+            )
+        
+            signal["signal_mode"] = "PREMOVE"
+            signal["signal_group"] = "PRE_SWING"
+            signal["premove_confirmed"] = True
+            signal["sendable"] = True
+        
+            print(
+                f"[PREMOVE_ROUTE] "
+                f"{instId} -> PRE_SWING",
+                flush=True
+            )
     
             print(
                 f"[PREMOVE_PASS] {instId}",
