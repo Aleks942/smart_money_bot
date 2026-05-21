@@ -5774,17 +5774,7 @@ def decide_entry(stage, flags, price, c5, sig=None):
             )
         )
         
-        ep = float(
-            signal.get("early_pressure_score") or 0
-        )
-
-        acc = float(
-            signal.get("acc_score") or 0
-        )
-
-        stage = str(
-            signal.get("stage") or ""
-        )
+        
         # =====================
         # LONG PREMOVE
         # =====================
