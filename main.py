@@ -9740,7 +9740,7 @@ def build_signal(instId):
 
         elite_transition_ok = (
 
-            score >= 22
+            score >= 15
 
             and (
                 "EXPLOSION_READY_UP" in flags
@@ -9751,7 +9751,7 @@ def build_signal(instId):
 
             and (
                 signal.get("retest_ok") is True
-                or score >= 30
+                or score >= 25
             )
         )
 
