@@ -9749,7 +9749,10 @@ def build_signal(instId):
                 or "LAUNCH_PROXIMITY_DOWN" in flags
             )
 
-            and signal.get("retest_ok") is True
+            and (
+                signal.get("retest_ok") is True
+                or score >= 30
+            )
         )
 
         if not elite_transition_ok:
