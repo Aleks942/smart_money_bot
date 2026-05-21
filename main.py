@@ -12597,8 +12597,106 @@ def get_signal_level(sig):
         )
 
 # =========================
-# SMART STORY ENGINE
+# ANTI REPEAT CACHE
 # =========================
+
+LAST_SIGNAL_CACHE = {}
+
+# =========================
+# ANTI REPEAT ENGINE
+# =========================
+
+def is_repeat_signal(sig):
+
+    try:
+
+        if not sig or not isinstance(sig, dict):
+            return False
+
+        symbol = str(
+            sig.get("symbol")
+            or sig.get("instId")
+            or ""
+        )
+
+        direction = str(
+            sig.get("direction_code")
+            or sig.get("direction")
+            or ""
+        )
+
+        stage = str(
+            sig.get("stage")
+            or ""
+        )
+
+        entry = str(
+            sig.get("entry")
+            or sig.get("entry_type")
+            or ""
+        )
+
+        score = float(
+            sig.get("score") or 0
+        )
+
+        signature = (
+            symbol,
+            direction,
+            stage,
+            entry
+        )
+
+        now = time.time()
+
+        old = LAST_SIGNAL_CACHE.get(signature)
+
+        if old:
+
+            old_ts = old.get("ts", 0)
+            old_score = old.get("score", 0)
+
+            age = now - old_ts
+
+            score_diff = abs(
+                score - old_score
+            )
+
+            if (
+                age < 1800
+                and score_diff <= 2
+            ):
+
+                print(
+                    f"[REPEAT_SIGNAL_SKIP] "
+                    f"{symbol} "
+                    f"age={round(age)}s "
+                    f"score_diff={score_diff}",
+                    flush=True
+                )
+
+                return True
+
+        LAST_SIGNAL_CACHE[signature] = {
+            "ts": now,
+            "score": score
+        }
+
+        return False
+
+    except Exception as e:
+
+        print(
+            f"[ANTI_REPEAT_ERROR] {e}",
+            flush=True
+        )
+
+        return False
+
+# =========================
+# SMART STORY
+# =========================
+
 def build_smart_story(sig):
 
     try:
@@ -13000,12 +13098,6 @@ if __name__ == "__main__":
 
     if not isinstance(state.get("swing_sent"), dict):
         state["swing_sent"] = {}
-
-    # =====================
-    # ANTI REPEAT CACHE
-    # =====================
-
-    LAST_SIGNAL_CACHE = {}
 
     # =====================
     # SCAN SETTINGS
