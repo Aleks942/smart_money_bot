@@ -2843,9 +2843,30 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             return empty
         
         
+        
+        # =====================
+        # REPEAT FILTER
+        # =====================
+        
+        last_score = LAST_PREMOVE_SCORE.get(instId)
+        
+        if (
+            last_score is not None
+            and abs(last_score - score) <= 2
+        ):
+        
+            print(
+                f"[PREMOVE_REPEAT_SKIP] "
+                f"{instId}",
+                flush=True
+            )
+        
+            return empty
+        
         # =====================
         # SEND TELEGRAM
         # =====================
+        
         send_telegram(
             f"🎯 <b>RETEST ENTRY — {instId}</b>\n\n"
             f"🧭 Side: <b>{side}</b>\n"
@@ -2856,6 +2877,7 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             f"📌 Причина: {rt.get('reason')}"
         )
         
+        LAST_PREMOVE_SCORE[instId] = score
         # =====================
         # UPDATE PREVIOUS VALUES (ПОСЛЕ ОТПРАВКИ)
         # =====================
