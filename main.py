@@ -9852,7 +9852,7 @@ def build_signal(instId):
             flush=True
         )
 
-    if ep < 10:
+    if ep < 6:
 
         print(
             f"[OVERRIDE_BLOCK_EP] "
@@ -9863,7 +9863,7 @@ def build_signal(instId):
 
         return False
 
-    if acc < 3:
+    if acc < 2:
 
         print(
             f"[OVERRIDE_BLOCK_ACC] "
