@@ -9740,7 +9740,7 @@ def build_signal(instId):
 
         elite_transition_ok = (
 
-            score >= 28
+            score >= 22
 
             and (
                 "EXPLOSION_READY_UP" in flags
