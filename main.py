@@ -5773,20 +5773,18 @@ def decide_entry(stage, flags, price, c5, sig=None):
                 )
             )
         )
-        if not sig:
-            sig = {}
+        
         ep = float(
-            sig.get("early_pressure_score") or 0
+            signal.get("early_pressure_score") or 0
         )
-    
+
         acc = float(
-            sig.get("acc_score") or 0
+            signal.get("acc_score") or 0
         )
-    
+
         stage = str(
-            sig.get("stage") or ""
+            signal.get("stage") or ""
         )
-    
         # =====================
         # LONG PREMOVE
         # =====================
@@ -5907,9 +5905,7 @@ def decide_entry(stage, flags, price, c5, sig=None):
                 flush=True
             )
 
-    # =========================
-    # TRANSITION
-    # =========================
+   
 
     # =========================
     # TRANSITION
