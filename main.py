@@ -13002,6 +13002,12 @@ if __name__ == "__main__":
         state["swing_sent"] = {}
 
     # =====================
+    # ANTI REPEAT CACHE
+    # =====================
+
+    LAST_SIGNAL_CACHE = {}
+
+    # =====================
     # SCAN SETTINGS
     # =====================
 
