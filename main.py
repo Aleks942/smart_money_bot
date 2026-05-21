@@ -6113,6 +6113,46 @@ def detect_early_pressure(sig):
     
         if down_score > 0:
             add_down(2, "STRONG_ACCUMULATION")
+
+    # =========================
+    # SHIFT
+    # =========================
+
+    if "BULLISH_SHIFT" in flags:
+        add_up(3, "BULLISH_SHIFT")
+
+    if "BEARISH_SHIFT" in flags:
+        add_down(3, "BEARISH_SHIFT")
+
+    # =========================
+    # ACCELERATION
+    # =========================
+
+    if "ACCELERATION_UP" in flags:
+        add_up(2, "ACCELERATION_UP")
+
+    if "ACCELERATION_DOWN" in flags:
+        add_down(2, "ACCELERATION_DOWN")
+
+    # =========================
+    # LAUNCH PROXIMITY
+    # =========================
+
+    if "LAUNCH_PROXIMITY_UP" in flags:
+        add_up(3, "LAUNCH_PROXIMITY_UP")
+
+    if "LAUNCH_PROXIMITY_DOWN" in flags:
+        add_down(3, "LAUNCH_PROXIMITY_DOWN")
+
+    # =========================
+    # EXPLOSION READY
+    # =========================
+
+    if "EXPLOSION_READY_UP" in flags:
+        add_up(4, "EXPLOSION_READY_UP")
+
+    if "EXPLOSION_READY_DOWN" in flags:
+        add_down(4, "EXPLOSION_READY_DOWN")
       
     # =========================
     # MTF CONTEXT
