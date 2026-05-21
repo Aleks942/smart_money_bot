@@ -5798,41 +5798,6 @@ def decide_entry(stage, flags, price, c5, sig=None):
         # =====================
         elif short_premove and not long_premove:
     
-            # =====================
-            # BLOCK WEAK PREMOVE
-            # =====================
-    
-            if ep < 6:
-    
-                print(
-                    f"[BLOCK_PREMOVE_EP] "
-                    f"{sig.get('symbol')} "
-                    f"ep={ep}",
-                    flush=True
-                )
-    
-                short_premove = False
-    
-            if acc < 2:
-    
-                print(
-                    f"[BLOCK_PREMOVE_ACC] "
-                    f"{sig.get('symbol')} "
-                    f"acc={acc}",
-                    flush=True
-                )
-    
-                short_premove = False
-    
-            if "TRANSITION" in stage:
-    
-                print(
-                    f"[BLOCK_PREMOVE_TRANSITION] "
-                    f"{sig.get('symbol')}",
-                    flush=True
-                )
-    
-                short_premove = False
     
             # =====================
             # VALID SHORT PREMOVE
