@@ -10021,7 +10021,19 @@ def build_signal(instId):
                 f"[PREMOVE_PASS] {instId}",
                 flush=True
             )
-    
+            signal["signal_mode"] = "PREMOVE"
+
+            signal["signal_group"] = "PRE_SWING"
+            
+            signal["premove_confirmed"] = True
+            
+            signal["sendable"] = True
+            
+            print(
+                f"[PREMOVE_ROUTE] "
+                f"{instId} -> PRE_SWING",
+                flush=True
+            )
         if strong_structure_pass and quality_pass:
     
             # =========================
