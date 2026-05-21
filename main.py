@@ -14198,7 +14198,9 @@ if __name__ == "__main__":
                     f"🧠 Swing setup detected.\n"
                     f"Reason: {elite_swing_reason}"
                 )
+                if is_repeat_signal(sig):
 
+                    continue
                 send_telegram(swing_msg)
 
                 print(
