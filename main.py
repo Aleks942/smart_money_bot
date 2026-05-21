@@ -5778,38 +5778,113 @@ def decide_entry(stage, flags, price, c5, sig=None):
         # =====================
         # LONG PREMOVE
         # =====================
-        if long_premove and not short_premove:
-    
-
-            # =====================
-            # VALID LONG PREMOVE
-            # =====================
-    
-            if long_premove:
-    
+        if long_premove:
+        
+            long_strength = 0
+        
+            if "PRESSURE_UP" in flags:
+                long_strength += 2
+        
+            if "BULLISH_SHIFT" in flags:
+                long_strength += 2
+        
+            if "ACCELERATION_UP" in flags:
+                long_strength += 2
+        
+            if "MTF_LONG_ALIGN" in flags:
+                long_strength += 2
+        
+            if "EMA_BULL_STRONG" in flags:
+                long_strength += 1
+        
+            short_strength = 0
+        
+            if "PRESSURE_DOWN" in flags:
+                short_strength += 2
+        
+            if "BEARISH_SHIFT" in flags:
+                short_strength += 2
+        
+            if "ACCELERATION_DOWN" in flags:
+                short_strength += 2
+        
+            if "MTF_SHORT_ALIGN" in flags:
+                short_strength += 2
+        
+            if "EMA_BEAR_STRONG" in flags:
+                short_strength += 1
+        
+            if long_strength >= short_strength:
+                print(
+                    f"[LONG_DOMINANCE] "
+                    f"{instId} "
+                    f"long={long_strength} "
+                    f"short={short_strength}",
+                    flush=True
+                )
+        
                 entry = "PREMOVE_LONG"
-    
+        
                 stop = recent_low
-    
+        
                 reason = "PREMOVE_LONG"
+            
     
         # =====================
         # SHORT PREMOVE
         # =====================
-        elif short_premove and not long_premove:
-    
-    
-            # =====================
-            # VALID SHORT PREMOVE
-            # =====================
-    
-            if short_premove:
-    
+        elif short_premove:
+        
+            short_strength = 0
+        
+            if "PRESSURE_DOWN" in flags:
+                short_strength += 2
+        
+            if "BEARISH_SHIFT" in flags:
+                short_strength += 2
+        
+            if "ACCELERATION_DOWN" in flags:
+                short_strength += 2
+        
+            if "MTF_SHORT_ALIGN" in flags:
+                short_strength += 2
+        
+            if "EMA_BEAR_STRONG" in flags:
+                short_strength += 1
+        
+            long_strength = 0
+        
+            if "PRESSURE_UP" in flags:
+                long_strength += 2
+        
+            if "BULLISH_SHIFT" in flags:
+                long_strength += 2
+        
+            if "ACCELERATION_UP" in flags:
+                long_strength += 2
+        
+            if "MTF_LONG_ALIGN" in flags:
+                long_strength += 2
+        
+            if "EMA_BULL_STRONG" in flags:
+                long_strength += 1
+        
+            if short_strength >= long_strength:
+                print(
+                    f"[SHORT_DOMINANCE] "
+                    f"{instId} "
+                    f"short={short_strength} "
+                    f"long={long_strength}",
+                    flush=True
+                )
+        
                 entry = "PREMOVE_SHORT"
-    
+        
                 stop = recent_high
-    
+        
                 reason = "PREMOVE_SHORT"
+
+           
 
         # =====================
         # CONFLICT
