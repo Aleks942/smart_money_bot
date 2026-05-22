@@ -12669,6 +12669,13 @@ def get_signal_level(sig):
     try:
 
         elite_score, _ = calc_elite_score(sig)
+        acc = float(
+            sig.get("acc_score") or 0
+        )
+        
+        ep = float(
+            sig.get("early_pressure_score") or 0
+        )
 
         # =====================
         # VERY STRONG
