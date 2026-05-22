@@ -13690,30 +13690,30 @@ if __name__ == "__main__":
                         
                             if not elite_ok:
 
-                        if (
-                            sig.get("sendable") is True
-                            or float(sig.get("score") or 0) >= 18
-                            or float(sig.get("early_pressure_score") or 0) >= 10
-                        ):
-                    
-                            print(
-                                f"[PRE_SWING_OVERRIDE_KEEP] "
-                                f"{instId} "
-                                f"score={sig.get('score')} "
-                                f"ep={sig.get('early_pressure_score')} "
-                                f"reason={elite_reason}",
-                                flush=True
-                            )
-                    
-                        else:
-                    
-                            print(
-                                f"[SKIP_WEAK_PRE_SWING] "
-                                f"{instId}",
-                                flush=True
-                            )
-                    
-                            continue
+                                if (
+                                    sig.get("sendable") is True
+                                    or float(sig.get("score") or 0) >= 18
+                                    or float(sig.get("early_pressure_score") or 0) >= 10
+                                ):
+                            
+                                    print(
+                                        f"[PRE_SWING_OVERRIDE_KEEP] "
+                                        f"{instId} "
+                                        f"score={sig.get('score')} "
+                                        f"ep={sig.get('early_pressure_score')} "
+                                        f"reason={elite_reason}",
+                                        flush=True
+                                    )
+                            
+                                else:
+                            
+                                    print(
+                                        f"[SKIP_WEAK_PRE_SWING] "
+                                        f"{instId}",
+                                        flush=True
+                                    )
+                            
+                                    continue
                         send_telegram(msg)
                 
                         scalp_sent_this_cycle += 1
