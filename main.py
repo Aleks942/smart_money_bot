@@ -14008,63 +14008,92 @@ if __name__ == "__main__":
                         # =========================
                         # TELEGRAM FINAL FIREWALL
                         # =========================
-
+    
                         symbol_key = (
                             f"{instId}_"
                             f"{group}_"
                             f"{sig.get('direction_code')}_"
                             f"{sig.get('entry')}"
                         )
-
+    
                         if not can_send(symbol_key, 1800):
-
+    
                             print(
                                 f"[GLOBAL_COOLDOWN_SKIP] "
                                 f"{symbol_key}",
                                 flush=True
                             )
-
+    
                             continue
-
+    
                         if "NEUTRAL" in str(sig.get("stage")):
-
+    
                             print(
                                 f"[SKIP_NEUTRAL_TG] "
                                 f"{instId}",
                                 flush=True
                             )
-
+    
                             continue
-
+    
                         if (
                             group == "PRE_SWING"
                             and float(sig.get("score") or 0) < 16
-                            and float(sig.get("early_pressure_score") or 0) < 10
+                            and float(
+                                sig.get("early_pressure_score") or 0
+                            ) < 10
                         ):
-
+    
                             print(
                                 f"[SKIP_WEAK_PRE_SWING_TG] "
                                 f"{instId}",
                                 flush=True
                             )
-
+    
                             continue
-
+    
+                        # =========================
+                        # ELITE ONLY
+                        # =========================
+    
+                        if sig.get("setup_rank") != "ELITE":
+    
+                            print(
+                                f"[SKIP_NON_ELITE] "
+                                f"{instId}",
+                                flush=True
+                            )
+    
+                            continue
+    
+                        # =========================
+                        # LIMIT PER CYCLE
+                        # =========================
+    
+                        if scalp_sent_this_cycle >= 3:
+    
+                            print(
+                                "[SWING_LIMIT_REACHED]",
+                                flush=True
+                            )
+    
+                            continue
+    
                         send_telegram(msg)
-                
+    
                         scalp_sent_this_cycle += 1
-                
+    
                         print(
                             f"[SIGNAL_SENT] "
                             f"{instId} "
                             f"group={group}",
                             flush=True
                         )
-                
+    
                         alerts.append(sig)
-                
+    
                         mark_alert_sent(state, sig)
-                
+    
                         continue
                 
                 except Exception as e:
