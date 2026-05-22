@@ -13711,6 +13711,17 @@ if __name__ == "__main__":
 
                     if sig.get("sendable") is True:
 
+                        # =====================
+                        # EXPANSION ALREADY VALID
+                        # =====================
+
+                        if (
+                            sig.get("signal_mode")
+                            == "EXPANSION"
+                        ):
+
+                            return sig
+
                         sig["valid"] = True
 
                         print(
