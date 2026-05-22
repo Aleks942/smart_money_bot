@@ -10288,58 +10288,6 @@ def build_signal(instId):
             return signal
 
 
-        
-    # =========================
-    # TRANSITION PASS
-    # =========================
-    
-    elif (
-
-        signal_mode == "TRANSITION"
-    
-        and (
-            "BULLISH_SHIFT" in flags
-            or "BEARISH_SHIFT" in flags
-            or "ACCELERATION_UP" in flags
-            or "ACCELERATION_DOWN" in flags
-        )
-    
-    ):
-    
-        quality_pass = True
-    
-        print(
-            f"[TRANSITION_PASS] {instId}",
-            flush=True
-        )
-    
-        # =========================
-        # TRANSITION GROUP ASSIGN
-        # =========================
-    
-        signal["sendable"] = True
-    
-        if (
-            score >= 18
-            and ep >= 8
-        ):
-    
-            signal["signal_group"] = "PRE_SWING"
-    
-        else:
-    
-            signal["signal_group"] = "SCALP"
-    
-        print(
-            f"[TRANSITION_GROUP] "
-            f"{instId} "
-            f"group={signal.get('signal_group')}",
-            flush=True
-        )
-
-        return signal
-
-
     # =========================
     # FINAL FILTER
     # =========================
