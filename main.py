@@ -10267,7 +10267,9 @@ def build_signal(instId):
             # =====================
     
             elif (
-                signal_mode in (
+                not signal.get("signal_group")
+            
+                and signal.get("signal_mode") in (
                     "TRANSITION",
                     "CONFIRMED",
                 )
