@@ -60,10 +60,25 @@ def classify_signal_mode(sig):
                return "WATCH"
             return "EXPANSION"
 
-        if "TRANSITION" in stage:
+        if (
+
+            "TRANSITION" in stage
+        
+            and ep >= 6
+        
+        ):
             return "TRANSITION"
 
-        if "ACCUMULATION" in stage:
+        if (
+
+            "ACCUMULATION" in stage
+        
+            and acc >= 3
+        
+            and ep >= 10
+        
+        ):
+        
             return "PREMOVE"
 
         # =====================
