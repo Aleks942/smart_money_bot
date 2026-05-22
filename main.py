@@ -14201,11 +14201,11 @@ if __name__ == "__main__":
             if sig.get("signal_group") == "SCALP":   
                 symbol = sig.get("instId")
 
-                now_ts = time.time()
+                current_ts = time.time()
 
                 if symbol in scalp_sent_cache:
 
-                    age = now_ts - scalp_sent_cache[symbol]
+                    age = current_ts - scalp_sent_cache[symbol]
 
                     if age < 3600:
 
