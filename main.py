@@ -9873,30 +9873,7 @@ def build_signal(instId):
 
         return None
 
-    # =====================
-    # SIGNAL MODE
-    # =====================
-    
-    signal_mode = classify_signal_mode(signal)
-    
-    ep = float(
-        signal.get("early_pressure_score") or 0
-    )
-    
-    print(
-        f"[SIGNAL_MODE] {instId} mode={signal_mode}",
-        flush=True
-    )
-    
-    print(
-        f"[EARLY_DEBUG] {instId} "
-        f"flags={signal.get('flags')} "
-        f"score={signal.get('score')} "
-        f"acc={signal.get('acc_score')} "
-        f"stage={signal.get('stage')} "
-        f"ep={ep}",
-        flush=True
-    )
+   
     
     # =====================
     # EARLY IGNORE
@@ -10184,7 +10161,7 @@ def build_signal(instId):
                 flush=True
             )
 
-            return False
+            return None
 
         print(
             f"[ELITE_TRANSITION_PASS] "
@@ -10212,8 +10189,7 @@ def build_signal(instId):
             flush=True
         )
 
-        return False
-
+        return None
     if acc < 0:
 
         print(
@@ -10223,7 +10199,7 @@ def build_signal(instId):
             flush=True
         )
 
-        return False
+        return None
     
     # =====================
     # ALLOW OVERRIDE
