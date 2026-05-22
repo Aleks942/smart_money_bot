@@ -9807,16 +9807,19 @@ def build_signal(instId):
     # =====================
     # SIGNAL MODE
     # =====================
+
     signal_mode = classify_signal_mode(signal)
+
+    signal["signal_mode"] = signal_mode
+
     ep = float(
         signal.get("early_pressure_score") or 0
     )
-    
+
     print(
         f"[SIGNAL_MODE] {instId} mode={signal_mode}",
         flush=True
     )
-
 
     print(
         f"[EARLY_DEBUG] {instId} "
@@ -9827,6 +9830,7 @@ def build_signal(instId):
         f"ep={ep}",
         flush=True
     )
+
     # =====================
     # EARLY IGNORE
     # =====================
