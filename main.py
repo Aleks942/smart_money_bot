@@ -10328,8 +10328,10 @@ def build_signal(instId):
             f"group={signal.get('signal_group')}",
             flush=True
         )
-    
+
         return signal
+
+
     # =========================
     # FINAL FILTER
     # =========================
@@ -10355,7 +10357,7 @@ def build_signal(instId):
     if not signal.get("signal_group"):
 
         if (
-            signal_mode == "TRANSITION"
+            signal.get("signal_mode") == "TRANSITION"
             and ep >= 8
             and signal.get("entry") not in (
                 "NO_ENTRY",
@@ -10368,12 +10370,30 @@ def build_signal(instId):
                 or "BREAKOUT_CONFIRM_DOWN" in flags
             )
         ):
+
             signal["signal_group"] = "SCALP"
-    
+
         else:
+
+            # =====================
+            # KEEP OVERRIDE SIGNALS
+            # =====================
+
+            if signal.get("sendable") is True:
+
+                print(
+                    f"[KEEP_OVERRIDE_SIGNAL] "
+                    f"{instId}",
+                    flush=True
+                )
+
+                return signal
+
             return None
-            
-        
+
+    return signal
+
+
 # ==============================
 # 🎯 SNIPER SIGNAL ENGINE
 # ==============================
