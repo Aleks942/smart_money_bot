@@ -10524,10 +10524,18 @@ def build_signal(instId):
         else:
 
             # =====================
-            # KEEP OVERRIDE SIGNALS
+            # KEEP ONLY STRONG OVERRIDES
             # =====================
 
-            if signal.get("sendable") is True:
+            if (
+
+                signal.get("sendable") is True
+
+                and score >= 18
+
+                and ep >= 10
+
+            ):
 
                 print(
                     f"[KEEP_OVERRIDE_SIGNAL] "
@@ -10538,8 +10546,6 @@ def build_signal(instId):
                 return signal
 
             return None
-
-    return signal
 
 
 # ==============================
