@@ -9873,6 +9873,31 @@ def build_signal(instId):
 
         return None
 
+
+    # =====================
+    # WEAK TRANSITION IGNORE
+    # =====================
+
+    if (
+
+        signal_mode == "TRANSITION"
+
+        and score < 10
+
+        and ep < 10
+
+    ):
+
+        print(
+            f"[WEAK_TRANSITION_IGNORE] "
+            f"{instId} "
+            f"score={score} "
+            f"ep={ep}",
+            flush=True
+        )
+
+        return None
+
    
     
     # =====================
@@ -9906,6 +9931,11 @@ def build_signal(instId):
     
     signal["sniper"] = sniper_signal(signal)
     
+        
+
+    # =====================
+    # PRE-SWING PROMOTION
+    # =====================
         
 
     # =====================
