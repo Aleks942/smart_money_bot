@@ -5797,8 +5797,45 @@ def decide_entry(stage, flags, price, c5, sig=None):
     # EXPANSION
     # =========================
     if stage == "🟢 EXPANSION":
+        # =====================
+        # SMART EXPANSION LONG
+        # =====================
 
-        if "BREAKOUT_CONFIRM_UP" in flags:
+        if (
+            "PRESSURE_UP" in flags
+            and (
+                "ACCELERATION_UP" in flags
+                or "EXPLOSION_READY_UP" in flags
+                or "LAUNCH_PROXIMITY_UP" in flags
+            )
+        ):
+
+            entry = "EXPANSION_LONG"
+
+            stop = recent_low
+
+            reason = "SMART_EXPANSION_LONG"
+
+        # =====================
+        # SMART EXPANSION SHORT
+        # =====================
+
+        elif (
+            "PRESSURE_DOWN" in flags
+            and (
+                "ACCELERATION_DOWN" in flags
+                or "EXPLOSION_READY_DOWN" in flags
+                or "LAUNCH_PROXIMITY_DOWN" in flags
+            )
+        ):
+
+            entry = "EXPANSION_SHORT"
+
+            stop = recent_high
+
+            reason = "SMART_EXPANSION_SHORT"
+
+        elif "BREAKOUT_CONFIRM_UP" in flags:
             entry = "LONG_CONFIRM"
             stop = recent_low
             reason = "LONG_CONFIRM"
