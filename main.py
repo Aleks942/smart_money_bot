@@ -14799,9 +14799,7 @@ if __name__ == "__main__":
                 s for s in alerts
 
                 if (
-                    s.get("setup_rank") in [
-                        "PRIORITY_1",
-                        "PRIORITY_2"
+                    s.get("setup_rank") == "PRIORITY_1"
                     ]
 
                     and (
