@@ -2319,106 +2319,102 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             return "НЕЯСНО"
 
         # =====================
-        # RETEST
-        # =====================
-        rt = retest_ok(sig, m15_trigger)
-
-        # =====================
         # RETEST OVERRIDE (важно)
         # =====================
         if not rt.get("ok"):
-        
+
             flags = set(sig.get("flags", []))
             direction = sig.get("direction", "")
-            
-        ep = float(
-            sig.get("early_pressure_score") or 0
-        )
 
-        acc = float(
-            sig.get("acc_score") or 0
-        )
+            ep = float(
+                sig.get("early_pressure_score") or 0
+            )
 
-        strong_momentum = (
+            acc = float(
+                sig.get("acc_score") or 0
+            )
 
-            "BREAKOUT_UP" in flags or
-            "CONTINUATION_UP" in flags or
-            "BREAKOUT_DOWN" in flags or
-            "CONTINUATION_DOWN" in flags
+            strong_momentum = (
 
-            or "BREAKOUT_CONFIRM_UP" in flags
-            or "BREAKOUT_CONFIRM_DOWN" in flags
+                "BREAKOUT_UP" in flags
+                or "CONTINUATION_UP" in flags
+                or "BREAKOUT_DOWN" in flags
+                or "CONTINUATION_DOWN" in flags
 
-            or "EXPLOSION_READY_UP" in flags
-            or "EXPLOSION_READY_DOWN" in flags
+                or "BREAKOUT_CONFIRM_UP" in flags
+                or "BREAKOUT_CONFIRM_DOWN" in flags
 
-            or "ACCELERATION_UP" in flags
-            or "ACCELERATION_DOWN" in flags
+                or "EXPLOSION_READY_UP" in flags
+                or "EXPLOSION_READY_DOWN" in flags
 
-            or "LAUNCH_PROXIMITY_UP" in flags
-            or "LAUNCH_PROXIMITY_DOWN" in flags
+                or "ACCELERATION_UP" in flags
+                or "ACCELERATION_DOWN" in flags
 
-            or (
-                ep >= 10
-                and (
-                    "MTF_LONG_ALIGN" in flags
-                    or "MTF_SHORT_ALIGN" in flags
+                or "LAUNCH_PROXIMITY_UP" in flags
+                or "LAUNCH_PROXIMITY_DOWN" in flags
+
+                or (
+                    ep >= 10
+                    and (
+                        "MTF_LONG_ALIGN" in flags
+                        or "MTF_SHORT_ALIGN" in flags
+                    )
+                )
+
+                # =====================
+                # ACCUMULATION OVERRIDE
+                # =====================
+
+                or (
+                    "COMP_5M" in flags
+                    and acc >= 3
+                    and ep >= 10
+                )
+
+                or (
+                    "COMP_PRO_5M" in flags
+                    and acc >= 3
+                    and ep >= 10
                 )
             )
 
-        # =====================
-        # ACCUMULATION OVERRIDE
-        # =====================
+            if strong_momentum:
 
-        or (
-            "COMP_5M" in flags
-            and acc >= 3
-            and ep >= 10
-        )
+                print(
+                    f"[RETEST_OVERRIDE] {instId} strong momentum → allow",
+                    flush=True
+                )
 
-        or (
-            "COMP_PRO_5M" in flags
-            and acc >= 3
-            and ep >= 10
-        )
-    )
+                entry = sig.get("price")
 
-    if strong_momentum:
+                if "ВВЕРХ" in direction:
+                    stop = entry * 0.985
 
-        print(
-            f"[RETEST_OVERRIDE] {instId} strong momentum → allow",
-            flush=True
-        )
+                elif "ВНИЗ" in direction:
+                    stop = entry * 1.015
 
-        entry = sig.get("price")
+                else:
+                    return empty
 
-        if "ВВЕРХ" in direction:
-            stop = entry * 0.985
+            else:
 
-        elif "ВНИЗ" in direction:
-            stop = entry * 1.015
+                print(
+                    f"[RETEST_SKIP] {instId} {rt.get('reason')}",
+                    flush=True
+                )
+
+                return empty
 
         else:
-            return empty
 
-    else:
+            print(
+                f"[RETEST_OK] {instId}",
+                flush=True
+            )
 
-        print(
-            f"[RETEST_SKIP] {instId} {rt.get('reason')}",
-            flush=True
-        )
+            entry = rt["entry"]
+            stop = rt["stop"]
 
-        return empty
-
-else:
-
-    print(
-        f"[RETEST_OK] {instId}",
-        flush=True
-    )
-
-    entry = rt["entry"]
-    stop = rt["stop"]
         # =====================
         # RR (ОБЩИЙ ДЛЯ ВСЕХ)
         # =====================
