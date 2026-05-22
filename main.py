@@ -10034,7 +10034,16 @@ def build_signal(instId):
             flush=True
         )
 
-    if ep < 6:
+        if (
+
+            ep < 6
+    
+            and signal.get("signal_mode") not in (
+                "EXPANSION",
+                "TRANSITION",
+                "CONFIRMED"
+            )
+        ):
 
         print(
             f"[OVERRIDE_BLOCK_EP] "
