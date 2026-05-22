@@ -10384,33 +10384,53 @@ def build_signal(instId):
 
                 signal["signal_group"] = "SWING"
             # =====================
+            # EXPANSION
+            # =====================
+
+            if (
+
+                signal.get("signal_mode") == "EXPANSION"
+
+                and score >= 15
+
+                and ep >= 6
+
+            ):
+
+                signal["signal_group"] = "SWING"
+
+            # =====================
             # PRE SWING
             # =====================
-    
+
             elif (
                 signal.get("signal_mode") == "TRANSITION"
                 and ep >= 8
                 and score >= 14
             ):
-    
+
                 signal["signal_group"] = "PRE_SWING"
-    
+
             # =====================
             # SCALP
             # =====================
-    
+
             elif (
+
                 not signal.get("signal_group")
-            
+
                 and signal.get("signal_mode") in (
                     "TRANSITION",
                     "CONFIRMED",
                 )
+
                 and ep >= 7
                 and score >= 12
+
             ):
-    
+
                 signal["signal_group"] = "SCALP"
+
             # =====================
             # NO GROUP
             # =====================
