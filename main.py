@@ -9805,7 +9805,7 @@ def build_signal(instId):
         )
     
         and ep < 6
-        and score < 10
+        and score < 11
     
     ):
     
