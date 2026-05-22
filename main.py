@@ -62,6 +62,29 @@ def classify_signal_mode(sig):
 
         if "ACCUMULATION" in stage:
             return "PREMOVE"
+
+        # =====================
+        # CONFIRMED
+        # =====================
+        if (
+            "BREAKOUT_CONFIRM_UP" in flags
+            or "BREAKOUT_CONFIRM_DOWN" in flags
+            or "BOS_UP" in flags
+            or "BOS_DOWN" in flags
+        ):
+            return "CONFIRMED"
+
+        # =====================
+        # CONTINUATION
+        # =====================
+        if (
+            "CONTINUATION_UP" in flags
+            or "CONTINUATION_DOWN" in flags
+            or "STRONG_CONTINUATION_UP" in flags
+            or "STRONG_CONTINUATION_DOWN" in flags
+        ):
+            return "CONTINUATION"
+
         # =====================
         # PREMOVE
         # =====================
@@ -71,63 +94,48 @@ def classify_signal_mode(sig):
             or "COMP_5M" in flags
             or "COMP_15M" in flags
         )
-        
+
         absorption_present = (
             "BUYER_ABSORPTION" in flags
             or "SELLER_ABSORPTION" in flags
         )
-        
+
         launch_present = (
             "LAUNCH_PROXIMITY_UP" in flags
             or "LAUNCH_PROXIMITY_DOWN" in flags
             or "EXPLOSION_READY_UP" in flags
             or "EXPLOSION_READY_DOWN" in flags
         )
-        
+
         if (
             "ENERGY_BUILDUP" in flags
             and (
                 launch_present
-                or (compression_present and absorption_present)
+                or (
+                    compression_present
+                    and absorption_present
+                )
             )
+            and ep_score >= 5
         ):
             return "PREMOVE"
 
-        # 2. TRANSITION — смена контроля
+        # =====================
+        # TRANSITION
+        # =====================
         if (
             "BULLISH_SHIFT" in flags
             or "BEARISH_SHIFT" in flags
-            or "🟠 TRANSITION" in stage
             or ep_score >= 6
         ):
             return "TRANSITION"
 
-        # 3. CONFIRMED — уже есть подтверждённый пробой
-        if (
-            "BREAKOUT_CONFIRM_UP" in flags
-            or "BREAKOUT_CONFIRM_DOWN" in flags
-            or "BOS_UP" in flags
-            or "BOS_DOWN" in flags
-        ):
-            return "CONFIRMED"
-
-        # 4. CONTINUATION — движение уже продолжается
-        if (
-            "CONTINUATION_UP" in flags
-            or "CONTINUATION_DOWN" in flags
-            or "STRONG_CONTINUATION_UP" in flags
-            or "STRONG_CONTINUATION_DOWN" in flags
-        ):
-            return "CONTINUATION"
-
-        # 5. Если просто высокий score, но нет направления — watch
+        # =====================
+        # WATCH
+        # =====================
         if score >= 6:
             return "WATCH"
 
-        return "NO_MODE"
-
-    except Exception as e:
-        print(f"[SIGNAL_MODE_ERROR] {e}", flush=True)
         return "NO_MODE"
 
 
