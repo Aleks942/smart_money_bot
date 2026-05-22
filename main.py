@@ -9822,7 +9822,63 @@ def build_signal(instId):
 
         return None
 
+    # =====================
+    # SIGNAL MODE
+    # =====================
+    
+    signal_mode = classify_signal_mode(signal)
+    
+    ep = float(
+        signal.get("early_pressure_score") or 0
+    )
+    
+    print(
+        f"[SIGNAL_MODE] {instId} mode={signal_mode}",
+        flush=True
+    )
+    
+    print(
+        f"[EARLY_DEBUG] {instId} "
+        f"flags={signal.get('flags')} "
+        f"score={signal.get('score')} "
+        f"acc={signal.get('acc_score')} "
+        f"stage={signal.get('stage')} "
+        f"ep={ep}",
+        flush=True
+    )
+    
+    # =====================
+    # EARLY IGNORE
+    # =====================
+    
+    if (
+    
+        signal_mode in (
+            "WATCH",
+            "NO_MODE",
+        )
+    
+        and (
+            score <= 11
+            or ep == 0
+        )
+    
+    ):
+    
+        print(
+            f"[EARLY_IGNORE] "
+            f"{instId} "
+            f"mode={signal_mode} "
+            f"score={score} "
+            f"ep={ep}",
+            flush=True
+        )
+    
+        return None
+    
     signal["sniper"] = sniper_signal(signal)
+    
+        
 
     # =====================
     # PRE-SWING PROMOTION
