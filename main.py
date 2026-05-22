@@ -10429,9 +10429,22 @@ def build_signal(instId):
             # =====================
 
             elif (
-                signal.get("signal_mode") == "TRANSITION"
-                and ep >= 8
-                and score >= 14
+
+                (
+                    signal.get("signal_mode") == "TRANSITION"
+                    and ep >= 8
+                    and score >= 14
+                )
+
+                or (
+
+                    signal.get("signal_mode") == "PREMOVE"
+
+                    and acc >= 3
+                    and ep >= 10
+                    and score >= 11
+                )
+
             ):
 
                 signal["signal_group"] = "PRE_SWING"
