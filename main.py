@@ -6080,12 +6080,12 @@ def decide_entry(stage, flags, price, c5, sig=None):
         # =====================
         else:
 
-            entry = "NO_ENTRY"
+            entry = "WATCH_BUILDUP"
             stop = None
-            reason = "PREMOVE_CONFLICT"
-
+            reason = "WATCH_BUILDUP"
+        
             print(
-                f"[PREMOVE_CONFLICT] {stage} flags={flags}",
+                f"[WATCH_BUILDUP] {stage} flags={flags}",
                 flush=True
             )
 
