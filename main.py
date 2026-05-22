@@ -13410,17 +13410,44 @@ if __name__ == "__main__":
                 sig = None
 
                 try:
-                
+
                     sig = build_signal(instId)
-                
-                    if not sig or not isinstance(sig, dict):
-                
+
+                    # =====================
+                    # INVALID CHECK
+                    # =====================
+
+                    if not sig:
+
                         print(
                             f"[INVALID_SIGNAL] {instId}",
                             flush=True
                         )
-                
+
                         continue
+
+                    if not isinstance(sig, dict):
+
+                        print(
+                            f"[INVALID_TYPE] {instId}",
+                            flush=True
+                        )
+
+                        continue
+
+                    # =====================
+                    # FORCE VALID BY OVERRIDE
+                    # =====================
+
+                    if sig.get("sendable") is True:
+
+                        sig["valid"] = True
+
+                        print(
+                            f"[FORCE_VALID_BY_OVERRIDE] "
+                            f"{instId}",
+                            flush=True
+                        )
 
                     # =====================
                     # OPEN INTEREST
