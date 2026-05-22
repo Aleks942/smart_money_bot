@@ -9818,6 +9818,20 @@ def build_signal(instId):
                 f"[SWING_PROMOTION] {instId}",
                 flush=True
             )
+
+            print(
+                f"[FINAL_DECISION] "
+                f"{instId} "
+                f"group={signal.get('signal_group')} "
+                f"mode={signal.get('signal_mode')} "
+                f"score={score} "
+                f"ep={ep} "
+                f"acc={acc} "
+                f"sendable={signal.get('sendable')} "
+                f"valid={signal.get('valid')} "
+                f"entry={signal.get('entry')}",
+                flush=True
+            )
         
             return signal
   
@@ -10278,22 +10292,37 @@ def build_signal(instId):
             ):
     
                 signal["signal_group"] = "SCALP"
-    
             # =====================
             # NO GROUP
             # =====================
-    
+
             else:
-    
-                signal["signal_group"] = None
-    
+
+                if not signal.get("sendable"):
+
+                    signal["signal_group"] = None
+
+            print(
+                f"[FINAL_DECISION] "
+                f"{instId} "
+                f"group={signal.get('signal_group')} "
+                f"mode={signal.get('signal_mode')} "
+                f"score={score} "
+                f"ep={ep} "
+                f"acc={acc} "
+                f"sendable={signal.get('sendable')} "
+                f"valid={signal.get('valid')} "
+                f"entry={signal.get('entry')}",
+                flush=True
+            )
+
             return signal
 
 
     # =========================
     # FINAL FILTER
-    # =========================
-
+    # ========================= 
+            
     if not ok and not premove_override:
 
         print(
