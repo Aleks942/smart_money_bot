@@ -10413,49 +10413,42 @@ def build_signal(instId):
             if (
 
                 signal.get("signal_mode") == "EXPANSION"
-            
+
                 and score >= 26
-            
+
                 and ep >= 16
-            
+
                 and (
-            
+
                     "EXPLOSION_READY_UP" in flags
                     or "EXPLOSION_READY_DOWN" in flags
-            
+
                     or "LAUNCH_PROXIMITY_UP" in flags
                     or "LAUNCH_PROXIMITY_DOWN" in flags
                 )
-            
-                and (
-                    "MTF_LONG_ALIGN" in flags
-                    or "MTF_SHORT_ALIGN" in flags
-                )
-            
-            ):
 
                 and (
+
                     "BREAKOUT_CONFIRM_UP" in flags
                     or "BREAKOUT_CONFIRM_DOWN" in flags
                     or "CONTINUATION_UP" in flags
                     or "CONTINUATION_DOWN" in flags
                     or "ACCELERATION_UP" in flags
                     or "ACCELERATION_DOWN" in flags
-                    or "EXPLOSION_READY_UP" in flags
-                    or "EXPLOSION_READY_DOWN" in flags
                 )
 
                 and (
                     "MTF_LONG_ALIGN" in flags
                     or "MTF_SHORT_ALIGN" in flags
-               ) 
-           ):
+                )
+
+            ):
 
                 signal["signal_group"] = "SWING"
+
             # =====================
             # EXPANSION
             # =====================
-
             if (
 
                 signal.get("signal_mode") == "EXPANSION"
