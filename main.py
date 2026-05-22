@@ -10106,63 +10106,55 @@ def build_signal(instId):
     # =========================
     # PRE-MOVE ENERGY PASS
     # =========================
-    
+
     elif (
-    
+
         "ENERGY_BUILDUP" in flags
-    
+
         and (
-    
+
             "PRESSURE_UP" in flags
             or "PRESSURE_DOWN" in flags
         )
-    
+
         and (
             "COMP_PRO_5M" in flags
             or "COMP_PRO_15M" in flags
         )
-    
+
     ):
-    
+
         quality_pass = True
-    
+
         if strong_structure_pass and quality_pass:
 
             print(
                 f"[PREMOVE_PASS] {instId}",
                 flush=True
             )
-        
-            signal["signal_mode"] = "PREMOVE"
-            signal["signal_group"] = "PRE_SWING"
-            signal["premove_confirmed"] = True
-            signal["sendable"] = True
-        
-            print(
-                f"[PREMOVE_ROUTE] "
-                f"{instId} -> PRE_SWING",
-                flush=True
-            )
-    
-            print(
-                f"[PREMOVE_PASS] {instId}",
-                flush=True
-            )
-            signal["signal_mode"] = "PREMOVE"
+
+            # =========================
+            # DO NOT DOWNGRADE EXPANSION
+            # =========================
+
+            if signal.get("signal_mode") != "EXPANSION":
+
+                signal["signal_mode"] = "PREMOVE"
 
             signal["signal_group"] = "PRE_SWING"
-            
+
             signal["premove_confirmed"] = True
-            
+
             signal["sendable"] = True
-            
+
+            signal["valid"] = True
+
             print(
                 f"[PREMOVE_ROUTE] "
                 f"{instId} -> PRE_SWING",
                 flush=True
             )
-        if strong_structure_pass and quality_pass:
-    
+
             # =========================
             # AUTO GROUP ASSIGN
             # =========================
