@@ -5626,6 +5626,58 @@ def smart_money_stage(score, flags):
         return "🟢 EXPANSION", "Сильный bearish expansion"
 
     # =========================
+    # SMART EXPANSION
+    # =========================
+
+    smart_bull_expansion = (
+
+        (
+            "EXPLOSION_READY_UP" in flags
+            or "LAUNCH_PROXIMITY_UP" in flags
+            or "ACCELERATION_UP" in flags
+        )
+
+        and (
+            "PRESSURE_UP" in flags
+            or "BULLISH_SHIFT" in flags
+        )
+
+        and (
+            "EMA_BULL_STRONG" in flags
+            or "MTF_LONG_ALIGN" in flags
+        )
+
+        and score >= 8
+    )
+
+    smart_bear_expansion = (
+
+        (
+            "EXPLOSION_READY_DOWN" in flags
+            or "LAUNCH_PROXIMITY_DOWN" in flags
+            or "ACCELERATION_DOWN" in flags
+        )
+
+        and (
+            "PRESSURE_DOWN" in flags
+            or "BEARISH_SHIFT" in flags
+        )
+
+        and (
+            "EMA_BEAR_STRONG" in flags
+            or "MTF_SHORT_ALIGN" in flags
+        )
+
+        and score >= 8
+    )
+
+    if smart_bull_expansion:
+        return "🟢 EXPANSION", "Smart-money bullish expansion"
+
+    if smart_bear_expansion:
+        return "🟢 EXPANSION", "Smart-money bearish expansion"
+
+    # =========================
     # ACCUMULATION
     # =========================
     if (
