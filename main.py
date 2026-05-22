@@ -13731,6 +13731,14 @@ if __name__ == "__main__":
                     # =====================
 
                     if sig.get("sendable") is True:
+                        if sig.get("setup_rank") != "ELITE":
+
+                            print(
+                                f"[SKIP_NON_ELITE] {instId}",
+                                flush=True
+                            )
+                        
+                            continue
 
                         # =====================
                         # EXPANSION ALREADY VALID
