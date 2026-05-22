@@ -10033,17 +10033,19 @@ def build_signal(instId):
             f"{symbol}",
             flush=True
         )
+        signal["valid"] = True
+        signal["sendable"] = True
+        
+    if (
 
-        if (
+        ep < 6
 
-            ep < 6
-    
-            and signal.get("signal_mode") not in (
-                "EXPANSION",
-                "TRANSITION",
-                "CONFIRMED"
-            )
-        ):
+        and signal.get("signal_mode") not in (
+            "EXPANSION",
+            "TRANSITION",
+            "CONFIRMED"
+        )
+    ):
 
         print(
             f"[OVERRIDE_BLOCK_EP] "
