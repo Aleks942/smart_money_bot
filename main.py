@@ -14800,7 +14800,7 @@ if __name__ == "__main__":
 
                 if (
                     s.get("setup_rank") == "PRIORITY_1"
-                    ]
+                    
 
                     and (
 
