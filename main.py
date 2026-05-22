@@ -12830,7 +12830,7 @@ def get_signal_level(sig):
         stage = str(sig.get("stage") or "")
         
         if (
-            elite_score >= 15
+            elite_score >= 18
             and acc >= 2
             and ep >= 9
             and "EXPANSION" in stage
