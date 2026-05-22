@@ -2956,6 +2956,15 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         )
         
         LAST_PREMOVE_SCORE[instId] = score
+        print(
+            f"[RETEST_SENT] "
+            f"{instId} "
+            f"score={score} "
+            f"rr={round(rr,2)} "
+            f"entry={entry} "
+            f"stop={stop}",
+            flush=True
+        )
         # =====================
         # UPDATE PREVIOUS VALUES (ПОСЛЕ ОТПРАВКИ)
         # =====================
