@@ -55,6 +55,9 @@ def classify_signal_mode(sig):
         # STAGE FIRST
         # =====================
         if "EXPANSION" in stage:
+
+            if score < 12 or ep < 6:
+               return "WATCH"
             return "EXPANSION"
 
         if "TRANSITION" in stage:
