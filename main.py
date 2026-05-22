@@ -9529,6 +9529,10 @@ def build_signal(instId):
     
     stage, stage_reason = smart_money_stage(score, flags)
 
+    if "signal_type" not in locals():
+
+        signal_type = "NORMAL"    
+
 
     # =========================
     # SIGNAL TYPE DEBUG
