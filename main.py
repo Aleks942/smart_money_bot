@@ -10485,8 +10485,8 @@ def build_signal(instId):
 
     # =========================
     # FINAL FILTER
-    # ========================= 
-            
+    # =========================
+
     if not ok and not premove_override:
 
         print(
@@ -10526,29 +10526,29 @@ def build_signal(instId):
 
         else:
 
-        # =====================
-        # KEEP ONLY STRONG OVERRIDES
-        # =====================
+            # =====================
+            # KEEP ONLY STRONG OVERRIDES
+            # =====================
 
-        if (
+            if (
 
-            signal.get("sendable") is True
+                signal.get("sendable") is True
 
-            and score >= 18
+                and score >= 18
 
-            and ep >= 10
+                and ep >= 10
 
-        ):
+            ):
 
-            print(
-                f"[KEEP_OVERRIDE_SIGNAL] "
-                f"{instId}",
-                flush=True
-            )
+                print(
+                    f"[KEEP_OVERRIDE_SIGNAL] "
+                    f"{instId}",
+                    flush=True
+                )
 
-            return signal
+                return signal
 
-        return None                    
+            return None                 
 
 # ==============================
 # 🎯 SNIPER SIGNAL ENGINE
