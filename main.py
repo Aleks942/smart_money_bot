@@ -71,7 +71,6 @@ def classify_signal_mode(sig):
         
             and ep >= 10
         
-            and acc >= 3
         
         ):
         
