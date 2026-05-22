@@ -12831,7 +12831,7 @@ def get_signal_level(sig):
         
         if (
             elite_score >= 15
-            and acc >= 3
+            and acc >= 2
             and ep >= 9
             and "EXPANSION" in stage
         ):
