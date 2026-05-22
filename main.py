@@ -50,7 +50,18 @@ def classify_signal_mode(sig):
         ep_score = float(sig.get("early_pressure_score") or 0)
         stage = str(sig.get("stage") or "")
 
-        # 1. PREMOVE — рынок сжат, энергия есть, но пробой ещё не обязан быть
+
+        # =====================
+        # STAGE FIRST
+        # =====================
+        if "EXPANSION" in stage:
+            return "EXPANSION"
+
+        if "TRANSITION" in stage:
+            return "TRANSITION"
+
+        if "ACCUMULATION" in stage:
+            return "PREMOVE"
         # =====================
         # PREMOVE
         # =====================
