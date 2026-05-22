@@ -137,6 +137,11 @@ def classify_signal_mode(sig):
             return "WATCH"
 
         return "NO_MODE"
+        
+    except Exception as e:
+        print(f"[SIGNAL_MODE_ERROR] {e}", flush=True)
+        return "NO_MODE"
+
 
 
 # =========================
