@@ -10242,7 +10242,9 @@ def build_signal(instId):
                 "TRANSITION"
             ):
 
-                signal["signal_mode"] = "PREMOVE"
+                if signal.get("signal_mode") != "EXPANSION":
+
+                    signal["signal_mode"] = "PREMOVE"
 
             signal["signal_group"] = "PRE_SWING"
 
