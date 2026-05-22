@@ -2384,27 +2384,27 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         )
         
              
-            if strong_momentum:
-                print(f"[RETEST_OVERRIDE] {instId} strong momentum → allow", flush=True)
-        
-                entry = sig.get("price")
-        
-                if "ВВЕРХ" in direction:
-                    stop = entry * 0.985
-                elif "ВНИЗ" in direction:
-                    stop = entry * 1.015
-                else:
-                    return empty
-        
+        if strong_momentum:
+            print(f"[RETEST_OVERRIDE] {instId} strong momentum → allow", flush=True)
+    
+            entry = sig.get("price")
+    
+            if "ВВЕРХ" in direction:
+                stop = entry * 0.985
+            elif "ВНИЗ" in direction:
+                stop = entry * 1.015
             else:
-                print(f"[RETEST_SKIP] {instId} {rt.get('reason')}", flush=True)
                 return empty
-        
+    
         else:
-            print(f"[RETEST_OK] {instId}", flush=True)
-        
-            entry = rt["entry"]
-            stop = rt["stop"]
+            print(f"[RETEST_SKIP] {instId} {rt.get('reason')}", flush=True)
+            return empty
+    
+    else:
+        print(f"[RETEST_OK] {instId}", flush=True)
+    
+        entry = rt["entry"]
+        stop = rt["stop"]
 
 
         # =====================
