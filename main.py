@@ -10544,6 +10544,27 @@ def build_signal(instId):
 
             return signal
 
+  
+    # =====================
+    # FORCE EXPANSION SWING
+    # =====================
+
+    if (
+        signal.get("signal_mode") == "EXPANSION"
+        and score >= 14
+        and ep >= 10
+    ):
+
+        signal["signal_group"] = "SWING"
+        signal["sendable"] = True
+
+        print(
+            f"[FORCE_EXPANSION_SWING] "
+            f"{instId}",
+            flush=True
+        )
+
+        return signal
 
     # =========================
     # FINAL FILTER
