@@ -10175,7 +10175,10 @@ def build_signal(instId):
             # DO NOT DOWNGRADE EXPANSION
             # =========================
 
-            if signal.get("signal_mode") != "EXPANSION":
+            if signal.get("signal_mode") not in (
+                "EXPANSION",
+                "TRANSITION"
+            ):
 
                 signal["signal_mode"] = "PREMOVE"
 
