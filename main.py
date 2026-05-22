@@ -9967,11 +9967,19 @@ def build_signal(instId):
 
             score >= 10
 
-            and (
+           and (
+
                 "EXPLOSION_READY_UP" in flags
                 or "EXPLOSION_READY_DOWN" in flags
+            
                 or "LAUNCH_PROXIMITY_UP" in flags
                 or "LAUNCH_PROXIMITY_DOWN" in flags
+            
+                or "PRESSURE_UP" in flags
+                or "PRESSURE_DOWN" in flags
+            
+                or "BULLISH_SHIFT" in flags
+                or "BEARISH_SHIFT" in flags
             )
 
             and (
