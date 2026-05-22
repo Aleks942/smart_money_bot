@@ -49,14 +49,14 @@ def classify_signal_mode(sig):
         score = float(sig.get("score") or 0)
         ep_score = float(sig.get("early_pressure_score") or 0)
         stage = str(sig.get("stage") or "")
-        score = float(signal.get("score") or 0)
+        score = float(sig.get("score") or 0)
 
         ep = float(
-            signal.get("early_pressure_score") or 0
+            sig.get("early_pressure_score") or 0
         )
         
         acc = float(
-            signal.get("acc_score") or 0
+            sig.get("acc_score") or 0
         )
 
 
