@@ -12412,6 +12412,10 @@ def is_elite_pre_swing(sig):
 
                 return False, "elite_low_ep"
 
+        acc = float(
+            sig.get("acc_score") or 0
+        )
+
         # =====================
         # ACC FILTER
         # =====================
