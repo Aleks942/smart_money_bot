@@ -14699,18 +14699,37 @@ if __name__ == "__main__":
             sent_ids = set()
 
             premove_alerts = [
-            
+
                 s for s in alerts
-            
+
                 if (
-                    s.get("setup_rank") in ["PRIORITY_1", "PRIORITY_2"]
+                    s.get("setup_rank") in [
+                        "PRIORITY_1",
+                        "PRIORITY_2"
+                    ]
+
                     and (
+
                         "LAUNCH_PROXIMITY_UP" in s.get("flags", [])
                         or "LAUNCH_PROXIMITY_DOWN" in s.get("flags", [])
+
                         or "EXPLOSION_READY_UP" in s.get("flags", [])
                         or "EXPLOSION_READY_DOWN" in s.get("flags", [])
+
+                        or (
+                            "COMP_PRO_5M" in s.get("flags", [])
+                            and s.get("acc_score", 0) >= 3
+                            and s.get("early_pressure_score", 0) >= 10
+                        )
+
+                        or (
+                            "COMP_PRO_15M" in s.get("flags", [])
+                            and s.get("acc_score", 0) >= 3
+                            and s.get("early_pressure_score", 0) >= 10
+                        )
                     )
                 )
+
             ][:3]
             
             for sig in premove_alerts:
