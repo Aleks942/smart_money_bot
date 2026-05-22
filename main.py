@@ -63,10 +63,18 @@ def classify_signal_mode(sig):
         # =====================
         # STAGE FIRST
         # =====================
-        if "EXPANSION" in stage:
+        if (
 
-            if score < 12 or ep < 6:
-               return "WATCH"
+            "EXPANSION" in stage
+        
+            and score >= 14
+        
+            and ep >= 10
+        
+            and acc >= 3
+        
+        ):
+        
             return "EXPANSION"
 
         if (
