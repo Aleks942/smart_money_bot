@@ -2366,47 +2366,59 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
                 )
             )
 
-            # =====================
-            # ACCUMULATION OVERRIDE
-            # =====================
+        # =====================
+        # ACCUMULATION OVERRIDE
+        # =====================
 
-            or (
-                "COMP_5M" in flags
-                and acc >= 3
-                and ep >= 10
-            )
-
-            or (
-                "COMP_PRO_5M" in flags
-                and acc >= 3
-                and ep >= 10
-            )
+        or (
+            "COMP_5M" in flags
+            and acc >= 3
+            and ep >= 10
         )
-        
-             
-        if strong_momentum:
-            print(f"[RETEST_OVERRIDE] {instId} strong momentum → allow", flush=True)
-    
-            entry = sig.get("price")
-    
-            if "ВВЕРХ" in direction:
-                stop = entry * 0.985
-            elif "ВНИЗ" in direction:
-                stop = entry * 1.015
-            else:
-                return empty
-    
+
+        or (
+            "COMP_PRO_5M" in flags
+            and acc >= 3
+            and ep >= 10
+        )
+    )
+
+    if strong_momentum:
+
+        print(
+            f"[RETEST_OVERRIDE] {instId} strong momentum → allow",
+            flush=True
+        )
+
+        entry = sig.get("price")
+
+        if "ВВЕРХ" in direction:
+            stop = entry * 0.985
+
+        elif "ВНИЗ" in direction:
+            stop = entry * 1.015
+
         else:
-            print(f"[RETEST_SKIP] {instId} {rt.get('reason')}", flush=True)
             return empty
-    
-        else:
-            print(f"[RETEST_OK] {instId}", flush=True)
-        
-        entry = rt["entry"]
-        stop = rt["stop"]
 
+    else:
 
+        print(
+            f"[RETEST_SKIP] {instId} {rt.get('reason')}",
+            flush=True
+        )
+
+        return empty
+
+else:
+
+    print(
+        f"[RETEST_OK] {instId}",
+        flush=True
+    )
+
+    entry = rt["entry"]
+    stop = rt["stop"]
         # =====================
         # RR (ОБЩИЙ ДЛЯ ВСЕХ)
         # =====================
