@@ -9480,12 +9480,6 @@ def build_signal(instId):
         else:
             signal_type = "SWING_EARLY"
             swing_only_candidate = True
-
-    # =========================
-    # DEFAULT SIGNAL TYPE
-    # =========================
-    
-    signal_type = "NORMAL"
     
     
     # =========================
