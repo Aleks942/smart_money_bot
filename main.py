@@ -9796,19 +9796,21 @@ def build_signal(instId):
     # =====================
     # EARLY IGNORE
     # =====================
-    
+
     if (
-    
+
         signal.get("signal_mode") in (
             "WATCH",
             "NO_MODE",
         )
-    
-        and ep < 6
-        and score < 11
-    
+
+        and (
+            score <= 11
+            or ep == 0
+        )
+
     ):
-    
+
         print(
             f"[EARLY_IGNORE] "
             f"{instId} "
@@ -9817,8 +9819,9 @@ def build_signal(instId):
             f"ep={ep}",
             flush=True
         )
-    
+
         return None
+
     signal["sniper"] = sniper_signal(signal)
 
     # =====================
