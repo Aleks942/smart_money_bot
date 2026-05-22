@@ -10305,6 +10305,12 @@ def build_signal(instId):
             or "COMP_PRO_15M" in flags
         )
 
+        and score >= 14
+
+        and ep >= 10
+
+        and acc >= 3
+
     ):
 
         quality_pass = True
