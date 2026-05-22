@@ -13720,15 +13720,23 @@ if __name__ == "__main__":
                             == "EXPANSION"
                         ):
 
-                            return sig
+                            sig["valid"] = True
 
-                        sig["valid"] = True
+                            print(
+                                f"[EXPANSION_ALREADY_VALID] "
+                                f"{instId}",
+                                flush=True
+                            )
 
-                        print(
-                            f"[FORCE_VALID_BY_OVERRIDE] "
-                            f"{instId}",
-                            flush=True
-                        )
+                        else:
+
+                            sig["valid"] = True
+
+                            print(
+                                f"[FORCE_VALID_BY_OVERRIDE] "
+                                f"{instId}",
+                                flush=True
+                            )
 
                     # =====================
                     # OPEN INTEREST
