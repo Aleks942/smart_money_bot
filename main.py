@@ -2400,9 +2400,9 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             print(f"[RETEST_SKIP] {instId} {rt.get('reason')}", flush=True)
             return empty
     
-    else:
-        print(f"[RETEST_OK] {instId}", flush=True)
-    
+        else:
+            print(f"[RETEST_OK] {instId}", flush=True)
+        
         entry = rt["entry"]
         stop = rt["stop"]
 
