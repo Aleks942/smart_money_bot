@@ -11392,17 +11392,21 @@ def swing_grade(sig):
         # =====================
         # SWING LEVELS
         # =====================
-        
-        if total >= 9:
-        
+
+        if total >= 13:
+
+            title = "🔥 ELITE SWING"
+
+        elif total >= 10:
+
             title = "🟢 СИЛЬНЫЙ SWING"
-        
+
         elif total >= 7:
-        
+
             title = "🟡 SWING SETUP"
-        
+
         else:
-        
+
             title = "⚪ НАБЛЮДЕНИЕ"
         
         # =====================
