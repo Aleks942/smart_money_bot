@@ -10224,30 +10224,38 @@ def build_signal(instId):
             # =====================
             # SWING
             # =====================
-    
+
             if (
-                score >= 18
+
+                signal.get("signal_mode") == "EXPANSION"
+
+                and score >= 18
                 and ep >= 8
+
                 and (
                     "BREAKOUT_CONFIRM_UP" in flags
                     or "BREAKOUT_CONFIRM_DOWN" in flags
                     or "CONTINUATION_UP" in flags
                     or "CONTINUATION_DOWN" in flags
+                    or "ACCELERATION_UP" in flags
+                    or "ACCELERATION_DOWN" in flags
+                    or "EXPLOSION_READY_UP" in flags
+                    or "EXPLOSION_READY_DOWN" in flags
                 )
+
                 and (
                     "MTF_LONG_ALIGN" in flags
                     or "MTF_SHORT_ALIGN" in flags
                 )
             ):
-    
+
                 signal["signal_group"] = "SWING"
-    
             # =====================
             # PRE SWING
             # =====================
     
             elif (
-                signal_mode == "TRANSITION"
+                signal.get("signal_mode") == "TRANSITION"
                 and ep >= 8
                 and score >= 14
             ):
