@@ -2331,37 +2331,59 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             flags = set(sig.get("flags", []))
             direction = sig.get("direction", "")
             
-            ep = float(
-                sig.get("early_pressure_score") or 0
-            )
-            strong_momentum = (
+        ep = float(
+            sig.get("early_pressure_score") or 0
+        )
 
-                "BREAKOUT_UP" in flags or
-                "CONTINUATION_UP" in flags or
-                "BREAKOUT_DOWN" in flags or
-                "CONTINUATION_DOWN" in flags
-            
-                or "BREAKOUT_CONFIRM_UP" in flags
-                or "BREAKOUT_CONFIRM_DOWN" in flags
-            
-                or "EXPLOSION_READY_UP" in flags
-                or "EXPLOSION_READY_DOWN" in flags
-            
-                or "ACCELERATION_UP" in flags
-                or "ACCELERATION_DOWN" in flags
-            
-                or "LAUNCH_PROXIMITY_UP" in flags
-                or "LAUNCH_PROXIMITY_DOWN" in flags
-            
-                or (
-                    ep >= 10
-                    and (
-                        "MTF_LONG_ALIGN" in flags
-                        or "MTF_SHORT_ALIGN" in flags
-                    )
+        acc = float(
+            sig.get("acc_score") or 0
+        )
+
+        strong_momentum = (
+
+            "BREAKOUT_UP" in flags or
+            "CONTINUATION_UP" in flags or
+            "BREAKOUT_DOWN" in flags or
+            "CONTINUATION_DOWN" in flags
+
+            or "BREAKOUT_CONFIRM_UP" in flags
+            or "BREAKOUT_CONFIRM_DOWN" in flags
+
+            or "EXPLOSION_READY_UP" in flags
+            or "EXPLOSION_READY_DOWN" in flags
+
+            or "ACCELERATION_UP" in flags
+            or "ACCELERATION_DOWN" in flags
+
+            or "LAUNCH_PROXIMITY_UP" in flags
+            or "LAUNCH_PROXIMITY_DOWN" in flags
+
+            or (
+                ep >= 10
+                and (
+                    "MTF_LONG_ALIGN" in flags
+                    or "MTF_SHORT_ALIGN" in flags
                 )
             )
+
+            # =====================
+            # ACCUMULATION OVERRIDE
+            # =====================
+
+            or (
+                "COMP_5M" in flags
+                and acc >= 3
+                and ep >= 10
+            )
+
+            or (
+                "COMP_PRO_5M" in flags
+                and acc >= 3
+                and ep >= 10
+            )
+        )
         
+             
             if strong_momentum:
                 print(f"[RETEST_OVERRIDE] {instId} strong momentum → allow", flush=True)
         
