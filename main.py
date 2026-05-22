@@ -10448,8 +10448,8 @@ def build_signal(instId):
                 and (
                     "MTF_LONG_ALIGN" in flags
                     or "MTF_SHORT_ALIGN" in flags
-                )
-           
+                
+           ):
 
                 signal["signal_group"] = "SWING"
             # =====================
