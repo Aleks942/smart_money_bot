@@ -397,6 +397,35 @@ def is_scalp_candidate(signal):
 
             return True, "scalp_accumulation"
 
+        
+        # =========================
+        # EXPLOSION SETUP
+        # =========================
+
+        if (
+
+            score >= 14
+
+            and ep_score >= 10
+
+            and (
+
+                "EXPLOSION_READY_UP" in flags
+                or "EXPLOSION_READY_DOWN" in flags
+                or "LAUNCH_PROXIMITY_UP" in flags
+                or "LAUNCH_PROXIMITY_DOWN" in flags
+            )
+
+            and (
+
+                "ACCELERATION_UP" in flags
+                or "ACCELERATION_DOWN" in flags
+            )
+
+        ):
+
+            return True, "scalp_explosion_setup"
+
         return False, "scalp_no_match"
 
     except Exception as e:
