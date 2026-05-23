@@ -246,8 +246,21 @@ def money_flow_ok(candles, oi_change, direction):
         oi_ok = False
         if oi_change is not None:
             try:
-                if float(oi_change) > 0:
-                    oi_ok = True
+                oi_value = float(oi_change)
+
+                if direction in ("LONG", "BUY"):
+
+                    oi_ok = (
+                        oi_value >= 0.3
+                        and move_pct > 0.3
+                    )
+                
+                elif direction in ("SHORT", "SELL"):
+                
+                    oi_ok = (
+                        oi_value >= 0.3
+                        and move_pct < -0.3
+                    )
             except:
                 pass
 
