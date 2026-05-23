@@ -5350,7 +5350,36 @@ def signal_quality_filter(sig):
         or "CONTINUATION_UP" in flags
         or "CONTINUATION_DOWN" in flags
     )
+    # =====================
+    # 🔥 ELITE PREMOVE PASS
+    # =====================
     
+    if (
+    
+        ep_score >= 12
+        and acc >= 3
+    
+        and (
+            "PRESSURE_UP" in flags
+            or "PRESSURE_DOWN" in flags
+        )
+    
+        and (
+            "BUYER_ABSORPTION" in flags
+            or "SELLER_ABSORPTION" in flags
+        )
+    
+        and (
+            "COMP_5M" in flags
+            or "COMP_15M" in flags
+            or "COMP_PRO_5M" in flags
+            or "COMP_PRO_15M" in flags
+        )
+    
+    ):
+    
+        return True, "elite_premove_pass"
+        
     if score >= 4 and real_structure:
         return True, "structure_pass"
 
