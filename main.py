@@ -10310,6 +10310,39 @@ def build_signal(instId):
     
         signal["valid"] = True
         signal["sendable"] = True
+
+        # =====================
+        # EXPANSION PASS
+        # =====================
+        
+        if "EXPANSION" in stage:
+        
+            expansion_ok = (
+        
+                ep >= 8
+        
+                and (
+        
+                    "ACCELERATION_UP" in flags
+                    or "ACCELERATION_DOWN" in flags
+        
+                    or "BREAKOUT_CONFIRM_UP" in flags
+                    or "BREAKOUT_CONFIRM_DOWN" in flags
+        
+                    or "VOL_SPIKE" in flags
+                )
+            )
+        
+            if expansion_ok:
+        
+                print(
+                    f"[EXPANSION_PASS] "
+                    f"{symbol}",
+                    flush=True
+                )
+        
+                signal["valid"] = True
+                signal["sendable"] = True
     
        
         # =====================
