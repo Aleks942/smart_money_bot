@@ -12901,7 +12901,7 @@ def calc_elite_score(sig):
         # ACCUMULATION
         # =====================
 
-        if acc >= 3:
+        if acc >= 2:
 
             elite_score += 2
             reasons.append("acc")
