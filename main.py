@@ -14048,24 +14048,26 @@ if __name__ == "__main__":
                             continue
     
                         # =========================
-                        # ELITE ONLY
+                        # FINAL RANK FIREWALL
                         # =========================
-    
+
                         if (
 
                             sig.get("setup_rank") not in (
-                                "ELITE",
                                 "PRIORITY_1",
+                                "PRIORITY_2",
                             )
-                        
+
+                            and sig.get("signal_mode") != "PREMOVE"
+
                         ):
-                        
+
                             print(
                                 f"[SKIP_LOW_RANK] "
                                 f"{instId}",
                                 flush=True
                             )
-                        
+
                             continue
                             
                         # =========================
