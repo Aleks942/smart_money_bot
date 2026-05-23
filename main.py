@@ -10134,14 +10134,14 @@ def build_signal(instId):
         flush=True
     )
     
-        if late_entry:
+    if late_entry:
 
-        print(
-            f"[LATE_ENTRY_WARNING] "
-            f"{instId} "
-            f"{late_reason}",
-            flush=True
-        )
+    print(
+        f"[LATE_ENTRY_WARNING] "
+        f"{instId} "
+        f"{late_reason}",
+        flush=True
+    )
 
         # =====================
         # HARD BLOCK ONLY FOR WEAK
