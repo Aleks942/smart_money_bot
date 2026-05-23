@@ -10205,9 +10205,9 @@ def build_signal(instId):
 
         elite_transition_ok = (
 
-            score >= 14
+            score >= 10
 
-            and ep >= 10
+            and ep >= 7
 
            and (
 
