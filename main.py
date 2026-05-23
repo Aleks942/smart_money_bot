@@ -14203,20 +14203,28 @@ if __name__ == "__main__":
 
                             continue
 
+                       
+
                         if (
                             group == "PRE_SWING"
-                            and float(sig.get("score") or 0) < 16
-                            and float(sig.get("early_pressure_score") or 0) < 10
+                        
+                            and float(sig.get("score") or 0) < 12
+                        
+                            and float(sig.get("early_pressure_score") or 0) < 8
+                        
+                            and sig.get("signal_mode") not in (
+                                "PREMOVE",
+                                "TRANSITION",
+                            )
                         ):
-
+                        
                             print(
                                 f"[SKIP_WEAK_PRE_SWING_TG] "
                                 f"{instId}",
                                 flush=True
                             )
-
+                        
                             continue
-
                         send_telegram(msg)
                 
                         scalp_sent_this_cycle += 1
