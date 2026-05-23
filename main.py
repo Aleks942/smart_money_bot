@@ -9929,7 +9929,7 @@ def build_signal(instId):
 
         and score < 6
 
-        and ep < 7
+        and ep < 6
 
     ):
 
