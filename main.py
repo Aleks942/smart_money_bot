@@ -10291,14 +10291,34 @@ def build_signal(instId):
         signal["valid"] = True
         signal["sendable"] = True
     
+       
         # =====================
-        # FORCE ROUTING
+        # FORCE EXPANSION ROUTE
         # =====================
-    
+        
+        if (
+        
+            signal.get("signal_mode") == "EXPANSION"
+        
+            and ep >= 10
+        
+        ):
+        
+            signal["signal_group"] = "SWING"
+            signal["sendable"] = True
+            signal["valid"] = True
+        
+            print(
+                f"[FORCE_EXPANSION_SWING] "
+                f"{instId}",
+                flush=True
+            )
         if signal.get("signal_group") is None:
     
             signal["signal_group"] = "PRE_SWING"
-    
+            
+            signal["sendable"] = True
+            signal["valid"] = True
             print(
                 f"[FORCE_PRE_SWING] "
                 f"{symbol}",
