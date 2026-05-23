@@ -10226,7 +10226,7 @@ def build_signal(instId):
 
             and (
                 signal.get("retest_ok") is True
-                or score >= 12
+                or score >= 10
             )
         )
 
