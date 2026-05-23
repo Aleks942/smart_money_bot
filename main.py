@@ -10318,36 +10318,41 @@ def build_signal(instId):
         
         if (
         
-            signal.get("signal_mode") == "EXPANSION"
+            (
+                sig.get("signal_mode") == "EXPANSION"
+                or "EXPANSION" in stage
+            )
         
             and ep >= 10
         
         ):
         
-            signal["signal_group"] = "SWING"
-            signal["sendable"] = True
-            signal["valid"] = True
+            sig["signal_group"] = "SWING"
+            sig["sendable"] = True
+            sig["valid"] = True
         
             print(
                 f"[FORCE_EXPANSION_SWING] "
                 f"{instId}",
                 flush=True
             )
-        if signal.get("signal_group") is None:
-    
-            signal["signal_group"] = "PRE_SWING"
-            
-            signal["sendable"] = True
-            signal["valid"] = True
+        
+        if sig.get("signal_group") is None:
+        
+            sig["signal_group"] = "PRE_SWING"
+        
+            sig["sendable"] = True
+            sig["valid"] = True
+        
             print(
                 f"[FORCE_PRE_SWING] "
                 f"{symbol}",
                 flush=True
             )
-    
-    # =====================
-    # EP BLOCK
-    # =====================
+        
+        # =====================
+        # EP BLOCK
+        # =====================
     
     if (
     
