@@ -9793,34 +9793,7 @@ def build_signal(instId):
         f"ep={ep}",
         flush=True
     )
-    # =====================
-    # EARLY IGNORE
-    # =====================
-
-    if (
-
-        signal.get("signal_mode") in (
-            "WATCH",
-            "NO_MODE",
-        )
-
-        and (
-            score <= 11
-            or ep == 0
-        )
-
-    ):
-
-        print(
-            f"[EARLY_IGNORE] "
-            f"{instId} "
-            f"mode={signal.get('signal_mode')} "
-            f"score={score} "
-            f"ep={ep}",
-            flush=True
-        )
-
-        return None
+   
 
     
     # =====================
