@@ -397,7 +397,38 @@ def is_scalp_candidate(signal):
 
             return True, "scalp_accumulation"
 
-        
+        # =========================
+        # EARLY ENERGY SETUP
+        # =========================
+
+        if (
+
+            score >= 10
+
+            and ep_score >= 8
+
+            and (
+
+                "ENERGY_BUILDUP" in flags
+                or "COMP_PRO_5M" in flags
+                or "COMP_PRO_15M" in flags
+            )
+
+            and (
+
+                "MTF_LONG_ALIGN" in flags
+                or "MTF_SHORT_ALIGN" in flags
+            )
+
+            and (
+
+                "EMA_BULL_STRONG" in flags
+                or "EMA_BEAR_STRONG" in flags
+            )
+
+        ):
+
+            return True, "scalp_energy_setup"
         # =========================
         # EXPLOSION SETUP
         # =========================
