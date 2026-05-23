@@ -13942,6 +13942,29 @@ if __name__ == "__main__":
                         )
 
                     # =====================
+                    # AUTO TRANSITION ROUTE
+                    # =====================
+
+                    if (
+                        sig.get("signal_mode") == "TRANSITION"
+                        and not group
+                        and float(sig.get("score") or 0) >= 10
+                        and float(
+                            sig.get("early_pressure_score") or 0
+                        ) >= 7
+                    ):
+
+                        group = "PRE_SWING"
+
+                        sig["signal_group"] = group
+
+                        print(
+                            f"[AUTO_TRANSITION_ROUTE] "
+                            f"{instId} -> PRE_SWING",
+                            flush=True
+                        )
+
+                    # =====================
                     # AUTO EXPANSION ROUTE
                     # =====================
 
