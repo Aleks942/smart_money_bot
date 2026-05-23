@@ -14268,7 +14268,7 @@ if __name__ == "__main__":
                 f"side={sig_side}",
                 flush=True
             )
-
+            flags = set(sig.get("flags", []))
             # =====================
             # ELITE SIDE CONFIRM
             # =====================
