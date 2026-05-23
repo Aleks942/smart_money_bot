@@ -12932,17 +12932,31 @@ def is_elite_pre_swing(sig):
             # =====================
             # STRONG ACC EXCEPTION
             # =====================
-
-            if ep >= 15 and acc >= 3:
-
+            
+            if (
+            
+                (
+                    ep >= 10
+                    and acc >= 2
+                )
+            
+                or has_mtf
+            
+                or (
+                    "BUYER_ABSORPTION" in flags
+                    or "SELLER_ABSORPTION" in flags
+                )
+            
+            ):
+            
                 print(
                     f"[ELITE_ACC_EXCEPTION] "
                     f"{sig.get('symbol')}",
                     flush=True
                 )
-
+            
             else:
-
+            
                 return False, "elite_no_launch_or_shift"
 
         # =====================
