@@ -13919,12 +13919,32 @@ if __name__ == "__main__":
                     # =====================
                     # SIGNAL DISPATCH
                     # =====================
-                
+
                     group = sig.get("signal_group")
+
+                    # =====================
+                    # AUTO PREMOVE ROUTE
+                    # =====================
+
                     if (
                         sig.get("signal_mode") == "PREMOVE"
                         and not group
                     ):
+
+                        group = "PRE_SWING"
+
+                        sig["signal_group"] = group
+
+                        print(
+                            f"[AUTO_PREMOVE_ROUTE] "
+                            f"{instId} -> PRE_SWING",
+                            flush=True
+                        )
+
+                    # =====================
+                    # AUTO EXPANSION ROUTE
+                    # =====================
+
                     if (
                         sig.get("signal_mode") == "EXPANSION"
                         and not group
@@ -13943,27 +13963,18 @@ if __name__ == "__main__":
                             f"{instId} -> PRE_SWING",
                             flush=True
                         )
-                        group = "PRE_SWING"
-                    
-                        sig["signal_group"] = group
-                    
-                        print(
-                            f"[AUTO_PREMOVE_ROUTE] "
-                            f"{instId} -> PRE_SWING",
-                            flush=True
-                        )
-                
+
                     allowed_groups = [
                         "PRE_SWING",
                         "SWING",
                     ]
-                    
+
                     if ENABLE_SCALP_ALERTS:
-                    
+
                         allowed_groups.append("SCALP")
-                    
+
                     if group in allowed_groups:
-                
+
                         # =====================
                         # MESSAGE TYPE
                         # =====================
