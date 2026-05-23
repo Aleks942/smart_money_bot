@@ -448,9 +448,15 @@ def is_scalp_candidate(signal):
             )
 
             and (
-
+            
                 "ACCELERATION_UP" in flags
                 or "ACCELERATION_DOWN" in flags
+            
+                or "BULLISH_SHIFT" in flags
+                or "BEARISH_SHIFT" in flags
+            
+                or "EXPLOSION_READY_UP" in flags
+                or "EXPLOSION_READY_DOWN" in flags
             )
 
         ):
