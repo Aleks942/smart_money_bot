@@ -10134,19 +10134,38 @@ def build_signal(instId):
         flush=True
     )
     
-    if late_entry:
-    
-        signal["filter_pass"] = False
-        signal["filter_reason"] = late_reason
-    
+        if late_entry:
+
         print(
-            f"[SKIP_LATE_ENTRY] "
+            f"[LATE_ENTRY_WARNING] "
             f"{instId} "
             f"{late_reason}",
             flush=True
         )
-    
-        return None
+
+        # =====================
+        # HARD BLOCK ONLY FOR WEAK
+        # =====================
+
+        if (
+
+            score < 24
+
+            and ep < 14
+
+        ):
+
+            signal["filter_pass"] = False
+            signal["filter_reason"] = late_reason
+
+            print(
+                f"[SKIP_LATE_ENTRY] "
+                f"{instId} "
+                f"{late_reason}",
+                flush=True
+            )
+
+            return None
 
     # =====================
     # RETEST CHECK
