@@ -6289,6 +6289,13 @@ def detect_early_pressure(sig):
     
     if "PRESSURE_DOWN" in flags:
         add_down(2, "PRESSURE_DOWN")
+
+    # ABSORPTION
+    if "BUYER_ABSORPTION" in flags:
+        add_up(4, "BUYER_ABSORPTION")
+
+    if "SELLER_ABSORPTION" in flags:
+        add_down(4, "SELLER_ABSORPTION")
         
     if "PRE_BREAKOUT_BUY" in flags:
         add_up(3, "PRE_BREAKOUT_BUY")
