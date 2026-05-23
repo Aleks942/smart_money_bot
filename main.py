@@ -10073,7 +10073,33 @@ def build_signal(instId):
     acc = float(
         signal.get("acc_score") or 0
     )
-    
+# =====================
+# EXPANSION RETEST EXCEPTION
+# =====================
+
+if (
+
+    signal.get("signal_mode") == "EXPANSION"
+
+    and ep >= 10
+
+    and (
+        "ACCELERATION_UP" in flags
+        or "ACCELERATION_DOWN" in flags
+
+        or "BULLISH_SHIFT" in flags
+        or "BEARISH_SHIFT" in flags
+    )
+
+):
+
+    retest_ok = True
+
+    print(
+        f"[EXPANSION_RETEST_OVERRIDE] "
+        f"{instId}",
+        flush=True
+    )
     # =====================
     # HARD BLOCK
     # =====================
