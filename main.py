@@ -13648,12 +13648,13 @@ if __name__ == "__main__":
                         # =====================
                 
                         if group == "SWING":
-                
-                            msg = safe_msg_builder(
-                                globals().get("msg_swing"),
-                                sig,
-                                "SWING"
+
+                            print(
+                                f"[SWING_DISABLED] {instId}",
+                                flush=True
                             )
+                        
+                            continue
                 
                         elif group == "PRE_SWING":
                 
