@@ -10073,33 +10073,34 @@ def build_signal(instId):
     acc = float(
         signal.get("acc_score") or 0
     )
-# =====================
-# EXPANSION RETEST EXCEPTION
-# =====================
+    # =====================
+    # EXPANSION RETEST EXCEPTION
+    # =====================
 
-if (
+    if (
 
-    signal.get("signal_mode") == "EXPANSION"
+        signal.get("signal_mode") == "EXPANSION"
 
-    and ep >= 10
+        and ep >= 10
 
-    and (
-        "ACCELERATION_UP" in flags
-        or "ACCELERATION_DOWN" in flags
+        and (
+            "ACCELERATION_UP" in flags
+            or "ACCELERATION_DOWN" in flags
 
-        or "BULLISH_SHIFT" in flags
-        or "BEARISH_SHIFT" in flags
-    )
+            or "BULLISH_SHIFT" in flags
+            or "BEARISH_SHIFT" in flags
+        )
 
-):
+    ):
 
-    retest_ok = True
+        retest_ok = True
 
-    print(
-        f"[EXPANSION_RETEST_OVERRIDE] "
-        f"{instId}",
-        flush=True
-    )
+        print(
+            f"[EXPANSION_RETEST_OVERRIDE] "
+            f"{instId}",
+            flush=True
+        )
+
     # =====================
     # HARD BLOCK
     # =====================
@@ -10110,17 +10111,17 @@ if (
 
             score >= 10
 
-           and (
+            and (
 
                 "EXPLOSION_READY_UP" in flags
                 or "EXPLOSION_READY_DOWN" in flags
-            
+
                 or "LAUNCH_PROXIMITY_UP" in flags
                 or "LAUNCH_PROXIMITY_DOWN" in flags
-            
+
                 or "PRESSURE_UP" in flags
                 or "PRESSURE_DOWN" in flags
-            
+
                 or "BULLISH_SHIFT" in flags
                 or "BEARISH_SHIFT" in flags
             )
@@ -10146,9 +10147,10 @@ if (
             f"{symbol}",
             flush=True
         )
+
         signal["valid"] = True
         signal["sendable"] = True
-        
+
     if (
 
         ep < 6
@@ -10179,11 +10181,11 @@ if (
         )
 
         return False
-    
+
     # =====================
     # ALLOW OVERRIDE
     # =====================
-    
+
     if (
         score >= 28
         and (
@@ -10193,7 +10195,7 @@ if (
             or "LAUNCH_PROXIMITY_DOWN" in flags
         )
     ):
-    
+
         print(
             f"[PREMOVE_OVERRIDE_OK] "
             f"{symbol} "
@@ -10202,12 +10204,13 @@ if (
             f"acc={acc}",
             flush=True
         )
-    
+
         premove_override = True
-    
+
     else:
-    
+
         premove_override = False
+
     # =========================
     # STRUCTURE PASS
     # =========================
