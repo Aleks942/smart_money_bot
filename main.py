@@ -1076,7 +1076,7 @@ def telegram_firewall(sig, group="GENERAL"):
         # MINIMUM QUALITY
         # =====================
         if group == "SCALP":
-            if score < 16:
+            if score < 12:
                 return False, f"scalp_score_low_{score}"
             if ep < 7:
                 return False, f"scalp_ep_low_{ep}"
