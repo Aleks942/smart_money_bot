@@ -10570,91 +10570,89 @@ def build_signal(instId):
 
                     signal["signal_group"] = None
 
-            print(
-                f"[FINAL_DECISION] "
-                f"{instId} "
-                f"group={signal.get('signal_group')} "
-                f"mode={signal.get('signal_mode')} "
-                f"score={score} "
-                f"ep={ep} "
-                f"acc={acc} "
-                f"sendable={signal.get('sendable')} "
-                f"valid={signal.get('valid')} "
-                f"entry={signal.get('entry')}",
-                flush=True
-            )
-
-            return signal
-
-  
-  
-
-    # =========================
-    # FINAL FILTER
-    # =========================
-
-    if not ok and not premove_override:
-
-        print(
-            f"[FILTER_BLOCK] "
-            f"{instId} reason={reason}",
-            flush=True
-        )
-
-        return None
-
-    if premove_override:
-
-        print(
-            f"[OVERRIDE_FINAL_PASS] "
-            f"{instId}",
-            flush=True
-        )
-
-    if not signal.get("signal_group"):
-
-        if (
-            signal.get("signal_mode") == "TRANSITION"
-            and ep >= 8
-            and signal.get("entry") not in (
-                "NO_ENTRY",
-                "PREMOVE_CONFLICT",
-            )
-            and (
-                "ACCELERATION_UP" in flags
-                or "ACCELERATION_DOWN" in flags
-                or "BREAKOUT_CONFIRM_UP" in flags
-                or "BREAKOUT_CONFIRM_DOWN" in flags
-            )
-        ):
-
-            signal["signal_group"] = "SCALP"
-
-        else:
-
-            # =====================
-            # KEEP ONLY STRONG OVERRIDES
-            # =====================
-
-            if (
-
-                signal.get("sendable") is True
-
-                and score >= 18
-
-                and ep >= 10
-
-            ):
+            
+            # =========================
+            # FINAL FILTER
+            # =========================
+            
+            if not ok and not premove_override:
 
                 print(
-                    f"[KEEP_OVERRIDE_SIGNAL] "
+                    f"[FILTER_BLOCK] "
+                    f"{instId} reason={reason}",
+                    flush=True
+                )
+        
+                return None
+        
+            if premove_override:
+        
+                print(
+                    f"[OVERRIDE_FINAL_PASS] "
                     f"{instId}",
                     flush=True
                 )
+        
+            if not signal.get("signal_group"):
+        
+                if (
+                    signal.get("signal_mode") == "TRANSITION"
+                    and ep >= 8
+                    and signal.get("entry") not in (
+                        "NO_ENTRY",
+                        "PREMOVE_CONFLICT",
+                    )
+                    and (
+                        "ACCELERATION_UP" in flags
+                        or "ACCELERATION_DOWN" in flags
+                        or "BREAKOUT_CONFIRM_UP" in flags
+                        or "BREAKOUT_CONFIRM_DOWN" in flags
+                    )
+                ):
+        
+                    signal["signal_group"] = "SCALP"
+        
+                else:
 
-                return signal
-
-            return None                 
+                # =====================
+                # KEEP ONLY STRONG OVERRIDES
+                # =====================
+    
+                if (
+    
+                    signal.get("sendable") is True
+    
+                    and score >= 18
+    
+                    and ep >= 10
+    
+                ):
+    
+                    print(
+                        f"[KEEP_OVERRIDE_SIGNAL] "
+                        f"{instId}",
+                        flush=True
+                    )
+    
+                else:
+    
+                    return None
+    
+        print(
+            f"[FINAL_DECISION] "
+            f"{instId} "
+            f"group={signal.get('signal_group')} "
+            f"mode={signal.get('signal_mode')} "
+            f"score={score} "
+            f"ep={ep} "
+            f"acc={acc} "
+            f"sendable={signal.get('sendable')} "
+            f"valid={signal.get('valid')} "
+            f"entry={signal.get('entry')}",
+            flush=True
+        )
+    
+        return signal
 
 # ==============================
 # 🎯 SNIPER SIGNAL ENGINE
