@@ -10234,91 +10234,116 @@ def build_signal(instId):
     # =====================
     # HARD BLOCK
     # =====================
-
+    
     if "TRANSITION" in stage:
-
+    
         elite_transition_ok = (
-
-            score >= 10
-
+    
+            ep >= 7
+    
             and (
-
-                "EXPLOSION_READY_UP" in flags
-                or "EXPLOSION_READY_DOWN" in flags
-
-                or "LAUNCH_PROXIMITY_UP" in flags
-                or "LAUNCH_PROXIMITY_DOWN" in flags
-
-                or "PRESSURE_UP" in flags
+    
+                "PRESSURE_UP" in flags
                 or "PRESSURE_DOWN" in flags
-
+    
                 or "BULLISH_SHIFT" in flags
                 or "BEARISH_SHIFT" in flags
+    
+                or "EXPLOSION_READY_UP" in flags
+                or "EXPLOSION_READY_DOWN" in flags
+    
+                or "LAUNCH_PROXIMITY_UP" in flags
+                or "LAUNCH_PROXIMITY_DOWN" in flags
             )
-
+    
             and (
-                signal.get("retest_ok") is True
-                or score >= 10
-                or (
-                    ep >= 8
-                    and (
-                        "MTF_LONG_ALIGN" in flags
-                        or "MTF_SHORT_ALIGN" in flags
-                    )
-                )
+    
+                "EMA_BULL_STRONG" in flags
+                or "EMA_BEAR_STRONG" in flags
+    
+                or "MTF_LONG_ALIGN" in flags
+                or "MTF_SHORT_ALIGN" in flags
+    
+                or "BUYER_ABSORPTION" in flags
+                or "SELLER_ABSORPTION" in flags
+    
+                or "ACCELERATION_UP" in flags
+                or "ACCELERATION_DOWN" in flags
             )
         )
-
+    
         if not elite_transition_ok:
-
+    
             print(
                 f"[OVERRIDE_BLOCK_TRANSITION] "
                 f"{symbol}",
                 flush=True
             )
-
+    
             return False
-
+    
         print(
             f"[ELITE_TRANSITION_PASS] "
             f"{symbol}",
             flush=True
         )
-
+    
         signal["valid"] = True
         signal["sendable"] = True
-
+    
+        # =====================
+        # FORCE ROUTING
+        # =====================
+    
+        if signal.get("signal_group") is None:
+    
+            signal["signal_group"] = "PRE_SWING"
+    
+            print(
+                f"[FORCE_PRE_SWING] "
+                f"{symbol}",
+                flush=True
+            )
+    
+    # =====================
+    # EP BLOCK
+    # =====================
+    
     if (
-
-        ep < 6
-
+    
+        ep < 5
+    
         and signal.get("signal_mode") not in (
             "EXPANSION",
             "TRANSITION",
             "CONFIRMED"
         )
     ):
-
+    
         print(
             f"[OVERRIDE_BLOCK_EP] "
             f"{symbol} "
             f"ep={ep}",
             flush=True
         )
-
+    
         return False
-
+    
+    # =====================
+    # ACC BLOCK
+    # =====================
+    
     if acc < 0:
-
+    
         print(
             f"[OVERRIDE_BLOCK_ACC] "
             f"{symbol} "
             f"acc={acc}",
             flush=True
         )
-
+    
         return False
-
+    
     # =====================
     # ALLOW OVERRIDE
     # =====================
