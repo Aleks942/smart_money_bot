@@ -8342,7 +8342,7 @@ def detect_retest_entry(sig):
         # =====================
         # SHORT RETEST
         # =====================
-        
+
         if (
             (
                 "PRESSURE_DOWN" in flags
@@ -8354,28 +8354,39 @@ def detect_retest_entry(sig):
                 or "TRANSITION" in stage
             )
         ):
-        
+
             return True, "short_retest_ready"
-        
+
         # =====================
         # EXPANSION / PREMOVE EXCEPTION
         # =====================
-        
-        if signal.get("signal_mode") in (
+
+        if sig.get("signal_mode") in (
             "EXPANSION",
             "PREMOVE",
         ):
-        
+
             print(
                 f"[RETEST_BYPASS] "
-                f"{instId} "
-                f"mode={signal.get('signal_mode')}",
+                f"{sig.get('symbol')} "
+                f"mode={sig.get('signal_mode')}",
                 flush=True
             )
-        
+
             return True, "retest_bypass"
-        
+
         return False, "no_retest"
+
+    except Exception as e:
+
+        print(
+            f"[RETEST_ERROR] {e}",
+            flush=True
+        )
+
+        return False, "retest_error"
+
+
 # =========================
 # MAIN SIGNAL BUILDER
 # =========================
