@@ -10674,6 +10674,15 @@ def build_signal(instId):
                 ):
 
                     signal["signal_group"] = "SCALP"
+                    print(
+                        f"[ROUTING_DEBUG] "
+                        f"{instId} "
+                        f"group={signal.get('signal_group')} "
+                        f"mode={signal.get('signal_mode')} "
+                        f"score={score} "
+                        f"ep={ep}",
+                        flush=True
+                    )
 
                 else:
 
