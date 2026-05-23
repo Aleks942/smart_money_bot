@@ -10497,6 +10497,7 @@ def build_signal(instId):
                 signal.get("signal_mode") in (
                     "TRANSITION",
                     "PREMOVE",
+                    "EXPANSION",
                 )
             
                 and ep >= 6
