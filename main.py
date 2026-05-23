@@ -12770,16 +12770,23 @@ def is_elite_pre_swing(sig):
         # =====================
         # HARD MINIMUM
         # =====================
-
-        if score < 16:
+        
+        if (
+        
+            score < 12
+        
+            and ep < 7
+        
+        ):
+        
             return False, "elite_low_score"
-
+        
         # =====================
         # EP FILTER
         # =====================
-
-        if ep < 12:
-
+        
+        if ep < 10:
+        
             # =====================
             # FAST IMPULSE EXCEPTION
             # =====================
