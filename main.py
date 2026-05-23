@@ -10120,12 +10120,12 @@ def build_signal(instId):
     # =====================
     # LATE ENTRY CHECK
     # =====================
-    
+
     late_entry, late_reason = detect_late_entry(signal)
-    
+
     signal["late_entry"] = late_entry
     signal["late_reason"] = late_reason
-    
+
     print(
         f"[LATE_ENTRY] "
         f"{instId} "
@@ -10133,26 +10133,23 @@ def build_signal(instId):
         f"reason={late_reason}",
         flush=True
     )
-    
+
     if late_entry:
 
-    print(
-        f"[LATE_ENTRY_WARNING] "
-        f"{instId} "
-        f"{late_reason}",
-        flush=True
-    )
+        print(
+            f"[LATE_ENTRY_WARNING] "
+            f"{instId} "
+            f"{late_reason}",
+            flush=True
+        )
 
         # =====================
         # HARD BLOCK ONLY FOR WEAK
         # =====================
 
         if (
-
             score < 24
-
             and ep < 14
-
         ):
 
             signal["filter_pass"] = False
