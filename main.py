@@ -5232,11 +5232,12 @@ def signal_quality_filter(sig):
         return True, "safe_entry"
 
     # =====================
-    # 🟠 PRE-MOVE — ДО ДВИЖЕНИЯ (ключевое)
+    # 🟠 PRE-MOVE — ДО ДВИЖЕНИЯ
     # =====================
+    
     if pre_move:
         return True, "pre_move_entry"
-
+    
     # =====================
     # 🟠 EARLY PRESSURE — SMART FILTER
     # =====================
@@ -5257,25 +5258,38 @@ def signal_quality_filter(sig):
             "COMP_5M" in flags
             or "COMP_15M" in flags
         )
+    
         and (
+    
             "PRESSURE_UP" in flags
             or "PRESSURE_DOWN" in flags
         )
     )
-
+    
     # =====================
     # 🟠 EARLY PRESSURE PASS
     # =====================
-
-    if ep_score >= 7 and (
-
-        "MTF_LONG_ALIGN" in flags
-        or "MTF_SHORT_ALIGN" in flags
-        or "EMA_BULL_STRONG" in flags
-        or "EMA_BEAR_STRONG" in flags
-        or real_impulse
-        or compression_context
+    
+    if (
+    
+        ep_score >= 7
+    
+        and (
+    
+            "MTF_LONG_ALIGN" in flags
+            or "MTF_SHORT_ALIGN" in flags
+    
+            or "EMA_BULL_STRONG" in flags
+            or "EMA_BEAR_STRONG" in flags
+    
+            or real_impulse
+            or compression_context
+    
+            or "BULLISH_SHIFT" in flags
+            or "BEARISH_SHIFT" in flags
+        )
     ):
+    
         return True, "early_pressure"
     
     # =====================
@@ -5306,19 +5320,22 @@ def signal_quality_filter(sig):
     )
     
     if weak_trend_only:
-
-        # allow only if real context exists
+    
         allow_context = (
     
             real_impulse
             or compression_context
+    
             or "MTF_LONG_ALIGN" in flags
             or "MTF_SHORT_ALIGN" in flags
+    
             or acc >= 3
         )
     
         if not allow_context:
+    
             return False, "weak_trend_only"
+    
     # =====================
     # 🌍 MARKET REGIME FILTER
     # =====================
