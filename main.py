@@ -6552,12 +6552,12 @@ def detect_early_pressure(sig):
         "early_pressure_reasons": [],
     }
 
-    if up_score >= 5 and up_score > down_score:
+    if up_score >= 5 and up_score >= down_score:
         result["early_pressure_side"] = "BUY"
         result["early_pressure_score"] = up_score
         result["early_pressure_reasons"] = up_reasons
 
-    elif down_score >= 5 and down_score > up_score:
+    elif down_score >= 5 and down_score >= up_score:
         result["early_pressure_side"] = "SELL"
         result["early_pressure_score"] = down_score
         result["early_pressure_reasons"] = down_reasons
