@@ -5059,7 +5059,51 @@ def direction_hint(flags):
 
     if "PRESSURE_UP" in flags:
         up += 1; reasons.append("Давление к верху (+1)")
+        
+    # SMART MONEY ABSORPTION
+    if "BUYER_ABSORPTION" in flags:
+        up += 4
+        reasons.append("Поглощение продавца (+4)")
 
+    if "SELLER_ABSORPTION" in flags:
+        down += 4
+        reasons.append("Поглощение покупателя (+4)")
+
+    # SHIFT
+    if "BULLISH_SHIFT" in flags:
+        up += 4
+        reasons.append("Смена контроля в LONG (+4)")
+
+    if "BEARISH_SHIFT" in flags:
+        down += 4
+        reasons.append("Смена контроля в SHORT (+4)")
+
+    # ACCELERATION
+    if "ACCELERATION_UP" in flags:
+        up += 4
+        reasons.append("Ускорение вверх (+4)")
+
+    if "ACCELERATION_DOWN" in flags:
+        down += 4
+        reasons.append("Ускорение вниз (+4)")
+
+    # LAUNCH PROXIMITY
+    if "LAUNCH_PROXIMITY_UP" in flags:
+        up += 5
+        reasons.append("Близость запуска вверх (+5)")
+
+    if "LAUNCH_PROXIMITY_DOWN" in flags:
+        down += 5
+        reasons.append("Близость запуска вниз (+5)")
+
+    # EXPLOSION READY
+    if "EXPLOSION_READY_UP" in flags:
+        up += 5
+        reasons.append("Готовность к импульсу вверх (+5)")
+
+    if "EXPLOSION_READY_DOWN" in flags:
+        down += 5
+        reasons.append("Готовность к импульсу вниз (+5)")
     if "CONTINUATION_UP" in flags:
         up += 2; reasons.append("Продолжение ВВЕРХ (+2)")
     if "CONTINUATION_DOWN" in flags:
