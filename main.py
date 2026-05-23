@@ -13925,7 +13925,24 @@ if __name__ == "__main__":
                         sig.get("signal_mode") == "PREMOVE"
                         and not group
                     ):
-                    
+                    if (
+                        sig.get("signal_mode") == "EXPANSION"
+                        and not group
+                        and float(sig.get("score") or 0) >= 16
+                        and float(
+                            sig.get("early_pressure_score") or 0
+                        ) >= 10
+                    ):
+
+                        group = "PRE_SWING"
+
+                        sig["signal_group"] = group
+
+                        print(
+                            f"[AUTO_EXPANSION_ROUTE] "
+                            f"{instId} -> PRE_SWING",
+                            flush=True
+                        )
                         group = "PRE_SWING"
                     
                         sig["signal_group"] = group
