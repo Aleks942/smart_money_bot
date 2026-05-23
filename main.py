@@ -9902,9 +9902,9 @@ def build_signal(instId):
 
         signal_mode == "TRANSITION"
 
-        and score < 10
+        and score < 7
 
-        and ep < 10
+        and ep < 6
 
     ):
 
