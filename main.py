@@ -14175,7 +14175,25 @@ if __name__ == "__main__":
 
                             continue
 
-                        if "NEUTRAL" in str(sig.get("stage")):
+                        if (
+                        
+                            "NEUTRAL" in str(sig.get("stage"))
+                        
+                            and sig.get("signal_mode") not in (
+                                "PREMOVE",
+                                "TRANSITION",
+                                "EXPANSION",
+                            )
+                        
+                        ):
+                        
+                            print(
+                                f"[SKIP_NEUTRAL_TG] "
+                                f"{instId}",
+                                flush=True
+                            )
+                        
+                            continue
 
                             print(
                                 f"[SKIP_NEUTRAL_TG] "
