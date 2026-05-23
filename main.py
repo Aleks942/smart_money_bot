@@ -335,7 +335,10 @@ def is_scalp_candidate(signal):
         # HARD FILTER
         # =========================
 
-        if score < 12:
+        if (
+            score < 10
+            and ep_score < 8
+        ):
             return False, "scalp_low_score"
 
         if entry in ("NO_ENTRY", "PREMOVE_CONFLICT", None):
