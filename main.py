@@ -10617,7 +10617,21 @@ def build_signal(instId):
                 )
 
                 and ep >= 7
-                and score >= 12
+                and (
+                    score >= 12
+                    or (
+                        score >= 10
+                        and (
+                            "ENERGY_BUILDUP" in flags
+                            or "COMP_PRO_5M" in flags
+                            or "COMP_PRO_15M" in flags
+                        )
+                        and (
+                            "MTF_LONG_ALIGN" in flags
+                            or "MTF_SHORT_ALIGN" in flags
+                        )
+                    )
+                )
 
             ):
 
