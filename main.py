@@ -12874,8 +12874,17 @@ def is_elite_pre_swing(sig):
         # =====================
         # MTF FILTER
         # =====================
-
-        if not has_mtf:
+        
+        if (
+        
+            not has_mtf
+        
+            and ep < 12
+        
+            and not has_launch
+        
+        ):
+        
             return False, "elite_no_mtf"
 
         # =====================
