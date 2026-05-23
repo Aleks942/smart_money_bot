@@ -12834,23 +12834,41 @@ def is_elite_pre_swing(sig):
         # =====================
         # ACC FILTER
         # =====================
-
-        if acc < 3:
-
+        
+        if acc < 2:
+        
             if (
-                has_launch
-                and has_acceleration
-                and has_shift
+        
+                (
+                    has_launch
+                    and has_acceleration
+                    and has_shift
+                )
+        
+                or (
+        
+                    ep >= 10
+        
+                    and (
+                        "MTF_LONG_ALIGN" in flags
+                        or "MTF_SHORT_ALIGN" in flags
+                    )
+                )
+        
+                or (
+                    "BUYER_ABSORPTION" in flags
+                    or "SELLER_ABSORPTION" in flags
+                )
             ):
-
+        
                 print(
                     f"[FAST_EXPANSION_ACC_EXCEPTION] "
                     f"{sig.get('symbol')}",
                     flush=True
                 )
-
+        
             else:
-
+        
                 return False, "elite_low_acc"
 
         # =====================
