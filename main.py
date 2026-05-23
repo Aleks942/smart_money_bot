@@ -14379,18 +14379,20 @@ if __name__ == "__main__":
             # FINAL ELITE DECISION
             # =====================
             
-            elite = elite and elite_score >= 6
+            elite = False
             
-            if elite:
+            # elite = elite and elite_score >= 6
             
-                send_telegram(
-                    f"🔥 <b>ELITE SIGNAL — {instId}</b>\n\n"
-                    f"🧭 Side: {sig.get('direction_code')}\n"
-                    f"💰 Price: {sig.get('price')}\n"
-                    f"📊 RR: {rr1}\n"
-                    f"⭐ Elite Score: {elite_score}\n\n"
-                    f"📌 Reasons: {', '.join(reasons)}"
-                )
+            # if elite:
+            #
+            #     send_telegram(
+            #         f"🔥 <b>ELITE SIGNAL — {instId}</b>\n\n"
+            #         f"🧭 Side: {sig.get('direction_code')}\n"
+            #         f"💰 Price: {sig.get('price')}\n"
+            #         f"📊 RR: {rr1}\n"
+            #         f"⭐ Elite Score: {elite_score}\n\n"
+            #         f"📌 Reasons: {', '.join(reasons)}"
+            #     )
             
             # =====================
             # SEND SIGNAL
