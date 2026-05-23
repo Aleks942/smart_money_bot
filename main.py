@@ -14039,11 +14039,15 @@ if __name__ == "__main__":
                         if group == "SWING":
 
                             print(
-                                f"[SWING_DISABLED] {instId}",
+                                f"[SWING_ENABLED] {instId}",
                                 flush=True
                             )
                         
-                            continue
+                            msg = safe_msg_builder(
+                                globals().get("msg_swing"),
+                                sig,
+                                "SWING"
+                            )
                 
                         elif group == "PRE_SWING":
                 
