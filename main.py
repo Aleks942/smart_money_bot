@@ -10618,41 +10618,41 @@ def build_signal(instId):
                 # KEEP ONLY STRONG OVERRIDES
                 # =====================
     
-                if (
-    
-                    signal.get("sendable") is True
-    
-                    and score >= 18
-    
-                    and ep >= 10
-    
-                ):
-    
-                    print(
-                        f"[KEEP_OVERRIDE_SIGNAL] "
-                        f"{instId}",
-                        flush=True
-                    )
-    
-                else:
-    
-                    return None
-    
-        print(
-            f"[FINAL_DECISION] "
-            f"{instId} "
-            f"group={signal.get('signal_group')} "
-            f"mode={signal.get('signal_mode')} "
-            f"score={score} "
-            f"ep={ep} "
-            f"acc={acc} "
-            f"sendable={signal.get('sendable')} "
-            f"valid={signal.get('valid')} "
-            f"entry={signal.get('entry')}",
-            flush=True
-        )
-    
-        return signal
+            if (
+
+                signal.get("sendable") is True
+
+                and score >= 18
+
+                and ep >= 10
+
+            ):
+
+                print(
+                    f"[KEEP_OVERRIDE_SIGNAL] "
+                    f"{instId}",
+                    flush=True
+                )
+
+            else:
+
+                return None
+
+    print(
+        f"[FINAL_DECISION] "
+        f"{instId} "
+        f"group={signal.get('signal_group')} "
+        f"mode={signal.get('signal_mode')} "
+        f"score={score} "
+        f"ep={ep} "
+        f"acc={acc} "
+        f"sendable={signal.get('sendable')} "
+        f"valid={signal.get('valid')} "
+        f"entry={signal.get('entry')}",
+        flush=True
+    )
+
+    return signal
 
 # ==============================
 # 🎯 SNIPER SIGNAL ENGINE
