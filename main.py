@@ -512,9 +512,9 @@ def route_signal(sig):
                 or "ACCUMULATION" in stage
             )
 
-            and score >= 14
+            and score >= 13
 
-            and ep >= 8
+            and ep >= 7
 
             and (
                 has_structure
