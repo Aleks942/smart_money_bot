@@ -6289,7 +6289,25 @@ def detect_early_pressure(sig):
     
     if "PRESSURE_DOWN" in flags:
         add_down(2, "PRESSURE_DOWN")
+    # =========================
+    # ENERGY BUILDUP
+    # =========================
 
+    if (
+        "ENERGY_BUILDUP" in flags
+        and (
+            "COMP_PRO_5M" in flags
+            or "COMP_PRO_15M" in flags
+            or "COMP_5M" in flags
+            or "COMP_15M" in flags
+        )
+    ):
+
+        if "PRESSURE_UP" in flags:
+            add_up(4, "ENERGY_BUILDUP_LONG")
+
+        if "PRESSURE_DOWN" in flags:
+            add_down(4, "ENERGY_BUILDUP_SHORT")
     # ABSORPTION
     if "BUYER_ABSORPTION" in flags:
         add_up(4, "BUYER_ABSORPTION")
