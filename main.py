@@ -5320,8 +5320,7 @@ def signal_quality_filter(sig):
         # breakout
         "BREAKOUT_UP" in flags
         or "BREAKOUT_DOWN" in flags
-        or "BREAKOUT_CONFIRM_UP" in flags
-        or "BREAKOUT_CONFIRM_DOWN" in flags
+       
     
         # compression + pressure
         or (
