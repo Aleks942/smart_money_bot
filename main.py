@@ -10204,18 +10204,26 @@ def build_signal(instId):
     elif (
 
         "ENERGY_BUILDUP" in flags
-
+    
         and (
-
             "PRESSURE_UP" in flags
             or "PRESSURE_DOWN" in flags
         )
-
+    
         and (
             "COMP_PRO_5M" in flags
             or "COMP_PRO_15M" in flags
         )
-
+    
+        and (
+    
+            "LAUNCH_PROXIMITY_UP" in flags
+            or "LAUNCH_PROXIMITY_DOWN" in flags
+    
+            or "EXPLOSION_READY_UP" in flags
+            or "EXPLOSION_READY_DOWN" in flags
+        )
+    
     ):
 
         quality_pass = True
