@@ -10238,32 +10238,6 @@ def build_signal(instId):
                 flush=True
             )
 
-            # =========================
-            # DO NOT DOWNGRADE EXPANSION
-            # =========================
-
-            if signal.get("signal_mode") not in (
-                "EXPANSION",
-                "TRANSITION"
-            ):
-
-                if signal.get("signal_mode") != "EXPANSION":
-
-                    signal["signal_mode"] = "PREMOVE"
-
-            signal["signal_group"] = "PRE_SWING"
-
-            signal["premove_confirmed"] = True
-
-            signal["sendable"] = True
-
-            signal["valid"] = True
-
-            print(
-                f"[PREMOVE_ROUTE] "
-                f"{instId} -> PRE_SWING",
-                flush=True
-            )
 
             # =========================
             # AUTO GROUP ASSIGN
