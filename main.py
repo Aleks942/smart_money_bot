@@ -10657,7 +10657,7 @@ def build_signal(instId):
                 )
             
             if not signal.get("signal_group"):
-            
+
                 if (
                     signal.get("signal_mode") == "TRANSITION"
                     and ep >= 8
@@ -10670,33 +10670,26 @@ def build_signal(instId):
                         or "ACCELERATION_DOWN" in flags
                         or "BREAKOUT_CONFIRM_UP" in flags
                         or "BREAKOUT_CONFIRM_DOWN" in flags
-            
                         or (
-            
                             (
                                 "ENERGY_BUILDUP" in flags
                                 or "COMP_PRO_5M" in flags
                                 or "COMP_PRO_15M" in flags
                             )
-            
                             and (
-            
                                 "MTF_LONG_ALIGN" in flags
                                 or "MTF_SHORT_ALIGN" in flags
                             )
-            
                             and (
-            
                                 "EMA_BULL_STRONG" in flags
                                 or "EMA_BEAR_STRONG" in flags
                             )
-            
                         )
                     )
                 ):
-            
+
                     signal["signal_group"] = "SCALP"
-            
+
                     print(
                         f"[ROUTING_DEBUG] "
                         f"{instId} "
@@ -10706,48 +10699,44 @@ def build_signal(instId):
                         f"ep={ep}",
                         flush=True
                     )
-            
+
                 else:
-            
-                                # =====================
-                                # KEEP ONLY STRONG OVERRIDES
-                                # =====================
-            
-                                if (
-            
-                                    signal.get("sendable") is True
-            
-                                    and score >= 18
-            
-                                    and ep >= 10
-            
-                                ):
-            
-                                    print(
-                                        f"[KEEP_OVERRIDE_SIGNAL] "
-                                        f"{instId}",
-                                        flush=True
-                                    )
-            
-                                else:
-            
-                                    return None
-            
+
+                    # =====================
+                    # KEEP ONLY STRONG OVERRIDES
+                    # =====================
+
+                    if (
+                        signal.get("sendable") is True
+                        and score >= 18
+                        and ep >= 10
+                    ):
+
                         print(
-                            f"[FINAL_DECISION] "
-                            f"{instId} "
-                            f"group={signal.get('signal_group')} "
-                            f"mode={signal.get('signal_mode')} "
-                            f"score={score} "
-                            f"ep={ep} "
-                            f"acc={acc} "
-                            f"sendable={signal.get('sendable')} "
-                            f"valid={signal.get('valid')} "
-                            f"entry={signal.get('entry')}",
+                            f"[KEEP_OVERRIDE_SIGNAL] "
+                            f"{instId}",
                             flush=True
                         )
-            
-                        return signal
+
+                    else:
+
+                        return None
+
+            print(
+                f"[FINAL_DECISION] "
+                f"{instId} "
+                f"group={signal.get('signal_group')} "
+                f"mode={signal.get('signal_mode')} "
+                f"score={score} "
+                f"ep={ep} "
+                f"acc={acc} "
+                f"sendable={signal.get('sendable')} "
+                f"valid={signal.get('valid')} "
+                f"entry={signal.get('entry')}",
+                flush=True
+            )
+
+            return signal
 # ==============================
 # 🎯 SNIPER SIGNAL ENGINE
 # ==============================
