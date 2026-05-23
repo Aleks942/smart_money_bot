@@ -5166,11 +5166,7 @@ def signal_quality_filter(sig):
     if score <= 0 and acc == 0:
         return False, "trash_signal"
 
-    # =====================
-    # 🔥 СИЛЬНЫЙ СИГНАЛ — ПРОПУСКАЕМ ВСЕГДА
-    # =====================
-    if score >= 7:
-        return True, "strong_signal"
+    
 
     # =====================
     # 🟢 SAFE / ENTRY — пропускаем
@@ -5379,6 +5375,12 @@ def signal_quality_filter(sig):
         and watch_structure
     ):
         return True, "watchlist"
+
+    # =====================
+    # 🔥 СИЛЬНЫЙ СИГНАЛ — ПРОПУСКАЕМ ВСЕГДА
+    # =====================
+    if score >= 7:
+        return True, "strong_signal"
 
     # =====================
     # ❌ BLOCK
