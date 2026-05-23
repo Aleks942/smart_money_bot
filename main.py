@@ -10533,7 +10533,7 @@ def build_signal(instId):
 
                     and acc >= 3
                     and ep >= 10
-                    and score >= 11
+                    and score >= 9
                 )
 
             ):
