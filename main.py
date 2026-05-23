@@ -10241,7 +10241,14 @@ def build_signal(instId):
 
             and (
                 signal.get("retest_ok") is True
-                or score >= 12
+                or score >= 10
+                or (
+                    ep >= 8
+                    and (
+                        "MTF_LONG_ALIGN" in flags
+                        or "MTF_SHORT_ALIGN" in flags
+                    )
+                )
             )
         )
 
