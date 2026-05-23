@@ -5319,7 +5319,7 @@ def signal_quality_filter(sig):
     
         # breakout
         "BREAKOUT_UP" in flags
-        or "BREAKOUT_DOWN" in flags
+        
        
     
         # compression + pressure
@@ -5333,7 +5333,9 @@ def signal_quality_filter(sig):
                 or "PRESSURE_DOWN" in flags
             )
         )
-    
+        # continuation
+        or "CONTINUATION_UP" in flags
+        or "CONTINUATION_DOWN" in flags
     )
     
     if score >= 4 and real_structure:
