@@ -10594,7 +10594,7 @@ def build_signal(instId):
                 )
         
             if not signal.get("signal_group"):
-        
+
                 if (
                     signal.get("signal_mode") == "TRANSITION"
                     and ep >= 8
@@ -10609,51 +10609,50 @@ def build_signal(instId):
                         or "BREAKOUT_CONFIRM_DOWN" in flags
                     )
                 ):
-        
+
                     signal["signal_group"] = "SCALP"
-        
+
                 else:
 
-                # =====================
-                # KEEP ONLY STRONG OVERRIDES
-                # =====================
-    
-            if (
+                    # =====================
+                    # KEEP ONLY STRONG OVERRIDES
+                    # =====================
 
-                signal.get("sendable") is True
+                    if (
 
-                and score >= 18
+                        signal.get("sendable") is True
 
-                and ep >= 10
+                        and score >= 18
 
-            ):
+                        and ep >= 10
 
-                print(
-                    f"[KEEP_OVERRIDE_SIGNAL] "
-                    f"{instId}",
-                    flush=True
-                )
+                    ):
 
-            else:
+                        print(
+                            f"[KEEP_OVERRIDE_SIGNAL] "
+                            f"{instId}",
+                            flush=True
+                        )
 
-                return None
+                    else:
 
-    print(
-        f"[FINAL_DECISION] "
-        f"{instId} "
-        f"group={signal.get('signal_group')} "
-        f"mode={signal.get('signal_mode')} "
-        f"score={score} "
-        f"ep={ep} "
-        f"acc={acc} "
-        f"sendable={signal.get('sendable')} "
-        f"valid={signal.get('valid')} "
-        f"entry={signal.get('entry')}",
-        flush=True
-    )
+                        return None
 
-    return signal
+            print(
+                f"[FINAL_DECISION] "
+                f"{instId} "
+                f"group={signal.get('signal_group')} "
+                f"mode={signal.get('signal_mode')} "
+                f"score={score} "
+                f"ep={ep} "
+                f"acc={acc} "
+                f"sendable={signal.get('sendable')} "
+                f"valid={signal.get('valid')} "
+                f"entry={signal.get('entry')}",
+                flush=True
+            )
 
+            return signal
 # ==============================
 # 🎯 SNIPER SIGNAL ENGINE
 # ==============================
