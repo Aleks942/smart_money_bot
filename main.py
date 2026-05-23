@@ -10225,6 +10225,7 @@ def build_signal(instId):
                 f"[PREMOVE_PASS] {instId}",
                 flush=True
             )
+            signal["signal_group"] = "PRE_SWING"
 
 
             # =========================
