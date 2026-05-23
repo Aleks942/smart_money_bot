@@ -10309,22 +10309,6 @@ def build_signal(instId):
 
                     signal["signal_group"] = None
 
-            print(
-                f"[FINAL_DECISION] "
-                f"{instId} "
-                f"group={signal.get('signal_group')} "
-                f"mode={signal.get('signal_mode')} "
-                f"score={score} "
-                f"ep={ep} "
-                f"acc={acc} "
-                f"sendable={signal.get('sendable')} "
-                f"valid={signal.get('valid')} "
-                f"entry={signal.get('entry')}",
-                flush=True
-            )
-
-            return signal
-
 
     # =========================
     # FINAL FILTER
