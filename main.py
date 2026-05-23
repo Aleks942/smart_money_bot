@@ -13726,13 +13726,24 @@ if __name__ == "__main__":
                     # =====================
 
                     if sig.get("sendable") is True:
-                        if sig.get("setup_rank") != "ELITE":
+
+                        if (
+
+                            sig.get("setup_rank") not in (
+                                "PRIORITY_1",
+                                "PRIORITY_2",
+                            )
+
+                            and sig.get("signal_mode") != "PREMOVE"
+
+                        ):
 
                             print(
-                                f"[SKIP_NON_ELITE] {instId}",
+                                f"[SKIP_LOW_RANK] "
+                                f"{instId}",
                                 flush=True
                             )
-                        
+
                             continue
 
                         # =====================
