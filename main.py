@@ -10491,15 +10491,37 @@ def build_signal(instId):
             # =====================
             # PRE SWING
             # =====================
-    
+            
             elif (
-                signal.get("signal_mode") == "TRANSITION"
-                and ep >= 8
-                and score >= 14
+            
+                signal.get("signal_mode") in (
+                    "TRANSITION",
+                    "PREMOVE",
+                )
+            
+                and ep >= 6
+                and score >= 10
+            
+                and (
+                    signal.get("entry") not in (
+                        "NO_ENTRY",
+                        "PREMOVE_CONFLICT",
+                    )
+                )
+            
             ):
-    
+            
                 signal["signal_group"] = "PRE_SWING"
-                
+            
+                print(
+                    f"[PRE_SWING_ROUTE] "
+                    f"{instId} "
+                    f"mode={signal.get('signal_mode')} "
+                    f"score={score} "
+                    f"ep={ep} "
+                    f"acc={acc}",
+                    flush=True
+                )
             # =====================
             # SCALP
             # =====================
