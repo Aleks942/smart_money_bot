@@ -9519,7 +9519,51 @@ def build_signal(instId):
     if "STRUCTURE_CONFLICT" in flags:
         ema_boost -= 1
     
-    
+    # =========================
+    # SMART MONEY BOOST
+    # =========================
+
+    if "BUYER_ABSORPTION" in flags:
+        ema_boost += 2
+
+    if "SELLER_ABSORPTION" in flags:
+        ema_boost += 2
+
+    if "BULLISH_SHIFT" in flags:
+        ema_boost += 2
+
+    if "BEARISH_SHIFT" in flags:
+        ema_boost += 2
+
+    if "ACCELERATION_UP" in flags:
+        ema_boost += 2
+
+    if "ACCELERATION_DOWN" in flags:
+        ema_boost += 2
+
+    if "LAUNCH_PROXIMITY_UP" in flags:
+        ema_boost += 3
+
+    if "LAUNCH_PROXIMITY_DOWN" in flags:
+        ema_boost += 3
+
+    if "EXPLOSION_READY_UP" in flags:
+        ema_boost += 3
+
+    if "EXPLOSION_READY_DOWN" in flags:
+        ema_boost += 3
+
+    if "MTF_LONG_ALIGN" in flags:
+        ema_boost += 2
+
+    if "MTF_SHORT_ALIGN" in flags:
+        ema_boost += 2
+
+    if "BREAKOUT_CONFIRM_UP" in flags:
+        ema_boost += 2
+
+    if "BREAKOUT_CONFIRM_DOWN" in flags:
+        ema_boost += 2
     # =========================
     # DEBUG
     # =========================
