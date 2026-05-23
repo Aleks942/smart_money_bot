@@ -10282,7 +10282,7 @@ def build_signal(instId):
             ):
     
                 signal["signal_group"] = "PRE_SWING"
-    
+                signal["signal_mode"] = "PREMOVE"
             # =====================
             # SCALP
             # =====================
