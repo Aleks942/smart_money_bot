@@ -49,52 +49,18 @@ def classify_signal_mode(sig):
         score = float(sig.get("score") or 0)
         ep_score = float(sig.get("early_pressure_score") or 0)
         stage = str(sig.get("stage") or "")
-        score = float(sig.get("score") or 0)
-
-        ep = float(
-            sig.get("early_pressure_score") or 0
-        )
-        
-        acc = float(
-            sig.get("acc_score") or 0
-        )
 
 
         # =====================
         # STAGE FIRST
         # =====================
-        if (
-
-            "EXPANSION" in stage
-        
-            and score >= 14
-        
-            and ep >= 10
-        
-        
-        ):
-        
+        if "EXPANSION" in stage:
             return "EXPANSION"
 
-        if (
-
-            "TRANSITION" in stage
-        
-            and ep >= 6
-        
-        ):
+        if "TRANSITION" in stage:
             return "TRANSITION"
 
-        if (
-
-            "ACCUMULATION" in stage
-        
-            and acc >= 3
-        
-            and ep >= 10
-        
-        ):
-        
+        if "ACCUMULATION" in stage:
             return "PREMOVE"
 
         # =====================
@@ -335,10 +301,7 @@ def is_scalp_candidate(signal):
         # HARD FILTER
         # =========================
 
-        if (
-            score < 10
-            and ep_score < 8
-        ):
+        if score < 12:
             return False, "scalp_low_score"
 
         if entry in ("NO_ENTRY", "PREMOVE_CONFLICT", None):
@@ -396,72 +359,6 @@ def is_scalp_candidate(signal):
         ):
 
             return True, "scalp_accumulation"
-
-        # =========================
-        # EARLY ENERGY SETUP
-        # =========================
-
-        if (
-
-            score >= 10
-
-            and ep_score >= 8
-
-            and (
-
-                "ENERGY_BUILDUP" in flags
-                or "COMP_PRO_5M" in flags
-                or "COMP_PRO_15M" in flags
-            )
-
-            and (
-
-                "MTF_LONG_ALIGN" in flags
-                or "MTF_SHORT_ALIGN" in flags
-            )
-
-            and (
-
-                "EMA_BULL_STRONG" in flags
-                or "EMA_BEAR_STRONG" in flags
-            )
-
-        ):
-
-            return True, "scalp_energy_setup"
-        # =========================
-        # EXPLOSION SETUP
-        # =========================
-
-        if (
-
-            score >= 14
-
-            and ep_score >= 10
-
-            and (
-
-                "EXPLOSION_READY_UP" in flags
-                or "EXPLOSION_READY_DOWN" in flags
-                or "LAUNCH_PROXIMITY_UP" in flags
-                or "LAUNCH_PROXIMITY_DOWN" in flags
-            )
-
-            and (
-            
-                "ACCELERATION_UP" in flags
-                or "ACCELERATION_DOWN" in flags
-            
-                or "BULLISH_SHIFT" in flags
-                or "BEARISH_SHIFT" in flags
-            
-                or "EXPLOSION_READY_UP" in flags
-                or "EXPLOSION_READY_DOWN" in flags
-            )
-
-        ):
-
-            return True, "scalp_explosion_setup"
 
         return False, "scalp_no_match"
 
@@ -535,41 +432,15 @@ def route_signal(sig):
             or "ACCELERATION_DOWN" in flags
         )
 
-        has_confirm = (
-            "BREAKOUT_CONFIRM_UP" in flags
-            or "BREAKOUT_CONFIRM_DOWN" in flags
-
-            or "CONTINUATION_UP" in flags
-            or "CONTINUATION_DOWN" in flags
-        )
-
-        has_launch = (
-            "LAUNCH_PROXIMITY_UP" in flags
-            or "LAUNCH_PROXIMITY_DOWN" in flags
-
-            or "EXPLOSION_READY_UP" in flags
-            or "EXPLOSION_READY_DOWN" in flags
-        )
-
         if (
-
-            score >= 26
-
-            and ep >= 16
-
+            score >= 18
+            and ep >= 8
             and has_structure
-
             and has_mtf
-
             and has_acceleration
-
-            and has_confirm
-
-            and has_launch
-
         ):
 
-            return "PRE_SWING", "elite_swing_confirmed"
+            return "SWING", "swing_confirmed"
 
         # =====================
         # PRE_SWING
@@ -580,24 +451,16 @@ def route_signal(sig):
                 "TRANSITION" in stage
                 or "ACCUMULATION" in stage
             )
-
-            and score >= 13
-
+            and score >= 16
             and ep >= 7
-
             and (
                 has_structure
                 or has_mtf
                 or has_acceleration
             )
-
         ):
 
             return "PRE_SWING", "pre_swing"
-
-        # =====================
-        # SCALP
-        # =====================
 
         # =====================
         # SCALP
@@ -7571,7 +7434,7 @@ def detect_setup_rank(flags, score=0, acc_score=0):
         if rank_score >= 15:
             return "PRIORITY_1", rank_score, reasons
     
-        if rank_score >= 9:
+        if rank_score >= 11:
             return "PRIORITY_2", rank_score, reasons
         
         if rank_score >= 7:
@@ -9910,19 +9773,16 @@ def build_signal(instId):
     # =====================
     # SIGNAL MODE
     # =====================
-
     signal_mode = classify_signal_mode(signal)
-
-    signal["signal_mode"] = signal_mode
-
     ep = float(
         signal.get("early_pressure_score") or 0
     )
-
+    
     print(
         f"[SIGNAL_MODE] {instId} mode={signal_mode}",
         flush=True
     )
+
 
     print(
         f"[EARLY_DEBUG] {instId} "
@@ -9933,7 +9793,6 @@ def build_signal(instId):
         f"ep={ep}",
         flush=True
     )
-
     # =====================
     # EARLY IGNORE
     # =====================
@@ -9964,55 +9823,29 @@ def build_signal(instId):
         return None
 
     # =====================
-    # WEAK TRANSITION IGNORE
+    # SIGNAL MODE
     # =====================
-
-    if (
-
-        signal_mode == "TRANSITION"
-
-        and score < 7
-
-        and ep < 6
-
-    ):
-
-        print(
-            f"[WEAK_TRANSITION_IGNORE] "
-            f"{instId} "
-            f"score={score} "
-            f"ep={ep}",
-            flush=True
-        )
-
-        return None
-
-
-    # =====================
-    # WEAK TRANSITION IGNORE
-    # =====================
-
-    if (
-
-        signal_mode == "TRANSITION"
-
-        and score < 6
-
-        and ep < 6
-
-    ):
-
-        print(
-            f"[WEAK_TRANSITION_IGNORE] "
-            f"{instId} "
-            f"score={score} "
-            f"ep={ep}",
-            flush=True
-        )
-
-        return None
-
-   
+    
+    signal_mode = classify_signal_mode(signal)
+    
+    ep = float(
+        signal.get("early_pressure_score") or 0
+    )
+    
+    print(
+        f"[SIGNAL_MODE] {instId} mode={signal_mode}",
+        flush=True
+    )
+    
+    print(
+        f"[EARLY_DEBUG] {instId} "
+        f"flags={signal.get('flags')} "
+        f"score={signal.get('score')} "
+        f"acc={signal.get('acc_score')} "
+        f"stage={signal.get('stage')} "
+        f"ep={ep}",
+        flush=True
+    )
     
     # =====================
     # EARLY IGNORE
@@ -10045,11 +9878,6 @@ def build_signal(instId):
     
     signal["sniper"] = sniper_signal(signal)
     
-        
-
-    # =====================
-    # PRE-SWING PROMOTION
-    # =====================
         
 
     # =====================
@@ -10189,12 +10017,12 @@ def build_signal(instId):
     # =====================
     # LATE ENTRY CHECK
     # =====================
-
+    
     late_entry, late_reason = detect_late_entry(signal)
-
+    
     signal["late_entry"] = late_entry
     signal["late_reason"] = late_reason
-
+    
     print(
         f"[LATE_ENTRY] "
         f"{instId} "
@@ -10202,36 +10030,20 @@ def build_signal(instId):
         f"reason={late_reason}",
         flush=True
     )
-
+    
     if late_entry:
-
+    
+        signal["filter_pass"] = False
+        signal["filter_reason"] = late_reason
+    
         print(
-            f"[LATE_ENTRY_WARNING] "
+            f"[SKIP_LATE_ENTRY] "
             f"{instId} "
             f"{late_reason}",
             flush=True
         )
-
-        # =====================
-        # HARD BLOCK ONLY FOR WEAK
-        # =====================
-
-        if (
-            score < 24
-            and ep < 14
-        ):
-
-            signal["filter_pass"] = False
-            signal["filter_reason"] = late_reason
-
-            print(
-                f"[SKIP_LATE_ENTRY] "
-                f"{instId} "
-                f"{late_reason}",
-                flush=True
-            )
-
-            return None
+    
+        return None
 
     # =====================
     # RETEST CHECK
@@ -10292,8 +10104,6 @@ def build_signal(instId):
 
             score >= 10
 
-            and ep >= 7
-
            and (
 
                 "EXPLOSION_READY_UP" in flags
@@ -10311,7 +10121,7 @@ def build_signal(instId):
 
             and (
                 signal.get("retest_ok") is True
-                or score >= 10
+                or score >= 12
             )
         )
 
@@ -10323,7 +10133,7 @@ def build_signal(instId):
                 flush=True
             )
 
-            return None
+            return False
 
         print(
             f"[ELITE_TRANSITION_PASS] "
@@ -10351,7 +10161,8 @@ def build_signal(instId):
             flush=True
         )
 
-        return None
+        return False
+
     if acc < 0:
 
         print(
@@ -10361,7 +10172,7 @@ def build_signal(instId):
             flush=True
         )
 
-        return None
+        return False
     
     # =====================
     # ALLOW OVERRIDE
@@ -10467,12 +10278,6 @@ def build_signal(instId):
             or "COMP_PRO_15M" in flags
         )
 
-        and score >= 14
-
-        and ep >= 10
-
-        and acc >= 3
-
     ):
 
         quality_pass = True
@@ -10498,8 +10303,6 @@ def build_signal(instId):
                     signal["signal_mode"] = "PREMOVE"
 
             signal["signal_group"] = "PRE_SWING"
-
-            signal["setup_rank"] = "PRIORITY_1"
 
             signal["premove_confirmed"] = True
 
@@ -10535,114 +10338,55 @@ def build_signal(instId):
 
                 signal.get("signal_mode") == "EXPANSION"
 
-                and score >= 26
-
-                and ep >= 16
-
-                and (
-
-                    "EXPLOSION_READY_UP" in flags
-                    or "EXPLOSION_READY_DOWN" in flags
-
-                    or "LAUNCH_PROXIMITY_UP" in flags
-                    or "LAUNCH_PROXIMITY_DOWN" in flags
-                )
+                and score >= 18
+                and ep >= 8
 
                 and (
-
                     "BREAKOUT_CONFIRM_UP" in flags
                     or "BREAKOUT_CONFIRM_DOWN" in flags
                     or "CONTINUATION_UP" in flags
                     or "CONTINUATION_DOWN" in flags
                     or "ACCELERATION_UP" in flags
                     or "ACCELERATION_DOWN" in flags
+                    or "EXPLOSION_READY_UP" in flags
+                    or "EXPLOSION_READY_DOWN" in flags
                 )
 
                 and (
                     "MTF_LONG_ALIGN" in flags
                     or "MTF_SHORT_ALIGN" in flags
                 )
-
             ):
 
                 signal["signal_group"] = "SWING"
-
-            # =====================
-            # EXPANSION
-            # =====================
-            if (
-
-                signal.get("signal_mode") == "EXPANSION"
-
-                and score >= 15
-
-                and ep >= 6
-
-            ):
-
-                signal["signal_group"] = "SWING"
-
-           
-
             # =====================
             # PRE SWING
             # =====================
-
+    
             elif (
-
-                (
-                    signal.get("signal_mode") == "TRANSITION"
-                    and ep >= 8
-                    and score >= 14
-                )
-
-                or (
-
-                    signal.get("signal_mode") == "PREMOVE"
-
-                    and acc >= 3
-                    and ep >= 10
-                    and score >= 9
-                )
-
+                signal.get("signal_mode") == "TRANSITION"
+                and ep >= 8
+                and score >= 14
             ):
-
+    
                 signal["signal_group"] = "PRE_SWING"
-
+    
             # =====================
             # SCALP
             # =====================
-
+    
             elif (
-
                 not signal.get("signal_group")
-
+            
                 and signal.get("signal_mode") in (
                     "TRANSITION",
                     "CONFIRMED",
                 )
-
                 and ep >= 7
-                and (
-                    score >= 12
-                    or (
-                        score >= 10
-                        and (
-                            "ENERGY_BUILDUP" in flags
-                            or "COMP_PRO_5M" in flags
-                            or "COMP_PRO_15M" in flags
-                        )
-                        and (
-                            "MTF_LONG_ALIGN" in flags
-                            or "MTF_SHORT_ALIGN" in flags
-                        )
-                    )
-                )
-
+                and score >= 12
             ):
-
+    
                 signal["signal_group"] = "SCALP"
-
             # =====================
             # NO GROUP
             # =====================
@@ -10652,95 +10396,6 @@ def build_signal(instId):
                 if not signal.get("sendable"):
 
                     signal["signal_group"] = None
-
-            
-            # =========================
-            # FINAL FILTER
-            # =========================
-            
-            if not ok and not premove_override:
-
-                print(
-                    f"[FILTER_BLOCK] "
-                    f"{instId} reason={reason}",
-                    flush=True
-                )
-        
-                return None
-        
-            if premove_override:
-            
-                print(
-                    f"[OVERRIDE_FINAL_PASS] "
-                    f"{instId}",
-                    flush=True
-                )
-            
-            if not signal.get("signal_group"):
-
-                if (
-                    signal.get("signal_mode") == "TRANSITION"
-                    and ep >= 8
-                    and signal.get("entry") not in (
-                        "NO_ENTRY",
-                        "PREMOVE_CONFLICT",
-                    )
-                    and (
-                        "ACCELERATION_UP" in flags
-                        or "ACCELERATION_DOWN" in flags
-                        or "BREAKOUT_CONFIRM_UP" in flags
-                        or "BREAKOUT_CONFIRM_DOWN" in flags
-                        or (
-                            (
-                                "ENERGY_BUILDUP" in flags
-                                or "COMP_PRO_5M" in flags
-                                or "COMP_PRO_15M" in flags
-                            )
-                            and (
-                                "MTF_LONG_ALIGN" in flags
-                                or "MTF_SHORT_ALIGN" in flags
-                            )
-                            and (
-                                "EMA_BULL_STRONG" in flags
-                                or "EMA_BEAR_STRONG" in flags
-                            )
-                        )
-                    )
-                ):
-
-                    signal["signal_group"] = "SCALP"
-
-                    print(
-                        f"[ROUTING_DEBUG] "
-                        f"{instId} "
-                        f"group={signal.get('signal_group')} "
-                        f"mode={signal.get('signal_mode')} "
-                        f"score={score} "
-                        f"ep={ep}",
-                        flush=True
-                    )
-
-                else:
-
-                    # =====================
-                    # KEEP ONLY STRONG OVERRIDES
-                    # =====================
-
-                    if (
-                        signal.get("sendable") is True
-                        and score >= 18
-                        and ep >= 10
-                    ):
-
-                        print(
-                            f"[KEEP_OVERRIDE_SIGNAL] "
-                            f"{instId}",
-                            flush=True
-                        )
-
-                    else:
-
-                        return None
 
             print(
                 f"[FINAL_DECISION] "
@@ -10757,6 +10412,70 @@ def build_signal(instId):
             )
 
             return signal
+
+
+    # =========================
+    # FINAL FILTER
+    # ========================= 
+            
+    if not ok and not premove_override:
+
+        print(
+            f"[FILTER_BLOCK] "
+            f"{instId} reason={reason}",
+            flush=True
+        )
+
+        return None
+
+    if premove_override:
+
+        print(
+            f"[OVERRIDE_FINAL_PASS] "
+            f"{instId}",
+            flush=True
+        )
+
+    if not signal.get("signal_group"):
+
+        if (
+            signal.get("signal_mode") == "TRANSITION"
+            and ep >= 8
+            and signal.get("entry") not in (
+                "NO_ENTRY",
+                "PREMOVE_CONFLICT",
+            )
+            and (
+                "ACCELERATION_UP" in flags
+                or "ACCELERATION_DOWN" in flags
+                or "BREAKOUT_CONFIRM_UP" in flags
+                or "BREAKOUT_CONFIRM_DOWN" in flags
+            )
+        ):
+
+            signal["signal_group"] = "SCALP"
+
+        else:
+
+            # =====================
+            # KEEP OVERRIDE SIGNALS
+            # =====================
+
+            if signal.get("sendable") is True:
+
+                print(
+                    f"[KEEP_OVERRIDE_SIGNAL] "
+                    f"{instId}",
+                    flush=True
+                )
+
+                return signal
+
+            return None
+
+    return signal
+
+
 # ==============================
 # 🎯 SNIPER SIGNAL ENGINE
 # ==============================
@@ -11516,21 +11235,17 @@ def swing_grade(sig):
         # =====================
         # SWING LEVELS
         # =====================
-
-        if total >= 13:
-
-            title = "🔥 ELITE SWING"
-
-        elif total >= 10:
-
+        
+        if total >= 9:
+        
             title = "🟢 СИЛЬНЫЙ SWING"
-
+        
         elif total >= 7:
-
+        
             title = "🟡 SWING SETUP"
-
+        
         else:
-
+        
             title = "⚪ НАБЛЮДЕНИЕ"
         
         # =====================
@@ -13839,51 +13554,13 @@ if __name__ == "__main__":
 
                     if sig.get("sendable") is True:
 
-                        if (
+                        sig["valid"] = True
 
-                            sig.get("setup_rank") not in (
-                                "PRIORITY_1",
-                                "PRIORITY_2",
-                            )
-
-                            and sig.get("signal_mode") != "PREMOVE"
-
-                        ):
-
-                            print(
-                                f"[SKIP_LOW_RANK] "
-                                f"{instId}",
-                                flush=True
-                            )
-
-                            continue
-
-                        # =====================
-                        # EXPANSION ALREADY VALID
-                        # =====================
-
-                        if (
-                            sig.get("signal_mode")
-                            == "EXPANSION"
-                        ):
-
-                            sig["valid"] = True
-
-                            print(
-                                f"[EXPANSION_ALREADY_VALID] "
-                                f"{instId}",
-                                flush=True
-                            )
-
-                        else:
-
-                            sig["valid"] = True
-
-                            print(
-                                f"[FORCE_VALID_BY_OVERRIDE] "
-                                f"{instId}",
-                                flush=True
-                            )
+                        print(
+                            f"[FORCE_VALID_BY_OVERRIDE] "
+                            f"{instId}",
+                            flush=True
+                        )
 
                     # =====================
                     # OPEN INTEREST
@@ -14020,85 +13697,34 @@ if __name__ == "__main__":
                     # =====================
                     # SIGNAL DISPATCH
                     # =====================
-
+                
                     group = sig.get("signal_group")
-
-                    # =====================
-                    # AUTO PREMOVE ROUTE
-                    # =====================
-
                     if (
                         sig.get("signal_mode") == "PREMOVE"
                         and not group
                     ):
-
+                    
                         group = "PRE_SWING"
-
+                    
                         sig["signal_group"] = group
-
+                    
                         print(
                             f"[AUTO_PREMOVE_ROUTE] "
                             f"{instId} -> PRE_SWING",
                             flush=True
                         )
-
-                    # =====================
-                    # AUTO TRANSITION ROUTE
-                    # =====================
-
-                    if (
-                        sig.get("signal_mode") == "TRANSITION"
-                        and not group
-                        and float(sig.get("score") or 0) >= 10
-                        and float(
-                            sig.get("early_pressure_score") or 0
-                        ) >= 7
-                    ):
-
-                        group = "PRE_SWING"
-
-                        sig["signal_group"] = group
-
-                        print(
-                            f"[AUTO_TRANSITION_ROUTE] "
-                            f"{instId} -> PRE_SWING",
-                            flush=True
-                        )
-
-                    # =====================
-                    # AUTO EXPANSION ROUTE
-                    # =====================
-
-                    if (
-                        sig.get("signal_mode") == "EXPANSION"
-                        and not group
-                        and float(sig.get("score") or 0) >= 16
-                        and float(
-                            sig.get("early_pressure_score") or 0
-                        ) >= 10
-                    ):
-
-                        group = "PRE_SWING"
-
-                        sig["signal_group"] = group
-
-                        print(
-                            f"[AUTO_EXPANSION_ROUTE] "
-                            f"{instId} -> PRE_SWING",
-                            flush=True
-                        )
-
+                
                     allowed_groups = [
                         "PRE_SWING",
                         "SWING",
                     ]
-
+                    
                     if ENABLE_SCALP_ALERTS:
-
+                    
                         allowed_groups.append("SCALP")
-
+                    
                     if group in allowed_groups:
-
+                
                         # =====================
                         # MESSAGE TYPE
                         # =====================
@@ -14147,13 +13773,9 @@ if __name__ == "__main__":
                             if not elite_ok:
 
                                 if (
-
-                                    float(sig.get("score") or 0) >= 18
-                                
-                                    and float(
-                                        sig.get("early_pressure_score") or 0
-                                    ) >= 10
-                                
+                                    sig.get("sendable") is True
+                                    or float(sig.get("score") or 0) >= 18
+                                    or float(sig.get("early_pressure_score") or 0) >= 10
                                 ):
                             
                                     print(
@@ -14177,101 +13799,63 @@ if __name__ == "__main__":
                         # =========================
                         # TELEGRAM FINAL FIREWALL
                         # =========================
-    
+
                         symbol_key = (
                             f"{instId}_"
                             f"{group}_"
                             f"{sig.get('direction_code')}_"
                             f"{sig.get('entry')}"
                         )
-    
+
                         if not can_send(symbol_key, 1800):
-    
+
                             print(
                                 f"[GLOBAL_COOLDOWN_SKIP] "
                                 f"{symbol_key}",
                                 flush=True
                             )
-    
+
                             continue
-    
+
                         if "NEUTRAL" in str(sig.get("stage")):
-    
+
                             print(
                                 f"[SKIP_NEUTRAL_TG] "
                                 f"{instId}",
                                 flush=True
                             )
-    
+
                             continue
-    
+
                         if (
                             group == "PRE_SWING"
                             and float(sig.get("score") or 0) < 16
-                            and float(
-                                sig.get("early_pressure_score") or 0
-                            ) < 10
+                            and float(sig.get("early_pressure_score") or 0) < 10
                         ):
-    
+
                             print(
                                 f"[SKIP_WEAK_PRE_SWING_TG] "
                                 f"{instId}",
                                 flush=True
                             )
-    
-                            continue
-    
-                        # =========================
-                        # FINAL RANK FIREWALL
-                        # =========================
-
-                        if (
-
-                            sig.get("setup_rank") not in (
-                                "PRIORITY_1",
-                                "PRIORITY_2",
-                            )
-
-                            and sig.get("signal_mode") != "PREMOVE"
-
-                        ):
-
-                            print(
-                                f"[SKIP_LOW_RANK] "
-                                f"{instId}",
-                                flush=True
-                            )
 
                             continue
-                            
-                        # =========================
-                        # LIMIT PER CYCLE
-                        # =========================
-    
-                        if scalp_sent_this_cycle >= 3:
-    
-                            print(
-                                "[SWING_LIMIT_REACHED]",
-                                flush=True
-                            )
-    
-                            continue
-    
+
                         send_telegram(msg)
-    
+                
                         scalp_sent_this_cycle += 1
-    
+                
                         print(
                             f"[SIGNAL_SENT] "
                             f"{instId} "
                             f"group={group}",
                             flush=True
                         )
-    
+                
                         alerts.append(sig)
-    
+                
                         mark_alert_sent(state, sig)
-    
+                
                         continue
                 
                 except Exception as e:
