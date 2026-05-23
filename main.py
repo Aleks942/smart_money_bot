@@ -11711,16 +11711,61 @@ def msg_swing(sig):
     lines.append("")
     lines.append("🧠 Что делать:")
 
-    verdict = str(sig.get("verdict", "")).lower()
+    # =====================
+    # SMART ACTION LOGIC
+    # =====================
 
-    if "можно" in verdict:
-        lines.append("✅ Можно искать вход по M15 после подтверждения.")
-    elif "наблюдать" in verdict:
-        lines.append("⏳ Пока наблюдать.")
-    elif "skip" in verdict:
-        lines.append("❌ Лучше пропустить.")
+    mode = str(sig.get("signal_mode") or "")
+    ep = float(sig.get("early_pressure_score") or 0)
+    score_raw = float(sig.get("score") or 0)
+    retest_ok = sig.get("retest_ok") is True
+
+    if (
+        mode == "EXPANSION"
+        and ep >= 10
+        and score_raw >= 18
+    ):
+
+        lines.append(
+            "🚀 Импульс уже подтверждается. "
+            "Искать вход по откату или младшему ТФ."
+        )
+
+    elif (
+        mode == "TRANSITION"
+        and ep >= 8
+    ):
+
+        lines.append(
+            "🟠 Идёт смена контроля. "
+            "Следить за реакцией цены и искать ранний вход."
+        )
+
+    elif (
+        mode == "PREMOVE"
+        and (
+            ep >= 5
+            or retest_ok
+        )
+    ):
+
+        lines.append(
+            "🟡 Рынок копит энергию. "
+            "Готовить уровень входа заранее."
+        )
+
+    elif retest_ok:
+
+        lines.append(
+            "🟢 Есть удержание уровня / ретест. "
+            "Можно смотреть вход с коротким стопом."
+        )
+
     else:
-        lines.append(sig.get("verdict", "наблюдать"))
+
+        lines.append(
+            "⏳ Пока наблюдать за структурой."
+        )
 
     return "\n".join(lines)
 
