@@ -466,15 +466,41 @@ def route_signal(sig):
             or "ACCELERATION_DOWN" in flags
         )
 
+        has_confirm = (
+            "BREAKOUT_CONFIRM_UP" in flags
+            or "BREAKOUT_CONFIRM_DOWN" in flags
+
+            or "CONTINUATION_UP" in flags
+            or "CONTINUATION_DOWN" in flags
+        )
+
+        has_launch = (
+            "LAUNCH_PROXIMITY_UP" in flags
+            or "LAUNCH_PROXIMITY_DOWN" in flags
+
+            or "EXPLOSION_READY_UP" in flags
+            or "EXPLOSION_READY_DOWN" in flags
+        )
+
         if (
-            score >= 18
-            and ep >= 8
+
+            score >= 26
+
+            and ep >= 16
+
             and has_structure
+
             and has_mtf
+
             and has_acceleration
+
+            and has_confirm
+
+            and has_launch
+
         ):
 
-            return "SWING", "swing_confirmed"
+            return "SWING", "elite_swing_confirmed"
 
         # =====================
         # PRE_SWING
@@ -485,16 +511,24 @@ def route_signal(sig):
                 "TRANSITION" in stage
                 or "ACCUMULATION" in stage
             )
-            and score >= 16
-            and ep >= 7
+
+            and score >= 14
+
+            and ep >= 8
+
             and (
                 has_structure
                 or has_mtf
                 or has_acceleration
             )
+
         ):
 
             return "PRE_SWING", "pre_swing"
+
+        # =====================
+        # SCALP
+        # =====================
 
         # =====================
         # SCALP
