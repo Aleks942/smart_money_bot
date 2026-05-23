@@ -12908,7 +12908,7 @@ def is_elite_pre_swing(sig):
         # EP FILTER
         # =====================
         
-        if ep < 10:
+        if ep < 8:
         
             # =====================
             # FAST IMPULSE EXCEPTION
