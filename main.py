@@ -5334,9 +5334,6 @@ def signal_quality_filter(sig):
             )
         )
     
-        # continuation
-        or "CONTINUATION_UP" in flags
-        or "CONTINUATION_DOWN" in flags
     )
     
     if score >= 4 and real_structure:
