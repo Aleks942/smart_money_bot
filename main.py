@@ -14049,16 +14049,23 @@ if __name__ == "__main__":
                         # ELITE ONLY
                         # =========================
     
-                        if sig.get("setup_rank") != "ELITE":
-    
+                        if (
+
+                            sig.get("setup_rank") not in (
+                                "ELITE",
+                                "PRIORITY_1",
+                            )
+                        
+                        ):
+                        
                             print(
-                                f"[SKIP_NON_ELITE] "
+                                f"[SKIP_LOW_RANK] "
                                 f"{instId}",
                                 flush=True
                             )
-    
+                        
                             continue
-    
+                            
                         # =========================
                         # LIMIT PER CYCLE
                         # =========================
