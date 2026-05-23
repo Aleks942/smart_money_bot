@@ -10189,13 +10189,30 @@ def build_signal(instId):
     strong_structure_pass = False
 
     if (
+    
         acc_score >= 2
+    
         and (
+    
             "PRESSURE_UP" in flags
             or "PRESSURE_DOWN" in flags
+    
             or "BREAKOUT_CONFIRM_UP" in flags
             or "BREAKOUT_CONFIRM_DOWN" in flags
+    
+            or "BUYER_ABSORPTION" in flags
+            or "SELLER_ABSORPTION" in flags
+    
+            or "LAUNCH_PROXIMITY_UP" in flags
+            or "LAUNCH_PROXIMITY_DOWN" in flags
+    
+            or "EXPLOSION_READY_UP" in flags
+            or "EXPLOSION_READY_DOWN" in flags
+    
+            or "BULLISH_SHIFT" in flags
+            or "BEARISH_SHIFT" in flags
         )
+    
     ):
         strong_structure_pass = True
 
