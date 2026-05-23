@@ -500,7 +500,7 @@ def route_signal(sig):
 
         ):
 
-            return "SWING", "elite_swing_confirmed"
+            return "PRE_SWING", "elite_swing_confirmed"
 
         # =====================
         # PRE_SWING
