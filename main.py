@@ -5314,18 +5314,6 @@ def signal_quality_filter(sig):
     # =====================
     # 📊 STRUCTURE PASS
     # =====================
-    has_structure = (
-        "PRESSURE_UP" in flags or
-        "PRESSURE_DOWN" in flags or
-        "PRE_BREAKOUT_BUY" in flags or
-        "PRE_BREAKOUT_SELL" in flags or
-        "CONTINUATION_UP" in flags or
-        "CONTINUATION_DOWN" in flags
-    )
-
-    # =====================
-    # 📊 STRUCTURE PASS
-    # =====================
     
     real_structure = (
     
