@@ -10530,6 +10530,9 @@ def build_signal(instId):
             ):
             
                 signal["signal_group"] = "PRE_SWING"
+
+                signal["sendable"] = True
+                signal["valid"] = True
             
                 print(
                     f"[PRE_SWING_ROUTE] "
