@@ -10467,7 +10467,7 @@ def build_signal(instId):
 
                 signal.get("signal_mode") == "EXPANSION"
 
-                and score >= 18
+                and score >= 14
                 and ep >= 8
 
                 and (
