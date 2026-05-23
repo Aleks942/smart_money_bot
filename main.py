@@ -13679,8 +13679,9 @@ if __name__ == "__main__":
 
                                 if (
                                     sig.get("sendable") is True
-                                    or float(sig.get("score") or 0) >= 18
-                                    or float(sig.get("early_pressure_score") or 0) >= 10
+                                    and float(sig.get("score") or 0) >= 20
+                                    and float(sig.get("early_pressure_score") or 0) >= 12
+                                    and float(sig.get("acc_score") or 0) >= 3
                                 ):
                             
                                     print(
