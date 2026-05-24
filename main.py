@@ -13049,7 +13049,16 @@ def is_elite_pre_swing(sig):
         # ABSORPTION FILTER
         # =====================
 
-        if not has_absorption:
+        if (
+
+            not has_absorption
+
+            and ep < 12
+
+            and acc < 3
+
+        ):
+
             return False, "elite_no_absorption"
 
         return True, "elite_pre_swing"
