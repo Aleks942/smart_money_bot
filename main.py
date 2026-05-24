@@ -10714,8 +10714,11 @@ def build_signal(instId):
             f"{instId}",
             flush=True
         )
-
     if not signal.get("signal_group"):
+
+        # =====================
+        # AUTO SCALP FALLBACK
+        # =====================
 
         if (
             signal.get("signal_mode") == "TRANSITION"
@@ -10733,28 +10736,57 @@ def build_signal(instId):
         ):
 
             signal["signal_group"] = "SCALP"
+            signal["sendable"] = True
+            signal["valid"] = True
+
+            print(
+                f"[AUTO_SCALP_FALLBACK] "
+                f"{instId}",
+                flush=True
+            )
+
+        # =====================
+        # KEEP STRONG OVERRIDES
+        # =====================
+
+        elif (
+
+            premove_override
+
+            or signal.get("sendable") is True
+
+            or signal.get("signal_mode") in (
+                "EXPANSION",
+                "PREMOVE",
+            )
+
+        ):
+
+            signal["sendable"] = True
+            signal["valid"] = True
+
+            if not signal.get("signal_group"):
+
+                signal["signal_group"] = "PRE_SWING"
+
+            print(
+                f"[KEEP_OVERRIDE_SIGNAL] "
+                f"{instId}",
+                flush=True
+            )
+
+            return signal
 
         else:
 
-            # =====================
-            # KEEP OVERRIDE SIGNALS
-            # =====================
-
-            if signal.get("sendable") is True:
-
-                print(
-                    f"[KEEP_OVERRIDE_SIGNAL] "
-                    f"{instId}",
-                    flush=True
-                )
-
-                return signal
+            print(
+                f"[FINAL_INVALID] "
+                f"{instId}",
+                flush=True
+            )
 
             return None
-
-    return signal
-
-
+    
 # ==============================
 # 🎯 SNIPER SIGNAL ENGINE
 # ==============================
