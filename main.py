@@ -14428,7 +14428,7 @@ if __name__ == "__main__":
                             flush=True
                         )
                     
-                        try:
+                    try:
                         # =====================
                         # OI TREND ANALYSIS
                         # =====================
