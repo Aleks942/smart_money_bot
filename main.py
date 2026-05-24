@@ -14016,14 +14016,20 @@ if __name__ == "__main__":
                     # =====================
                     # INVALID CHECK
                     # =====================
-
+                    
                     if not sig:
-
+                    
                         print(
                             f"[INVALID_SIGNAL] {instId}",
                             flush=True
                         )
-
+                    
+                        print(
+                            f"[INVALID_DEBUG] "
+                            f"sig={sig}",
+                            flush=True
+                        )
+                    
                         continue
 
                     if not isinstance(sig, dict):
