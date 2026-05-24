@@ -14503,7 +14503,8 @@ if __name__ == "__main__":
                         # OI NOISE FILTER
                         # =====================
 
-                        if abs(new_oi) < 0.05:
+                        if abs(new_oi) < 0.02:
+                   
 
                             new_oi = 0
 
