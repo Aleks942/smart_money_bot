@@ -14785,6 +14785,108 @@ if __name__ == "__main__":
                         quality_points += 1
 
                     # =====================
+                    # PRICE + OI CONTEXT
+                    # =====================
+
+                    try:
+
+                        price_change = float(
+                            sig.get("price_change_pct") or 0
+                        )
+
+                    except:
+
+                        price_change = 0
+
+                    # =====================
+                    # REAL LONG BUILDUP
+                    # цена растет + OI растет
+                    # =====================
+
+                    if (
+                        price_change > 0
+                        and oi >= 0.25
+                    ):
+
+                        quality_points += 3
+
+                        flags.add("REAL_LONG_BUILDUP")
+
+                        print(
+                            f"[REAL_LONG_BUILDUP] "
+                            f"{instId} "
+                            f"price={price_change} "
+                            f"oi={oi}",
+                            flush=True
+                        )
+
+                    # =====================
+                    # REAL SHORT BUILDUP
+                    # цена падает + OI растет
+                    # =====================
+
+                    elif (
+                        price_change < 0
+                        and oi >= 0.25
+                    ):
+
+                        quality_points += 3
+
+                        flags.add("REAL_SHORT_BUILDUP")
+
+                        print(
+                            f"[REAL_SHORT_BUILDUP] "
+                            f"{instId} "
+                            f"price={price_change} "
+                            f"oi={oi}",
+                            flush=True
+                        )
+
+                    # =====================
+                    # SHORT SQUEEZE
+                    # цена растет + OI падает
+                    # =====================
+
+                    elif (
+                        price_change > 0
+                        and oi <= -0.25
+                    ):
+
+                        quality_points += 1
+
+                        flags.add("SHORT_SQUEEZE")
+
+                        print(
+                            f"[SHORT_SQUEEZE] "
+                            f"{instId} "
+                            f"price={price_change} "
+                            f"oi={oi}",
+                            flush=True
+                        )
+
+                    # =====================
+                    # LONG FLUSH
+                    # цена падает + OI падает
+                    # =====================
+
+                    elif (
+                        price_change < 0
+                        and oi <= -0.25
+                    ):
+
+                        quality_points += 1
+
+                        flags.add("LONG_FLUSH")
+
+                        print(
+                            f"[LONG_FLUSH] "
+                            f"{instId} "
+                            f"price={price_change} "
+                            f"oi={oi}",
+                            flush=True
+                        )
+
+                    # =====================
                     # LAUNCH
                     # =====================
 
