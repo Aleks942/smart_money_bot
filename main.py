@@ -11298,7 +11298,7 @@ def btc_regime():
 
         ep >= 10
 
-        and score >= 14
+        and score >= 10
 
         and mode in (
             "TRANSITION",
@@ -11315,8 +11315,15 @@ def btc_regime():
         )
 
         and (
+
             "EMA_BEAR" in flags
             or "EMA_BEAR_STRONG" in flags
+        
+            or (
+                "BEARISH_SHIFT" in flags
+                and "PRESSURE_DOWN" in flags
+                and ep >= 12
+            )
         )
 
     ):
