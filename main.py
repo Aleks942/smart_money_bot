@@ -10558,196 +10558,196 @@ def build_signal(instId):
 
         quality_pass = True
 
-if (
-
-    signal.get("signal_mode") == "PREMOVE"
-
-    and strong_structure_pass
-    and quality_pass
-):
-
-    print(
-        f"[PREMOVE_DEBUG] "
-        f"mode={signal.get('signal_mode')} "
-        f"symbol={instId}",
-        flush=True
-    )
-
-    print(
-        f"[PREMOVE_PASS] {instId}",
-        flush=True
-    )
-
-    signal["signal_group"] = "PRE_SWING"
-
-
-    # =========================
-    # AUTO GROUP ASSIGN
-    # =========================
-
-    ep = float(
-        signal.get("early_pressure_score") or 0
-    )
-
-    score = float(
-        signal.get("score") or 0
-    )
-
-    flags = set(signal.get("flags", []))
-
-    # =====================
-    # SWING
-    # =====================
-
     if (
-
-        signal.get("signal_mode") == "EXPANSION"
-
-        and score >= 14
-        and ep >= 8
-
-        and (
-            "BREAKOUT_CONFIRM_UP" in flags
-            or "BREAKOUT_CONFIRM_DOWN" in flags
-            or "CONTINUATION_UP" in flags
-            or "CONTINUATION_DOWN" in flags
-            or "ACCELERATION_UP" in flags
-            or "ACCELERATION_DOWN" in flags
-            or "EXPLOSION_READY_UP" in flags
-            or "EXPLOSION_READY_DOWN" in flags
-        )
-
-        and (
-            "MTF_LONG_ALIGN" in flags
-            or "MTF_SHORT_ALIGN" in flags
-        )
+    
+        signal.get("signal_mode") == "PREMOVE"
+    
+        and strong_structure_pass
+        and quality_pass
     ):
-
-        signal["signal_group"] = "SWING"
-    # =====================
-    # PRE SWING
-    # =====================
-    
-    elif (
-    
-        signal.get("signal_mode") in (
-            "TRANSITION",
-            "PREMOVE",
-            "EXPANSION",
-        )
-    
-        and ep >= 6
-        and score >= 10
-    
-        and (
-            signal.get("entry") not in (
-                "NO_ENTRY",
-                "PREMOVE_CONFLICT",
-            )
-        )
-    
-    ):
-    
-        signal["signal_group"] = "PRE_SWING"
-
-        signal["sendable"] = True
-        signal["valid"] = True
     
         print(
-            f"[PRE_SWING_ROUTE] "
-            f"{instId} "
+            f"[PREMOVE_DEBUG] "
             f"mode={signal.get('signal_mode')} "
-            f"score={score} "
-            f"ep={ep} "
-            f"acc={acc}",
+            f"symbol={instId}",
             flush=True
         )
+    
+        print(
+            f"[PREMOVE_PASS] {instId}",
+            flush=True
+        )
+    
+        signal["signal_group"] = "PRE_SWING"
+    
+    
+        # =========================
+        # AUTO GROUP ASSIGN
+        # =========================
+    
+        ep = float(
+            signal.get("early_pressure_score") or 0
+        )
+    
+        score = float(
+            signal.get("score") or 0
+        )
+    
+        flags = set(signal.get("flags", []))
+    
         # =====================
-        # SCALP
+        # SWING
         # =====================
     
         if (
-            not signal.get("signal_group")
     
-            and signal.get("signal_mode") in (
-                "TRANSITION",
-                "CONFIRMED",
+            signal.get("signal_mode") == "EXPANSION"
+    
+            and score >= 14
+            and ep >= 8
+    
+            and (
+                "BREAKOUT_CONFIRM_UP" in flags
+                or "BREAKOUT_CONFIRM_DOWN" in flags
+                or "CONTINUATION_UP" in flags
+                or "CONTINUATION_DOWN" in flags
+                or "ACCELERATION_UP" in flags
+                or "ACCELERATION_DOWN" in flags
+                or "EXPLOSION_READY_UP" in flags
+                or "EXPLOSION_READY_DOWN" in flags
             )
     
-            and ep >= 7
-            and score >= 12
+            and (
+                "MTF_LONG_ALIGN" in flags
+                or "MTF_SHORT_ALIGN" in flags
+            )
         ):
     
-            signal["signal_group"] = "SCALP"
-    
+            signal["signal_group"] = "SWING"
         # =====================
-        # NO GROUP
+        # PRE SWING
         # =====================
+        
+        elif (
+        
+            signal.get("signal_mode") in (
+                "TRANSITION",
+                "PREMOVE",
+                "EXPANSION",
+            )
+        
+            and ep >= 6
+            and score >= 10
+        
+            and (
+                signal.get("entry") not in (
+                    "NO_ENTRY",
+                    "PREMOVE_CONFLICT",
+                )
+            )
+        
+        ):
+        
+            signal["signal_group"] = "PRE_SWING"
     
-        if not signal.get("sendable"):
+            signal["sendable"] = True
+            signal["valid"] = True
+        
+            print(
+                f"[PRE_SWING_ROUTE] "
+                f"{instId} "
+                f"mode={signal.get('signal_mode')} "
+                f"score={score} "
+                f"ep={ep} "
+                f"acc={acc}",
+                flush=True
+            )
+            # =====================
+            # SCALP
+            # =====================
+        
+            if (
+                not signal.get("signal_group")
+        
+                and signal.get("signal_mode") in (
+                    "TRANSITION",
+                    "CONFIRMED",
+                )
+        
+                and ep >= 7
+                and score >= 12
+            ):
+        
+                signal["signal_group"] = "SCALP"
+        
+            # =====================
+            # NO GROUP
+            # =====================
+        
+            if not signal.get("sendable"):
+        
+                signal["signal_group"] = None
+        
+            # =========================
+            # FINAL FILTER
+            # ========================= 
+                    
+            if not ok and not premove_override:
+        
+                print(
+                    f"[FILTER_BLOCK] "
+                    f"{instId} reason={reason}",
+                    flush=True
+                )
+        
+                return None
     
-            signal["signal_group"] = None
-    
-        # =========================
-        # FINAL FILTER
-        # ========================= 
-                
-        if not ok and not premove_override:
+        if premove_override:
     
             print(
-                f"[FILTER_BLOCK] "
-                f"{instId} reason={reason}",
+                f"[OVERRIDE_FINAL_PASS] "
+                f"{instId}",
                 flush=True
             )
     
-            return None
-
-    if premove_override:
-
-        print(
-            f"[OVERRIDE_FINAL_PASS] "
-            f"{instId}",
-            flush=True
-        )
-
-    if not signal.get("signal_group"):
-
-        if (
-            signal.get("signal_mode") == "TRANSITION"
-            and ep >= 8
-            and signal.get("entry") not in (
-                "NO_ENTRY",
-                "PREMOVE_CONFLICT",
-            )
-            and (
-                "ACCELERATION_UP" in flags
-                or "ACCELERATION_DOWN" in flags
-                or "BREAKOUT_CONFIRM_UP" in flags
-                or "BREAKOUT_CONFIRM_DOWN" in flags
-            )
-        ):
-
-            signal["signal_group"] = "SCALP"
-
-        else:
-
-            # =====================
-            # KEEP OVERRIDE SIGNALS
-            # =====================
-
-            if signal.get("sendable") is True:
-
-                print(
-                    f"[KEEP_OVERRIDE_SIGNAL] "
-                    f"{instId}",
-                    flush=True
+        if not signal.get("signal_group"):
+    
+            if (
+                signal.get("signal_mode") == "TRANSITION"
+                and ep >= 8
+                and signal.get("entry") not in (
+                    "NO_ENTRY",
+                    "PREMOVE_CONFLICT",
                 )
-
-                return signal
-
-            return None
-
-    return signal
+                and (
+                    "ACCELERATION_UP" in flags
+                    or "ACCELERATION_DOWN" in flags
+                    or "BREAKOUT_CONFIRM_UP" in flags
+                    or "BREAKOUT_CONFIRM_DOWN" in flags
+                )
+            ):
+    
+                signal["signal_group"] = "SCALP"
+    
+            else:
+    
+                # =====================
+                # KEEP OVERRIDE SIGNALS
+                # =====================
+    
+                if signal.get("sendable") is True:
+    
+                    print(
+                        f"[KEEP_OVERRIDE_SIGNAL] "
+                        f"{instId}",
+                        flush=True
+                    )
+    
+                    return signal
+    
+                return None
+    
+        return signal
 
 
 # ==============================
