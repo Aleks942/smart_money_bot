@@ -11193,7 +11193,7 @@ def btc_regime():
 
         ep >= 10
 
-        and score >= 14
+        and score >= 10
 
         and mode in (
             "TRANSITION",
