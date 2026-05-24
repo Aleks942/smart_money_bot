@@ -10789,9 +10789,20 @@ def build_signal(instId):
 
     # =========================
     # FINAL FILTER
-    # ========================= 
-            
-    if not ok and not premove_override:
+    # =========================
+
+    if (
+
+        not ok
+
+        and not premove_override
+
+        and signal.get("signal_group") not in (
+            "PRE_SWING",
+            "SWING",
+        )
+
+    ):
 
         print(
             f"[FILTER_BLOCK] "
@@ -10800,7 +10811,6 @@ def build_signal(instId):
         )
 
         return None
-
     if premove_override:
 
         print(
