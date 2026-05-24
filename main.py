@@ -10479,7 +10479,7 @@ def build_signal(instId):
             flush=True
         )
     
-        return False
+        return None
     
     # =====================
     # ACC BLOCK
@@ -10494,7 +10494,7 @@ def build_signal(instId):
             flush=True
         )
     
-        return False
+        return None
     
     # =====================
     # ALLOW OVERRIDE
