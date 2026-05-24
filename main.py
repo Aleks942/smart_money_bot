@@ -1218,12 +1218,17 @@ def telegram_firewall(sig, group="GENERAL"):
     except Exception as e:
         print(f"[TELEGRAM_FIREWALL_ERROR] {e}", flush=True)
         return False, "firewall_error"
-
 # =========================
 # PRE-SWING MEMORY
 # =========================
 
 PRE_SWING_STATE = {}
+
+# =========================
+# OI MEMORY
+# =========================
+
+OI_MEMORY = {}
 
 # =========================
 # ALERT MEMORY
