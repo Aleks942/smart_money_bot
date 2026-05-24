@@ -11149,93 +11149,6 @@ def get_market_candidates():
 # =========================
 
 def btc_regime():
-    # =========================
-    # APPLY MARKET REGIME BIAS
-    # =========================
-    
-    def apply_regime_bias(sig, regime):
-    
-        try:
-    
-            if not sig or not isinstance(sig, dict):
-                return sig
-    
-            side = str(
-                sig.get("direction_code")
-                or sig.get("side")
-                or ""
-            ).upper()
-    
-            # =====================
-            # RISK ON
-            # =====================
-    
-            if regime == "RISK_ON":
-    
-                if side in ("LONG", "BUY", "UP"):
-    
-                    sig["score"] = float(
-                        sig.get("score") or 0
-                    ) + 2
-    
-                    print(
-                        f"[REGIME_BOOST_LONG] "
-                        f"{sig.get('symbol')}",
-                        flush=True
-                    )
-    
-                elif side in ("SHORT", "SELL", "DOWN"):
-    
-                    sig["score"] = float(
-                        sig.get("score") or 0
-                    ) - 2
-    
-                    print(
-                        f"[REGIME_PENALTY_SHORT] "
-                        f"{sig.get('symbol')}",
-                        flush=True
-                    )
-    
-            # =====================
-            # RISK OFF
-            # =====================
-    
-            elif regime == "RISK_OFF":
-    
-                if side in ("SHORT", "SELL", "DOWN"):
-    
-                    sig["score"] = float(
-                        sig.get("score") or 0
-                    ) + 2
-    
-                    print(
-                        f"[REGIME_BOOST_SHORT] "
-                        f"{sig.get('symbol')}",
-                        flush=True
-                    )
-    
-                elif side in ("LONG", "BUY", "UP"):
-    
-                    sig["score"] = float(
-                        sig.get("score") or 0
-                    ) - 2
-    
-                    print(
-                        f"[REGIME_PENALTY_LONG] "
-                        f"{sig.get('symbol')}",
-                        flush=True
-                    )
-    
-            return sig
-
-    except Exception as e:
-
-        print(
-            f"[REGIME_BIAS_ERROR] {e}",
-            flush=True
-        )
-
-        return sig
 
     try:
 
@@ -11358,6 +11271,86 @@ def btc_regime():
     )
 
     return ("NEUTRAL", sig)
+
+# =========================
+# APPLY MARKET REGIME BIAS
+# =========================
+
+def apply_regime_bias(sig, regime):
+
+    try:
+
+        if not sig or not isinstance(sig, dict):
+            return sig
+
+        side = str(
+            sig.get("direction_code")
+            or sig.get("side")
+            or ""
+        ).upper()
+
+        if regime == "RISK_ON":
+
+            if side in ("LONG", "BUY", "UP"):
+
+                sig["score"] = float(
+                    sig.get("score") or 0
+                ) + 2
+
+                print(
+                    f"[REGIME_BOOST_LONG] "
+                    f"{sig.get('symbol')}",
+                    flush=True
+                )
+
+            elif side in ("SHORT", "SELL", "DOWN"):
+
+                sig["score"] = float(
+                    sig.get("score") or 0
+                ) - 2
+
+                print(
+                    f"[REGIME_PENALTY_SHORT] "
+                    f"{sig.get('symbol')}",
+                    flush=True
+                )
+
+        elif regime == "RISK_OFF":
+
+            if side in ("SHORT", "SELL", "DOWN"):
+
+                sig["score"] = float(
+                    sig.get("score") or 0
+                ) + 2
+
+                print(
+                    f"[REGIME_BOOST_SHORT] "
+                    f"{sig.get('symbol')}",
+                    flush=True
+                )
+
+            elif side in ("LONG", "BUY", "UP"):
+
+                sig["score"] = float(
+                    sig.get("score") or 0
+                ) - 2
+
+                print(
+                    f"[REGIME_PENALTY_LONG] "
+                    f"{sig.get('symbol')}",
+                    flush=True
+                )
+
+        return sig
+
+    except Exception as e:
+
+        print(
+            f"[REGIME_BIAS_ERROR] {e}",
+            flush=True
+        )
+
+        return sig
 # =========================
 # PRO EDGE FILTER (NEW)
 # =========================
