@@ -14511,7 +14511,38 @@ if __name__ == "__main__":
                         f"scalp={sig.get('scalp_candidate') if isinstance(sig, dict) else None}",
                         flush=True
                     )
-                
+                    # =====================
+                    # MESSAGE TYPE
+                    # =====================
+            
+                    if group == "SWING":
+
+                        print(
+                            f"[SWING_ENABLED] {instId}",
+                            flush=True
+                        )
+                    
+                        msg = safe_msg_builder(
+                            globals().get("msg_swing"),
+                            sig,
+                            "SWING"
+                        )
+            
+                    elif group == "PRE_SWING":
+            
+                        msg = safe_msg_builder(
+                            globals().get("msg_pre_swing"),
+                            sig,
+                            "PRE_SWING"
+                        )
+            
+                    else:
+            
+                        msg = safe_msg_builder(
+                            globals().get("msg_scalp"),
+                            sig,
+                            "SCALP"
+                        )
                     # =====================
                     # INVALID SIGNAL PROTECTION
                     # =====================
@@ -14556,38 +14587,7 @@ if __name__ == "__main__":
                     
                     if group in allowed_groups:
                 
-                        # =====================
-                        # MESSAGE TYPE
-                        # =====================
-                
-                        if group == "SWING":
-
-                            print(
-                                f"[SWING_ENABLED] {instId}",
-                                flush=True
-                            )
-                        
-                            msg = safe_msg_builder(
-                                globals().get("msg_swing"),
-                                sig,
-                                "SWING"
-                            )
-                
-                        elif group == "PRE_SWING":
-                
-                            msg = safe_msg_builder(
-                                globals().get("msg_pre_swing"),
-                                sig,
-                                "PRE_SWING"
-                            )
-                
-                        else:
-                
-                            msg = safe_msg_builder(
-                                globals().get("msg_scalp"),
-                                sig,
-                                "SCALP"
-                            )
+                       
                         # =========================
                         # ELITE PRE-SWING FILTER
                         # =========================
