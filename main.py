@@ -11145,34 +11145,132 @@ def get_market_candidates():
 
 
 # =========================
-# BTC MARKET REGIME (V2)
+# BTC MARKET REGIME (SMART)
 # =========================
+
 def btc_regime():
+
     try:
+
         sig = build_signal(btc_symbol())
-    except:
+
+    except Exception as e:
+
+        print(
+            f"[BTC_REGIME_ERROR] {e}",
+            flush=True
+        )
+
         return ("NEUTRAL", None)
 
-    # защита от None
+    # =====================
+    # INVALID BTC
+    # =====================
+
     if not isinstance(sig, dict):
+
         return ("NEUTRAL", None)
 
     flags = set(sig.get("flags", []))
-    if ("BREAKOUT_CONFIRM_DOWN" in flags and "ATR_EXPANSION" in flags and "VOL_SPIKE" in flags):
-        return ("RISK_OFF", sig)
-    if ("BREAKOUT_CONFIRM_UP" in flags and "ATR_EXPANSION" in flags and "VOL_SPIKE" in flags):
+
+    ep = float(
+        sig.get("early_pressure_score") or 0
+    )
+
+    score = float(
+        sig.get("score") or 0
+    )
+
+    mode = str(
+        sig.get("signal_mode") or ""
+    )
+
+    # =====================
+    # RISK ON
+    # =====================
+
+    if (
+
+        ep >= 10
+
+        and score >= 14
+
+        and mode in (
+            "TRANSITION",
+            "EXPANSION",
+            "PREMOVE",
+        )
+
+        and (
+            "PRESSURE_UP" in flags
+            or "BULLISH_SHIFT" in flags
+            or "ACCELERATION_UP" in flags
+            or "EXPLOSION_READY_UP" in flags
+            or "LAUNCH_PROXIMITY_UP" in flags
+        )
+
+        and (
+            "EMA_BULL" in flags
+            or "EMA_BULL_STRONG" in flags
+        )
+
+    ):
+
+        print(
+            "[BTC_REGIME] RISK_ON",
+            flush=True
+        )
+
         return ("RISK_ON", sig)
+
+    # =====================
+    # RISK OFF
+    # =====================
+
+    if (
+
+        ep >= 10
+
+        and score >= 14
+
+        and mode in (
+            "TRANSITION",
+            "EXPANSION",
+            "PREMOVE",
+        )
+
+        and (
+            "PRESSURE_DOWN" in flags
+            or "BEARISH_SHIFT" in flags
+            or "ACCELERATION_DOWN" in flags
+            or "EXPLOSION_READY_DOWN" in flags
+            or "LAUNCH_PROXIMITY_DOWN" in flags
+        )
+
+        and (
+            "EMA_BEAR" in flags
+            or "EMA_BEAR_STRONG" in flags
+        )
+
+    ):
+
+        print(
+            "[BTC_REGIME] RISK_OFF",
+            flush=True
+        )
+
+        return ("RISK_OFF", sig)
+
+    # =====================
+    # NEUTRAL
+    # =====================
+
+    print(
+        "[BTC_REGIME] NEUTRAL",
+        flush=True
+    )
+
     return ("NEUTRAL", sig)
-
-def apply_regime_bias(sig, regime):
-    if regime == "RISK_OFF":
-        if "ВВЕРХ" in sig["direction"]:
-            sig["score"] -= 1
-    elif regime == "RISK_ON":
-        if "ВНИЗ" in sig["direction"]:
-            sig["score"] -= 1
-    return sig
-
 # =========================
 # PRO EDGE FILTER (NEW)
 # =========================
