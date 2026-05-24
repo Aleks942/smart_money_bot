@@ -12992,6 +12992,8 @@ def is_elite_pre_swing(sig):
         
             and not has_launch
         
+            and signal.get("signal_mode") != "PREMOVE"
+        
         ):
         
             return False, "elite_no_mtf"
