@@ -14986,7 +14986,7 @@ if __name__ == "__main__":
 
                     elif energy_stack <= 2:
 
-                        quality_points -= 2
+                        quality_points -= 5
 
                         print(
                             f"[ENERGY_STACK_WEAK] "
