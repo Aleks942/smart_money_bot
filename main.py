@@ -10888,6 +10888,18 @@ def build_signal(instId):
                 flush=True
             )
             return None
+
+    print(
+        f"[FINAL_RETURN_SIGNAL] "
+        f"{instId} "
+        f"group={signal.get('signal_group')} "
+        f"mode={signal.get('signal_mode')} "
+        f"sendable={signal.get('sendable')} "
+        f"valid={signal.get('valid')}",
+        flush=True
+    )
+
+    return signal
     
 # ==============================
 # 🎯 SNIPER SIGNAL ENGINE
