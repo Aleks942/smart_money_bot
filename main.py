@@ -2691,6 +2691,7 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         # PREMOVE BYPASS
         # =====================
         signal_mode = classify_signal_mode(sig)
+        
         sig["signal_mode"] = signal_mode
 
         premove_bypass = (
