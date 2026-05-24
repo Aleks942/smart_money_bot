@@ -9737,34 +9737,34 @@ def build_signal(instId):
         ema_boost += 2
 
     if "ACCELERATION_UP" in flags:
-        ema_boost += 2
+        ema_boost += 1
 
     if "ACCELERATION_DOWN" in flags:
-        ema_boost += 2
+        ema_boost += 1
 
     if "LAUNCH_PROXIMITY_UP" in flags:
-        ema_boost += 3
+        ema_boost += 1.5
 
     if "LAUNCH_PROXIMITY_DOWN" in flags:
-        ema_boost += 3
+        ema_boost += 1.5
 
     if "EXPLOSION_READY_UP" in flags:
-        ema_boost += 3
+        ema_boost += 1.5
 
     if "EXPLOSION_READY_DOWN" in flags:
-        ema_boost += 3
+        ema_boost += 1.5
 
     if "MTF_LONG_ALIGN" in flags:
-        ema_boost += 2
+        ema_boost += 1
 
     if "MTF_SHORT_ALIGN" in flags:
         ema_boost += 2
 
     if "BREAKOUT_CONFIRM_UP" in flags:
-        ema_boost += 2
+        ema_boost += 1
 
     if "BREAKOUT_CONFIRM_DOWN" in flags:
-        ema_boost += 2
+        ema_boost += 1
     # =========================
     # DEBUG
     # =========================
