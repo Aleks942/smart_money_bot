@@ -10666,28 +10666,27 @@ if (
     # SCALP
     # =====================
 
-    elif (
+    if (
         not signal.get("signal_group")
-    
+
         and signal.get("signal_mode") in (
             "TRANSITION",
             "CONFIRMED",
         )
+
         and ep >= 7
         and score >= 12
     ):
 
         signal["signal_group"] = "SCALP"
+
     # =====================
     # NO GROUP
     # =====================
 
-    else:
+    if not signal.get("sendable"):
 
-        if not signal.get("sendable"):
-
-            signal["signal_group"] = None
-
+        signal["signal_group"] = None
 
     # =========================
     # FINAL FILTER
