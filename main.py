@@ -14682,6 +14682,159 @@ if __name__ == "__main__":
                         )
 
                         continue
+
+                    # =====================
+                    # FINAL QUALITY SELECTOR
+                    # =====================
+
+                    flags = set(sig.get("flags", []))
+
+                    score = float(sig.get("score") or 0)
+                    ep = float(sig.get("early_pressure_score") or 0)
+                    acc = float(sig.get("acc_score") or 0)
+                    oi = float(sig.get("oi_change") or 0)
+
+                    group = sig.get("signal_group")
+                    mode = sig.get("signal_mode")
+                    entry = sig.get("entry")
+
+                    has_launch = (
+                        "LAUNCH_PROXIMITY_UP" in flags
+                        or "LAUNCH_PROXIMITY_DOWN" in flags
+                        or "EXPLOSION_READY_UP" in flags
+                        or "EXPLOSION_READY_DOWN" in flags
+                    )
+
+                    has_acceleration = (
+                        "ACCELERATION_UP" in flags
+                        or "ACCELERATION_DOWN" in flags
+                    )
+
+                    has_mtf = (
+                        "MTF_LONG_ALIGN" in flags
+                        or "MTF_SHORT_ALIGN" in flags
+                    )
+
+                    has_absorption = (
+                        "BUYER_ABSORPTION" in flags
+                        or "SELLER_ABSORPTION" in flags
+                    )
+
+                    has_compression = (
+                        "COMP_PRO_5M" in flags
+                        or "COMP_PRO_15M" in flags
+                        or "COMP_5M" in flags
+                        or "COMP_15M" in flags
+                    )
+
+                    is_expansion = mode == "EXPANSION" or "EXPANSION" in str(sig.get("stage", ""))
+                    is_premove = mode == "PREMOVE" or "PREMOVE" in str(entry)
+                    is_transition = mode == "TRANSITION"
+
+                    quality_points = 0
+
+                    if ep >= 16:
+                        quality_points += 2
+                    elif ep >= 12:
+                        quality_points += 1
+
+                    if acc >= 3:
+                        quality_points += 2
+                    elif acc >= 2:
+                        quality_points += 1
+
+                    if abs(oi) >= 0.25:
+                        quality_points += 2
+                    elif abs(oi) >= 0.08:
+                        quality_points += 1
+
+                    if has_launch:
+                        quality_points += 2
+
+                    if has_acceleration:
+                        quality_points += 2
+
+                    if has_mtf:
+                        quality_points += 1
+
+                    if has_absorption:
+                        quality_points += 1
+
+                    if has_compression:
+                        quality_points += 1
+
+                    sig["quality_points"] = quality_points
+
+                    print(
+                        f"[QUALITY_SELECTOR] "
+                        f"{instId} "
+                        f"qp={quality_points} "
+                        f"score={score} "
+                        f"ep={ep} "
+                        f"acc={acc} "
+                        f"oi={oi} "
+                        f"mode={mode} "
+                        f"entry={entry}",
+                        flush=True
+                    )
+
+                    # =====================
+                    # DROP LOW VALUE CLONES
+                    # =====================
+
+                    if (
+                        group == "PRE_SWING"
+                        and quality_points < 5
+                        and score < 18
+                    ):
+
+                        print(
+                            f"[SKIP_LOW_QUALITY] "
+                            f"{instId} "
+                            f"qp={quality_points}",
+                            flush=True
+                        )
+
+                        continue
+
+                    # =====================
+                    # DROP WEAK TRANSITIONS
+                    # =====================
+
+                    if (
+                        is_transition
+                        and quality_points < 5
+                        and abs(oi) < 0.15
+                    ):
+
+                        print(
+                            f"[SKIP_WEAK_TRANSITION] "
+                            f"{instId} "
+                            f"qp={quality_points}",
+                            flush=True
+                        )
+
+                        continue
+
+                    # =====================
+                    # DROP WEAK PREMOVES
+                    # =====================
+
+                    if (
+                        is_premove
+                        and quality_points < 6
+                        and abs(oi) < 0.15
+                        and acc < 3
+                    ):
+
+                        print(
+                            f"[SKIP_WEAK_PREMOVE_FINAL] "
+                            f"{instId} "
+                            f"qp={quality_points}",
+                            flush=True
+                        )
+
+                        continue
                     # =====================
                     # MESSAGE TYPE
                     # =====================
