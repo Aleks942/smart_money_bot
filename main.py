@@ -14804,7 +14804,7 @@ if __name__ == "__main__":
                     if (
                         is_transition
                         and quality_points < 5
-                        and abs(oi) < 0.15
+                        and abs(oi) < 0.25
                     ):
 
                         print(
@@ -14823,7 +14823,7 @@ if __name__ == "__main__":
                     if (
                         is_premove
                         and quality_points < 6
-                        and abs(oi) < 0.15
+                        and abs(oi) < 0.25
                         and acc < 3
                     ):
 
