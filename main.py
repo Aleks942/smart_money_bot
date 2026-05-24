@@ -10734,16 +10734,6 @@ def build_signal(instId):
             f"acc={acc}",
             flush=True
         )
-        
-            print(
-            f"[PRE_SWING_ROUTE] "
-            f"{instId} "
-            f"mode={signal.get('signal_mode')} "
-            f"score={score} "
-            f"ep={ep} "
-            f"acc={acc}",
-            flush=True
-        )
 
         print(
             f"[POST_ROUTE_DEBUG] "
