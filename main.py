@@ -14400,6 +14400,21 @@ if __name__ == "__main__":
                     
                         sig["oi_change"] = new_oi
                         sig["oi_available"] = True
+
+                        # =====================
+                        # OI MEMORY
+                        # =====================
+
+                        oi_history = OI_MEMORY.get(
+                            instId,
+                            []
+                        )
+
+                        oi_history.append(new_oi)
+
+                        oi_history = oi_history[-5:]
+
+                        OI_MEMORY[instId] = oi_history
                     
                         print(
                             f"[OI_OK] "
