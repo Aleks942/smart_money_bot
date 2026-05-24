@@ -14608,7 +14608,7 @@ if __name__ == "__main__":
                     # =====================
                     # MESSAGE TYPE
                     # =====================
-
+                    group = sig.get("signal_group")
                     if group == "SWING":
 
                         print(
