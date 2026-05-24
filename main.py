@@ -14498,7 +14498,52 @@ if __name__ == "__main__":
                                     f"{instId} "
                                     f"{last_3}",
                                     flush=True
-                                )         
+                                )  
+
+                            # =====================
+                            # OI SCORE BOOST
+                            # =====================
+
+                            oi_trend = sig.get("oi_trend")
+                            side = str(
+                                sig.get("direction_code")
+                                or sig.get("side")
+                                or sig.get("direction")
+                                or ""
+                            ).upper()
+
+                            # LONG + OI растёт = деньги заходят в сторону LONG
+                            if (
+                                oi_trend == "UP"
+                                and side in ("LONG", "BUY", "UP", "ВВЕРХ", "LONG BIAS")
+                            ):
+
+                                sig["score"] = float(sig.get("score") or 0) + 2
+                                sig["oi_score_boost"] = 2
+
+                                print(
+                                    f"[OI_SCORE_BOOST_LONG] "
+                                    f"{instId} "
+                                    f"trend={oi_trend}",
+                                    flush=True
+                                )
+
+                            # SHORT + OI падает/растёт: пока даём мягкий boost,
+                            # потому что в твоей логике отрицательный OI может показывать выход/давление
+                            elif (
+                                side in ("SHORT", "SELL", "DOWN", "ВНИЗ", "SHORT BIAS")
+                                and oi_trend in ("UP", "DOWN")
+                            ):
+
+                                sig["score"] = float(sig.get("score") or 0) + 2
+                                sig["oi_score_boost"] = 2
+
+                                print(
+                                    f"[OI_SCORE_BOOST_SHORT] "
+                                    f"{instId} "
+                                    f"trend={oi_trend}",
+                                    flush=True
+                                )
                         # =====================
                         # OI NOISE FILTER
                         # =====================
