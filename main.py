@@ -14763,7 +14763,8 @@ if __name__ == "__main__":
                         quality_points += 3
 
                     elif acc >= 2:
-                        quality_points += 1
+
+                        quality_points += 0
 
                     # =====================
                     # OI
@@ -14901,8 +14902,12 @@ if __name__ == "__main__":
                     # LAUNCH
                     # =====================
 
-                    if has_launch:
-                        quality_points += 2
+                    if (
+                        has_acceleration
+                        and abs(oi) >= 0.15
+                    ):
+
+                        energy_stack += 1
 
                     # =====================
                     # ACCELERATION
