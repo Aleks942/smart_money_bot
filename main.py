@@ -10846,7 +10846,7 @@ def build_signal(instId):
                 f"{instId}",
                 flush=True
             )
-
+      
             return signal
 
         else:
@@ -10856,7 +10856,15 @@ def build_signal(instId):
                 f"{instId}",
                 flush=True
             )
-
+            print(
+                f"[INVALID_DEBUG] "
+                f"group={signal.get('signal_group')} "
+                f"sendable={signal.get('sendable')} "
+                f"valid={signal.get('valid')} "
+                f"mode={signal.get('signal_mode')} "
+                f"entry={signal.get('entry')}",
+                flush=True
+            )
             return None
     
 # ==============================
