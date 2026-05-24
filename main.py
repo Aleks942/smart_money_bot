@@ -14696,7 +14696,7 @@ if __name__ == "__main__":
 
                     group = sig.get("signal_group")
                     mode = sig.get("signal_mode")
-                    entry = sig.get("entry")
+                    entry = str(sig.get("entry") or "")
 
                     has_launch = (
                         "LAUNCH_PROXIMITY_UP" in flags
@@ -14727,38 +14727,94 @@ if __name__ == "__main__":
                         or "COMP_15M" in flags
                     )
 
-                    is_expansion = mode == "EXPANSION" or "EXPANSION" in str(sig.get("stage", ""))
-                    is_premove = mode == "PREMOVE" or "PREMOVE" in str(entry)
+                    is_expansion = (
+                        mode == "EXPANSION"
+                        or "EXPANSION" in str(sig.get("stage", ""))
+                    )
+                    is_premove = (
+                        mode == "PREMOVE"
+                        or "PREMOVE" in str(entry)
+                    )
                     is_transition = mode == "TRANSITION"
 
                     quality_points = 0
 
-                    if ep >= 16:
+                    # =====================
+                    # EP
+                    # =====================
+
+                    if ep >= 20:
+                        quality_points += 3
+
+                    elif ep >= 16:
                         quality_points += 2
+
                     elif ep >= 12:
                         quality_points += 1
 
-                    if acc >= 3:
-                        quality_points += 2
+                    # =====================
+                    # ACCUMULATION
+                    # =====================
+
+                    if acc >= 4:
+                        quality_points += 4
+
+                    elif acc >= 3:
+                        quality_points += 3
+
                     elif acc >= 2:
                         quality_points += 1
 
-                    if abs(oi) >= 0.25:
+                    # =====================
+                    # OI
+                    # =====================
+
+                    if abs(oi) >= 2:
+                        quality_points += 5
+
+                    elif abs(oi) >= 1:
+                        quality_points += 4
+
+                    elif abs(oi) >= 0.5:
+                        quality_points += 3
+
+                    elif abs(oi) >= 0.25:
                         quality_points += 2
+
                     elif abs(oi) >= 0.08:
                         quality_points += 1
+
+                    # =====================
+                    # LAUNCH
+                    # =====================
 
                     if has_launch:
                         quality_points += 2
 
+                    # =====================
+                    # ACCELERATION
+                    # =====================
+
                     if has_acceleration:
                         quality_points += 2
+
+                    # =====================
+                    # MTF
+                    # =====================
 
                     if has_mtf:
                         quality_points += 1
 
+                    # =====================
+                    # ABSORPTION
+                    # =====================
+
                     if has_absorption:
-                        quality_points += 1
+                        quality_points += 2
+
+                    # =====================
+                    # COMPRESSION
+                    # =====================
 
                     if has_compression:
                         quality_points += 1
