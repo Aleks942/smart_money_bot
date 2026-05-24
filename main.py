@@ -14650,7 +14650,38 @@ if __name__ == "__main__":
                         f"scalp={sig.get('scalp_candidate') if isinstance(sig, dict) else None}",
                         flush=True
                     )
+                    # =====================
+                    # LOW ENERGY FILTER
+                    # =====================
 
+                    flags = set(sig.get("flags", []))
+
+                    weak_energy = (
+
+                        "ACCELERATION_UP" not in flags
+                        and "ACCELERATION_DOWN" not in flags
+
+                        and "EXPLOSION_READY_UP" not in flags
+                        and "EXPLOSION_READY_DOWN" not in flags
+
+                        and "LAUNCH_PROXIMITY_UP" not in flags
+                        and "LAUNCH_PROXIMITY_DOWN" not in flags
+
+                        and "MTF_LONG_ALIGN" not in flags
+                        and "MTF_SHORT_ALIGN" not in flags
+                    )
+
+                    oi = float(sig.get("oi_change") or 0)
+
+                    if weak_energy and abs(oi) < 0.15:
+
+                        print(
+                            f"[SKIP_LOW_ENERGY] "
+                            f"{instId}",
+                            flush=True
+                        )
+
+                        continue
                     # =====================
                     # MESSAGE TYPE
                     # =====================
