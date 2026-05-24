@@ -14429,78 +14429,171 @@ if __name__ == "__main__":
                         )
                     
                         try:
-                                      
+                        # =====================
+                        # OI TREND ANALYSIS
+                        # =====================
+
+                        oi_trend_up = False
+                        oi_trend_down = False
+
+                        if len(oi_history) >= 3:
+
+                            last_3 = oi_history[-3:]
+
                             # =====================
-                            # OI NOISE FILTER
+                            # RISING OI
                             # =====================
-                    
-                            if abs(new_oi) < 0.05:
-                    
-                                new_oi = 0
-                    
-                        except Exception as e:
-                    
-                            print(
-                                f"[OI_PARSE_ERROR] {instId} {e}",
-                                flush=True
-                            )
-                    
-                            new_oi = None
-                    
+
+                            if (
+
+                                last_3[0] < last_3[1]
+                                < last_3[2]
+
+                                and last_3[2] >= 0.08
+
+                            ):
+
+                                oi_trend_up = True
+
+                                sig["oi_trend"] = "UP"
+
+                                flags.append(
+                                    "OI_TREND_UP"
+                                )
+
+                                sig["score"] += 1
+
+                                print(
+                                    f"[OI_TREND_UP] "
+                                    f"{instId} "
+                                    f"{last_3}",
+                                    flush=True
+                                )
+
+                            # =====================
+                            # FALLING OI
+                            # =====================
+
+                            elif (
+
+                                last_3[0] > last_3[1]
+                                > last_3[2]
+
+                                and last_3[2] <= -0.08
+
+                            ):
+
+                                oi_trend_down = True
+
+                                sig["oi_trend"] = "DOWN"
+
+                                flags.append(
+                                    "OI_TREND_DOWN"
+                                )
+
+                                sig["score"] += 1
+
+                                print(
+                                    f"[OI_TREND_DOWN] "
+                                    f"{instId} "
+                                    f"{last_3}",
+                                    flush=True
+                                )         
+                        # =====================
+                        # OI NOISE FILTER
+                        # =====================
+
+                        if abs(new_oi) < 0.05:
+
+                            new_oi = 0
+
+                    except Exception as e:
+
+                        print(
+                            f"[OI_PARSE_ERROR] {instId} {e}",
+                            flush=True
+                        )
+
+                        new_oi = None
+
+                    # =====================
+                    # OI STATE CACHE
+                    # =====================
+
                     state["symbols"].setdefault(instId, {})
-                    
+
                     sym_state = state["symbols"][instId]
-                    
+
                     prev = sym_state.get("last_oi_change")
-                    
+
                     prev_ts = int(
                         sym_state.get("last_oi_ts", 0) or 0
                     )
-                    
+
                     age = (
                         now_ts() - prev_ts
                         if prev_ts
                         else None
                     )
-                    
+
+                    # =====================
+                    # APPLY FRESH OI
+                    # =====================
+
                     if new_oi is not None:
-                    
+
                         sig["oi_change"] = new_oi
-                    
+
                         sym_state["last_oi_change"] = new_oi
-                    
+
                         sym_state["last_oi_ts"] = now_ts()
-                    
+
                         print(
-                            f"[OI_NEW] {instId} fresh OI={new_oi}%",
+                            f"[OI_NEW] "
+                            f"{instId} fresh OI={new_oi}%",
                             flush=True
                         )
-                    
+
+                    # =====================
+                    # APPLY CACHED OI
+                    # =====================
+
                     elif (
                         prev is not None
                         and age is not None
                         and age <= oi_ttl
                     ):
-                    
+
                         sig["oi_change"] = prev
+
                         sig["oi_available"] = True
-                    
+
                         print(
-                            f"[OI_CACHE] {instId} "
+                            f"[OI_CACHE] "
+                            f"{instId} "
                             f"cached OI={prev}% age={age}s",
                             flush=True
                         )
-                    
+
+                    # =====================
+                    # NO OI
+                    # =====================
+
                     else:
-                    
+
                         sig["oi_change"] = None
-                    
+
                         print(
-                            f"[OI_NONE] {instId} "
+                            f"[OI_NONE] "
+                            f"{instId} "
                             f"no fresh OI / cache expired",
                             flush=True
                         )
-                
+
+                    # =====================
+                    # POST BUILD DEBUG
+                    # =====================
+
                     print(
                         f"[POST_BUILD] "
                         f"{instId} "
@@ -14511,38 +14604,40 @@ if __name__ == "__main__":
                         f"scalp={sig.get('scalp_candidate') if isinstance(sig, dict) else None}",
                         flush=True
                     )
+
                     # =====================
                     # MESSAGE TYPE
                     # =====================
-            
+
                     if group == "SWING":
 
                         print(
                             f"[SWING_ENABLED] {instId}",
                             flush=True
                         )
-                    
+
                         msg = safe_msg_builder(
                             globals().get("msg_swing"),
                             sig,
                             "SWING"
                         )
-            
+
                     elif group == "PRE_SWING":
-            
+
                         msg = safe_msg_builder(
                             globals().get("msg_pre_swing"),
                             sig,
                             "PRE_SWING"
                         )
-            
+
                     else:
-            
+
                         msg = safe_msg_builder(
                             globals().get("msg_scalp"),
                             sig,
                             "SCALP"
                         )
+
                     # =====================
                     # INVALID SIGNAL PROTECTION
                     # =====================
