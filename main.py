@@ -10849,9 +10849,33 @@ def build_signal(instId):
 
             or signal.get("sendable") is True
 
-            or signal.get("signal_mode") in (
-                "EXPANSION",
-                "PREMOVE",
+            or (
+
+                signal.get("signal_mode") == "EXPANSION"
+
+                and ep >= 8
+
+            )
+
+            or (
+
+                signal.get("signal_mode") == "PREMOVE"
+
+                and ep >= 7
+
+                and (
+                    "PRESSURE_UP" in flags
+                    or "PRESSURE_DOWN" in flags
+                    or "BULLISH_SHIFT" in flags
+                    or "BEARISH_SHIFT" in flags
+                    or "ACCELERATION_UP" in flags
+                    or "ACCELERATION_DOWN" in flags
+                    or "LAUNCH_PROXIMITY_UP" in flags
+                    or "LAUNCH_PROXIMITY_DOWN" in flags
+                    or "EXPLOSION_READY_UP" in flags
+                    or "EXPLOSION_READY_DOWN" in flags
+                )
+
             )
 
         ):
@@ -10868,7 +10892,7 @@ def build_signal(instId):
                 f"{instId}",
                 flush=True
             )
-      
+
             return signal
 
         else:
