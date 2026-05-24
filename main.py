@@ -10734,6 +10734,28 @@ def build_signal(instId):
             f"acc={acc}",
             flush=True
         )
+        
+            print(
+            f"[PRE_SWING_ROUTE] "
+            f"{instId} "
+            f"mode={signal.get('signal_mode')} "
+            f"score={score} "
+            f"ep={ep} "
+            f"acc={acc}",
+            flush=True
+        )
+
+        print(
+            f"[POST_ROUTE_DEBUG] "
+            f"{instId} "
+            f"group={signal.get('signal_group')} "
+            f"sendable={signal.get('sendable')} "
+            f"valid={signal.get('valid')} "
+            f"mode={signal.get('signal_mode')} "
+            f"entry={signal.get('entry')}",
+            flush=True
+        )
+
     # =====================
     # SCALP
     # =====================
