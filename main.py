@@ -10556,7 +10556,13 @@ def build_signal(instId):
 
         quality_pass = True
 
-    if strong_structure_pass and quality_pass:
+    if (
+
+        signal.get("signal_mode") == "PREMOVE"
+    
+        and strong_structure_pass
+        and quality_pass
+    ):
 
         print(
             f"[PREMOVE_PASS] {instId}",
