@@ -14769,20 +14769,31 @@ if __name__ == "__main__":
                     # OI
                     # =====================
 
-                    if abs(oi) >= 2:
+                    if abs(oi) >= 1.5:
                         quality_points += 5
 
-                    elif abs(oi) >= 1:
+                    elif abs(oi) >= 0.8:
                         quality_points += 4
 
-                    elif abs(oi) >= 0.5:
+                    elif abs(oi) >= 0.4:
                         quality_points += 3
 
                     elif abs(oi) >= 0.25:
                         quality_points += 2
 
-                    elif abs(oi) >= 0.08:
+                    elif abs(oi) >= 0.12:
                         quality_points += 1
+
+                    else:
+
+                        quality_points -= 3
+
+                        print(
+                            f"[LOW_OI_PENALTY] "
+                            f"{instId} "
+                            f"oi={oi}",
+                            flush=True
+                        )
 
                     # =====================
                     # PRICE + OI CONTEXT
