@@ -14819,6 +14819,69 @@ if __name__ == "__main__":
                     if has_compression:
                         quality_points += 1
 
+                    # =====================
+                    # ENERGY STACK
+                    # =====================
+
+                    energy_stack = 0
+
+                    if has_compression:
+                        energy_stack += 1
+
+                    if has_absorption:
+                        energy_stack += 1
+
+                    if has_acceleration:
+                        energy_stack += 1
+
+                    if has_launch:
+                        energy_stack += 1
+
+                    if abs(oi) >= 0.25:
+                        energy_stack += 1
+
+                    if ep >= 15:
+                        energy_stack += 1
+
+                    sig["energy_stack"] = energy_stack
+
+                    # =====================
+                    # ENERGY STACK BOOST
+                    # =====================
+
+                    if energy_stack >= 5:
+
+                        quality_points += 4
+
+                        print(
+                            f"[ENERGY_STACK_ELITE] "
+                            f"{instId} "
+                            f"stack={energy_stack}",
+                            flush=True
+                        )
+
+                    elif energy_stack >= 4:
+
+                        quality_points += 2
+
+                        print(
+                            f"[ENERGY_STACK_STRONG] "
+                            f"{instId} "
+                            f"stack={energy_stack}",
+                            flush=True
+                        )
+
+                    elif energy_stack <= 2:
+
+                        quality_points -= 2
+
+                        print(
+                            f"[ENERGY_STACK_WEAK] "
+                            f"{instId} "
+                            f"stack={energy_stack}",
+                            flush=True
+                        )
+
                     sig["quality_points"] = quality_points
 
                     print(
