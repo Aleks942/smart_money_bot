@@ -893,19 +893,86 @@ def analyze_signal_strength(sig):
             oi = float(oi)
     
             flags_set = set(flags)
+
+            # =====================
+            # REAL OI FLOW
+            # =====================
+
+            try:
+
+                price_change_pct = float(
+                    signal.get("price_change_pct") or 0
+                )
+
+            except:
+
+                price_change_pct = 0
+
+            oi_data = analyze_oi_flow(
+
+                instId,
+
+                price_change_pct,
+
+                oi
+
+            )
+
+            signal["oi_score"] = (
+                oi_data["oi_score"]
+            )
+
+            signal["oi_label"] = (
+                oi_data["oi_label"]
+            )
+
+            signal["oi_reason"] = (
+                oi_data["oi_reason"]
+            )
+
+            signal["oi_side"] = (
+                oi_data["oi_side"]
+            )
+
+            print(
+                f"[REAL_OI] "
+                f"{instId} "
+                f"label={oi_data['oi_label']} "
+                f"score={oi_data['oi_score']} "
+                f"side={oi_data['oi_side']}",
+                flush=True
+            )
     
             # =====================
             # STRONG OI BUILDUP
             # =====================
     
-            if oi >= 3:
+            if (
+
+                oi >= 0.15
+            
+                and (
+                    "COMP_PRO_5M" in flags_set
+                    or "COMP_PRO_15M" in flags_set
+                )
+            
+            ):
     
                 reasons.append("Сильный рост OI")
                 strength += 4
     
                 flags_set.add("OI_STRONG_BUILDUP")
     
-            elif oi >= 1:
+            elif (
+
+                oi >= 0.4
+            
+                and (
+                    "PRESSURE_UP" in flags_set
+                    or "PRESSURE_DOWN" in flags_set
+                )
+            
+            ):
     
                 reasons.append("Рост OI")
                 strength += 2
