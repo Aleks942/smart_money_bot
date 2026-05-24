@@ -10662,45 +10662,45 @@ if (
             f"acc={acc}",
             flush=True
         )
-    # =====================
-    # SCALP
-    # =====================
-
-    if (
-        not signal.get("signal_group")
-
-        and signal.get("signal_mode") in (
-            "TRANSITION",
-            "CONFIRMED",
-        )
-
-        and ep >= 7
-        and score >= 12
-    ):
-
-        signal["signal_group"] = "SCALP"
-
-    # =====================
-    # NO GROUP
-    # =====================
-
-    if not signal.get("sendable"):
-
-        signal["signal_group"] = None
-
-    # =========================
-    # FINAL FILTER
-    # ========================= 
-            
-    if not ok and not premove_override:
-
-        print(
-            f"[FILTER_BLOCK] "
-            f"{instId} reason={reason}",
-            flush=True
-        )
-
-        return None
+        # =====================
+        # SCALP
+        # =====================
+    
+        if (
+            not signal.get("signal_group")
+    
+            and signal.get("signal_mode") in (
+                "TRANSITION",
+                "CONFIRMED",
+            )
+    
+            and ep >= 7
+            and score >= 12
+        ):
+    
+            signal["signal_group"] = "SCALP"
+    
+        # =====================
+        # NO GROUP
+        # =====================
+    
+        if not signal.get("sendable"):
+    
+            signal["signal_group"] = None
+    
+        # =========================
+        # FINAL FILTER
+        # ========================= 
+                
+        if not ok and not premove_override:
+    
+            print(
+                f"[FILTER_BLOCK] "
+                f"{instId} reason={reason}",
+                flush=True
+            )
+    
+            return None
 
     if premove_override:
 
