@@ -10556,19 +10556,27 @@ def build_signal(instId):
 
         quality_pass = True
 
-    if (
+if (
 
-        signal.get("signal_mode") == "PREMOVE"
-    
-        and strong_structure_pass
-        and quality_pass
-    ):
+    signal.get("signal_mode") == "PREMOVE"
 
-        print(
-            f"[PREMOVE_PASS] {instId}",
-            flush=True
-        )
-        signal["signal_group"] = "PRE_SWING"
+    and strong_structure_pass
+    and quality_pass
+):
+
+    print(
+        f"[PREMOVE_DEBUG] "
+        f"mode={signal.get('signal_mode')} "
+        f"symbol={instId}",
+        flush=True
+    )
+
+    print(
+        f"[PREMOVE_PASS] {instId}",
+        flush=True
+    )
+
+    signal["signal_group"] = "PRE_SWING"
 
 
     # =========================
