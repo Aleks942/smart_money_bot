@@ -8388,7 +8388,79 @@ def detect_retest_entry(sig):
 
         return False, "retest_error"
 
+# =========================
+# MARKET REGIME FILTER
+# =========================
 
+def market_regime_filter(btc_signal):
+    """
+    Возвращает режим рынка:
+    RISK_ON  — лучше LONG
+    RISK_OFF — лучше SHORT / осторожно с LONG
+    NEUTRAL  — можно только сильные сетапы
+    """
+
+    try:
+        if not btc_signal or not isinstance(btc_signal, dict):
+            return {
+                "regime": "NEUTRAL",
+                "score": 0,
+                "reason": "no_btc_signal"
+            }
+
+        flags = set(btc_signal.get("flags", []))
+        score = 0
+        reasons = []
+
+        if "EMA_BULL" in flags or "EMA_BULL_STRONG" in flags:
+            score += 2
+            reasons.append("BTC EMA bull")
+
+        if "EMA_BEAR" in flags or "EMA_BEAR_STRONG" in flags:
+            score -= 2
+            reasons.append("BTC EMA bear")
+
+        if "PRESSURE_UP" in flags:
+            score += 2
+            reasons.append("BTC pressure up")
+
+        if "PRESSURE_DOWN" in flags:
+            score -= 2
+            reasons.append("BTC pressure down")
+
+        if "BREAKOUT_CONFIRM_UP" in flags or "ACCELERATION_UP" in flags:
+            score += 2
+            reasons.append("BTC impulse up")
+
+        if "BREAKOUT_CONFIRM_DOWN" in flags or "ACCELERATION_DOWN" in flags:
+            score -= 2
+            reasons.append("BTC impulse down")
+
+        if "STRUCTURE_CONFLICT" in flags:
+            score -= 1
+            reasons.append("BTC structure conflict")
+
+        if score >= 3:
+            regime = "RISK_ON"
+        elif score <= -3:
+            regime = "RISK_OFF"
+        else:
+            regime = "NEUTRAL"
+
+        return {
+            "regime": regime,
+            "score": score,
+            "reason": ", ".join(reasons) if reasons else "mixed"
+        }
+
+    except Exception as e:
+        print(f"[REGIME_FILTER_ERROR] {e}", flush=True)
+
+        return {
+            "regime": "NEUTRAL",
+            "score": 0,
+            "reason": "error"
+        }
 # =========================
 # MAIN SIGNAL BUILDER
 # =========================
