@@ -10624,130 +10624,135 @@ def build_signal(instId):
         ):
     
             signal["signal_group"] = "SWING"
-        # =====================
-        # PRE SWING
-        # =====================
-        
-        elif (
-        
-            signal.get("signal_mode") in (
-                "TRANSITION",
-                "PREMOVE",
-                "EXPANSION",
-            )
-        
-            and ep >= 6
-            and score >= 10
-        
-            and (
-                signal.get("entry") not in (
-                    "NO_ENTRY",
-                    "PREMOVE_CONFLICT",
-                )
-            )
-        
-        ):
-        
-            signal["signal_group"] = "PRE_SWING"
+    # =====================
+    # PRE SWING
+    # =====================
     
-            signal["sendable"] = True
-            signal["valid"] = True
-        
-            print(
-                f"[PRE_SWING_ROUTE] "
-                f"{instId} "
-                f"mode={signal.get('signal_mode')} "
-                f"score={score} "
-                f"ep={ep} "
-                f"acc={acc}",
-                flush=True
+    if (
+    
+        signal.get("signal_mode") in (
+            "TRANSITION",
+            "PREMOVE",
+            "EXPANSION",
+        )
+    
+        and ep >= 6
+        and score >= 10
+    
+        and (
+            signal.get("entry") not in (
+                "NO_ENTRY",
+                "PREMOVE_CONFLICT",
             )
+        )
+    
+    ):
+    
+        signal["signal_group"] = "PRE_SWING"
+
+        signal["sendable"] = True
+        signal["valid"] = True
+    
+        print(
+            f"[PRE_SWING_ROUTE] "
+            f"{instId} "
+            f"mode={signal.get('signal_mode')} "
+            f"score={score} "
+            f"ep={ep} "
+            f"acc={acc}",
+            flush=True
+        )
+    # =====================
+    # SCALP
+    # =====================
+
+    if (
+        not signal.get("signal_group")
+
+        and signal.get("signal_mode") in (
+            "TRANSITION",
+            "CONFIRMED",
+        )
+
+        and ep >= 7
+        and score >= 12
+    ):
+
+        signal["signal_group"] = "SCALP"
+
+    # =====================
+    # NO GROUP
+    # =====================
+
+    if (
+
+        not signal.get("sendable")
+    
+        and signal.get("signal_group") != "SWING"
+    ):
+    
+        signal["signal_group"] = None
+
+    # =========================
+    # FINAL FILTER
+    # ========================= 
+            
+    if not ok and not premove_override:
+
+        print(
+            f"[FILTER_BLOCK] "
+            f"{instId} reason={reason}",
+            flush=True
+        )
+
+        return None
+
+    if premove_override:
+
+        print(
+            f"[OVERRIDE_FINAL_PASS] "
+            f"{instId}",
+            flush=True
+        )
+
+    if not signal.get("signal_group"):
+
+        if (
+            signal.get("signal_mode") == "TRANSITION"
+            and ep >= 8
+            and signal.get("entry") not in (
+                "NO_ENTRY",
+                "PREMOVE_CONFLICT",
+            )
+            and (
+                "ACCELERATION_UP" in flags
+                or "ACCELERATION_DOWN" in flags
+                or "BREAKOUT_CONFIRM_UP" in flags
+                or "BREAKOUT_CONFIRM_DOWN" in flags
+            )
+        ):
+
+            signal["signal_group"] = "SCALP"
+
+        else:
+
             # =====================
-            # SCALP
+            # KEEP OVERRIDE SIGNALS
             # =====================
-        
-            if (
-                not signal.get("signal_group")
-        
-                and signal.get("signal_mode") in (
-                    "TRANSITION",
-                    "CONFIRMED",
-                )
-        
-                and ep >= 7
-                and score >= 12
-            ):
-        
-                signal["signal_group"] = "SCALP"
-        
-            # =====================
-            # NO GROUP
-            # =====================
-        
-            if not signal.get("sendable"):
-        
-                signal["signal_group"] = None
-        
-            # =========================
-            # FINAL FILTER
-            # ========================= 
-                    
-            if not ok and not premove_override:
-        
+
+            if signal.get("sendable") is True:
+
                 print(
-                    f"[FILTER_BLOCK] "
-                    f"{instId} reason={reason}",
+                    f"[KEEP_OVERRIDE_SIGNAL] "
+                    f"{instId}",
                     flush=True
                 )
-        
-                return None
-    
-        if premove_override:
-    
-            print(
-                f"[OVERRIDE_FINAL_PASS] "
-                f"{instId}",
-                flush=True
-            )
-    
-        if not signal.get("signal_group"):
-    
-            if (
-                signal.get("signal_mode") == "TRANSITION"
-                and ep >= 8
-                and signal.get("entry") not in (
-                    "NO_ENTRY",
-                    "PREMOVE_CONFLICT",
-                )
-                and (
-                    "ACCELERATION_UP" in flags
-                    or "ACCELERATION_DOWN" in flags
-                    or "BREAKOUT_CONFIRM_UP" in flags
-                    or "BREAKOUT_CONFIRM_DOWN" in flags
-                )
-            ):
-    
-                signal["signal_group"] = "SCALP"
-    
-            else:
-    
-                # =====================
-                # KEEP OVERRIDE SIGNALS
-                # =====================
-    
-                if signal.get("sendable") is True:
-    
-                    print(
-                        f"[KEEP_OVERRIDE_SIGNAL] "
-                        f"{instId}",
-                        flush=True
-                    )
-    
-                    return signal
-    
-                return None
-    
-        return signal
+
+                return signal
+
+            return None
+
+    return signal
 
 
 # ==============================
