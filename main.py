@@ -10499,14 +10499,14 @@ def build_signal(instId):
         f"class={setup_class}",
         flush=True
     )
-        ep = float(
-            signal.get("early_pressure_score") or 0
-        )
-        
-        print(
-            f"[SIGNAL_MODE] {instId} mode={signal_mode}",
-            flush=True
-        )
+    ep = float(
+        signal.get("early_pressure_score") or 0
+    )
+    
+    print(
+        f"[SIGNAL_MODE] {instId} mode={signal_mode}",
+        flush=True
+    )
 
     # =====================
     # PRESSURE MEMORY CHECK
