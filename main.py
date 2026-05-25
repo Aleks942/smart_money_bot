@@ -14840,7 +14840,7 @@ if __name__ == "__main__":
 
                     elif acc >= 2:
 
-                        quality_points += 0
+                        quality_points -= 1
 
                     # =====================
                     # OI
