@@ -10310,7 +10310,26 @@ def build_signal(instId):
         flush=True
     )
 
-
+    # =====================
+    # PRESSURE MEMORY CHECK
+    # =====================
+    
+    pressure_mem = analyze_pressure_memory(instId, flags)
+    
+    sig_pressure_power = pressure_mem.get("pressure_power", 0)
+    sig_pressure_count = pressure_mem.get("pressure_count", 0)
+    sig_pressure_side = pressure_mem.get("pressure_side")
+    
+    for f in pressure_mem.get("flags", []):
+        flags.add(f)
+    
+    print(
+        f"[PRESSURE_MEMORY] {instId} "
+        f"side={sig_pressure_side} "
+        f"count={sig_pressure_count} "
+        f"power={sig_pressure_power}",
+        flush=True
+    )
     print(
         f"[EARLY_DEBUG] {instId} "
         f"flags={signal.get('flags')} "
