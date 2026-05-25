@@ -1335,6 +1335,95 @@ def analyze_pressure_memory(symbol, flags):
             "pressure_power": 0,
             "flags": []
         }
+
+# =========================
+# RANGE DETECTOR
+# =========================
+
+RANGE_MEMORY = {}
+
+def analyze_range_behavior(symbol, candles):
+
+    try:
+
+        if not candles or len(candles) < 12:
+            return None
+
+        highs = []
+        lows = []
+        closes = []
+
+        for c in candles[-12:]:
+
+            try:
+                h = float(c[2])
+                l = float(c[3])
+                cl = float(c[4])
+
+                highs.append(h)
+                lows.append(l)
+                closes.append(cl)
+
+            except:
+                continue
+
+        if len(highs) < 8:
+            return None
+
+        high_range = max(highs)
+        low_range = min(lows)
+
+        mid = (high_range + low_range) / 2
+
+        current = closes[-1]
+
+        range_pct = (
+            (high_range - low_range)
+            / max(low_range, 0.0001)
+        ) * 100
+
+        compression = False
+
+        if range_pct <= 3.5:
+            compression = True
+
+        position = "MID"
+
+        if current >= mid:
+            position = "UPPER"
+
+        if current <= mid:
+            position = "LOWER"
+
+        flags = []
+
+        if compression:
+            flags.append("RANGE_COMPRESSION")
+
+        if range_pct <= 2:
+            flags.append("TIGHT_RANGE")
+
+        if position == "UPPER":
+            flags.append("RANGE_HOLD_HIGH")
+
+        if position == "LOWER":
+            flags.append("RANGE_HOLD_LOW")
+
+        return {
+            "range_pct": round(range_pct, 2),
+            "compression": compression,
+            "position": position,
+            "flags": flags
+        }
+
+    except Exception as e:
+
+        print(
+            f"[RANGE_DETECTOR_ERROR] {symbol} {e}",
+            flush=True
+        )
+
+        return None
 # =========================
 # OI ACCELERATION ENGINE
 # =========================
