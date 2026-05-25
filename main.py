@@ -10321,7 +10321,7 @@ def build_signal(instId):
     sig_pressure_side = pressure_mem.get("pressure_side")
     
     for f in pressure_mem.get("flags", []):
-        flags.add(f)
+        signal["flags"].append(f)
     
     print(
         f"[PRESSURE_MEMORY] {instId} "
