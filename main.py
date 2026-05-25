@@ -893,6 +893,28 @@ def analyze_signal_strength(sig):
             oi = float(oi)
     
             flags_set = set(flags)
+            # =====================
+            # OI ACCELERATION CHECK
+            # =====================
+            
+            oi_accel = analyze_oi_acceleration(instId, oi)
+            
+            sig["oi_trend"] = oi_accel.get("oi_trend")
+            sig["oi_acceleration"] = oi_accel.get("oi_acceleration")
+            sig["oi_persistence"] = oi_accel.get("oi_persistence")
+            sig["oi_power"] = oi_accel.get("oi_power")
+            
+            for f in oi_accel.get("flags", []):
+                flags_set.add(f)
+            
+            print(
+                f"[OI_ACCEL] {instId} "
+                f"trend={oi_accel.get('oi_trend')} "
+                f"power={oi_accel.get('oi_power')} "
+                f"accel={oi_accel.get('oi_acceleration')} "
+                f"persist={oi_accel.get('oi_persistence')}",
+                flush=True
+            )
 
             # =====================
             # REAL OI FLOW
