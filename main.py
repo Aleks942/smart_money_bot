@@ -15420,6 +15420,61 @@ if __name__ == "__main__":
                             flush=True
                         )
 
+                    # =====================
+                    # RANGE COMPRESSION BONUS
+                    # =====================
+                    
+                    range_compression = (
+                        "RANGE_COMPRESSION" in flags
+                    )
+                    
+                    tight_range = (
+                        "TIGHT_RANGE" in flags
+                    )
+                    
+                    pressure_persist = any(
+                        x in flags
+                        for x in [
+                            "PRESSURE_LONG_PERSIST_3",
+                            "PRESSURE_SHORT_PERSIST_3"
+                        ]
+                    )
+                    
+                    if range_compression:
+                    
+                        quality_points += 1
+                    
+                        print(
+                            f"[RANGE_BONUS] "
+                            f"{instId} compression",
+                            flush=True
+                        )
+                    
+                    if tight_range:
+                    
+                        quality_points += 1
+                        energy_stack += 1
+                    
+                        print(
+                            f"[TIGHT_RANGE_BONUS] "
+                            f"{instId}",
+                            flush=True
+                        )
+                    
+                    if (
+                        range_compression
+                        and pressure_persist
+                    ):
+                    
+                        quality_points += 3
+                        energy_stack += 2
+                    
+                        print(
+                            f"[ACCUMULATION_RANGE] "
+                            f"{instId}",
+                            flush=True
+                        )
+
                     sig["quality_points"] = quality_points
 
                     print(
