@@ -1231,6 +1231,101 @@ PRE_SWING_STATE = {}
 OI_MEMORY = {}
 
 # =========================
+# OI ACCELERATION ENGINE
+# =========================
+
+def analyze_oi_acceleration(symbol, oi_change):
+    try:
+        symbol = str(symbol)
+
+        try:
+            oi = float(oi_change or 0)
+        except:
+            oi = 0.0
+
+        hist = OI_MEMORY.get(symbol, [])
+        hist.append(oi)
+
+        if len(hist) > 6:
+            hist = hist[-6:]
+
+        OI_MEMORY[symbol] = hist
+
+        if len(hist) < 3:
+            return {
+                "oi_trend": "UNKNOWN",
+                "oi_acceleration": 0,
+                "oi_persistence": 0,
+                "oi_power": 0,
+                "flags": []
+            }
+
+        positive = [x for x in hist if x > 0]
+        negative = [x for x in hist if x < 0]
+
+        oi_persistence = len(positive)
+
+        last = hist[-1]
+        prev = hist[-2]
+        first = hist[0]
+
+        acceleration = last - prev
+        total_growth = last - first
+
+        flags = []
+        oi_power = 0
+
+        if oi_persistence >= 3:
+            flags.append("OI_PERSISTENT_BUILDUP")
+            oi_power += 2
+
+        if acceleration > 0.08:
+            flags.append("OI_ACCELERATION_UP")
+            oi_power += 2
+
+        if total_growth > 0.20:
+            flags.append("OI_TREND_UP")
+            oi_power += 2
+
+        if last >= 0.30:
+            flags.append("OI_STRONG_NOW")
+            oi_power += 1
+
+        if len(negative) >= 3:
+            flags.append("OI_PERSISTENT_DROP")
+            oi_power -= 2
+
+        if last < 0 and prev < 0:
+            flags.append("OI_CAPITAL_EXIT")
+            oi_power -= 1
+
+        if oi_power >= 5:
+            oi_trend = "STRONG_BUILDUP"
+        elif oi_power >= 3:
+            oi_trend = "BUILDUP"
+        elif oi_power <= -2:
+            oi_trend = "DROPPING"
+        else:
+            oi_trend = "NEUTRAL"
+
+        return {
+            "oi_trend": oi_trend,
+            "oi_acceleration": round(acceleration, 4),
+            "oi_persistence": oi_persistence,
+            "oi_power": oi_power,
+            "flags": flags
+        }
+
+    except Exception as e:
+        print(f"[OI_ACCEL_ERROR] {symbol} {e}", flush=True)
+        return {
+            "oi_trend": "ERROR",
+            "oi_acceleration": 0,
+            "oi_persistence": 0,
+            "oi_power": 0,
+            "flags": []
+        }
+# =========================
 # ALERT MEMORY
 # =========================
 
