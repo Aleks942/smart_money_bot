@@ -10371,7 +10371,46 @@ def build_signal(instId):
     
         ep_data = {}
     
+   
     signal.update(ep_data)
+
+    # =====================
+    # RANGE DETECTOR CHECK
+    # =====================
+    
+    range_data = analyze_range_behavior(
+        instId,
+        c15
+    )
+    
+    if range_data:
+    
+        signal["range_pct"] = range_data.get(
+            "range_pct"
+        )
+    
+        signal["range_position"] = range_data.get(
+            "position"
+        )
+    
+        signal["range_compression"] = range_data.get(
+            "compression"
+        )
+    
+        for f in range_data.get("flags", []):
+    
+            signal["flags"].append(f)
+    
+        print(
+            f"[RANGE_DETECTOR] {instId} "
+            f"range={range_data.get('range_pct')}% "
+            f"pos={range_data.get('position')} "
+            f"compression={range_data.get('compression')}",
+            flush=True
+        )
+    
+    print(
+        f"[EP_DATA_DEBUG]
 
     print(
         f"[EP_DATA_DEBUG] "
