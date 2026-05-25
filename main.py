@@ -10410,9 +10410,6 @@ def build_signal(instId):
         )
     
     print(
-        f"[EP_DATA_DEBUG]
-
-    print(
         f"[EP_DATA_DEBUG] "
         f"{instId} "
         f"ep_data={ep_data}",
