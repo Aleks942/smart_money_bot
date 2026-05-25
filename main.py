@@ -14062,19 +14062,95 @@ def build_market_interpretation(sig):
             )
 
         # =====================
-        # OI
+        # PRICE + OI CONTEXT
         # =====================
 
-        if oi >= 0.25:
+        try:
 
-            thoughts.append(
-                "в рынок заходят новые деньги"
+            price_change = float(
+                sig.get("price_change_pct") or 0
             )
 
-        elif oi <= -0.25:
+        except:
+
+            price_change = 0
+
+        # =====================
+        # REAL LONG BUILDUP
+        # =====================
+
+        if (
+            price_change > 0
+            and oi >= 0.25
+        ):
 
             thoughts.append(
-                "участники начинают выходить из позиции"
+                "в рынок заходят новые покупатели"
+            )
+
+            thoughts.append(
+                "рост поддерживается реальными деньгами"
+            )
+
+        # =====================
+        # REAL SHORT BUILDUP
+        # =====================
+
+        elif (
+            price_change < 0
+            and oi >= 0.25
+        ):
+
+            thoughts.append(
+                "в рынок заходят новые продавцы"
+            )
+
+            thoughts.append(
+                "давление вниз усиливается капиталом"
+            )
+
+        # =====================
+        # SHORT SQUEEZE
+        # =====================
+
+        elif (
+            price_change > 0
+            and oi <= -0.25
+        ):
+
+            thoughts.append(
+                "продавцы начинают закрывать SHORT позиции"
+            )
+
+            thoughts.append(
+                "рост может быть вызван ликвидацией шортов"
+            )
+
+        # =====================
+        # LONG FLUSH
+        # =====================
+
+        elif (
+            price_change < 0
+            and oi <= -0.25
+        ):
+
+            thoughts.append(
+                "участники начинают выходить из LONG позиций"
+            )
+
+            thoughts.append(
+                "интерес к росту начинает угасать"
+            )
+
+        # =====================
+        # NEUTRAL OI
+        # =====================
+
+        elif abs(oi) < 0.10:
+
+            thoughts.append(
+                "в рынке пока мало новых денег"
             )
 
         # =====================
