@@ -14967,7 +14967,7 @@ if __name__ == "__main__":
                     # ENERGY STACK BOOST
                     # =====================
 
-                    if energy_stack >= 5:
+                    if energy_stack >= 6:
 
                         quality_points += 4
 
@@ -14978,7 +14978,7 @@ if __name__ == "__main__":
                             flush=True
                         )
 
-                    elif energy_stack >= 4:
+                    elif energy_stack >= 5:
 
                         quality_points += 2
 
