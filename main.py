@@ -10426,14 +10426,87 @@ def build_signal(instId):
     # =====================
     signal_mode = classify_signal_mode(signal)
     signal["signal_mode"] = signal_mode
-    ep = float(
-        signal.get("early_pressure_score") or 0
+    # =====================
+    # SIGNAL CLASS ENGINE
+    # =====================
+    
+    setup_class = "WATCH"
+    
+    pressure_persist = any(
+        x in signal.get("flags", [])
+        for x in [
+            "PRESSURE_LONG_PERSIST_3",
+            "PRESSURE_SHORT_PERSIST_3"
+        ]
     )
     
+    range_compression = (
+        "RANGE_COMPRESSION"
+        in signal.get("flags", [])
+    )
+    
+    explosion_ready = any(
+        x in signal.get("flags", [])
+        for x in [
+            "EXPLOSION_READY_UP",
+            "EXPLOSION_READY_DOWN"
+        ]
+    )
+    
+    launch_proximity = any(
+        x in signal.get("flags", [])
+        for x in [
+            "LAUNCH_PROXIMITY_UP",
+            "LAUNCH_PROXIMITY_DOWN"
+        ]
+    )
+    
+    if (
+        ep >= 10
+        and acc_score >= 2
+    ):
+    
+        setup_class = "EARLY_BUILDUP"
+    
+    if (
+        pressure_persist
+        and range_compression
+        and ep >= 15
+    ):
+    
+        setup_class = "PRE_LAUNCH"
+    
+    if (
+        explosion_ready
+        and launch_proximity
+        and score >= 20
+    ):
+    
+        setup_class = "EXPANSION"
+    
+    if (
+        score >= 35
+        and not range_compression
+    ):
+    
+        setup_class = "LATE_TREND"
+    
+    signal["setup_class"] = setup_class
+    
     print(
-        f"[SIGNAL_MODE] {instId} mode={signal_mode}",
+        f"[SETUP_CLASS] "
+        f"{instId} "
+        f"class={setup_class}",
         flush=True
     )
+        ep = float(
+            signal.get("early_pressure_score") or 0
+        )
+        
+        print(
+            f"[SIGNAL_MODE] {instId} mode={signal_mode}",
+            flush=True
+        )
 
     # =====================
     # PRESSURE MEMORY CHECK
