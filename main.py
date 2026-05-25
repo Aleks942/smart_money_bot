@@ -1253,6 +1253,89 @@ PRE_SWING_STATE = {}
 OI_MEMORY = {}
 
 # =========================
+# PRESSURE MEMORY
+# =========================
+
+PRESSURE_MEMORY = {}
+
+def analyze_pressure_memory(symbol, flags):
+    try:
+        symbol = str(symbol)
+        flags = set(flags or [])
+
+        has_up = "PRESSURE_UP" in flags
+        has_down = "PRESSURE_DOWN" in flags
+
+        prev = PRESSURE_MEMORY.get(symbol, {
+            "side": None,
+            "count": 0,
+            "last_seen": 0
+        })
+
+        side = None
+
+        if has_up and not has_down:
+            side = "LONG"
+
+        elif has_down and not has_up:
+            side = "SHORT"
+
+        else:
+            PRESSURE_MEMORY[symbol] = {
+                "side": None,
+                "count": 0,
+                "last_seen": time.time()
+            }
+
+            return {
+                "pressure_side": None,
+                "pressure_count": 0,
+                "pressure_power": 0,
+                "flags": []
+            }
+
+        if prev.get("side") == side:
+            count = int(prev.get("count") or 0) + 1
+        else:
+            count = 1
+
+        PRESSURE_MEMORY[symbol] = {
+            "side": side,
+            "count": count,
+            "last_seen": time.time()
+        }
+
+        extra_flags = []
+        power = 0
+
+        if count >= 2:
+            extra_flags.append(f"PRESSURE_{side}_PERSIST_2")
+            power += 1
+
+        if count >= 3:
+            extra_flags.append(f"PRESSURE_{side}_PERSIST_3")
+            power += 2
+
+        if count >= 5:
+            extra_flags.append(f"PRESSURE_{side}_PERSIST_5")
+            power += 3
+
+        return {
+            "pressure_side": side,
+            "pressure_count": count,
+            "pressure_power": power,
+            "flags": extra_flags
+        }
+
+    except Exception as e:
+        print(f"[PRESSURE_MEMORY_ERROR] {symbol} {e}", flush=True)
+        return {
+            "pressure_side": None,
+            "pressure_count": 0,
+            "pressure_power": 0,
+            "flags": []
+        }
+# =========================
 # OI ACCELERATION ENGINE
 # =========================
 
