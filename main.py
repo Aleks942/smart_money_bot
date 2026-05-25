@@ -15016,6 +15016,47 @@ if __name__ == "__main__":
                     )
 
                     # =====================
+                    # CAPITAL GATE FILTER
+                    # =====================
+
+                    capital_ok = False
+
+                    if (
+                        abs(oi) >= 0.50
+                    ):
+
+                        capital_ok = True
+
+                    elif (
+                        abs(oi) >= 0.25
+                        and quality_points >= 10
+                    ):
+
+                        capital_ok = True
+
+                    elif (
+                        acc >= 3
+                        and ep >= 20
+                        and energy_stack >= 5
+                    ):
+
+                        capital_ok = True
+
+                    if not capital_ok:
+
+                        print(
+                            f"[CAPITAL_GATE_SKIP] "
+                            f"{instId} "
+                            f"oi={oi} "
+                            f"qp={quality_points} "
+                            f"acc={acc} "
+                            f"ep={ep} "
+                            f"stack={energy_stack}",
+                            flush=True
+                        )
+
+                        continue
+                    # =====================
                     # DROP LOW VALUE CLONES
                     # =====================
 
