@@ -10425,7 +10425,12 @@ def build_signal(instId):
     # SIGNAL MODE
     # =====================
     signal_mode = classify_signal_mode(signal)
+    
     signal["signal_mode"] = signal_mode
+
+    ep = float(
+        signal.get("early_pressure_score") or 0
+    )
     # =====================
     # SIGNAL CLASS ENGINE
     # =====================
@@ -10499,9 +10504,7 @@ def build_signal(instId):
         f"class={setup_class}",
         flush=True
     )
-    ep = float(
-        signal.get("early_pressure_score") or 0
-    )
+    
     
     print(
         f"[SIGNAL_MODE] {instId} mode={signal_mode}",
