@@ -11445,6 +11445,73 @@ def build_signal(instId):
         f"{smart_phase}",
         flush=True
     )
+
+    # =====================
+    # SMART FLOW CONFIRMATION
+    # =====================
+
+    smart_flow_score = 0
+
+    # =====================
+    # OI SUPPORT
+    # =====================
+
+    if "OI_BUILDUP" in flags:
+        smart_flow_score += 2
+
+    if "OI_BUILDUP_LONG" in flags:
+        smart_flow_score += 2
+
+    if "OI_BUILDUP_SHORT" in flags:
+        smart_flow_score += 2
+
+    # =====================
+    # CONTINUATION
+    # =====================
+
+    if "CONTINUATION_STRONG_LONG" in flags:
+        smart_flow_score += 3
+
+    if "CONTINUATION_STRONG_SHORT" in flags:
+        smart_flow_score += 3
+
+    # =====================
+    # PRESSURE PERSISTENCE
+    # =====================
+
+    if "PRESSURE_LONG_PERSIST_3" in flags:
+        smart_flow_score += 2
+
+    if "PRESSURE_SHORT_PERSIST_3" in flags:
+        smart_flow_score += 2
+
+    # =====================
+    # LIQUIDATION FLOW
+    # =====================
+
+    if "CASCADE_SHORTS" in flags:
+        smart_flow_score += 2
+
+    if "CASCADE_LONGS" in flags:
+        smart_flow_score += 2
+
+    flow_quality = "WEAK_FLOW"
+
+    if smart_flow_score >= 8:
+        flow_quality = "STRONG_FLOW"
+
+    elif smart_flow_score >= 5:
+        flow_quality = "MODERATE_FLOW"
+
+    sig_flow_quality = flow_quality
+
+    print(
+        f"[SMART_FLOW] "
+        f"{instId} "
+        f"{flow_quality} "
+        f"score={smart_flow_score}",
+        flush=True
+    )
     # =========================
     # SQUEEZE MATURITY
     # =========================
