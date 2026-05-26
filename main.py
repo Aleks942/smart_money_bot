@@ -1385,6 +1385,82 @@ def analyze_liquidation_pressure(
         flags = []
         power = 0
 
+        # =====================
+        # SHORT SQUEEZE
+        # =====================
+
+        if side == "SHORT":
+
+            if count >= 2:
+
+                flags.append(
+                    "SHORT_SQUEEZE"
+                )
+
+                power += 1
+
+            if count >= 4:
+
+                flags.append(
+                    "CASCADE_SHORTS"
+                )
+
+                power += 2
+
+        # =====================
+        # LONG FLUSH
+        # =====================
+
+        if side == "LONG":
+
+            if count >= 2:
+
+                flags.append(
+                    "LONG_FLUSH"
+                )
+
+                power += 1
+
+            if count >= 4:
+
+                flags.append(
+                    "CASCADE_LONGS"
+                )
+
+                power += 2
+
+        print(
+            f"[LIQ_PRESSURE] "
+            f"{symbol} "
+            f"side={side} "
+            f"count={count} "
+            f"power={power}",
+            flush=True
+        )
+
+        return {
+            "liq_side": side,
+            "liq_count": count,
+            "liq_power": power,
+            "flags": flags
+        }
+
+    except Exception as e:
+
+        print(
+            f"[LIQ_ERROR] "
+            f"{symbol} "
+            f"{e}",
+            flush=True
+        )
+
+        return {
+            "liq_side": None,
+            "liq_count": 0,
+            "liq_power": 0,
+            "flags": []
+        }
+
 # =========================
 # FLAT CONTROL ENGINE
 # =========================
