@@ -1359,9 +1359,12 @@ def analyze_oi_trend(symbol, oi_value):
         symbol = str(symbol)
         oi_value = float(oi_value or 0)
 
-        prev = OI_TREND_MEMORY.get(symbol, {
-            "values": []
-        })
+        prev = OI_TREND_MEMORY.get(
+            symbol,
+            {
+                "values": []
+            }
+        )
 
         values = list(
             prev.get("values", [])
@@ -1369,6 +1372,7 @@ def analyze_oi_trend(symbol, oi_value):
 
         values.append(oi_value)
 
+        # храним последние 5 значений
         values = values[-5:]
 
         OI_TREND_MEMORY[symbol] = {
@@ -1378,17 +1382,29 @@ def analyze_oi_trend(symbol, oi_value):
         flags = []
         trend_score = 0
 
+        # =====================
+        # BASIC TREND
+        # =====================
+
         if len(values) >= 3:
 
             growing = (
+
                 values[-1] > values[-2]
                 and values[-2] > values[-3]
+
             )
 
             falling = (
+
                 values[-1] < values[-2]
                 and values[-2] < values[-3]
+
             )
+
+            # =====================
+            # OI BUILDUP
+            # =====================
 
             if growing:
 
@@ -1410,12 +1426,64 @@ def analyze_oi_trend(symbol, oi_value):
                         "OI_BUILDUP_SHORT"
                     )
 
+            # =====================
+            # OI FADE
+            # =====================
+
             if falling:
 
                 trend_score -= 1
 
                 flags.append(
                     "OI_FADE"
+                )
+
+        # =====================
+        # OI REVERSAL
+        # =====================
+
+        if len(values) >= 5:
+
+            reversal_up = (
+
+                values[-5] < values[-4]
+                and values[-4] < values[-3]
+                and values[-2] > values[-3]
+                and values[-1] > values[-2]
+
+            )
+
+            reversal_down = (
+
+                values[-5] > values[-4]
+                and values[-4] > values[-3]
+                and values[-2] < values[-3]
+                and values[-1] < values[-2]
+
+            )
+
+            # =====================
+            # REVERSAL UP
+            # =====================
+
+            if reversal_up:
+
+                trend_score += 3
+
+                flags.append(
+                    "OI_REVERSAL_UP"
+                )
+
+            # =====================
+            # REVERSAL DOWN
+            # =====================
+
+            if reversal_down:
+
+                trend_score += 3
+
+                flags.append(
+                    "OI_REVERSAL_DOWN"
                 )
 
         print(
@@ -1428,8 +1496,10 @@ def analyze_oi_trend(symbol, oi_value):
         )
 
         return {
+
             "oi_trend_score": trend_score,
             "oi_trend_flags": flags
+
         }
 
     except Exception as e:
@@ -1442,9 +1512,12 @@ def analyze_oi_trend(symbol, oi_value):
         )
 
         return {
+
             "oi_trend_score": 0,
             "oi_trend_flags": []
+
         }
+
 # =========================
 # LIQUIDATION PRESSURE
 # =========================
