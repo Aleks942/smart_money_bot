@@ -1282,6 +1282,12 @@ LIQUIDATION_CASCADE_MEMORY = {}
 
 IMPULSE_CONFIRM_MEMORY = {}
 
+# =========================
+# MARKET REGIME MEMORY
+# =========================
+
+MARKET_REGIME_MEMORY = {}
+
 
 def analyze_pressure_memory(symbol, flags):
     try:
