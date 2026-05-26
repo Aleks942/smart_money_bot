@@ -1575,6 +1575,41 @@ def analyze_liquidation_pressure(
         power = 0
 
         # =====================
+        # CASCADE MEMORY
+        # =====================
+
+        cascade_prev = LIQUIDATION_CASCADE_MEMORY.get(
+            symbol,
+            {
+                "side": None,
+                "count": 0
+            }
+        )
+
+        cascade_count = 1
+
+        if cascade_prev.get("side") == side:
+
+            cascade_count = int(
+                cascade_prev.get("count") or 0
+            ) + 1
+
+        LIQUIDATION_CASCADE_MEMORY[symbol] = {
+
+            "side": side,
+            "count": cascade_count
+
+        }
+
+        print(
+            f"[LIQ_CASCADE] "
+            f"{symbol} "
+            f"side={side} "
+            f"cascade={cascade_count}",
+            flush=True
+        )
+
+        # =====================
         # SHORT SQUEEZE
         # =====================
 
