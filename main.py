@@ -11322,6 +11322,129 @@ def build_signal(instId):
             f"{instId}",
             flush=True
         )
+
+    # =====================
+    # SMART MONEY PHASE
+    # =====================
+
+    smart_phase = "NEUTRAL"
+
+    # =====================
+    # ACCUMULATION
+    # =====================
+
+    if (
+
+        "RANGE_COMPRESSION"
+        in flags
+
+        and "BUYER_ABSORPTION"
+        in flags
+
+        and (
+            "PRESSURE_UP"
+            in flags
+            or
+            "OI_BUILDUP_LONG"
+            in flags
+        )
+
+    ):
+
+        smart_phase = "ACCUMULATION"
+
+    # =====================
+    # MANIPULATION
+    # =====================
+
+    elif (
+
+        "FAKE_BREAKOUT_LONG"
+        in flags
+
+        or "FAKE_BREAKOUT_SHORT"
+        in flags
+
+        or "BULL_TRAP"
+        in flags
+
+        or "BEAR_TRAP"
+        in flags
+
+    ):
+
+        smart_phase = "MANIPULATION"
+
+    # =====================
+    # EXPANSION
+    # =====================
+
+    elif (
+
+        "IMPULSE_CONFIRMED_LONG"
+        in flags
+
+        or "IMPULSE_CONFIRMED_SHORT"
+        in flags
+
+    ) and (
+
+        "CONTINUATION_STRONG_LONG"
+        in flags
+
+        or "CONTINUATION_STRONG_SHORT"
+        in flags
+
+    ):
+
+        smart_phase = "EXPANSION"
+
+    # =====================
+    # DISTRIBUTION
+    # =====================
+
+    elif (
+
+        "VOLATILITY_CLIMAX_LONG"
+        in flags
+
+        or "VOLATILITY_CLIMAX_SHORT"
+        in flags
+
+        or "TAKE_PROFIT_LONG"
+        in flags
+
+        or "TAKE_PROFIT_SHORT"
+        in flags
+
+    ):
+
+        smart_phase = "DISTRIBUTION"
+
+    # =====================
+    # COLLAPSE
+    # =====================
+
+    elif (
+
+        "PANIC_SELL"
+        in str(market_regime)
+
+        and "CONTINUATION_STRONG_SHORT"
+        in flags
+
+    ):
+
+        smart_phase = "COLLAPSE"
+
+    sig_smart_phase = smart_phase
+
+    print(
+        f"[SMART_PHASE] "
+        f"{instId} "
+        f"{smart_phase}",
+        flush=True
+    )
     # =========================
     # SQUEEZE MATURITY
     # =========================
