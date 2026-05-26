@@ -1624,6 +1624,23 @@ def analyze_capital_flow(signal):
         capital_score = 0
         reasons = []
 
+        # =====================
+        # EARLY OI BUILDUP
+        # =====================
+
+        if (
+            oi >= 0.05
+            and ep >= 10
+            and acc >= 2
+            and "RANGE_COMPRESSION" in flags
+        ):
+
+            capital_score += 2
+
+            reasons.append(
+                "появляется ранний приток капитала внутри сжатия"
+            )
+
         if oi >= 0.30:
             capital_score += 3
             reasons.append("в рынок заметно заходят новые позиции")
