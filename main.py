@@ -1258,6 +1258,12 @@ OI_MEMORY = {}
 
 PRESSURE_MEMORY = {}
 
+# =========================
+# LIQUIDATION MEMORY
+# =========================
+
+LIQUIDATION_MEMORY = {}
+
 def analyze_pressure_memory(symbol, flags):
     try:
         symbol = str(symbol)
@@ -1773,165 +1779,8 @@ def generate_market_story(signal):
         return [
             "не удалось построить описание рынка"
         ]
-                # =====================
-                # SHORT CONTROL
-                # =====================
         
-                if "PRESSURE_DOWN" in flags:
-        
-                    short_control += 2
-                    reasons_short.append(
-                        "продавцы давят вниз"
-                    )
-        
-                if "SELLER_ABSORPTION" in flags:
-        
-                    short_control += 2
-                    reasons_short.append(
-                        "продавцы удерживают рост"
-                    )
-        
-                if "RANGE_HOLD_LOW" in flags:
-        
-                    short_control += 2
-                    reasons_short.append(
-                        "цена держится в нижней части диапазона"
-                    )
-        
-                if "EMA_BEAR" in flags:
-        
-                    short_control += 1
-        
-                if "ACCELERATION_DOWN" in flags:
-        
-                    short_control += 2
-                    reasons_short.append(
-                        "движение вниз ускоряется"
-                    )
-        
-                if "LONG_FLUSH" in flags:
-        
-                    short_control += 2
-                    reasons_short.append(
-                        "лонгистов начинают выбивать"
-                    )
-        
-                dominance = "NEUTRAL"
-        
-                if long_control > short_control:
-        
-                    dominance = "LONG"
-        
-                elif short_control > long_control:
-        
-                    dominance = "SHORT"
-        
-                return {
-        
-                    "long_control": long_control,
-                    "short_control": short_control,
-                    "dominance": dominance,
-        
-                    "long_reasons": reasons_long,
-                    "short_reasons": reasons_short
-                }
-        
-            except Exception as e:
-        
-                print(
-                    f"[FLAT_CONTROL_ERROR] {e}",
-                    flush=True
-                )
-        
-                return {
-        
-                    "long_control": 0,
-                    "short_control": 0,
-                    "dominance": "NEUTRAL",
-        
-                    "long_reasons": [],
-                    "short_reasons": []
-                }
-        # =====================
-        # SHORT SQUEEZE
-        # =====================
 
-        if side == "SHORT":
-
-            if count >= 2:
-
-                flags.append(
-                    "SHORT_SQUEEZE"
-                )
-
-                power += 1
-
-            if count >= 4:
-
-                flags.append(
-                    "CASCADE_SHORTS"
-                )
-
-                power += 2
-
-        # =====================
-        # LONG FLUSH
-        # =====================
-
-        if side == "LONG":
-
-            if count >= 2:
-
-                flags.append(
-                    "LONG_FLUSH"
-                )
-
-                power += 1
-
-            if count >= 4:
-
-                flags.append(
-                    "CASCADE_LONGS"
-                )
-
-                power += 2
-
-        print(
-            f"[LIQ_PRESSURE] "
-            f"{symbol} "
-            f"side={side} "
-            f"count={count} "
-            f"power={power}",
-            flush=True
-        )
-
-        return {
-            "liq_side": side,
-            "liq_count": count,
-            "liq_power": power,
-            "flags": flags
-        }
-
-    except Exception as e:
-
-        print(
-            f"[LIQ_ERROR] "
-            f"{symbol} "
-            f"{e}",
-            flush=True
-        )
-
-        return {
-            "liq_side": None,
-            "liq_count": 0,
-            "liq_power": 0,
-            "flags": []
-        }
-# =========================
-# LIQUIDATION MEMORY
-# =========================
-
-LIQUIDATION_MEMORY = {}
 
 # =========================
 # RANGE DETECTOR
