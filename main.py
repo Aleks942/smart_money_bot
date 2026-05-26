@@ -10794,8 +10794,8 @@ def build_signal(instId):
         "time": time.time()
     }
 
-    sig["market_regime"] = market_regime
-
+    market_regime_value = market_regime
+    
     print(
         f"[MARKET_REGIME] "
         f"{instId} "
