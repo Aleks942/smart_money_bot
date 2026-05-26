@@ -16476,6 +16476,26 @@ if __name__ == "__main__":
                             f"{instId}",
                             flush=True
                         )
+
+                    # =====================
+                    # IMPULSE CONFIRMATION BONUS
+                    # =====================
+
+                    if (
+                        "IMPULSE_CONFIRMED_LONG"
+                        in flags
+                        or
+                        "IMPULSE_CONFIRMED_SHORT"
+                        in flags
+                    ):
+
+                        quality_points += 5
+
+                        print(
+                            f"[IMPULSE_BONUS] "
+                            f"{instId}",
+                            flush=True
+                        )
                     # =====================
                     # RANGE COMPRESSION BONUS
                     # =====================
