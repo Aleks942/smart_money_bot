@@ -10453,8 +10453,10 @@ def build_signal(instId):
     explosion_ready = any(
         x in signal.get("flags", [])
         for x in [
-            "EXPLOSION_READY_UP",
-            "EXPLOSION_READY_DOWN"
+            "PRESSURE_LONG_PERSIST_2",
+            "PRESSURE_SHORT_PERSIST_2",
+            "PRESSURE_LONG_PERSIST_3",
+            "PRESSURE_SHORT_PERSIST_3"
         ]
     )
     
