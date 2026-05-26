@@ -11603,6 +11603,98 @@ def build_signal(instId):
         f"{smart_intent}",
         flush=True
     )
+
+    # =====================
+    # CONTEXT PRIORITY
+    # =====================
+
+    context_priority = 0
+
+    # =====================
+    # STRUCTURE SHIFT
+    # =====================
+
+    if (
+        "BULLISH_STRUCTURE_SHIFT"
+        in flags
+        or
+        "BEARISH_STRUCTURE_SHIFT"
+        in flags
+    ):
+
+        context_priority += 5
+
+    # =====================
+    # SMART FLOW
+    # =====================
+
+    if flow_quality == "STRONG_FLOW":
+
+        context_priority += 4
+
+    # =====================
+    # SMART PHASE
+    # =====================
+
+    if smart_phase == "EXPANSION":
+
+        context_priority += 3
+
+    if smart_phase == "ACCUMULATION":
+
+        context_priority += 2
+
+    # =====================
+    # LIQUIDITY GRABS
+    # =====================
+
+    if (
+        "LIQUIDITY_GRAB_LONG"
+        in flags
+        or
+        "LIQUIDITY_GRAB_SHORT"
+        in flags
+    ):
+
+        context_priority += 4
+
+    # =====================
+    # REVERSAL
+    # =====================
+
+    if (
+        "SMART_REVERSAL_LONG"
+        in flags
+        or
+        "SMART_REVERSAL_SHORT"
+        in flags
+    ):
+
+        context_priority += 4
+
+    context_grade = "LOW_CONTEXT"
+
+    if context_priority >= 14:
+
+        context_grade = "ELITE_CONTEXT"
+
+    elif context_priority >= 9:
+
+        context_grade = "HIGH_CONTEXT"
+
+    elif context_priority >= 5:
+
+        context_grade = "MID_CONTEXT"
+
+    sig_context_grade = context_grade
+
+    print(
+        f"[CONTEXT_PRIORITY] "
+        f"{instId} "
+        f"{context_grade} "
+        f"score={context_priority}",
+        flush=True
+    )
     # =========================
     # SQUEEZE MATURITY
     # =========================
