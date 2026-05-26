@@ -10699,7 +10699,109 @@ def build_signal(instId):
             flush=True
         )
 
-    
+    # =====================
+    # MARKET REGIME
+    # =====================
+
+    market_regime = "NEUTRAL"
+
+    # =====================
+    # BULL TREND
+    # =====================
+
+    if (
+
+        "IMPULSE_CONFIRMED_LONG"
+        in flags
+
+        and "CONTINUATION_STRONG_LONG"
+        in flags
+
+        and oi >= 0.15
+
+    ):
+
+        market_regime = "TREND_BULL"
+
+    # =====================
+    # BEAR TREND
+    # =====================
+
+    elif (
+
+        "IMPULSE_CONFIRMED_SHORT"
+        in flags
+
+        and "CONTINUATION_STRONG_SHORT"
+        in flags
+
+        and oi >= 0.15
+
+    ):
+
+        market_regime = "TREND_BEAR"
+
+    # =====================
+    # PANIC SELL
+    # =====================
+
+    elif (
+
+        "LIQUIDATION_CASCADE_ACTIVE"
+        in flags
+
+        and "IMPULSE_CONFIRMED_SHORT"
+        in flags
+
+    ):
+
+        market_regime = "PANIC_SELL"
+
+    # =====================
+    # SHORT SQUEEZE
+    # =====================
+
+    elif (
+
+        "LIQUIDATION_CASCADE_ACTIVE"
+        in flags
+
+        and "IMPULSE_CONFIRMED_LONG"
+        in flags
+
+    ):
+
+        market_regime = "SHORT_SQUEEZE"
+
+    # =====================
+    # RANGE
+    # =====================
+
+    elif (
+
+        "RANGE_COMPRESSION"
+        in flags
+
+        and "TIGHT_RANGE"
+        in flags
+
+    ):
+
+        market_regime = "RANGE"
+
+    MARKET_REGIME_MEMORY[instId] = {
+        "regime": market_regime,
+        "time": time.time()
+    }
+
+    sig["market_regime"] = market_regime
+
+    print(
+        f"[MARKET_REGIME] "
+        f"{instId} "
+        f"{market_regime}",
+        flush=True
+    )
     # =========================
     # SQUEEZE MATURITY
     # =========================
