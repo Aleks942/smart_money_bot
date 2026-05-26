@@ -10994,6 +10994,72 @@ def build_signal(instId):
             f"{instId}",
             flush=True
         )
+
+    # =====================
+    # VOLATILITY CLIMAX
+    # =====================
+
+    volatility_climax_long = (
+
+        "ACCELERATION_UP"
+        in flags
+
+        and abs(oi) >= 1.5
+
+        and (
+            "IMPULSE_EXHAUSTION_LONG"
+            in flags
+            or
+            "OI_FADE"
+            in flags
+        )
+
+    )
+
+    volatility_climax_short = (
+
+        "ACCELERATION_DOWN"
+        in flags
+
+        and abs(oi) >= 1.5
+
+        and (
+            "IMPULSE_EXHAUSTION_SHORT"
+            in flags
+            or
+            "OI_FADE"
+            in flags
+        )
+
+    )
+
+    if volatility_climax_long:
+
+        flags.add(
+            "VOLATILITY_CLIMAX_LONG"
+        )
+
+        score -= 4
+
+        print(
+            f"[VOL_CLIMAX_LONG] "
+            f"{instId}",
+            flush=True
+        )
+
+    if volatility_climax_short:
+
+        flags.add(
+            "VOLATILITY_CLIMAX_SHORT"
+        )
+
+        score -= 4
+
+        print(
+            f"[VOL_CLIMAX_SHORT] "
+            f"{instId}",
+            flush=True
+        )
     # =========================
     # SQUEEZE MATURITY
     # =========================
