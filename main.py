@@ -1335,6 +1335,11 @@ def analyze_pressure_memory(symbol, flags):
             "pressure_power": 0,
             "flags": []
         }
+# =========================
+# LIQUIDATION MEMORY
+# =========================
+
+LIQUIDATION_MEMORY = {}
 
 # =========================
 # RANGE DETECTOR
