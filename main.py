@@ -10802,6 +10802,78 @@ def build_signal(instId):
         f"{market_regime}",
         flush=True
     )
+
+    # =====================
+    # SMART ENTRY ENGINE
+    # =====================
+
+    entry_quality = "NEUTRAL"
+
+    # =====================
+    # EARLY ENTRY
+    # =====================
+
+    if (
+
+        "PREMOVE" in flags
+        or "ENERGY_BUILDUP" in flags
+
+    ) and not (
+        "IMPULSE_CONFIRMED_LONG"
+        in flags
+        or
+        "IMPULSE_CONFIRMED_SHORT"
+        in flags
+    ):
+
+        entry_quality = "EARLY_ENTRY"
+
+    # =====================
+    # SAFE ENTRY
+    # =====================
+
+    elif (
+
+        "IMPULSE_CONFIRMED_LONG"
+        in flags
+        or
+        "IMPULSE_CONFIRMED_SHORT"
+        in flags
+
+    ) and not (
+        "IMPULSE_EXHAUSTION_LONG"
+        in flags
+        or
+        "IMPULSE_EXHAUSTION_SHORT"
+        in flags
+    ):
+
+        entry_quality = "SAFE_ENTRY"
+
+    # =====================
+    # LATE ENTRY
+    # =====================
+
+    elif (
+
+        "IMPULSE_EXHAUSTION_LONG"
+        in flags
+        or
+        "IMPULSE_EXHAUSTION_SHORT"
+        in flags
+
+    ):
+
+        entry_quality = "LATE_ENTRY"
+
+    sig_entry_quality = entry_quality
+
+    print(
+        f"[ENTRY_QUALITY] "
+        f"{instId} "
+        f"{entry_quality}",
+        flush=True
+    )
     # =========================
     # SQUEEZE MATURITY
     # =========================
