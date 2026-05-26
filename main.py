@@ -11254,6 +11254,74 @@ def build_signal(instId):
         f"S={dominance_short}",
         flush=True
     )
+
+    # =====================
+    # STRUCTURE SHIFT
+    # =====================
+
+    bullish_structure_shift = (
+
+        "SMART_REVERSAL_LONG"
+        in flags
+
+        and "BUYERS_CONTROL"
+        in str(sig_market_control)
+
+        and (
+            "IMPULSE_EXHAUSTION_SHORT"
+            in flags
+            or
+            "BEAR_TRAP"
+            in flags
+        )
+
+    )
+
+    bearish_structure_shift = (
+
+        "SMART_REVERSAL_SHORT"
+        in flags
+
+        and "SELLERS_CONTROL"
+        in str(sig_market_control)
+
+        and (
+            "IMPULSE_EXHAUSTION_LONG"
+            in flags
+            or
+            "BULL_TRAP"
+            in flags
+        )
+
+    )
+
+    if bullish_structure_shift:
+
+        flags.add(
+            "BULLISH_STRUCTURE_SHIFT"
+        )
+
+        score += 7
+
+        print(
+            f"[STRUCTURE_SHIFT_BULL] "
+            f"{instId}",
+            flush=True
+        )
+
+    if bearish_structure_shift:
+
+        flags.add(
+            "BEARISH_STRUCTURE_SHIFT"
+        )
+
+        score += 7
+
+        print(
+            f"[STRUCTURE_SHIFT_BEAR] "
+            f"{instId}",
+            flush=True
+        )
     # =========================
     # SQUEEZE MATURITY
     # =========================
