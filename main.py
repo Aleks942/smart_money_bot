@@ -2122,6 +2122,124 @@ def generate_market_story(signal):
             )
 
         # =====================
+        # SMART NARRATIVE
+        # =====================
+
+        smart_phase = signal.get(
+            "smart_phase",
+            "NEUTRAL"
+        )
+
+        smart_intent = signal.get(
+            "smart_intent",
+            "NEUTRAL"
+        )
+
+        flow_quality = signal.get(
+            "flow_quality",
+            "WEAK_FLOW"
+        )
+
+        context_grade = signal.get(
+            "context_grade",
+            "LOW_CONTEXT"
+        )
+
+        # =====================
+        # PHASE NARRATIVE
+        # =====================
+
+        if smart_phase == "ACCUMULATION":
+
+            story.append(
+                "рынок находится в фазе накопления"
+            )
+
+        elif smart_phase == "EXPANSION":
+
+            story.append(
+                "рынок перешел в фазу активного импульса"
+            )
+
+        elif smart_phase == "DISTRIBUTION":
+
+            story.append(
+                "наблюдается возможная разгрузка позиций"
+            )
+
+        elif smart_phase == "MANIPULATION":
+
+            story.append(
+                "рынок выглядит манипулятивным и нестабильным"
+            )
+
+        elif smart_phase == "COLLAPSE":
+
+            story.append(
+                "рынок находится в фазе агрессивного слива"
+            )
+
+        # =====================
+        # INTENT NARRATIVE
+        # =====================
+
+        if smart_intent == "ACCUMULATING_LONG":
+
+            story.append(
+                "крупный капитал вероятно набирает LONG позиции"
+            )
+
+        elif smart_intent == "DISTRIBUTING_LONGS":
+
+            story.append(
+                "крупный капитал вероятно фиксирует LONG позиции"
+            )
+
+        elif smart_intent == "AGGRESSIVE_EXPANSION":
+
+            story.append(
+                "движение активно поддерживается потоком капитала"
+            )
+
+        elif smart_intent == "MANIPULATING_LIQUIDITY":
+
+            story.append(
+                "рынок может собирать ликвидность через ловушки"
+            )
+
+        # =====================
+        # FLOW NARRATIVE
+        # =====================
+
+        if flow_quality == "STRONG_FLOW":
+
+            story.append(
+                "движение выглядит поддержанным капиталом"
+            )
+
+        elif flow_quality == "WEAK_FLOW":
+
+            story.append(
+                "движение пока выглядит слабым по потоку денег"
+            )
+
+        # =====================
+        # CONTEXT NARRATIVE
+        # =====================
+
+        if context_grade == "ELITE_CONTEXT":
+
+            story.append(
+                "контекст движения выглядит очень сильным"
+            )
+
+        elif context_grade == "HIGH_CONTEXT":
+
+            story.append(
+                "контекст движения выглядит качественным"
+            )
+
+        # =====================
         # EMPTY
         # =====================
 
