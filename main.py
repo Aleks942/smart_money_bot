@@ -2007,8 +2007,14 @@ def generate_market_story(signal):
                 "цена удерживается в верхней части диапазона"
             )
 
-        if "BUYER_ABSORPTION" in flags:
-
+        if (
+            "BUYER_ABSORPTION" in flags
+            and not (
+                "PRESSURE_DOWN" in flags
+                and "CONTINUATION_STRONG_SHORT" in flags
+            )
+        ):
+        
             story.append(
                 "покупатели удерживают проливы"
             )
@@ -2035,8 +2041,14 @@ def generate_market_story(signal):
                 "цена удерживается в нижней части диапазона"
             )
 
-        if "SELLER_ABSORPTION" in flags:
-
+        if (
+            "SELLER_ABSORPTION" in flags
+            and not (
+                "PRESSURE_UP" in flags
+                and "CONTINUATION_STRONG_LONG" in flags
+            )
+        ):
+        
             story.append(
                 "продавцы удерживают рост"
             )
