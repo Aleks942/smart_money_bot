@@ -10938,47 +10938,47 @@ def build_signal(instId):
         
         if signal.get("signal_group") is None:
 
-        pressure_persist = any(
-            x in flags
-            for x in [
-                "PRESSURE_LONG_PERSIST_3",
-                "PRESSURE_SHORT_PERSIST_3"
-            ]
-        )
-    
-        range_compression = (
-            "RANGE_COMPRESSION" in flags
-        )
-    
-        if (
-            ep >= 10
-            and acc >= 2
-            and (
-                pressure_persist
-                or range_compression
+            pressure_persist = any(
+                x in flags
+                for x in [
+                    "PRESSURE_LONG_PERSIST_3",
+                    "PRESSURE_SHORT_PERSIST_3"
+                ]
             )
-        ):
-    
-            signal["signal_group"] = "PRE_SWING"
-    
-            signal["sendable"] = True
-            signal["valid"] = True
-    
-            print(
-                f"[FORCE_PRE_SWING] "
-                f"{symbol}",
-                flush=True
+        
+            range_compression = (
+                "RANGE_COMPRESSION" in flags
             )
-    
-        else:
-    
-            print(
-                f"[BLOCK_WEAK_PRE_SWING] "
-                f"{symbol} "
-                f"ep={ep} "
-                f"acc={acc}",
-                flush=True
-            )
+        
+            if (
+                ep >= 10
+                and acc >= 2
+                and (
+                    pressure_persist
+                    or range_compression
+                )
+            ):
+        
+                signal["signal_group"] = "PRE_SWING"
+        
+                signal["sendable"] = True
+                signal["valid"] = True
+        
+                print(
+                    f"[FORCE_PRE_SWING] "
+                    f"{symbol}",
+                    flush=True
+                )
+        
+            else:
+        
+                print(
+                    f"[BLOCK_WEAK_PRE_SWING] "
+                    f"{symbol} "
+                    f"ep={ep} "
+                    f"acc={acc}",
+                    flush=True
+                )
             
         # =====================
         # EP BLOCK
