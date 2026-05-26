@@ -17731,7 +17731,7 @@ if __name__ == "__main__":
                     if has_launch:
                         energy_stack += 1
 
-                    if abs(oi) >= 0.25:
+                    if abs(oi) >= 0.15:
                         energy_stack += 1
 
                     if ep >= 15:
