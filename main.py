@@ -1270,6 +1270,13 @@ PRESSURE_MEMORY = {}
 
 LIQUIDATION_MEMORY = {}
 
+# =========================
+# LIQUIDATION MEMORY
+# =========================
+
+LIQUIDATION_MEMORY = {}
+
+
 def analyze_pressure_memory(symbol, flags):
     try:
         symbol = str(symbol)
