@@ -16368,7 +16368,22 @@ if __name__ == "__main__":
                             f"stack={energy_stack}",
                             flush=True
                         )
+                    # =====================
+                    # LIQUIDATION CASCADE BONUS
+                    # =====================
 
+                    if (
+                        "LIQUIDATION_CASCADE_ACTIVE"
+                        in flags
+                    ):
+
+                        quality_points += 4
+
+                        print(
+                            f"[CASCADE_BONUS] "
+                            f"{instId}",
+                            flush=True
+                        )
                     # =====================
                     # RANGE COMPRESSION BONUS
                     # =====================
