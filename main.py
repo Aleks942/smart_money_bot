@@ -10936,6 +10936,64 @@ def build_signal(instId):
             f"{instId}",
             flush=True
         )
+
+    # =====================
+    # TAKE PROFIT ENGINE
+    # =====================
+
+    take_profit_long = (
+
+        "CONTINUATION_STRONG_LONG"
+        in flags
+
+        and (
+            "OI_FADE"
+            in flags
+            or
+            "IMPULSE_EXHAUSTION_LONG"
+            in flags
+        )
+
+    )
+
+    take_profit_short = (
+
+        "CONTINUATION_STRONG_SHORT"
+        in flags
+
+        and (
+            "OI_FADE"
+            in flags
+            or
+            "IMPULSE_EXHAUSTION_SHORT"
+            in flags
+        )
+
+    )
+
+    if take_profit_long:
+
+        flags.add(
+            "TAKE_PROFIT_LONG"
+        )
+
+        print(
+            f"[TAKE_PROFIT_LONG] "
+            f"{instId}",
+            flush=True
+        )
+
+    if take_profit_short:
+
+        flags.add(
+            "TAKE_PROFIT_SHORT"
+        )
+
+        print(
+            f"[TAKE_PROFIT_SHORT] "
+            f"{instId}",
+            flush=True
+        )
     # =========================
     # SQUEEZE MATURITY
     # =========================
