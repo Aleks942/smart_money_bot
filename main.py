@@ -1605,6 +1605,93 @@ def analyze_flat_control(flags):
             "long_reasons": [],
             "short_reasons": []
         }
+
+
+# =========================
+# CAPITAL FLOW ENGINE
+# =========================
+
+def analyze_capital_flow(signal):
+
+    try:
+        flags = set(signal.get("flags", []))
+
+        oi = float(signal.get("oi") or 0)
+        ep = float(signal.get("early_pressure_score") or 0)
+        acc = float(signal.get("acc_score") or 0)
+        score = float(signal.get("score") or 0)
+
+        capital_score = 0
+        reasons = []
+
+        if oi >= 0.30:
+            capital_score += 3
+            reasons.append("в рынок заметно заходят новые позиции")
+
+        elif oi >= 0.10:
+            capital_score += 1
+            reasons.append("в рынок умеренно заходят новые позиции")
+
+        elif oi <= -0.30:
+            capital_score -= 2
+            reasons.append("открытый интерес снижается — часть позиций выходит")
+
+        if ep >= 15:
+            capital_score += 2
+            reasons.append("раннее давление сильное")
+
+        if acc >= 3:
+            capital_score += 2
+            reasons.append("накопление позиции сильное")
+
+        if "RANGE_COMPRESSION" in flags:
+            capital_score += 1
+            reasons.append("рынок сжат — возможен набор позиции")
+
+        if (
+            "PRESSURE_LONG_PERSIST_2" in flags
+            or "PRESSURE_SHORT_PERSIST_2" in flags
+        ):
+            capital_score += 2
+            reasons.append("давление удерживается несколько циклов")
+
+        if (
+            "SHORT_SQUEEZE" in flags
+            or "LONG_FLUSH" in flags
+        ):
+            capital_score += 2
+            reasons.append("ликвидации начинают усиливать движение")
+
+        if score >= 25:
+            capital_score += 1
+            reasons.append("общая структура сигнала сильная")
+
+        if capital_score >= 7:
+            capital_state = "STRONG_CAPITAL_FLOW"
+        elif capital_score >= 4:
+            capital_state = "BUILDING_CAPITAL_FLOW"
+        elif capital_score <= 0:
+            capital_state = "WEAK_CAPITAL_FLOW"
+        else:
+            capital_state = "NEUTRAL_CAPITAL_FLOW"
+
+        return {
+            "capital_score": capital_score,
+            "capital_state": capital_state,
+            "capital_reasons": reasons
+        }
+
+    except Exception as e:
+        print(
+            f"[CAPITAL_FLOW_ERROR] {e}",
+            flush=True
+        )
+
+        return {
+            "capital_score": 0,
+            "capital_state": "ERROR",
+            "capital_reasons": []
+        }
 # =========================
 # MARKET STORY ENGINE
 # =========================
