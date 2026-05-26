@@ -10574,6 +10574,64 @@ def build_signal(instId):
             f"{instId}",
             flush=True
         )
+
+    # =====================
+    # IMPULSE EXHAUSTION
+    # =====================
+
+    exhaustion_long = (
+
+        "IMPULSE_CONFIRMED_LONG"
+        in flags
+
+        and "OI_FADE"
+        in flags
+
+        and "PRESSURE_DOWN"
+        in flags
+
+    )
+
+    exhaustion_short = (
+
+        "IMPULSE_CONFIRMED_SHORT"
+        in flags
+
+        and "OI_FADE"
+        in flags
+
+        and "PRESSURE_UP"
+        in flags
+
+    )
+
+    if exhaustion_long:
+
+        flags.add(
+            "IMPULSE_EXHAUSTION_LONG"
+        )
+
+        score -= 4
+
+        print(
+            f"[EXHAUSTION_LONG] "
+            f"{instId}",
+            flush=True
+        )
+
+    if exhaustion_short:
+
+        flags.add(
+            "IMPULSE_EXHAUSTION_SHORT"
+        )
+
+        score -= 4
+
+        print(
+            f"[EXHAUSTION_SHORT] "
+            f"{instId}",
+            flush=True
+        )
     # =========================
     # SQUEEZE MATURITY
     # =========================
