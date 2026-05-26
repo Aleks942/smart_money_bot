@@ -11190,6 +11190,70 @@ def build_signal(instId):
             f"{instId}",
             flush=True
         )
+
+    # =====================
+    # MARKET DOMINANCE
+    # =====================
+
+    dominance_long = 0
+    dominance_short = 0
+
+    # =====================
+    # LONG DOMINANCE
+    # =====================
+
+    if "PRESSURE_UP" in flags:
+        dominance_long += 2
+
+    if "BUYER_ABSORPTION" in flags:
+        dominance_long += 2
+
+    if "CONTINUATION_STRONG_LONG" in flags:
+        dominance_long += 3
+
+    if "OI_BUILDUP_LONG" in flags:
+        dominance_long += 2
+
+    if "SMART_REVERSAL_LONG" in flags:
+        dominance_long += 3
+
+    # =====================
+    # SHORT DOMINANCE
+    # =====================
+
+    if "PRESSURE_DOWN" in flags:
+        dominance_short += 2
+
+    if "SELLER_ABSORPTION" in flags:
+        dominance_short += 2
+
+    if "CONTINUATION_STRONG_SHORT" in flags:
+        dominance_short += 3
+
+    if "OI_BUILDUP_SHORT" in flags:
+        dominance_short += 2
+
+    if "SMART_REVERSAL_SHORT" in flags:
+        dominance_short += 3
+
+    market_control = "NEUTRAL"
+
+    if dominance_long > dominance_short:
+        market_control = "BUYERS_CONTROL"
+
+    elif dominance_short > dominance_long:
+        market_control = "SELLERS_CONTROL"
+
+    sig_market_control = market_control
+
+    print(
+        f"[MARKET_CONTROL] "
+        f"{instId} "
+        f"{market_control} "
+        f"L={dominance_long} "
+        f"S={dominance_short}",
+        flush=True
+    )
     # =========================
     # SQUEEZE MATURITY
     # =========================
