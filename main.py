@@ -2050,7 +2050,21 @@ def generate_market_story(signal):
             story.append(
                 "движение вниз начинает ускоряться"
             )
+        # =====================
+        # IMPULSE CONFIRMATION
+        # =====================
 
+        if "IMPULSE_CONFIRMED_LONG" in flags:
+
+            story.append(
+                "начинается подтвержденный импульс вверх"
+            )
+
+        if "IMPULSE_CONFIRMED_SHORT" in flags:
+
+            story.append(
+                "начинается подтвержденный импульс вниз"
+            )
         # =====================
         # LIQUIDATIONS
         # =====================
