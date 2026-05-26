@@ -1631,6 +1631,14 @@ def analyze_liquidation_pressure(
 
                 power += 2
 
+            if cascade_count >= 3:
+
+                flags.append(
+                    "LIQUIDATION_CASCADE_ACTIVE"
+                )
+
+                power += 3
+
         # =====================
         # LONG FLUSH
         # =====================
@@ -1652,6 +1660,14 @@ def analyze_liquidation_pressure(
                 )
 
                 power += 2
+
+            if cascade_count >= 3:
+
+                flags.append(
+                    "LIQUIDATION_CASCADE_ACTIVE"
+                )
+
+                power += 3
 
         print(
             f"[LIQ_PRESSURE] "
