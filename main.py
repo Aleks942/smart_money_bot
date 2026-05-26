@@ -10874,6 +10874,68 @@ def build_signal(instId):
         f"{entry_quality}",
         flush=True
     )
+
+    # =====================
+    # RETEST ENGINE
+    # =====================
+
+    retest_long = (
+
+        "BREAKOUT_CONFIRM_UP"
+        in flags
+
+        and "PRESSURE_UP"
+        in flags
+
+        and not (
+            "IMPULSE_EXHAUSTION_LONG"
+            in flags
+        )
+
+    )
+
+    retest_short = (
+
+        "BREAKOUT_CONFIRM_DOWN"
+        in flags
+
+        and "PRESSURE_DOWN"
+        in flags
+
+        and not (
+            "IMPULSE_EXHAUSTION_SHORT"
+            in flags
+        )
+
+    )
+
+    if retest_long:
+
+        flags.add(
+            "RETEST_LONG"
+        )
+
+        score += 3
+
+        print(
+            f"[RETEST_LONG] "
+            f"{instId}",
+            flush=True
+        )
+
+    if retest_short:
+
+        flags.add(
+            "RETEST_SHORT"
+        )
+
+        score += 3
+
+        print(
+            f"[RETEST_SHORT] "
+            f"{instId}",
+            flush=True
+        )
     # =========================
     # SQUEEZE MATURITY
     # =========================
