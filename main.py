@@ -11128,6 +11128,68 @@ def build_signal(instId):
             f"{instId}",
             flush=True
         )
+
+    # =====================
+    # SMART MONEY TRAP ZONES
+    # =====================
+
+    liquidity_grab_long = (
+
+        "LONG_FLUSH"
+        in flags
+
+        and (
+            "BUYER_ABSORPTION"
+            in flags
+            or
+            "SMART_REVERSAL_LONG"
+            in flags
+        )
+
+    )
+
+    liquidity_grab_short = (
+
+        "SHORT_SQUEEZE"
+        in flags
+
+        and (
+            "SELLER_ABSORPTION"
+            in flags
+            or
+            "SMART_REVERSAL_SHORT"
+            in flags
+        )
+
+    )
+
+    if liquidity_grab_long:
+
+        flags.add(
+            "LIQUIDITY_GRAB_LONG"
+        )
+
+        score += 6
+
+        print(
+            f"[LIQUIDITY_GRAB_LONG] "
+            f"{instId}",
+            flush=True
+        )
+
+    if liquidity_grab_short:
+
+        flags.add(
+            "LIQUIDITY_GRAB_SHORT"
+        )
+
+        score += 6
+
+        print(
+            f"[LIQUIDITY_GRAB_SHORT] "
+            f"{instId}",
+            flush=True
+        )
     # =========================
     # SQUEEZE MATURITY
     # =========================
