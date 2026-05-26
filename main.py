@@ -1253,6 +1253,12 @@ PRE_SWING_STATE = {}
 OI_MEMORY = {}
 
 # =========================
+# OI TREND MEMORY
+# =========================
+
+OI_TREND_MEMORY = {}
+
+# =========================
 # PRESSURE MEMORY
 # =========================
 
@@ -1342,6 +1348,103 @@ def analyze_pressure_memory(symbol, flags):
             "flags": []
         }
 
+# =========================
+# OI TREND ENGINE
+# =========================
+
+def analyze_oi_trend(symbol, oi_value):
+
+    try:
+
+        symbol = str(symbol)
+        oi_value = float(oi_value or 0)
+
+        prev = OI_TREND_MEMORY.get(symbol, {
+            "values": []
+        })
+
+        values = list(
+            prev.get("values", [])
+        )
+
+        values.append(oi_value)
+
+        values = values[-5:]
+
+        OI_TREND_MEMORY[symbol] = {
+            "values": values
+        }
+
+        flags = []
+        trend_score = 0
+
+        if len(values) >= 3:
+
+            growing = (
+                values[-1] > values[-2]
+                and values[-2] > values[-3]
+            )
+
+            falling = (
+                values[-1] < values[-2]
+                and values[-2] < values[-3]
+            )
+
+            if growing:
+
+                trend_score += 2
+
+                flags.append(
+                    "OI_BUILDUP"
+                )
+
+                if values[-1] >= 0:
+
+                    flags.append(
+                        "OI_BUILDUP_LONG"
+                    )
+
+                else:
+
+                    flags.append(
+                        "OI_BUILDUP_SHORT"
+                    )
+
+            if falling:
+
+                trend_score -= 1
+
+                flags.append(
+                    "OI_FADE"
+                )
+
+        print(
+            f"[OI_TREND] "
+            f"{symbol} "
+            f"values={values} "
+            f"score={trend_score} "
+            f"flags={flags}",
+            flush=True
+        )
+
+        return {
+            "oi_trend_score": trend_score,
+            "oi_trend_flags": flags
+        }
+
+    except Exception as e:
+
+        print(
+            f"[OI_TREND_ERROR] "
+            f"{symbol} "
+            f"{e}",
+            flush=True
+        )
+
+        return {
+            "oi_trend_score": 0,
+            "oi_trend_flags": []
+        }
 # =========================
 # LIQUIDATION PRESSURE
 # =========================
