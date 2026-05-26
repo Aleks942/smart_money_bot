@@ -16788,6 +16788,83 @@ if __name__ == "__main__":
                             f"{instId}",
                             flush=True
                         )
+
+                    # =====================
+                    # MARKET REGIME BONUS
+                    # =====================
+
+                    regime = sig.get(
+                        "market_regime",
+                        "NEUTRAL"
+                    )
+
+                    # =====================
+                    # TREND BULL
+                    # =====================
+
+                    if (
+                        regime == "TREND_BULL"
+                        and side == "LONG"
+                    ):
+
+                        quality_points += 3
+
+                        print(
+                            f"[REGIME_BULL_BONUS] "
+                            f"{instId}",
+                            flush=True
+                        )
+
+                    # =====================
+                    # TREND BEAR
+                    # =====================
+
+                    if (
+                        regime == "TREND_BEAR"
+                        and side == "SHORT"
+                    ):
+
+                        quality_points += 3
+
+                        print(
+                            f"[REGIME_BEAR_BONUS] "
+                            f"{instId}",
+                            flush=True
+                        )
+
+                    # =====================
+                    # PANIC SELL
+                    # =====================
+
+                    if (
+                        regime == "PANIC_SELL"
+                        and side == "SHORT"
+                    ):
+
+                        quality_points += 4
+
+                        print(
+                            f"[PANIC_SELL_BONUS] "
+                            f"{instId}",
+                            flush=True
+                        )
+
+                    # =====================
+                    # SHORT SQUEEZE
+                    # =====================
+
+                    if (
+                        regime == "SHORT_SQUEEZE"
+                        and side == "LONG"
+                    ):
+
+                        quality_points += 4
+
+                        print(
+                            f"[SHORT_SQUEEZE_BONUS] "
+                            f"{instId}",
+                            flush=True
+                        )
                     # =====================
                     # RANGE COMPRESSION BONUS
                     # =====================
