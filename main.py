@@ -15604,6 +15604,7 @@ if __name__ == "__main__":
                     )
                     
                     new_oi = get_open_interest_change(instId)
+                    
                     print(
                         f"[OI_DEBUG_RAW] "
                         f"{instId} "
@@ -15611,7 +15612,27 @@ if __name__ == "__main__":
                         f"type={type(new_oi)}",
                         flush=True
                     )
-
+                    
+                    # =====================
+                    # OI TREND
+                    # =====================
+                    
+                    if new_oi is not None:
+                    
+                        oi_trend_data = analyze_oi_trend(
+                            instId,
+                            new_oi
+                        )
+                    
+                        signal.update(oi_trend_data)
+                    
+                        for f in oi_trend_data.get(
+                            "oi_trend_flags",
+                            []
+                        ):
+                    
+                            signal["flags"].append(f)
+                    
                     # =====================
                     # OI NORMALIZATION
                     # =====================
