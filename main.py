@@ -15728,7 +15728,69 @@ if __name__ == "__main__":
                         f"entry={entry}",
                         flush=True
                     )
-
+                    # =====================
+                    # LIQUIDATION BONUS
+                    # =====================
+                    
+                    short_squeeze = (
+                        "SHORT_SQUEEZE" in flags
+                    )
+                    
+                    long_flush = (
+                        "LONG_FLUSH" in flags
+                    )
+                    
+                    cascade_shorts = (
+                        "CASCADE_SHORTS" in flags
+                    )
+                    
+                    cascade_longs = (
+                        "CASCADE_LONGS" in flags
+                    )
+                    
+                    if short_squeeze:
+                    
+                        quality_points += 2
+                        energy_stack += 1
+                    
+                        print(
+                            f"[SHORT_SQUEEZE_BONUS] "
+                            f"{instId}",
+                            flush=True
+                        )
+                    
+                    if long_flush:
+                    
+                        quality_points += 2
+                        energy_stack += 1
+                    
+                        print(
+                            f"[LONG_FLUSH_BONUS] "
+                            f"{instId}",
+                            flush=True
+                        )
+                    
+                    if cascade_shorts:
+                    
+                        quality_points += 3
+                        energy_stack += 2
+                    
+                        print(
+                            f"[CASCADE_SHORTS] "
+                            f"{instId}",
+                            flush=True
+                        )
+                    
+                    if cascade_longs:
+                    
+                        quality_points += 3
+                        energy_stack += 2
+                    
+                        print(
+                            f"[CASCADE_LONGS] "
+                            f"{instId}",
+                            flush=True
+                        )
                     # =====================
                     # CAPITAL GATE FILTER
                     # =====================
