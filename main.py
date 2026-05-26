@@ -10632,6 +10632,68 @@ def build_signal(instId):
             f"{instId}",
             flush=True
         )
+
+    # =====================
+    # FAKE BREAKOUT
+    # =====================
+
+    fake_breakout_long = (
+
+        "BREAKOUT_CONFIRM_UP"
+        in flags
+
+        and oi < 0.05
+
+        and (
+            "IMPULSE_CONFIRMED_LONG"
+            not in flags
+        )
+
+    )
+
+    fake_breakout_short = (
+
+        "BREAKOUT_CONFIRM_DOWN"
+        in flags
+
+        and oi < 0.05
+
+        and (
+            "IMPULSE_CONFIRMED_SHORT"
+            not in flags
+        )
+
+    )
+
+    if fake_breakout_long:
+
+        flags.add(
+            "FAKE_BREAKOUT_LONG"
+        )
+
+        score -= 5
+
+        print(
+            f"[FAKE_BREAKOUT_LONG] "
+            f"{instId}",
+            flush=True
+        )
+
+    if fake_breakout_short:
+
+        flags.add(
+            "FAKE_BREAKOUT_SHORT"
+        )
+
+        score -= 5
+
+        print(
+            f"[FAKE_BREAKOUT_SHORT] "
+            f"{instId}",
+            flush=True
+        )
+
+    
     # =========================
     # SQUEEZE MATURITY
     # =========================
