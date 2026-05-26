@@ -11512,6 +11512,97 @@ def build_signal(instId):
         f"score={smart_flow_score}",
         flush=True
     )
+
+    # =====================
+    # SMART MONEY INTENT
+    # =====================
+
+    smart_intent = "NEUTRAL"
+
+    # =====================
+    # ACCUMULATION INTENT
+    # =====================
+
+    if (
+
+        smart_phase == "ACCUMULATION"
+
+        and (
+            "BUYERS_CONTROL"
+            in str(sig_market_control)
+        )
+
+        and flow_quality == "STRONG_FLOW"
+
+    ):
+
+        smart_intent = "ACCUMULATING_LONG"
+
+    # =====================
+    # DISTRIBUTION INTENT
+    # =====================
+
+    elif (
+
+        smart_phase == "DISTRIBUTION"
+
+        and (
+            "SELLERS_CONTROL"
+            in str(sig_market_control)
+        )
+
+    ):
+
+        smart_intent = "DISTRIBUTING_LONGS"
+
+    # =====================
+    # AGGRESSIVE EXPANSION
+    # =====================
+
+    elif (
+
+        smart_phase == "EXPANSION"
+
+        and flow_quality == "STRONG_FLOW"
+
+        and (
+            "CONTINUATION_STRONG_LONG"
+            in flags
+            or
+            "CONTINUATION_STRONG_SHORT"
+            in flags
+        )
+
+    ):
+
+        smart_intent = "AGGRESSIVE_EXPANSION"
+
+    # =====================
+    # MANIPULATION
+    # =====================
+
+    elif (
+
+        smart_phase == "MANIPULATION"
+
+        or "BULL_TRAP"
+        in flags
+
+        or "BEAR_TRAP"
+        in flags
+
+    ):
+
+        smart_intent = "MANIPULATING_LIQUIDITY"
+
+    sig_smart_intent = smart_intent
+
+    print(
+        f"[SMART_INTENT] "
+        f"{instId} "
+        f"{smart_intent}",
+        flush=True
+    )
     # =========================
     # SQUEEZE MATURITY
     # =========================
