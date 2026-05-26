@@ -15624,14 +15624,14 @@ if __name__ == "__main__":
                             new_oi
                         )
                     
-                        signal.update(oi_trend_data)
+                        sig.update(oi_trend_data)
                     
                         for f in oi_trend_data.get(
                             "oi_trend_flags",
                             []
                         ):
                     
-                            signal["flags"].append(f)
+                            sig["flags"].append(f)
                     
                     # =====================
                     # OI NORMALIZATION
