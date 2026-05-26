@@ -1271,10 +1271,16 @@ PRESSURE_MEMORY = {}
 LIQUIDATION_MEMORY = {}
 
 # =========================
-# LIQUIDATION MEMORY
+# LIQUIDATION CASCADE MEMORY
 # =========================
 
-LIQUIDATION_MEMORY = {}
+LIQUIDATION_CASCADE_MEMORY = {}
+
+# =========================
+# IMPULSE CONFIRMATION MEMORY
+# =========================
+
+IMPULSE_CONFIRM_MEMORY = {}
 
 
 def analyze_pressure_memory(symbol, flags):
