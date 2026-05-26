@@ -1519,6 +1519,86 @@ def analyze_flat_control(flags):
             reasons_long.append(
                 "шортистов начинают выбивать"
             )
+            
+        # =====================
+        # SHORT CONTROL
+        # =====================
+
+        if "PRESSURE_DOWN" in flags:
+
+            short_control += 2
+            reasons_short.append(
+                "продавцы давят вниз"
+            )
+
+        if "SELLER_ABSORPTION" in flags:
+
+            short_control += 2
+            reasons_short.append(
+                "продавцы удерживают рост"
+            )
+
+        if "RANGE_HOLD_LOW" in flags:
+
+            short_control += 2
+            reasons_short.append(
+                "цена держится в нижней части диапазона"
+            )
+
+        if "EMA_BEAR" in flags:
+
+            short_control += 1
+
+        if "ACCELERATION_DOWN" in flags:
+
+            short_control += 2
+            reasons_short.append(
+                "движение вниз ускоряется"
+            )
+
+        if "LONG_FLUSH" in flags:
+
+            short_control += 2
+            reasons_short.append(
+                "лонгистов начинают выбивать"
+            )
+
+        dominance = "NEUTRAL"
+
+        if long_control > short_control:
+
+            dominance = "LONG"
+
+        elif short_control > long_control:
+
+            dominance = "SHORT"
+
+        return {
+
+            "long_control": long_control,
+            "short_control": short_control,
+            "dominance": dominance,
+
+            "long_reasons": reasons_long,
+            "short_reasons": reasons_short
+        }
+
+    except Exception as e:
+
+        print(
+            f"[FLAT_CONTROL_ERROR] {e}",
+            flush=True
+        )
+
+        return {
+
+            "long_control": 0,
+            "short_control": 0,
+            "dominance": "NEUTRAL",
+
+            "long_reasons": [],
+            "short_reasons": []
+        }
 # =========================
 # MARKET STORY ENGINE
 # =========================
