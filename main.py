@@ -1443,7 +1443,180 @@ def analyze_liquidation_pressure(
                     reasons_long.append(
                         "шортистов начинают выбивать"
                     )
-        
+                # =========================
+                # MARKET STORY ENGINE
+                # =========================
+                
+                def generate_market_story(signal):
+                
+                    try:
+                
+                        flags = set(
+                            signal.get("flags", [])
+                        )
+                
+                        story = []
+                
+                        # =====================
+                        # COMPRESSION
+                        # =====================
+                
+                        if "RANGE_COMPRESSION" in flags:
+                
+                            story.append(
+                                "рынок сильно сжался — готовится движение"
+                            )
+                
+                        if "TIGHT_RANGE" in flags:
+                
+                            story.append(
+                                "цена зажата в очень узком диапазоне"
+                            )
+                
+                        # =====================
+                        # LONG CONTROL
+                        # =====================
+                
+                        if "PRESSURE_UP" in flags:
+                
+                            story.append(
+                                "покупатели начинают усиливать давление"
+                            )
+                
+                        if "PRESSURE_LONG_PERSIST_2" in flags:
+                
+                            story.append(
+                                "покупатели удерживают контроль уже некоторое время"
+                            )
+                
+                        if "RANGE_HOLD_HIGH" in flags:
+                
+                            story.append(
+                                "цена удерживается в верхней части диапазона"
+                            )
+                
+                        if "BUYER_ABSORPTION" in flags:
+                
+                            story.append(
+                                "покупатели удерживают проливы"
+                            )
+                
+                        # =====================
+                        # SHORT CONTROL
+                        # =====================
+                
+                        if "PRESSURE_DOWN" in flags:
+                
+                            story.append(
+                                "продавцы начинают усиливать давление"
+                            )
+                
+                        if "PRESSURE_SHORT_PERSIST_2" in flags:
+                
+                            story.append(
+                                "продавцы удерживают контроль уже некоторое время"
+                            )
+                
+                        if "RANGE_HOLD_LOW" in flags:
+                
+                            story.append(
+                                "цена удерживается в нижней части диапазона"
+                            )
+                
+                        if "SELLER_ABSORPTION" in flags:
+                
+                            story.append(
+                                "продавцы удерживают рост"
+                            )
+                
+                        # =====================
+                        # ACCELERATION
+                        # =====================
+                
+                        if "ACCELERATION_UP" in flags:
+                
+                            story.append(
+                                "движение вверх начинает ускоряться"
+                            )
+                
+                        if "ACCELERATION_DOWN" in flags:
+                
+                            story.append(
+                                "движение вниз начинает ускоряться"
+                            )
+                
+                        # =====================
+                        # LIQUIDATIONS
+                        # =====================
+                
+                        if "SHORT_SQUEEZE" in flags:
+                
+                            story.append(
+                                "шортистов начинают выбивать — это усиливает рост"
+                            )
+                
+                        if "LONG_FLUSH" in flags:
+                
+                            story.append(
+                                "лонгистов начинают выбивать — падение усиливается"
+                            )
+                
+                        if "CASCADE_SHORTS" in flags:
+                
+                            story.append(
+                                "начался каскад ликвидаций шортов"
+                            )
+                
+                        if "CASCADE_LONGS" in flags:
+                
+                            story.append(
+                                "начался каскад ликвидаций лонгов"
+                            )
+                
+                        # =====================
+                        # ENERGY
+                        # =====================
+                
+                        if "ENERGY_BUILDUP" in flags:
+                
+                            story.append(
+                                "рынок выглядит напряжённым перед импульсом"
+                            )
+                
+                        if "EXPLOSION_READY_UP" in flags:
+                
+                            story.append(
+                                "рынок готовится к сильному движению вверх"
+                            )
+                
+                        if "EXPLOSION_READY_DOWN" in flags:
+                
+                            story.append(
+                                "рынок готовится к сильному движению вниз"
+                            )
+                
+                        # =====================
+                        # EMPTY
+                        # =====================
+                
+                        if not story:
+                
+                            story.append(
+                                "рынок пока не показывает сильного преимущества одной из сторон"
+                            )
+                
+                        return story
+                
+                    except Exception as e:
+                
+                        print(
+                            f"[MARKET_STORY_ERROR] {e}",
+                            flush=True
+                        )
+                
+                        return [
+                            "не удалось построить описание рынка"
+                        ]
                 # =====================
                 # SHORT CONTROL
                 # =====================
