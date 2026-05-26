@@ -10816,6 +10816,23 @@ def build_signal(instId):
     signal.update(ep_data)
 
     # =====================
+    # MARKET STORY
+    # =====================
+    
+    market_story = generate_market_story(
+        signal
+    )
+    
+    signal["market_story"] = market_story
+    
+    print(
+        f"[MARKET_STORY] "
+        f"{instId} "
+        f"story={market_story}",
+        flush=True
+    )
+
+    # =====================
     # RANGE DETECTOR CHECK
     # =====================
     
