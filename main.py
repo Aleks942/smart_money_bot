@@ -10437,7 +10437,79 @@ def build_signal(instId):
         )
     
         
+    # =====================
+    # IMPULSE CONFIRMATION
+    # =====================
 
+    impulse_long = (
+
+        "ACCELERATION_UP" in flags
+        and "BREAKOUT_CONFIRM_UP" in flags
+        and (
+            "PRESSURE_LONG_PERSIST_2"
+            in flags
+            or
+            "PRESSURE_LONG_PERSIST_3"
+            in flags
+        )
+        and (
+            "LAUNCH_PROXIMITY_UP"
+            in flags
+            or
+            "EXPLOSION_READY_UP"
+            in flags
+        )
+
+    )
+
+    impulse_short = (
+
+        "ACCELERATION_DOWN" in flags
+        and "BREAKOUT_CONFIRM_DOWN" in flags
+        and (
+            "PRESSURE_SHORT_PERSIST_2"
+            in flags
+            or
+            "PRESSURE_SHORT_PERSIST_3"
+            in flags
+        )
+        and (
+            "LAUNCH_PROXIMITY_DOWN"
+            in flags
+            or
+            "EXPLOSION_READY_DOWN"
+            in flags
+        )
+
+    )
+
+    if impulse_long:
+
+        flags.add(
+            "IMPULSE_CONFIRMED_LONG"
+        )
+
+        score += 5
+
+        print(
+            f"[IMPULSE_LONG] "
+            f"{instId}",
+            flush=True
+        )
+
+    if impulse_short:
+
+        flags.add(
+            "IMPULSE_CONFIRMED_SHORT"
+        )
+
+        score += 5
+
+        print(
+            f"[IMPULSE_SHORT] "
+            f"{instId}",
+            flush=True
+        )
     # =========================
     # SQUEEZE MATURITY
     # =========================
