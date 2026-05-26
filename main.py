@@ -1385,64 +1385,64 @@ def analyze_liquidation_pressure(
         flags = []
         power = 0
 
-        # =========================
-        # FLAT CONTROL ENGINE
-        # =========================
-        
-        def analyze_flat_control(flags):
-        
-            try:
-        
-                flags = set(flags or [])
-        
-                long_control = 0
-                short_control = 0
-        
-                reasons_long = []
-                reasons_short = []
-        
-                # =====================
-                # LONG CONTROL
-                # =====================
-        
-                if "PRESSURE_UP" in flags:
-        
-                    long_control += 2
-                    reasons_long.append(
-                        "покупатели давят вверх"
-                    )
-        
-                if "BUYER_ABSORPTION" in flags:
-        
-                    long_control += 2
-                    reasons_long.append(
-                        "покупатели удерживают проливы"
-                    )
-        
-                if "RANGE_HOLD_HIGH" in flags:
-        
-                    long_control += 2
-                    reasons_long.append(
-                        "цена держится в верхней части диапазона"
-                    )
-        
-                if "EMA_BULL" in flags:
-        
-                    long_control += 1
-        
-                if "ACCELERATION_UP" in flags:
-        
-                    long_control += 2
-                    reasons_long.append(
-                        "движение вверх ускоряется"
-                    )
-        
-                if "SHORT_SQUEEZE" in flags:
-        
-                    long_control += 2
-                    reasons_long.append(
-                        "шортистов начинают выбивать"
-                    )
+# =========================
+# FLAT CONTROL ENGINE
+# =========================
+
+def analyze_flat_control(flags):
+
+    try:
+
+        flags = set(flags or [])
+
+        long_control = 0
+        short_control = 0
+
+        reasons_long = []
+        reasons_short = []
+
+        # =====================
+        # LONG CONTROL
+        # =====================
+
+        if "PRESSURE_UP" in flags:
+
+            long_control += 2
+            reasons_long.append(
+                "покупатели давят вверх"
+            )
+
+        if "BUYER_ABSORPTION" in flags:
+
+            long_control += 2
+            reasons_long.append(
+                "покупатели удерживают проливы"
+            )
+
+        if "RANGE_HOLD_HIGH" in flags:
+
+            long_control += 2
+            reasons_long.append(
+                "цена держится в верхней части диапазона"
+            )
+
+        if "EMA_BULL" in flags:
+
+            long_control += 1
+
+        if "ACCELERATION_UP" in flags:
+
+            long_control += 2
+            reasons_long.append(
+                "движение вверх ускоряется"
+            )
+
+        if "SHORT_SQUEEZE" in flags:
+
+            long_control += 2
+            reasons_long.append(
+                "шортистов начинают выбивать"
+            )
 # =========================
 # MARKET STORY ENGINE
 # =========================
