@@ -10916,6 +10916,24 @@ def build_signal(instId):
     )
     
     signal["market_story"] = market_story
+
+    # =====================
+    # CAPITAL FLOW
+    # =====================
+    
+    capital_data = analyze_capital_flow(
+        signal
+    )
+    
+    signal.update(capital_data)
+    
+    print(
+        f"[CAPITAL_FLOW] "
+        f"{instId} "
+        f"state={signal.get('capital_state')} "
+        f"score={signal.get('capital_score')}",
+        flush=True
+    )
     
     print(
         f"[MARKET_STORY] "
