@@ -10510,6 +10510,70 @@ def build_signal(instId):
             f"{instId}",
             flush=True
         )
+
+    # =====================
+    # CONTINUATION ENGINE
+    # =====================
+
+    continuation_long = (
+
+        "IMPULSE_CONFIRMED_LONG"
+        in flags
+
+        and "PRESSURE_UP"
+        in flags
+
+        and (
+            "OI_BUILDUP"
+            in flags
+            or oi >= 0.15
+        )
+
+    )
+
+    continuation_short = (
+
+        "IMPULSE_CONFIRMED_SHORT"
+        in flags
+
+        and "PRESSURE_DOWN"
+        in flags
+
+        and (
+            "OI_BUILDUP"
+            in flags
+            or oi >= 0.15
+        )
+
+    )
+
+    if continuation_long:
+
+        flags.add(
+            "CONTINUATION_STRONG_LONG"
+        )
+
+        score += 4
+
+        print(
+            f"[CONTINUATION_LONG] "
+            f"{instId}",
+            flush=True
+        )
+
+    if continuation_short:
+
+        flags.add(
+            "CONTINUATION_STRONG_SHORT"
+        )
+
+        score += 4
+
+        print(
+            f"[CONTINUATION_SHORT] "
+            f"{instId}",
+            flush=True
+        )
     # =========================
     # SQUEEZE MATURITY
     # =========================
