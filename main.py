@@ -11060,6 +11060,74 @@ def build_signal(instId):
             f"{instId}",
             flush=True
         )
+
+    # =====================
+    # SMART REVERSAL
+    # =====================
+
+    reversal_long = (
+
+        "IMPULSE_EXHAUSTION_SHORT"
+        in flags
+
+        and "PRESSURE_UP"
+        in flags
+
+        and (
+            "BUYER_ABSORPTION"
+            in flags
+            or
+            "BULLISH_SHIFT"
+            in flags
+        )
+
+    )
+
+    reversal_short = (
+
+        "IMPULSE_EXHAUSTION_LONG"
+        in flags
+
+        and "PRESSURE_DOWN"
+        in flags
+
+        and (
+            "SELLER_ABSORPTION"
+            in flags
+            or
+            "BEARISH_SHIFT"
+            in flags
+        )
+
+    )
+
+    if reversal_long:
+
+        flags.add(
+            "SMART_REVERSAL_LONG"
+        )
+
+        score += 5
+
+        print(
+            f"[REVERSAL_LONG] "
+            f"{instId}",
+            flush=True
+        )
+
+    if reversal_short:
+
+        flags.add(
+            "SMART_REVERSAL_SHORT"
+        )
+
+        score += 5
+
+        print(
+            f"[REVERSAL_SHORT] "
+            f"{instId}",
+            flush=True
+        )
     # =========================
     # SQUEEZE MATURITY
     # =========================
