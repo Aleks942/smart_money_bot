@@ -11771,6 +11771,75 @@ def build_signal(instId):
         f"{liquidity_magnet}",
         flush=True
     )
+
+    # =====================
+    # MARKET TRAPS
+    # =====================
+
+    market_trap = "NO_TRAP"
+
+    # =====================
+    # BULL TRAP
+    # =====================
+
+    if (
+
+        "BREAKOUT_UP"
+        in flags
+
+        and "ACCELERATION_UP"
+        in flags
+
+        and flow_quality == "WEAK_FLOW"
+
+        and not (
+            "CONTINUATION_STRONG_LONG"
+            in flags
+        )
+
+    ):
+
+        market_trap = "BULL_TRAP"
+
+        flags.add(
+            "BULL_TRAP"
+        )
+
+    # =====================
+    # BEAR TRAP
+    # =====================
+
+    elif (
+
+        "BREAKOUT_DOWN"
+        in flags
+
+        and "ACCELERATION_DOWN"
+        in flags
+
+        and flow_quality == "WEAK_FLOW"
+
+        and not (
+            "CONTINUATION_STRONG_SHORT"
+            in flags
+        )
+
+    ):
+
+        market_trap = "BEAR_TRAP"
+
+        flags.add(
+            "BEAR_TRAP"
+        )
+
+    sig_market_trap = market_trap
+
+    print(
+        f"[MARKET_TRAP] "
+        f"{instId} "
+        f"{market_trap}",
+        flush=True
+    )
     # =====================
     # SMART MONEY INTENT
     # =====================
