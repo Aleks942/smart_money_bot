@@ -11368,7 +11368,21 @@ def build_signal(instId):
     if "PRESSURE_DOWN" in flags:
         dominance_short += 2
 
-    if "SELLER_ABSORPTION" in flags:
+    if (
+
+        "SELLER_ABSORPTION"
+        in flags
+
+        and "PRESSURE_UP"
+        in flags
+
+        and not (
+            "CONTINUATION_STRONG_LONG"
+            in flags
+        )
+
+    ):
+
         dominance_short += 2
 
     if "CONTINUATION_STRONG_SHORT" in flags:
