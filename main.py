@@ -1955,6 +1955,128 @@ def analyze_capital_flow(signal):
             "capital_state": "ERROR",
             "capital_reasons": []
         }
+
+# =========================
+# FLOW SNAPSHOT ENGINE — SWING MONEY FLOW
+# =========================
+
+def analyze_flow_snapshot(sig):
+    """
+    Главный снимок движения денег для SWING.
+    Пока работает безопасно на тех данных, которые уже есть в signal.
+    Позже сюда подключим CVD, Funding, Long/Short Ratio и Coinglass liquidity.
+    """
+
+    try:
+        flags = set(sig.get("flags", []))
+
+        price_change_pct = float(sig.get("price_change_pct") or 0)
+        oi = float(sig.get("oi_change") or 0)
+        volume_score = float(sig.get("volume_score") or 0)
+        ep = float(sig.get("early_pressure_score") or 0)
+        acc = float(sig.get("acc_score") or 0)
+
+        flow_score = 0
+        flow_reasons = []
+        flow_flags = []
+
+        # 1) OI + давление
+        if oi >= 0.30:
+            flow_score += 3
+            flow_reasons.append("OI растёт — в рынок заходят новые позиции")
+            flow_flags.append("FLOW_OI_BUILDUP")
+
+        elif oi >= 0.10:
+            flow_score += 1
+            flow_reasons.append("OI умеренно растёт")
+            flow_flags.append("FLOW_OI_GROWING")
+
+        elif oi <= -0.30:
+            flow_score -= 2
+            flow_reasons.append("OI падает — часть денег выходит")
+            flow_flags.append("FLOW_OI_EXIT")
+
+        # 2) Накопление
+        if acc >= 3:
+            flow_score += 2
+            flow_reasons.append("есть признаки накопления")
+            flow_flags.append("FLOW_ACCUMULATION")
+
+        # 3) Раннее давление
+        if ep >= 10:
+            flow_score += 2
+            flow_reasons.append("сильное раннее давление")
+            flow_flags.append("FLOW_EARLY_PRESSURE")
+
+        elif ep >= 7:
+            flow_score += 1
+            flow_reasons.append("есть раннее давление")
+            flow_flags.append("FLOW_PRESSURE_START")
+
+        # 4) Сжатие рынка
+        if (
+            "RANGE_COMPRESSION" in flags
+            or "TIGHT_RANGE" in flags
+            or "COMP_PRO_5M" in flags
+            or "COMP_PRO_15M" in flags
+        ):
+            flow_score += 2
+            flow_reasons.append("рынок сжат — возможен набор позиции перед движением")
+            flow_flags.append("FLOW_COMPRESSION")
+
+        # 5) Абсорбция
+        if (
+            "BUYER_ABSORPTION" in flags
+            or "SELLER_ABSORPTION" in flags
+        ):
+            flow_score += 2
+            flow_reasons.append("есть абсорбция — крупный участник удерживает цену")
+            flow_flags.append("FLOW_ABSORPTION")
+
+        # 6) Ликвидации
+        if (
+            "SHORT_SQUEEZE" in flags
+            or "LONG_FLUSH" in flags
+            or "LIQUIDATION_CASCADE_ACTIVE" in flags
+        ):
+            flow_score += 2
+            flow_reasons.append("ликвидации начинают усиливать движение")
+            flow_flags.append("FLOW_LIQUIDATION_PRESSURE")
+
+        # 7) Подозрение на поздний вход
+        if (
+            "BREAKOUT_CONFIRM_UP" in flags
+            or "BREAKOUT_CONFIRM_DOWN" in flags
+            or "ATR_EXPANSION" in flags
+        ) and acc < 2:
+            flow_score -= 2
+            flow_reasons.append("движение может быть уже поздним — нет накопления")
+            flow_flags.append("FLOW_LATE_RISK")
+
+        if flow_score >= 8:
+            flow_state = "STRONG_MONEY_FLOW"
+        elif flow_score >= 5:
+            flow_state = "BUILDING_MONEY_FLOW"
+        elif flow_score >= 2:
+            flow_state = "EARLY_MONEY_FLOW"
+        else:
+            flow_state = "WEAK_OR_NO_FLOW"
+
+        sig["flow_score"] = flow_score
+        sig["flow_state"] = flow_state
+        sig["flow_reasons"] = flow_reasons
+
+        old_flags = list(sig.get("flags") or [])
+        sig["flags"] = list(set(old_flags + flow_flags))
+
+        return sig
+
+    except Exception as e:
+        print(f"[FLOW_SNAPSHOT_ERROR] {e}", flush=True)
+        sig["flow_score"] = 0
+        sig["flow_state"] = "FLOW_ERROR"
+        sig["flow_reasons"] = []
+        return sig
 # =========================
 # MARKET STORY ENGINE
 # =========================
