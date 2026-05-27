@@ -11804,16 +11804,16 @@ def build_signal(instId):
 
     context_grade = "LOW_CONTEXT"
 
-    if context_priority >= 14:
+    if context_priority >= 12:
 
         context_grade = "ELITE_CONTEXT"
-
-    elif context_priority >= 9:
-
+    
+    elif context_priority >= 7:
+    
         context_grade = "HIGH_CONTEXT"
-
-    elif context_priority >= 5:
-
+    
+    elif context_priority >= 4:
+    
         context_grade = "MID_CONTEXT"
 
     sig_context_grade = context_grade
