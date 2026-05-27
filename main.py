@@ -11882,6 +11882,98 @@ def build_signal(instId):
         f"score={context_priority}",
         flush=True
     )
+
+    # =====================
+    # SIGNAL CONFIDENCE
+    # =====================
+
+    confidence_score = 0
+
+    # =====================
+    # FLOW
+    # =====================
+
+    if flow_quality == "STRONG_FLOW":
+        confidence_score += 3
+
+    elif flow_quality == "MODERATE_FLOW":
+        confidence_score += 1
+
+    # =====================
+    # CONTEXT
+    # =====================
+
+    if context_grade == "ELITE_CONTEXT":
+        confidence_score += 4
+
+    elif context_grade == "HIGH_CONTEXT":
+        confidence_score += 2
+
+    # =====================
+    # STRUCTURE
+    # =====================
+
+    if (
+        "BULLISH_STRUCTURE_SHIFT"
+        in flags
+        or
+        "BEARISH_STRUCTURE_SHIFT"
+        in flags
+    ):
+
+        confidence_score += 3
+
+    # =====================
+    # REVERSAL
+    # =====================
+
+    if (
+        "SMART_REVERSAL_LONG"
+        in flags
+        or
+        "SMART_REVERSAL_SHORT"
+        in flags
+    ):
+
+        confidence_score += 2
+
+    # =====================
+    # PENALTIES
+    # =====================
+
+    if flow_quality == "WEAK_FLOW":
+        confidence_score -= 3
+
+    if smart_phase == "MANIPULATION":
+        confidence_score -= 2
+
+    # =====================
+    # FINAL CONFIDENCE
+    # =====================
+
+    signal_confidence = "LOW_CONFIDENCE"
+
+    if confidence_score >= 9:
+
+        signal_confidence = "ELITE_CONFIDENCE"
+
+    elif confidence_score >= 6:
+
+        signal_confidence = "HIGH_CONFIDENCE"
+
+    elif confidence_score >= 3:
+
+        signal_confidence = "MODERATE_CONFIDENCE"
+
+    sig_signal_confidence = signal_confidence
+
+    print(
+        f"[SIGNAL_CONFIDENCE] "
+        f"{instId} "
+        f"{signal_confidence} "
+        f"score={confidence_score}",
+        flush=True
+    )
     # =========================
     # SQUEEZE MATURITY
     # =========================
