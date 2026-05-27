@@ -11840,6 +11840,85 @@ def build_signal(instId):
         f"{market_trap}",
         flush=True
     )
+
+    # =====================
+    # MARKET EXHAUSTION
+    # =====================
+
+    market_exhaustion = "NO_EXHAUSTION"
+
+    # =====================
+    # LONG EXHAUSTION
+    # =====================
+
+    if (
+
+        "ACCELERATION_UP"
+        in flags
+
+        and (
+            "BREAKOUT_UP"
+            in flags
+            or
+            "BREAKOUT_CONFIRM_UP"
+            in flags
+        )
+
+        and flow_quality == "WEAK_FLOW"
+
+        and not (
+            "OI_BUILDUP_LONG"
+            in flags
+        )
+
+    ):
+
+        market_exhaustion = "LONG_EXHAUSTION"
+
+        flags.add(
+            "LONG_EXHAUSTION"
+        )
+
+    # =====================
+    # SHORT EXHAUSTION
+    # =====================
+
+    elif (
+
+        "ACCELERATION_DOWN"
+        in flags
+
+        and (
+            "BREAKOUT_DOWN"
+            in flags
+            or
+            "BREAKOUT_CONFIRM_DOWN"
+            in flags
+        )
+
+        and flow_quality == "WEAK_FLOW"
+
+        and not (
+            "OI_BUILDUP_SHORT"
+            in flags
+        )
+
+    ):
+
+        market_exhaustion = "SHORT_EXHAUSTION"
+
+        flags.add(
+            "SHORT_EXHAUSTION"
+        )
+
+    sig_market_exhaustion = market_exhaustion
+
+    print(
+        f"[MARKET_EXHAUSTION] "
+        f"{instId} "
+        f"{market_exhaustion}",
+        flush=True
+    )
     # =====================
     # SMART MONEY INTENT
     # =====================
