@@ -13519,7 +13519,20 @@ def build_signal(instId):
         f"reasons={signal.get('flow_reasons')}",
         flush=True
     )
+
+    # =========================
+    # OI CLASSIFIER
+    # =========================
     
+    signal = analyze_oi_behavior(signal)
+    
+    print(
+        f"[OI_STATE] "
+        f"{signal.get('instId')} "
+        f"state={signal.get('oi_state')} "
+        f"reasons={signal.get('oi_reasons')}",
+        flush=True
+    )    
     # =========================
     # FINAL QUALITY FILTER
     # =========================
