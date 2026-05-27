@@ -2077,6 +2077,135 @@ def analyze_flow_snapshot(sig):
         sig["flow_state"] = "FLOW_ERROR"
         sig["flow_reasons"] = []
         return sig
+
+# =========================
+# OI BEHAVIOR CLASSIFIER
+# =========================
+
+def analyze_oi_behavior(sig):
+
+    try:
+
+        price_change = float(
+            sig.get("price_change_pct") or 0
+        )
+
+        oi_change = float(
+            sig.get("oi_change") or 0
+        )
+
+        flags = []
+        reasons = []
+
+        oi_state = "NEUTRAL"
+
+        # =====================
+        # NEW LONGS
+        # =====================
+
+        if (
+            price_change > 0.25
+            and oi_change > 0.10
+        ):
+
+            oi_state = "NEW_LONGS"
+
+            flags.append(
+                "OI_NEW_LONGS"
+            )
+
+            reasons.append(
+                "в рынок заходят новые LONG позиции"
+            )
+
+        # =====================
+        # NEW SHORTS
+        # =====================
+
+        elif (
+            price_change < -0.25
+            and oi_change > 0.10
+        ):
+
+            oi_state = "NEW_SHORTS"
+
+            flags.append(
+                "OI_NEW_SHORTS"
+            )
+
+            reasons.append(
+                "в рынок заходят новые SHORT позиции"
+            )
+
+        # =====================
+        # SHORT COVERING
+        # =====================
+
+        elif (
+            price_change > 0.25
+            and oi_change < -0.10
+        ):
+
+            oi_state = "SHORT_COVERING"
+
+            flags.append(
+                "OI_SHORT_COVERING"
+            )
+
+            reasons.append(
+                "рост идет в основном за счет закрытия SHORT"
+            )
+
+        # =====================
+        # LONG EXIT
+        # =====================
+
+        elif (
+            price_change < -0.25
+            and oi_change < -0.10
+        ):
+
+            oi_state = "LONG_EXIT"
+
+            flags.append(
+                "OI_LONG_EXIT"
+            )
+
+            reasons.append(
+                "падение идет из-за выхода LONG позиций"
+            )
+
+        sig["oi_state"] = oi_state
+        sig["oi_reasons"] = reasons
+
+        old_flags = list(sig.get("flags") or [])
+
+        sig["flags"] = list(
+            set(old_flags + flags)
+        )
+
+        print(
+            f"[OI_CLASSIFIER] "
+            f"{sig.get('instId')} "
+            f"state={oi_state} "
+            f"price_change={price_change} "
+            f"oi={oi_change}",
+            flush=True
+        )
+
+        return sig
+
+    except Exception as e:
+
+        print(
+            f"[OI_CLASSIFIER_ERROR] {e}",
+            flush=True
+        )
+
+        sig["oi_state"] = "ERROR"
+        sig["oi_reasons"] = []
+
+        return sig
 # =========================
 # MARKET STORY ENGINE
 # =========================
