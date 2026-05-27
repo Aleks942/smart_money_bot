@@ -2206,6 +2206,118 @@ def analyze_oi_behavior(sig):
         sig["oi_reasons"] = []
 
         return sig
+
+# =========================
+# FLOW + OI MERGE ENGINE
+# =========================
+
+def merge_flow_with_oi(sig):
+    """
+    Объединяет FLOW и OI.
+    Помогает понять: это настоящий вход денег или движение без поддержки капитала.
+    """
+
+    try:
+        flags = set(sig.get("flags", []))
+
+        flow_score = float(sig.get("flow_score") or 0)
+        flow_state = str(sig.get("flow_state") or "")
+        oi_state = str(sig.get("oi_state") or "NEUTRAL")
+
+        direction = str(
+            sig.get("direction_code")
+            or sig.get("direction")
+            or sig.get("side")
+            or ""
+        ).upper()
+
+        smart_money_score = flow_score
+        smart_money_state = "NEUTRAL_SMART_MONEY"
+        reasons = []
+
+        # LONG подтверждается новыми деньгами
+        if (
+            ("LONG" in direction or "UP" in direction or "BUY" in direction)
+            and oi_state == "NEW_LONGS"
+        ):
+            smart_money_score += 4
+            reasons.append("LONG поддержан новым ростом OI")
+            flags.add("SMART_MONEY_LONG_CONFIRM")
+
+        # SHORT подтверждается новыми деньгами
+        if (
+            ("SHORT" in direction or "DOWN" in direction or "SELL" in direction)
+            and oi_state == "NEW_SHORTS"
+        ):
+            smart_money_score += 4
+            reasons.append("SHORT поддержан новым ростом OI")
+            flags.add("SMART_MONEY_SHORT_CONFIRM")
+
+        # LONG без новых денег
+        if (
+            ("LONG" in direction or "UP" in direction or "BUY" in direction)
+            and oi_state == "SHORT_COVERING"
+        ):
+            smart_money_score -= 3
+            reasons.append("рост похож на закрытие SHORT, а не на новый LONG")
+            flags.add("SMART_MONEY_LONG_WEAK_COVERING")
+
+        # SHORT без новых денег
+        if (
+            ("SHORT" in direction or "DOWN" in direction or "SELL" in direction)
+            and oi_state == "LONG_EXIT"
+        ):
+            smart_money_score -= 3
+            reasons.append("падение похоже на выход LONG, а не на новый SHORT")
+            flags.add("SMART_MONEY_SHORT_WEAK_EXIT")
+
+        # Сильный базовый flow
+        if flow_state in ("STRONG_MONEY_FLOW", "BUILDING_MONEY_FLOW"):
+            smart_money_score += 2
+            reasons.append("есть качественный поток денег")
+            flags.add("SMART_MONEY_FLOW_OK")
+
+        # Абсорбция + сжатие
+        if (
+            "FLOW_ABSORPTION" in flags
+            and "FLOW_COMPRESSION" in flags
+        ):
+            smart_money_score += 2
+            reasons.append("есть сжатие и удержание цены крупным участником")
+            flags.add("SMART_MONEY_ACCUMULATION_CONTEXT")
+
+        if smart_money_score >= 10:
+            smart_money_state = "STRONG_SMART_MONEY"
+        elif smart_money_score >= 7:
+            smart_money_state = "BUILDING_SMART_MONEY"
+        elif smart_money_score >= 4:
+            smart_money_state = "EARLY_SMART_MONEY"
+        elif smart_money_score <= 1:
+            smart_money_state = "WEAK_SMART_MONEY"
+
+        sig["smart_money_score"] = smart_money_score
+        sig["smart_money_state"] = smart_money_state
+        sig["smart_money_reasons"] = reasons
+        sig["flags"] = list(flags)
+
+        print(
+            f"[SMART_MONEY_MERGE] "
+            f"{sig.get('instId')} "
+            f"state={smart_money_state} "
+            f"score={smart_money_score} "
+            f"oi_state={oi_state} "
+            f"flow={flow_state}",
+            flush=True
+        )
+
+        return sig
+
+    except Exception as e:
+        print(f"[SMART_MONEY_MERGE_ERROR] {e}", flush=True)
+        sig["smart_money_score"] = 0
+        sig["smart_money_state"] = "SMART_MONEY_ERROR"
+        sig["smart_money_reasons"] = []
+        return sig
 # =========================
 # MARKET STORY ENGINE
 # =========================
