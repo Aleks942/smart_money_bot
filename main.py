@@ -13644,7 +13644,22 @@ def build_signal(instId):
         f"state={signal.get('oi_state')} "
         f"reasons={signal.get('oi_reasons')}",
         flush=True
-    )    
+    )  
+
+    # =========================
+    # SMART MONEY MERGE
+    # =========================
+    
+    signal = merge_flow_with_oi(signal)
+    
+    print(
+        f"[SMART_MONEY] "
+        f"{signal.get('instId')} "
+        f"state={signal.get('smart_money_state')} "
+        f"score={signal.get('smart_money_score')} "
+        f"reasons={signal.get('smart_money_reasons')}",
+        flush=True
+    )
     # =========================
     # FINAL QUALITY FILTER
     # =========================
