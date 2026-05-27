@@ -1288,6 +1288,12 @@ IMPULSE_CONFIRM_MEMORY = {}
 
 MARKET_REGIME_MEMORY = {}
 
+# =========================
+# PRICE MEMORY
+# =========================
+
+PRICE_MEMORY = {}
+
 
 def analyze_pressure_memory(symbol, flags):
     try:
