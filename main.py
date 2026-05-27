@@ -13370,16 +13370,31 @@ def build_signal(instId):
         "score": signal.get("score", 0),
         "oi_change": signal.get("oi_change")
     })
-
+    
     signal["rating"] = rating
     signal["strength"] = strength
     signal["strength_reasons"] = reasons_strength
-
+    
+    
+    # =========================
+    # FLOW SNAPSHOT
+    # =========================
+    
+    signal = analyze_flow_snapshot(signal)
+    
+    print(
+        f"[FLOW] "
+        f"{signal.get('instId')} "
+        f"state={signal.get('flow_state')} "
+        f"score={signal.get('flow_score')} "
+        f"reasons={signal.get('flow_reasons')}",
+        flush=True
+    )
     
     # =========================
     # FINAL QUALITY FILTER
     # =========================
-    
+        
     if not signal or not isinstance(signal, dict):
     
         print(
