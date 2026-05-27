@@ -13660,6 +13660,110 @@ def build_signal(instId):
         f"reasons={signal.get('smart_money_reasons')}",
         flush=True
     )
+
+# =========================
+# SMART MONEY SCORE IMPACT
+# =========================
+
+try:
+
+    sm_state = str(
+        signal.get("smart_money_state") or ""
+    )
+
+    sm_score = float(
+        signal.get("smart_money_score") or 0
+    )
+
+    score_before_sm = signal.get("score", 0)
+
+    # =====================
+    # STRONG SMART MONEY
+    # =====================
+
+    if sm_state == "STRONG_SMART_MONEY":
+
+        signal["score"] += 4
+
+        print(
+            f"[SMART_MONEY_BOOST] "
+            f"{signal.get('instId')} "
+            f"+4 STRONG_SMART_MONEY "
+            f"score_before={score_before_sm} "
+            f"score_after={signal.get('score')}",
+            flush=True
+        )
+
+    # =====================
+    # BUILDING SMART MONEY
+    # =====================
+
+    elif sm_state == "BUILDING_SMART_MONEY":
+
+        signal["score"] += 2
+
+        print(
+            f"[SMART_MONEY_BOOST] "
+            f"{signal.get('instId')} "
+            f"+2 BUILDING_SMART_MONEY "
+            f"score_before={score_before_sm} "
+            f"score_after={signal.get('score')}",
+            flush=True
+        )
+
+    # =====================
+    # WEAK SMART MONEY
+    # =====================
+
+    elif sm_state == "WEAK_SMART_MONEY":
+
+        signal["score"] -= 4
+
+        print(
+            f"[SMART_MONEY_PENALTY] "
+            f"{signal.get('instId')} "
+            f"-4 WEAK_SMART_MONEY "
+            f"score_before={score_before_sm} "
+            f"score_after={signal.get('score')}",
+            flush=True
+        )
+
+    # =====================
+    # LONG COVERING WEAKNESS
+    # =====================
+
+    if "SMART_MONEY_LONG_WEAK_COVERING" in signal.get("flags", []):
+
+        signal["score"] -= 2
+
+        print(
+            f"[SMART_MONEY_COVERING_PENALTY] "
+            f"{signal.get('instId')} "
+            f"LONG covering weakness",
+            flush=True
+        )
+
+    # =====================
+    # SHORT EXIT WEAKNESS
+    # =====================
+
+    if "SMART_MONEY_SHORT_WEAK_EXIT" in signal.get("flags", []):
+
+        signal["score"] -= 2
+
+        print(
+            f"[SMART_MONEY_EXIT_PENALTY] "
+            f"{signal.get('instId')} "
+            f"SHORT weak exit",
+            flush=True
+        )
+
+except Exception as e:
+
+    print(
+        f"[SMART_MONEY_SCORE_ERROR] {e}",
+        flush=True
+    )
     # =========================
     # FINAL QUALITY FILTER
     # =========================
