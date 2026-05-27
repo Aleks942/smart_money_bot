@@ -11699,7 +11699,78 @@ def build_signal(instId):
         flush=True
     )
     
+    # =====================
+    # LIQUIDITY MAGNET
+    # =====================
 
+    liquidity_magnet = "NEUTRAL"
+
+    # =====================
+    # UP MAGNET
+    # =====================
+
+    if (
+
+        "PRESSURE_UP"
+        in flags
+
+        and (
+            "EXPLOSION_READY_UP"
+            in flags
+            or
+            "LAUNCH_PROXIMITY_UP"
+            in flags
+        )
+
+        and (
+            "CASCADE_SHORTS"
+            in flags
+            or
+            "LIQUIDITY_GRAB_LONG"
+            in flags
+        )
+
+    ):
+
+        liquidity_magnet = "MAGNET_UP"
+
+    # =====================
+    # DOWN MAGNET
+    # =====================
+
+    elif (
+
+        "PRESSURE_DOWN"
+        in flags
+
+        and (
+            "EXPLOSION_READY_DOWN"
+            in flags
+            or
+            "LAUNCH_PROXIMITY_DOWN"
+            in flags
+        )
+
+        and (
+            "CASCADE_LONGS"
+            in flags
+            or
+            "LIQUIDITY_GRAB_SHORT"
+            in flags
+        )
+
+    ):
+
+        liquidity_magnet = "MAGNET_DOWN"
+
+    sig_liquidity_magnet = liquidity_magnet
+
+    print(
+        f"[LIQUIDITY_MAGNET] "
+        f"{instId} "
+        f"{liquidity_magnet}",
+        flush=True
+    )
     # =====================
     # SMART MONEY INTENT
     # =====================
