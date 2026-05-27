@@ -11650,6 +11650,34 @@ def build_signal(instId):
     if "CASCADE_SHORTS" in flags:
         smart_flow_score += 2
 
+    # =====================
+    # LIQUIDITY GRABS
+    # =====================
+
+    if (
+        "LIQUIDITY_GRAB_LONG"
+        in flags
+        or
+        "LIQUIDITY_GRAB_SHORT"
+        in flags
+    ):
+
+        smart_flow_score += 2
+
+    # =====================
+    # REVERSAL FLOW
+    # =====================
+
+    if (
+        "SMART_REVERSAL_LONG"
+        in flags
+        or
+        "SMART_REVERSAL_SHORT"
+        in flags
+    ):
+
+        smart_flow_score += 2
+
     if "CASCADE_LONGS" in flags:
         smart_flow_score += 2
 
@@ -11670,6 +11698,7 @@ def build_signal(instId):
         f"score={smart_flow_score}",
         flush=True
     )
+    
 
     # =====================
     # SMART MONEY INTENT
