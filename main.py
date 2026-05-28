@@ -10137,6 +10137,100 @@ def market_regime_filter(btc_signal):
             "score": 0,
             "reason": "error"
         }
+
+def detect_liquidity_zones(candles):
+
+    try:
+
+        if not candles or len(candles) < 20:
+            return {}
+
+        highs = [float(c["high"]) for c in candles]
+        lows = [float(c["low"]) for c in candles]
+        closes = [float(c["close"]) for c in candles]
+
+        current_price = closes[-1]
+
+        recent_highs = highs[-15:]
+        recent_lows = lows[-15:]
+
+        liquidity_above = None
+        liquidity_below = None
+
+        equal_highs = False
+        equal_lows = False
+
+        # =========================
+        # EQUAL HIGHS
+        # =========================
+
+        high_cluster = []
+
+        for h in recent_highs:
+
+            if abs(h - max(recent_highs)) / current_price < 0.003:
+                high_cluster.append(h)
+
+        if len(high_cluster) >= 3:
+
+            equal_highs = True
+            liquidity_above = max(high_cluster)
+
+        # =========================
+        # EQUAL LOWS
+        # =========================
+
+        low_cluster = []
+
+        for l in recent_lows:
+
+            if abs(l - min(recent_lows)) / current_price < 0.003:
+                low_cluster.append(l)
+
+        if len(low_cluster) >= 3:
+
+            equal_lows = True
+            liquidity_below = min(low_cluster)
+
+        # =========================
+        # DISTANCE
+        # =========================
+
+        dist_above_pct = None
+        dist_below_pct = None
+
+        if liquidity_above:
+
+            dist_above_pct = round(
+                ((liquidity_above - current_price) / current_price) * 100,
+                2
+            )
+
+        if liquidity_below:
+
+            dist_below_pct = round(
+                ((current_price - liquidity_below) / current_price) * 100,
+                2
+            )
+
+        return {
+
+            "equal_highs": equal_highs,
+            "equal_lows": equal_lows,
+
+            "liquidity_above": liquidity_above,
+            "liquidity_below": liquidity_below,
+
+            "dist_above_pct": dist_above_pct,
+            "dist_below_pct": dist_below_pct,
+
+        }
+
+    except Exception as e:
+
+        print(f"[LIQUIDITY_MAP_ERROR] {e}")
+
+        return {}
 # =========================
 # MAIN SIGNAL BUILDER
 # =========================
