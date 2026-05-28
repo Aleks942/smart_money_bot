@@ -2618,6 +2618,164 @@ def analyze_late_move(signal):
         signal["late_move_reasons"] = []
 
         return signal
+
+# =========================
+# RETEST + RECLAIM ENGINE
+# =========================
+
+def analyze_retest_reclaim(signal):
+
+    try:
+
+        flags = set(
+            signal.get("flags", [])
+        )
+
+        retest_score = 0
+        retest_state = "NO_RETEST"
+        retest_reasons = []
+
+        entry = str(
+            signal.get("entry") or ""
+        )
+
+        stage = str(
+            signal.get("stage") or ""
+        )
+
+        ema_distance = float(
+            signal.get("ema_distance_pct") or 0
+        )
+
+        # =====================
+        # SHORT RETEST
+        # =====================
+
+        if (
+            "SHORT" in entry
+            and ema_distance <= 1.2
+            and "PRESSURE_DOWN" in flags
+        ):
+
+            retest_score += 2
+
+            retest_reasons.append(
+                "цена близко к EMA — возможен short retest"
+            )
+
+        if (
+            "SHORT" in entry
+            and "SELLER_ABSORPTION" in flags
+        ):
+
+            retest_score += 2
+
+            retest_reasons.append(
+                "продавцы продолжают удерживать цену"
+            )
+
+        if (
+            "SHORT" in entry
+            and "MTF_SHORT_ALIGN" in flags
+        ):
+
+            retest_score += 2
+
+            retest_reasons.append(
+                "таймфреймы поддерживают continuation вниз"
+            )
+
+        # =====================
+        # LONG RETEST
+        # =====================
+
+        if (
+            "LONG" in entry
+            and ema_distance <= 1.2
+            and "PRESSURE_UP" in flags
+        ):
+
+            retest_score += 2
+
+            retest_reasons.append(
+                "цена близко к EMA — возможен long retest"
+            )
+
+        if (
+            "LONG" in entry
+            and "BUYER_ABSORPTION" in flags
+        ):
+
+            retest_score += 2
+
+            retest_reasons.append(
+                "покупатели продолжают удерживать цену"
+            )
+
+        if (
+            "LONG" in entry
+            and "MTF_LONG_ALIGN" in flags
+        ):
+
+            retest_score += 2
+
+            retest_reasons.append(
+                "таймфреймы поддерживают continuation вверх"
+            )
+
+        # =====================
+        # RECLAIM BONUS
+        # =====================
+
+        if (
+            "TRANSITION" in stage
+            and ema_distance <= 0.8
+        ):
+
+            retest_score += 1
+
+            retest_reasons.append(
+                "рынок близок к reclaim-фазе"
+            )
+
+        # =====================
+        # FINAL STATE
+        # =====================
+
+        if retest_score >= 5:
+
+            retest_state = "STRONG_RETEST"
+
+        elif retest_score >= 3:
+
+            retest_state = "RETEST_BUILDUP"
+
+        signal["retest_score"] = retest_score
+        signal["retest_state"] = retest_state
+        signal["retest_reasons"] = retest_reasons
+
+        print(
+            f"[RETEST_ENGINE] "
+            f"{signal.get('instId')} "
+            f"state={retest_state} "
+            f"score={retest_score}",
+            flush=True
+        )
+
+        return signal
+
+    except Exception as e:
+
+        print(
+            f"[RETEST_ENGINE_ERROR] {e}",
+            flush=True
+        )
+
+        signal["retest_score"] = 0
+        signal["retest_state"] = "RETEST_ERROR"
+        signal["retest_reasons"] = []
+
+        return signal
 # =========================
 # MARKET STORY ENGINE
 # =========================
