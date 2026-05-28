@@ -1980,6 +1980,7 @@ def analyze_capital_flow(signal):
             "capital_reasons": []
         }
 
+
 # =========================
 # FLOW SNAPSHOT ENGINE — SWING MONEY FLOW
 # =========================
@@ -2161,6 +2162,128 @@ def analyze_flow_snapshot(sig):
         sig["flow_reasons"] = []
         return sig
 
+# =========================
+# STOP HUNT ENGINE V1
+# =========================
+
+def analyze_stop_hunt(signal):
+
+    try:
+
+        flags = set(signal.get("flags", []))
+
+        stop_hunt_score = 0
+        stop_hunt_state = "NO_STOP_HUNT"
+        stop_hunt_reasons = []
+
+        oi_state = str(
+            signal.get("oi_state") or ""
+        )
+
+        # =====================
+        # LONG STOP HUNT
+        # =====================
+
+        long_stop_hunt = (
+
+            "EQUAL_LOWS" in flags
+            and "LIQUIDITY_BELOW" in flags
+            and "PRESSURE_DOWN" in flags
+            and (
+                "COMP_PRO_5M" in flags
+                or "COMP_PRO_15M" in flags
+                or "RANGE_COMPRESSION" in flags
+            )
+            and oi_state == "NEW_SHORTS"
+        )
+
+        if long_stop_hunt:
+
+            stop_hunt_score += 5
+
+            stop_hunt_reasons.append(
+                "внизу есть liquidity pool + заходят новые SHORT"
+            )
+
+            flags.add(
+                "LONG_STOP_HUNT_SETUP"
+            )
+
+        # =====================
+        # SHORT STOP HUNT
+        # =====================
+
+        short_stop_hunt = (
+
+            "EQUAL_HIGHS" in flags
+            and "LIQUIDITY_ABOVE" in flags
+            and "PRESSURE_UP" in flags
+            and (
+                "COMP_PRO_5M" in flags
+                or "COMP_PRO_15M" in flags
+                or "RANGE_COMPRESSION" in flags
+            )
+            and oi_state == "NEW_LONGS"
+        )
+
+        if short_stop_hunt:
+
+            stop_hunt_score += 5
+
+            stop_hunt_reasons.append(
+                "сверху есть liquidity pool + заходят новые LONG"
+            )
+
+            flags.add(
+                "SHORT_STOP_HUNT_SETUP"
+            )
+
+        # =====================
+        # FINAL STATE
+        # =====================
+
+        if stop_hunt_score >= 5:
+
+            stop_hunt_state = "ACTIVE_STOP_HUNT"
+
+        signal["stop_hunt_score"] = (
+            stop_hunt_score
+        )
+
+        signal["stop_hunt_state"] = (
+            stop_hunt_state
+        )
+
+        signal["stop_hunt_reasons"] = (
+            stop_hunt_reasons
+        )
+
+        signal["flags"] = list(flags)
+
+        print(
+            f"[STOP_HUNT] "
+            f"{signal.get('instId')} "
+            f"state={stop_hunt_state} "
+            f"score={stop_hunt_score}",
+            flush=True
+        )
+
+        return signal
+
+    except Exception as e:
+
+        print(
+            f"[STOP_HUNT_ERROR] "
+            f"{signal.get('instId')} "
+            f"{e}",
+            flush=True
+        )
+
+        signal["stop_hunt_score"] = 0
+        signal["stop_hunt_state"] = "STOP_HUNT_ERROR"
+        signal["stop_hunt_reasons"] = []
+
+        return signal
 # =========================
 # OI BEHAVIOR CLASSIFIER
 # =========================
