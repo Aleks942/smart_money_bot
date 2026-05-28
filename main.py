@@ -10854,99 +10854,170 @@ def market_regime_filter(btc_signal):
             "reason": "error"
         }
 
-def detect_liquidity_zones(candles):
+def detect_liquidity_zones(candles, lookback=40, tolerance_pct=0.25):
 
     try:
 
-        if not candles or len(candles) < 20:
-            return {}
+        if candles is None or len(candles) < 20:
+            return {
+                "equal_highs": False,
+                "equal_lows": False,
+                "liquidity_above": None,
+                "liquidity_below": None,
+                "dist_above_pct": None,
+                "dist_below_pct": None,
+                "liq_flags": [],
+                "liq_score": 0,
+                "liq_state": "NO_LIQUIDITY_DATA"
+            }
 
-        highs = [float(c["high"]) for c in candles]
-        lows = [float(c["low"]) for c in candles]
-        closes = [float(c["close"]) for c in candles]
+        highs = []
+        lows = []
+        closes = []
 
-        current_price = closes[-1]
+        for c in candles[-lookback:]:
 
-        recent_highs = highs[-15:]
-        recent_lows = lows[-15:]
+            try:
+                # формат dict
+                if isinstance(c, dict):
+                    high = float(c.get("high"))
+                    low = float(c.get("low"))
+                    close = float(c.get("close"))
 
-        liquidity_above = None
-        liquidity_below = None
+                # формат list/tuple: [ts, open, high, low, close, volume]
+                else:
+                    high = float(c[2])
+                    low = float(c[3])
+                    close = float(c[4])
 
-        equal_highs = False
-        equal_lows = False
+                highs.append(high)
+                lows.append(low)
+                closes.append(close)
 
-        # =========================
-        # EQUAL HIGHS
-        # =========================
+            except:
+                continue
+
+        if len(highs) < 20 or len(lows) < 20 or len(closes) < 20:
+            return {
+                "equal_highs": False,
+                "equal_lows": False,
+                "liquidity_above": None,
+                "liquidity_below": None,
+                "dist_above_pct": None,
+                "dist_below_pct": None,
+                "liq_flags": [],
+                "liq_score": 0,
+                "liq_state": "BAD_CANDLE_FORMAT"
+            }
+
+        current_price = float(closes[-1])
+
+        max_high = max(highs)
+        min_low = min(lows)
 
         high_cluster = []
-
-        for h in recent_highs:
-
-            if abs(h - max(recent_highs)) / current_price < 0.003:
-                high_cluster.append(h)
-
-        if len(high_cluster) >= 3:
-
-            equal_highs = True
-            liquidity_above = max(high_cluster)
-
-        # =========================
-        # EQUAL LOWS
-        # =========================
-
         low_cluster = []
 
-        for l in recent_lows:
+        # =========================
+        # EQUAL HIGHS = стопы шортистов сверху
+        # =========================
 
-            if abs(l - min(recent_lows)) / current_price < 0.003:
+        for h in highs:
+            dist = abs(h - max_high) / current_price * 100
+
+            if dist <= tolerance_pct:
+                high_cluster.append(h)
+
+        # =========================
+        # EQUAL LOWS = стопы лонгистов снизу
+        # =========================
+
+        for l in lows:
+            dist = abs(l - min_low) / current_price * 100
+
+            if dist <= tolerance_pct:
                 low_cluster.append(l)
 
-        if len(low_cluster) >= 3:
+        equal_highs = len(high_cluster) >= 3
+        equal_lows = len(low_cluster) >= 3
 
-            equal_lows = True
-            liquidity_below = min(low_cluster)
-
-        # =========================
-        # DISTANCE
-        # =========================
+        liquidity_above = max(high_cluster) if equal_highs else None
+        liquidity_below = min(low_cluster) if equal_lows else None
 
         dist_above_pct = None
         dist_below_pct = None
 
         if liquidity_above:
-
             dist_above_pct = round(
                 ((liquidity_above - current_price) / current_price) * 100,
                 2
             )
 
         if liquidity_below:
-
             dist_below_pct = round(
                 ((current_price - liquidity_below) / current_price) * 100,
                 2
             )
 
-        return {
+        liq_flags = []
+        liq_score = 0
 
+        if equal_highs:
+            liq_flags.append("EQUAL_HIGHS")
+            liq_flags.append("LIQUIDITY_ABOVE")
+            liq_score += 2
+
+        if equal_lows:
+            liq_flags.append("EQUAL_LOWS")
+            liq_flags.append("LIQUIDITY_BELOW")
+            liq_score += 2
+
+        # Близкая ликвидность — важнее, потому что её легче забрать
+        if dist_above_pct is not None and 0 <= dist_above_pct <= 1.5:
+            liq_flags.append("NEAR_LIQUIDITY_ABOVE")
+            liq_score += 1
+
+        if dist_below_pct is not None and 0 <= dist_below_pct <= 1.5:
+            liq_flags.append("NEAR_LIQUIDITY_BELOW")
+            liq_score += 1
+
+        if liq_score >= 4:
+            liq_state = "STRONG_LIQUIDITY_MAP"
+        elif liq_score >= 2:
+            liq_state = "ACTIVE_LIQUIDITY_MAP"
+        else:
+            liq_state = "WEAK_LIQUIDITY_MAP"
+
+        return {
             "equal_highs": equal_highs,
             "equal_lows": equal_lows,
-
             "liquidity_above": liquidity_above,
             "liquidity_below": liquidity_below,
-
             "dist_above_pct": dist_above_pct,
             "dist_below_pct": dist_below_pct,
-
+            "liq_flags": liq_flags,
+            "liq_score": liq_score,
+            "liq_state": liq_state
         }
 
     except Exception as e:
 
-        print(f"[LIQUIDITY_MAP_ERROR] {e}")
+        print(
+            f"[LIQUIDITY_MAP_ERROR] {e}",
+            flush=True
+        )
 
-        return {}
+        return {
+            "equal_highs": False,
+            "equal_lows": False,
+            "liquidity_above": None,
+            "liquidity_below": None,
+            "dist_above_pct": None,
+            "dist_below_pct": None,
+            "liq_flags": [],
+            "liq_score": 0,
+            "liq_state": "LIQUIDITY_ERROR"
+        }
 # =========================
 # MAIN SIGNAL BUILDER
 # =========================
