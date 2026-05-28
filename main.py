@@ -2163,7 +2163,7 @@ def analyze_flow_snapshot(sig):
         return sig
 
 # =========================
-# STOP HUNT ENGINE V1
+# STOP HUNT ENGINE V2
 # =========================
 
 def analyze_stop_hunt(signal):
@@ -2174,77 +2174,113 @@ def analyze_stop_hunt(signal):
 
         stop_hunt_score = 0
         stop_hunt_state = "NO_STOP_HUNT"
+        stop_hunt_side = "NEUTRAL"
         stop_hunt_reasons = []
 
-        oi_state = str(
-            signal.get("oi_state") or ""
+        oi_state = str(signal.get("oi_state") or "")
+
+        has_compression = (
+            "COMP_PRO_5M" in flags
+            or "COMP_PRO_15M" in flags
+            or "RANGE_COMPRESSION" in flags
+            or "TIGHT_RANGE" in flags
         )
 
         # =====================
-        # LONG STOP HUNT
+        # PROBABLE SWEEP ABOVE
         # =====================
 
-        long_stop_hunt = (
-
-            "EQUAL_LOWS" in flags
-            and "LIQUIDITY_BELOW" in flags
-            and "PRESSURE_DOWN" in flags
-            and (
-                "COMP_PRO_5M" in flags
-                or "COMP_PRO_15M" in flags
-                or "RANGE_COMPRESSION" in flags
-            )
-            and oi_state == "NEW_SHORTS"
-        )
-
-        if long_stop_hunt:
-
-            stop_hunt_score += 5
-
-            stop_hunt_reasons.append(
-                "внизу есть liquidity pool + заходят новые SHORT"
-            )
-
-            flags.add(
-                "LONG_STOP_HUNT_SETUP"
-            )
-
-        # =====================
-        # SHORT STOP HUNT
-        # =====================
-
-        short_stop_hunt = (
-
+        if (
             "EQUAL_HIGHS" in flags
             and "LIQUIDITY_ABOVE" in flags
             and "PRESSURE_UP" in flags
-            and (
-                "COMP_PRO_5M" in flags
-                or "COMP_PRO_15M" in flags
-                or "RANGE_COMPRESSION" in flags
-            )
-            and oi_state == "NEW_LONGS"
-        )
+            and has_compression
+        ):
 
-        if short_stop_hunt:
-
-            stop_hunt_score += 5
+            stop_hunt_score += 3
+            stop_hunt_side = "UP"
 
             stop_hunt_reasons.append(
-                "сверху есть liquidity pool + заходят новые LONG"
+                "сверху есть пул ликвидности"
             )
 
-            flags.add(
-                "SHORT_STOP_HUNT_SETUP"
+            flags.add("PROBABLE_STOP_HUNT_UP")
+
+            if "NEAR_LIQUIDITY_ABOVE" in flags:
+
+                stop_hunt_score += 2
+
+                stop_hunt_reasons.append(
+                    "ликвидность сверху очень близко"
+                )
+
+                flags.add("NEAR_STOP_POOL_ABOVE")
+
+            if oi_state == "NEW_LONGS":
+
+                stop_hunt_score += 3
+
+                stop_hunt_reasons.append(
+                    "заходят новые LONG"
+                )
+
+                flags.add(
+                    "SHORT_STOP_HUNT_SETUP"
+                )
+
+        # =====================
+        # PROBABLE SWEEP BELOW
+        # =====================
+
+        if (
+            "EQUAL_LOWS" in flags
+            and "LIQUIDITY_BELOW" in flags
+            and "PRESSURE_DOWN" in flags
+            and has_compression
+        ):
+
+            stop_hunt_score += 3
+            stop_hunt_side = "DOWN"
+
+            stop_hunt_reasons.append(
+                "снизу есть пул ликвидности"
             )
+
+            flags.add("PROBABLE_STOP_HUNT_DOWN")
+
+            if "NEAR_LIQUIDITY_BELOW" in flags:
+
+                stop_hunt_score += 2
+
+                stop_hunt_reasons.append(
+                    "ликвидность снизу очень близко"
+                )
+
+                flags.add("NEAR_STOP_POOL_BELOW")
+
+            if oi_state == "NEW_SHORTS":
+
+                stop_hunt_score += 3
+
+                stop_hunt_reasons.append(
+                    "заходят новые SHORT"
+                )
+
+                flags.add(
+                    "LONG_STOP_HUNT_SETUP"
+                )
 
         # =====================
         # FINAL STATE
         # =====================
 
-        if stop_hunt_score >= 5:
+        if stop_hunt_score >= 6:
 
             stop_hunt_state = "ACTIVE_STOP_HUNT"
+
+        elif stop_hunt_score >= 3:
+
+            stop_hunt_state = "PROBABLE_STOP_HUNT"
 
         signal["stop_hunt_score"] = (
             stop_hunt_score
@@ -2252,6 +2288,10 @@ def analyze_stop_hunt(signal):
 
         signal["stop_hunt_state"] = (
             stop_hunt_state
+        )
+
+        signal["stop_hunt_side"] = (
+            stop_hunt_side
         )
 
         signal["stop_hunt_reasons"] = (
@@ -2264,7 +2304,9 @@ def analyze_stop_hunt(signal):
             f"[STOP_HUNT] "
             f"{signal.get('instId')} "
             f"state={stop_hunt_state} "
-            f"score={stop_hunt_score}",
+            f"side={stop_hunt_side} "
+            f"score={stop_hunt_score} "
+            f"reasons={stop_hunt_reasons}",
             flush=True
         )
 
@@ -2281,6 +2323,7 @@ def analyze_stop_hunt(signal):
 
         signal["stop_hunt_score"] = 0
         signal["stop_hunt_state"] = "STOP_HUNT_ERROR"
+        signal["stop_hunt_side"] = "NEUTRAL"
         signal["stop_hunt_reasons"] = []
 
         return signal
