@@ -2067,6 +2067,65 @@ def analyze_flow_snapshot(sig):
             flow_reasons.append("ликвидации начинают усиливать движение")
             flow_flags.append("FLOW_LIQUIDATION_PRESSURE")
 
+        # =====================
+        # LIQUIDITY MAP
+        # =====================
+        
+        try:
+        
+            candles = sig.get("candles")
+        
+            if candles:
+        
+                liq_data = detect_liquidity_zones(candles)
+        
+                liq_flags = liq_data.get("liq_flags", [])
+        
+                for f in liq_flags:
+                    flags.add(f)
+        
+                sig["liquidity_above"] = (
+                    liq_data.get("liquidity_above")
+                )
+        
+                sig["liquidity_below"] = (
+                    liq_data.get("liquidity_below")
+                )
+        
+                sig["dist_above_pct"] = (
+                    liq_data.get("dist_above_pct")
+                )
+        
+                sig["dist_below_pct"] = (
+                    liq_data.get("dist_below_pct")
+                )
+        
+                sig["liq_score"] = (
+                    liq_data.get("liq_score")
+                )
+        
+                sig["liq_state"] = (
+                    liq_data.get("liq_state")
+                )
+        
+                print(
+                    f"[LIQUIDITY_MAP] "
+                    f"{sig.get('instId')} "
+                    f"state={liq_data.get('liq_state')} "
+                    f"flags={liq_flags} "
+                    f"above={liq_data.get('dist_above_pct')}% "
+                    f"below={liq_data.get('dist_below_pct')}%",
+                    flush=True
+                )
+        
+        except Exception as e:
+        
+            print(
+                f"[LIQUIDITY_MAP_PIPELINE_ERROR] "
+                f"{sig.get('instId')} "
+                f"{e}",
+                flush=True
+            )
         # 7) Подозрение на поздний вход
         if (
             "BREAKOUT_CONFIRM_UP" in flags
