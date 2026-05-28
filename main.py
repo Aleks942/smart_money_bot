@@ -14465,6 +14465,37 @@ def build_signal(instId):
     )  
 
     # =========================
+    # REAL OI FLOW V2
+    # =========================
+    
+    try:
+        real_oi_data = analyze_real_oi_flow(
+            signal.get("instId"),
+            float(signal.get("price") or 0),
+            float(signal.get("oi_change") or 0)
+        )
+    
+        signal["real_oi_state"] = real_oi_data.get("oi_state")
+        signal["real_oi_score"] = real_oi_data.get("oi_score")
+        signal["real_oi_reason"] = real_oi_data.get("oi_reason")
+        signal["real_oi_side"] = real_oi_data.get("oi_side")
+    
+        print(
+            f"[REAL_OI_V2] "
+            f"{signal.get('instId')} "
+            f"state={signal.get('real_oi_state')} "
+            f"score={signal.get('real_oi_score')} "
+            f"side={signal.get('real_oi_side')} "
+            f"reason={signal.get('real_oi_reason')}",
+            flush=True
+        )
+    
+    except Exception as e:
+        print(
+            f"[REAL_OI_V2_ERROR] {signal.get('instId')} {e}",
+            flush=True
+        )
+    # =========================
     # SMART MONEY MERGE
     # =========================
     
