@@ -1265,6 +1265,12 @@ OI_TREND_MEMORY = {}
 PRESSURE_MEMORY = {}
 
 # =========================
+# PRICE MEMORY
+# =========================
+
+PRICE_MEMORY = {}
+
+# =========================
 # LIQUIDATION MEMORY
 # =========================
 
