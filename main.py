@@ -2241,10 +2241,10 @@ def analyze_real_oi_flow(instId, price, oi):
     try:
 
         global PRICE_MEMORY
-        global OI_MEMORY
+        global REAL_OI_MEMORY
 
         prev_price = PRICE_MEMORY.get(instId)
-        prev_oi = OI_MEMORY.get(instId)
+        prev_oi = REAL_OI_MEMORY.get(instId)
 
         PRICE_MEMORY[instId] = price
         OI_MEMORY[instId] = oi
