@@ -2247,7 +2247,7 @@ def analyze_real_oi_flow(instId, price, oi):
         prev_oi = REAL_OI_MEMORY.get(instId)
 
         PRICE_MEMORY[instId] = price
-        OI_MEMORY[instId] = oi
+        REAL_OI_MEMORY[instId] = oi
 
         if prev_price is None or prev_oi is None:
 
