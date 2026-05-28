@@ -14005,24 +14005,133 @@ def build_signal(instId):
         # =====================
         # SHORT EXIT WEAKNESS
         # =====================
-    
         if "SMART_MONEY_SHORT_WEAK_EXIT" in signal.get("flags", []):
-    
+
             signal["score"] -= 2
-    
+
             print(
                 f"[SMART_MONEY_EXIT_PENALTY] "
                 f"{signal.get('instId')} "
                 f"SHORT weak exit",
                 flush=True
             )
-    
+
     except Exception as e:
-    
+
         print(
             f"[SMART_MONEY_SCORE_ERROR] {e}",
             flush=True
         )
+
+
+# =========================
+# CVD SCORE IMPACT
+# =========================
+
+    try:
+        
+    
+    # =========================
+    # CVD SCORE IMPACT
+    # =========================
+    
+    try:
+    
+        cvd_state = str(signal.get("cvd_state") or "")
+    
+        direction = str(
+            signal.get("direction_code")
+            or signal.get("direction")
+            or signal.get("side")
+            or ""
+        ).upper()
+    
+        score_before_cvd = signal.get("score", 0)
+    
+        # LONG подтверждается агрессивными покупателями
+        if (
+            ("LONG" in direction or "UP" in direction or "BUY" in direction)
+            and cvd_state in ("BUY_CVD", "STRONG_BUY_CVD")
+        ):
+    
+            bonus = 3 if cvd_state == "STRONG_BUY_CVD" else 2
+    
+            signal["score"] += bonus
+    
+            print(
+                f"[CVD_BOOST] "
+                f"{signal.get('instId')} "
+                f"+{bonus} {cvd_state} confirms LONG "
+                f"score_before={score_before_cvd} "
+                f"score_after={signal.get('score')}",
+                flush=True
+            )
+    
+        # SHORT подтверждается агрессивными продавцами
+        elif (
+            ("SHORT" in direction or "DOWN" in direction or "SELL" in direction)
+            and cvd_state in ("SELL_CVD", "STRONG_SELL_CVD")
+        ):
+    
+            bonus = 3 if cvd_state == "STRONG_SELL_CVD" else 2
+    
+            signal["score"] += bonus
+    
+            print(
+                f"[CVD_BOOST] "
+                f"{signal.get('instId')} "
+                f"+{bonus} {cvd_state} confirms SHORT "
+                f"score_before={score_before_cvd} "
+                f"score_after={signal.get('score')}",
+                flush=True
+            )
+    
+        # LONG против агрессивных продавцов
+        elif (
+            ("LONG" in direction or "UP" in direction or "BUY" in direction)
+            and cvd_state in ("SELL_CVD", "STRONG_SELL_CVD")
+        ):
+    
+            penalty = 4 if cvd_state == "STRONG_SELL_CVD" else 2
+    
+            signal["score"] -= penalty
+    
+            print(
+                f"[CVD_PENALTY] "
+                f"{signal.get('instId')} "
+                f"-{penalty} {cvd_state} against LONG "
+                f"score_before={score_before_cvd} "
+                f"score_after={signal.get('score')}",
+                flush=True
+            )
+    
+        # SHORT против агрессивных покупателей
+        elif (
+            ("SHORT" in direction or "DOWN" in direction or "SELL" in direction)
+            and cvd_state in ("BUY_CVD", "STRONG_BUY_CVD")
+        ):
+    
+            penalty = 4 if cvd_state == "STRONG_BUY_CVD" else 2
+    
+            signal["score"] -= penalty
+    
+            print(
+                f"[CVD_PENALTY] "
+                f"{signal.get('instId')} "
+                f"-{penalty} {cvd_state} against SHORT "
+                f"score_before={score_before_cvd} "
+                f"score_after={signal.get('score')}",
+                flush=True
+            )
+    
+    except Exception as e:
+    
+        print(
+            f"[CVD_SCORE_ERROR] {e}",
+            flush=True
+        )
+    
+    
     # =========================
     # FINAL QUALITY FILTER
     # =========================
