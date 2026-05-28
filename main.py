@@ -14022,13 +14022,6 @@ def build_signal(instId):
             f"[SMART_MONEY_SCORE_ERROR] {e}",
             flush=True
         )
-
-
-# =========================
-# CVD SCORE IMPACT
-# =========================
-
-    try:
         
     
     # =========================
