@@ -5785,7 +5785,23 @@ def bybit_get(url, params, retries=5):
                 timeout=10
             )
 
-            data = r.json()
+            try:
+
+                data = r.json()
+            
+            except Exception as e:
+            
+                print(
+                    f"[BYBIT_JSON_ERROR] "
+                    f"url={url} "
+                    f"status={r.status_code} "
+                    f"text={r.text[:200]}",
+                    flush=True
+                )
+            
+                time.sleep(1)
+            
+                continue
 
             # =====================
             # SUCCESS
