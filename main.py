@@ -2776,6 +2776,177 @@ def analyze_retest_reclaim(signal):
         signal["retest_reasons"] = []
 
         return signal
+
+# =========================
+# ENTRY QUALITY ENGINE V2
+# =========================
+
+def analyze_entry_quality_v2(signal):
+
+    try:
+        flags = set(signal.get("flags", []))
+
+        entry_quality_score = 0
+        entry_quality_state = "LOW_QUALITY_ENTRY"
+        entry_quality_reasons = []
+
+        entry = str(signal.get("entry") or "")
+        direction = str(
+            signal.get("direction_code")
+            or signal.get("direction")
+            or signal.get("side")
+            or ""
+        ).upper()
+
+        ema_distance = float(signal.get("ema_distance_pct") or 0)
+        late_penalty = float(signal.get("late_move_penalty") or 0)
+
+        retest_state = str(signal.get("retest_state") or "")
+        cvd_state = str(signal.get("cvd_state") or "")
+        smart_money_state = str(signal.get("smart_money_state") or "")
+        flow_state = str(signal.get("flow_state") or "")
+
+        # =====================
+        # PRICE NOT EXTENDED
+        # =====================
+
+        if ema_distance <= 0.8:
+            entry_quality_score += 3
+            entry_quality_reasons.append("цена близко к EMA — вход не растянут")
+
+        elif ema_distance <= 1.5:
+            entry_quality_score += 2
+            entry_quality_reasons.append("дистанция до EMA допустимая")
+
+        elif ema_distance >= 3:
+            entry_quality_score -= 3
+            entry_quality_reasons.append("цена далеко от EMA — вход может быть поздним")
+
+        # =====================
+        # RETEST QUALITY
+        # =====================
+
+        if retest_state == "STRONG_RETEST":
+            entry_quality_score += 4
+            entry_quality_reasons.append("есть сильный retest/reclaim контекст")
+
+        elif retest_state == "RETEST_BUILDUP":
+            entry_quality_score += 2
+            entry_quality_reasons.append("есть retest buildup")
+
+        # =====================
+        # SMART MONEY QUALITY
+        # =====================
+
+        if smart_money_state == "STRONG_SMART_MONEY":
+            entry_quality_score += 3
+            entry_quality_reasons.append("smart money подтверждает сетап")
+
+        elif smart_money_state == "BUILDING_SMART_MONEY":
+            entry_quality_score += 2
+            entry_quality_reasons.append("smart money начинает подтверждать сетап")
+
+        elif smart_money_state == "WEAK_SMART_MONEY":
+            entry_quality_score -= 3
+            entry_quality_reasons.append("smart money слабый")
+
+        # =====================
+        # FLOW QUALITY
+        # =====================
+
+        if flow_state == "STRONG_MONEY_FLOW":
+            entry_quality_score += 3
+            entry_quality_reasons.append("сильный поток денег")
+
+        elif flow_state == "BUILDING_MONEY_FLOW":
+            entry_quality_score += 2
+            entry_quality_reasons.append("поток денег формируется")
+
+        # =====================
+        # CVD ALIGNMENT
+        # =====================
+
+        if (
+            ("SHORT" in direction or "DOWN" in direction or "SELL" in direction)
+            and cvd_state in ("SELL_CVD", "STRONG_SELL_CVD")
+        ):
+            entry_quality_score += 2
+            entry_quality_reasons.append("CVD подтверждает SHORT")
+
+        elif (
+            ("LONG" in direction or "UP" in direction or "BUY" in direction)
+            and cvd_state in ("BUY_CVD", "STRONG_BUY_CVD")
+        ):
+            entry_quality_score += 2
+            entry_quality_reasons.append("CVD подтверждает LONG")
+
+        elif (
+            ("SHORT" in direction or "DOWN" in direction or "SELL" in direction)
+            and cvd_state in ("BUY_CVD", "STRONG_BUY_CVD")
+        ):
+            entry_quality_score -= 2
+            entry_quality_reasons.append("CVD против SHORT")
+
+        elif (
+            ("LONG" in direction or "UP" in direction or "BUY" in direction)
+            and cvd_state in ("SELL_CVD", "STRONG_SELL_CVD")
+        ):
+            entry_quality_score -= 2
+            entry_quality_reasons.append("CVD против LONG")
+
+        # =====================
+        # LATE MOVE PENALTY
+        # =====================
+
+        if late_penalty > 0:
+            entry_quality_score -= late_penalty
+            entry_quality_reasons.append("есть штраф за позднее движение")
+
+        # =====================
+        # FINAL ENTRY QUALITY
+        # =====================
+
+        if entry_quality_score >= 10:
+            entry_quality_state = "ELITE_ENTRY"
+
+        elif entry_quality_score >= 7:
+            entry_quality_state = "HIGH_QUALITY_ENTRY"
+
+        elif entry_quality_score >= 4:
+            entry_quality_state = "GOOD_ENTRY"
+
+        elif entry_quality_score >= 2:
+            entry_quality_state = "WATCH_ENTRY"
+
+        else:
+            entry_quality_state = "LOW_QUALITY_ENTRY"
+
+        signal["entry_quality_score_v2"] = entry_quality_score
+        signal["entry_quality_state_v2"] = entry_quality_state
+        signal["entry_quality_reasons_v2"] = entry_quality_reasons
+
+        print(
+            f"[ENTRY_QUALITY_V2] "
+            f"{signal.get('instId')} "
+            f"state={entry_quality_state} "
+            f"score={entry_quality_score} "
+            f"ema_dist={round(ema_distance, 2)}%",
+            flush=True
+        )
+
+        return signal
+
+    except Exception as e:
+        print(
+            f"[ENTRY_QUALITY_V2_ERROR] {e}",
+            flush=True
+        )
+
+        signal["entry_quality_score_v2"] = 0
+        signal["entry_quality_state_v2"] = "ENTRY_QUALITY_ERROR"
+        signal["entry_quality_reasons_v2"] = []
+
+        return signal
 # =========================
 # MARKET STORY ENGINE
 # =========================
