@@ -11095,7 +11095,7 @@ def market_regime_filter(btc_signal):
             "reason": "error"
         }
 
-def detect_liquidity_zones(candles, lookback=40, tolerance_pct=0.25):
+def detect_liquidity_zones(candles, lookback=40, tolerance_pct=0.45):
 
     try:
 
