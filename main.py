@@ -2225,6 +2225,126 @@ def analyze_oi_behavior(sig):
 
         return sig
 
+
+# =========================
+# REAL OI CLASSIFIER V2
+# =========================
+
+def analyze_real_oi_flow(instId, price, oi):
+
+    try:
+
+        global PRICE_MEMORY
+        global OI_MEMORY
+
+        prev_price = PRICE_MEMORY.get(instId)
+        prev_oi = OI_MEMORY.get(instId)
+
+        PRICE_MEMORY[instId] = price
+        OI_MEMORY[instId] = oi
+
+        if prev_price is None or prev_oi is None:
+
+            return {
+                "oi_state": "NO_OI_HISTORY",
+                "oi_score": 0,
+                "oi_reason": "нет истории OI",
+                "oi_side": "NEUTRAL"
+            }
+
+        price_delta = price - prev_price
+        oi_delta = oi - prev_oi
+
+        oi_state = "NEUTRAL"
+        oi_score = 0
+        oi_reason = ""
+        oi_side = "NEUTRAL"
+
+        # =====================
+        # NEW LONGS
+        # =====================
+
+        if (
+            price_delta > 0
+            and oi_delta > 0
+        ):
+
+            oi_state = "NEW_LONGS"
+            oi_score = 4
+            oi_reason = "в рынок заходят новые LONG позиции"
+            oi_side = "LONG"
+
+        # =====================
+        # NEW SHORTS
+        # =====================
+
+        elif (
+            price_delta < 0
+            and oi_delta > 0
+        ):
+
+            oi_state = "NEW_SHORTS"
+            oi_score = 4
+            oi_reason = "в рынок заходят новые SHORT позиции"
+            oi_side = "SHORT"
+
+        # =====================
+        # SHORT COVERING
+        # =====================
+
+        elif (
+            price_delta > 0
+            and oi_delta < 0
+        ):
+
+            oi_state = "SHORT_COVERING"
+            oi_score = -2
+            oi_reason = "рост идет за счет закрытия SHORT"
+            oi_side = "LONG"
+
+        # =====================
+        # LONG EXITS
+        # =====================
+
+        elif (
+            price_delta < 0
+            and oi_delta < 0
+        ):
+
+            oi_state = "LONG_EXIT"
+            oi_score = -2
+            oi_reason = "падение идет за счет выхода LONG"
+            oi_side = "SHORT"
+
+        print(
+            f"[REAL_OI_CLASSIFIER] "
+            f"{instId} "
+            f"state={oi_state} "
+            f"price_delta={round(price_delta, 6)} "
+            f"oi_delta={round(oi_delta, 6)}",
+            flush=True
+        )
+
+        return {
+            "oi_state": oi_state,
+            "oi_score": oi_score,
+            "oi_reason": oi_reason,
+            "oi_side": oi_side
+        }
+
+    except Exception as e:
+
+        print(
+            f"[REAL_OI_CLASSIFIER_ERROR] {e}",
+            flush=True
+        )
+
+        return {
+            "oi_state": "OI_ERROR",
+            "oi_score": 0,
+            "oi_reason": str(e),
+            "oi_side": "NEUTRAL"
+        }
 # =========================
 # FLOW + OI MERGE ENGINE
 # =========================
