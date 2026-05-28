@@ -8496,7 +8496,7 @@ def decide_entry(stage, flags, price, c5, sig=None):
             if long_strength >= short_strength:
                 print(
                     f"[LONG_DOMINANCE] "
-                    f"{instId} "
+                    sig.get("instId")
                     f"long={long_strength} "
                     f"short={short_strength}",
                     flush=True
@@ -8551,7 +8551,7 @@ def decide_entry(stage, flags, price, c5, sig=None):
             if short_strength >= long_strength:
                 print(
                     f"[SHORT_DOMINANCE] "
-                    f"{instId} "
+                    sig.get("instId")
                     f"short={short_strength} "
                     f"long={long_strength}",
                     flush=True
