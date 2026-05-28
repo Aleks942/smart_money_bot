@@ -14069,6 +14069,20 @@ def build_signal(instId):
         f"reasons={signal.get('cvd_reasons')}",
         flush=True
     )
+
+    # =========================
+    # LATE MOVE FILTER
+    # =========================
+    
+    signal = analyze_late_move(signal)
+    
+    print(
+        f"[LATE_MOVE_STATE] "
+        f"{signal.get('instId')} "
+        f"penalty={signal.get('late_move_penalty')} "
+        f"reasons={signal.get('late_move_reasons')}",
+        flush=True
+    )
     # =========================
     # SMART MONEY SCORE IMPACT
     # =========================
