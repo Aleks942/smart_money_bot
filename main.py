@@ -14308,6 +14308,8 @@ def build_signal(instId):
         "price": price,
         "score": score,
 
+        "candles": candles,
+
         "setup_rank": setup_rank,
         "rank_score": rank_score,
         "rank_reasons": rank_reasons,
