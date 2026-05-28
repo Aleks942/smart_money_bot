@@ -14241,6 +14241,21 @@ def build_signal(instId):
         f"reasons={signal.get('late_move_reasons')}",
         flush=True
     )
+
+    # =========================
+    # RETEST + RECLAIM ENGINE
+    # =========================
+    
+    signal = analyze_retest_reclaim(signal)
+    
+    print(
+        f"[RETEST_STATE] "
+        f"{signal.get('instId')} "
+        f"state={signal.get('retest_state')} "
+        f"score={signal.get('retest_score')} "
+        f"reasons={signal.get('retest_reasons')}",
+        flush=True
+    )
     # =========================
     # SMART MONEY SCORE IMPACT
     # =========================
