@@ -13905,7 +13905,21 @@ def build_signal(instId):
         f"reasons={signal.get('smart_money_reasons')}",
         flush=True
     )
-
+    
+    # =========================
+    # CVD ENGINE
+    # =========================
+    
+    signal = analyze_cvd(signal)
+    
+    print(
+        f"[CVD_STATE] "
+        f"{signal.get('instId')} "
+        f"state={signal.get('cvd_state')} "
+        f"score={signal.get('cvd_score')} "
+        f"reasons={signal.get('cvd_reasons')}",
+        flush=True
+    )
     # =========================
     # SMART MONEY SCORE IMPACT
     # =========================
