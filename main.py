@@ -2330,6 +2330,145 @@ def merge_flow_with_oi(sig):
         sig["smart_money_state"] = "SMART_MONEY_ERROR"
         sig["smart_money_reasons"] = []
         return sig
+
+# =========================
+# CVD ENGINE V1
+# =========================
+
+def analyze_cvd(signal):
+
+    try:
+
+        flags = set(
+            signal.get("flags", [])
+        )
+
+        cvd_score = 0
+        cvd_state = "NEUTRAL_CVD"
+        cvd_reasons = []
+
+        # =====================
+        # BUY PRESSURE
+        # =====================
+
+        if "PRESSURE_UP" in flags:
+
+            cvd_score += 2
+
+            cvd_reasons.append(
+                "покупатели агрессивно давят market-ордерами"
+            )
+
+        # =====================
+        # SELL PRESSURE
+        # =====================
+
+        if "PRESSURE_DOWN" in flags:
+
+            cvd_score -= 2
+
+            cvd_reasons.append(
+                "продавцы агрессивно давят market-ордерами"
+            )
+
+        # =====================
+        # ACCELERATION
+        # =====================
+
+        if "ACCELERATION_UP" in flags:
+
+            cvd_score += 2
+
+            cvd_reasons.append(
+                "покупатели начинают ускорять движение"
+            )
+
+        if "ACCELERATION_DOWN" in flags:
+
+            cvd_score -= 2
+
+            cvd_reasons.append(
+                "продавцы начинают ускорять движение"
+            )
+
+        # =====================
+        # ABSORPTION
+        # =====================
+
+        if "BUYER_ABSORPTION" in flags:
+
+            cvd_score += 1
+
+            cvd_reasons.append(
+                "покупатели удерживают цену"
+            )
+
+        if "SELLER_ABSORPTION" in flags:
+
+            cvd_score -= 1
+
+            cvd_reasons.append(
+                "продавцы удерживают цену"
+            )
+
+        # =====================
+        # BREAKOUT CONFIRM
+        # =====================
+
+        if "BREAKOUT_CONFIRM_UP" in flags:
+
+            cvd_score += 2
+
+        if "BREAKOUT_CONFIRM_DOWN" in flags:
+
+            cvd_score -= 2
+
+        # =====================
+        # CVD STATE
+        # =====================
+
+        if cvd_score >= 5:
+
+            cvd_state = "STRONG_BUY_CVD"
+
+        elif cvd_score >= 2:
+
+            cvd_state = "BUY_CVD"
+
+        elif cvd_score <= -5:
+
+            cvd_state = "STRONG_SELL_CVD"
+
+        elif cvd_score <= -2:
+
+            cvd_state = "SELL_CVD"
+
+        signal["cvd_score"] = cvd_score
+        signal["cvd_state"] = cvd_state
+        signal["cvd_reasons"] = cvd_reasons
+
+        print(
+            f"[CVD] "
+            f"{signal.get('instId')} "
+            f"state={cvd_state} "
+            f"score={cvd_score}",
+            flush=True
+        )
+
+        return signal
+
+    except Exception as e:
+
+        print(
+            f"[CVD_ERROR] {e}",
+            flush=True
+        )
+
+        signal["cvd_score"] = 0
+        signal["cvd_state"] = "CVD_ERROR"
+        signal["cvd_reasons"] = []
+
+        return signal
 # =========================
 # MARKET STORY ENGINE
 # =========================
