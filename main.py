@@ -2470,120 +2470,94 @@ def analyze_cvd(signal):
 
         return signal
 
+
 # =========================
-# LATE MOVE FILTER
+# LATE MOVE FILTER V2
 # =========================
 
 def analyze_late_move(signal):
 
     try:
+        flags = set(signal.get("flags", []))
 
         score_penalty = 0
         late_reasons = []
 
-        price = float(
-            signal.get("price") or 0
-        )
+        price = float(signal.get("price") or 0)
+        ema20 = float(signal.get("ema20") or 0)
+        exp_move_max = float(signal.get("exp_move_max") or 0)
 
-        ema20 = float(
-            signal.get("ema20") or 0
-        )
-
-        exp_move_max = float(
-            signal.get("exp_move_max") or 0
-        )
-
-        entry = str(
-            signal.get("entry") or ""
-        )
-
-        cvd_state = str(
-            signal.get("cvd_state") or ""
-        )
-
-        # =====================
-        # DISTANCE FROM EMA20
-        # =====================
+        entry = str(signal.get("entry") or "")
+        stage = str(signal.get("stage") or "")
+        cvd_state = str(signal.get("cvd_state") or "")
 
         ema_distance_pct = 0
 
         if ema20 > 0:
+            ema_distance_pct = abs((price - ema20) / ema20) * 100
 
-            ema_distance_pct = abs(
-                (
-                    price - ema20
-                ) / ema20
-            ) * 100
+        signal["ema_distance_pct"] = ema_distance_pct
 
-        signal["ema_distance_pct"] = (
-            ema_distance_pct
+        has_compression = (
+            "RANGE_COMPRESSION" in flags
+            or "TIGHT_RANGE" in flags
+            or "COMP_PRO_5M" in flags
+            or "COMP_PRO_15M" in flags
+        )
+
+        has_retest_context = (
+            ema_distance_pct <= 1.2
+            and has_compression
         )
 
         # =====================
-        # TOO EXTENDED
+        # REAL LATE MOVE
         # =====================
 
         if ema_distance_pct >= 4:
+            score_penalty += 5
+            late_reasons.append("цена слишком далеко ушла от EMA20")
 
-            score_penalty += 4
+        elif ema_distance_pct >= 3:
+            score_penalty += 3
+            late_reasons.append("движение уже сильно растянуто")
 
-            late_reasons.append(
-                "цена слишком далеко ушла от EMA20"
-            )
-
-        elif ema_distance_pct >= 2.5:
-
-            score_penalty += 2
-
-            late_reasons.append(
-                "движение уже начинает растягиваться"
-            )
+        elif ema_distance_pct >= 2:
+            score_penalty += 1
+            late_reasons.append("движение начинает растягиваться")
 
         # =====================
-        # EXPANSION ALREADY MOVED
+        # EXPANSION PENALTY ONLY IF NO RETEST
         # =====================
 
         if (
             "EXPANSION" in entry
             and exp_move_max <= 2
+            and not has_retest_context
         ):
-
             score_penalty += 2
-
-            late_reasons.append(
-                "часть импульса уже могла реализоваться"
-            )
+            late_reasons.append("часть импульса уже могла реализоваться")
 
         # =====================
-        # STRONG CVD EXCEPTION
+        # RETEST PROTECTION
         # =====================
 
-        if cvd_state in (
-            "STRONG_BUY_CVD",
-            "STRONG_SELL_CVD"
-        ):
-
-            score_penalty = max(
-                score_penalty - 1,
-                0
-            )
+        if has_retest_context:
+            score_penalty = max(score_penalty - 2, 0)
+            late_reasons.append("есть retest/compression context — не считаем движение поздним")
 
         # =====================
-        # APPLY PENALTY
+        # STRONG CVD PROTECTION
         # =====================
 
-        signal["late_move_penalty"] = (
-            score_penalty
-        )
+        if cvd_state in ("STRONG_BUY_CVD", "STRONG_SELL_CVD"):
+            score_penalty = max(score_penalty - 1, 0)
 
-        signal["late_move_reasons"] = (
-            late_reasons
-        )
+        signal["late_move_penalty"] = score_penalty
+        signal["late_move_reasons"] = late_reasons
 
         if score_penalty > 0:
-
             before = signal.get("score", 0)
-
             signal["score"] -= score_penalty
 
             print(
@@ -2597,28 +2571,23 @@ def analyze_late_move(signal):
             )
 
         else:
-
             print(
                 f"[LATE_MOVE_OK] "
                 f"{signal.get('instId')} "
-                f"ema_distance={round(ema_distance_pct, 2)}%",
+                f"ema_distance={round(ema_distance_pct, 2)}% "
+                f"retest_context={has_retest_context}",
                 flush=True
             )
 
         return signal
 
     except Exception as e:
-
-        print(
-            f"[LATE_MOVE_ERROR] {e}",
-            flush=True
-        )
+        print(f"[LATE_MOVE_ERROR] {e}", flush=True)
 
         signal["late_move_penalty"] = 0
         signal["late_move_reasons"] = []
 
         return signal
-
 # =========================
 # RETEST + RECLAIM ENGINE
 # =========================
