@@ -1271,6 +1271,12 @@ PRESSURE_MEMORY = {}
 LIQUIDATION_MEMORY = {}
 
 # =========================
+# LIQUIDITY MAP MEMORY
+# =========================
+
+LIQUIDITY_ZONES = {}
+
+# =========================
 # LIQUIDATION CASCADE MEMORY
 # =========================
 
