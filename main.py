@@ -2469,6 +2469,155 @@ def analyze_cvd(signal):
         signal["cvd_reasons"] = []
 
         return signal
+
+# =========================
+# LATE MOVE FILTER
+# =========================
+
+def analyze_late_move(signal):
+
+    try:
+
+        score_penalty = 0
+        late_reasons = []
+
+        price = float(
+            signal.get("price") or 0
+        )
+
+        ema20 = float(
+            signal.get("ema20") or 0
+        )
+
+        exp_move_max = float(
+            signal.get("exp_move_max") or 0
+        )
+
+        entry = str(
+            signal.get("entry") or ""
+        )
+
+        cvd_state = str(
+            signal.get("cvd_state") or ""
+        )
+
+        # =====================
+        # DISTANCE FROM EMA20
+        # =====================
+
+        ema_distance_pct = 0
+
+        if ema20 > 0:
+
+            ema_distance_pct = abs(
+                (
+                    price - ema20
+                ) / ema20
+            ) * 100
+
+        signal["ema_distance_pct"] = (
+            ema_distance_pct
+        )
+
+        # =====================
+        # TOO EXTENDED
+        # =====================
+
+        if ema_distance_pct >= 4:
+
+            score_penalty += 4
+
+            late_reasons.append(
+                "цена слишком далеко ушла от EMA20"
+            )
+
+        elif ema_distance_pct >= 2.5:
+
+            score_penalty += 2
+
+            late_reasons.append(
+                "движение уже начинает растягиваться"
+            )
+
+        # =====================
+        # EXPANSION ALREADY MOVED
+        # =====================
+
+        if (
+            "EXPANSION" in entry
+            and exp_move_max <= 2
+        ):
+
+            score_penalty += 2
+
+            late_reasons.append(
+                "часть импульса уже могла реализоваться"
+            )
+
+        # =====================
+        # STRONG CVD EXCEPTION
+        # =====================
+
+        if cvd_state in (
+            "STRONG_BUY_CVD",
+            "STRONG_SELL_CVD"
+        ):
+
+            score_penalty = max(
+                score_penalty - 1,
+                0
+            )
+
+        # =====================
+        # APPLY PENALTY
+        # =====================
+
+        signal["late_move_penalty"] = (
+            score_penalty
+        )
+
+        signal["late_move_reasons"] = (
+            late_reasons
+        )
+
+        if score_penalty > 0:
+
+            before = signal.get("score", 0)
+
+            signal["score"] -= score_penalty
+
+            print(
+                f"[LATE_MOVE_FILTER] "
+                f"{signal.get('instId')} "
+                f"penalty={score_penalty} "
+                f"score_before={before} "
+                f"score_after={signal.get('score')} "
+                f"ema_distance={round(ema_distance_pct, 2)}%",
+                flush=True
+            )
+
+        else:
+
+            print(
+                f"[LATE_MOVE_OK] "
+                f"{signal.get('instId')} "
+                f"ema_distance={round(ema_distance_pct, 2)}%",
+                flush=True
+            )
+
+        return signal
+
+    except Exception as e:
+
+        print(
+            f"[LATE_MOVE_ERROR] {e}",
+            flush=True
+        )
+
+        signal["late_move_penalty"] = 0
+        signal["late_move_reasons"] = []
+
+        return signal
 # =========================
 # MARKET STORY ENGINE
 # =========================
