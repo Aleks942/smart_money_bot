@@ -14706,7 +14706,22 @@ def build_signal(instId):
         f"reasons={signal.get('flow_reasons')}",
         flush=True
     )
-
+    # =========================
+    # STOP HUNT ENGINE
+    # =========================
+    
+    try:
+    
+        signal = analyze_stop_hunt(signal)
+    
+    except Exception as e:
+    
+        print(
+            f"[STOP_HUNT_PIPELINE_ERROR] "
+            f"{signal.get('instId')} "
+            f"{e}",
+            flush=True
+        )
     # =========================
     # OI CLASSIFIER
     # =========================
