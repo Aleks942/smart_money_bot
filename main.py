@@ -15786,7 +15786,7 @@ def build_signal(instId):
             )
         
             if (
-            
+
                 (
             
                     ep >= 10
@@ -15815,12 +15815,13 @@ def build_signal(instId):
             
                 )
             
-            ):
+            )
             
             and (
             
                 pressure_persist
                 or range_compression
+            
             ):
                     
                 signal["signal_group"] = "PRE_SWING"
