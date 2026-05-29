@@ -16026,11 +16026,11 @@ def build_signal(instId):
                 )
     
             ):
-    
                 signal["signal_group"] = "PRE_SWING"
     
                 signal["sendable"] = True
                 signal["valid"] = True
+                
     
                 print(
                     f"[SMART_BUILDUP_ROUTE] "
@@ -16047,7 +16047,8 @@ def build_signal(instId):
                     f"acc={acc}",
                     flush=True
                 )
-            
+                
+                return signal
         # =====================
         # EP BLOCK
         # =====================
