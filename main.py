@@ -12998,6 +12998,10 @@ def build_signal(instId):
             flush=True
         )
 
+    oi = float(
+        sig.get("oi_change") or 0
+    )
+    
     # =====================
     # VOLATILITY CLIMAX
     # =====================
