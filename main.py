@@ -6163,7 +6163,82 @@ def get_bybit_candles(symbol: str, interval: str, limit: int = 200):
         return candles
 
     except Exception as e:
-        print(f"❌ get_bybit_candles error {symbol} {interval}: {e}")
+
+        print(
+            f"❌ get_bybit_candles error "
+            f"{symbol} {interval}: {e}",
+            flush=True
+        )
+    
+        # =====================
+        # OKX FALLBACK
+        # =====================
+    
+        print(
+            f"[BYBIT_FALLBACK_OKX] "
+            f"{symbol} interval={interval}",
+            flush=True
+        )
+    
+        try:
+    
+            tf_map = {
+                "5": "5m",
+                "15": "15m",
+                "60": "1h",
+                "240": "4h",
+    
+                "5m": "5m",
+                "15m": "15m",
+                "1H": "1h",
+                "4H": "4h",
+            }
+    
+            okx_tf = tf_map.get(
+                str(interval),
+                "15m"
+            )
+    
+            df = get_tf_candles_okx(
+                symbol,
+                tf=okx_tf,
+                limit=limit
+            )
+    
+            if df is not None and not df.empty:
+    
+                candles = []
+    
+                for _, row in df.iterrows():
+    
+                    candles.append([
+                        0,
+                        float(row["open"]),
+                        float(row["high"]),
+                        float(row["low"]),
+                        float(row["close"]),
+                        float(row["volume"])
+                    ])
+    
+                print(
+                    f"[OKX_FALLBACK_OK] "
+                    f"{symbol} "
+                    f"tf={okx_tf} "
+                    f"candles={len(candles)}",
+                    flush=True
+                )
+    
+                return candles
+    
+        except Exception as okx_error:
+    
+            print(
+                f"[OKX_FALLBACK_FAILED] "
+                f"{symbol} "
+                f"{okx_error}",
+                flush=True
+            )
+    
         return []
 
 def get_bybit_books(symbol: str, limit: int = 25):
