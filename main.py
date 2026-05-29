@@ -12998,13 +12998,15 @@ def build_signal(instId):
             flush=True
         )
 
-    oi = float(
-        sig.get("oi_change") or 0
-    )
+    
     
     # =====================
     # VOLATILITY CLIMAX
     # =====================
+    
+    oi = float(
+        sig.get("oi_change") or 0
+    )
 
     volatility_climax_long = (
 
