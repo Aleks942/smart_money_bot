@@ -16594,11 +16594,15 @@ def btc_regime():
 
     except Exception as e:
 
+        import traceback
+    
         print(
             f"[BTC_REGIME_ERROR] {e}",
             flush=True
         )
-
+    
+        traceback.print_exc()
+    
         return ("NEUTRAL", None)
 
     # =====================
