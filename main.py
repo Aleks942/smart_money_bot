@@ -2513,6 +2513,48 @@ def analyze_liquidity_sweep(signal):
             flags.add("BEARISH_RECLAIM")
 
         # =====================
+        # RECLAIM TRAP FILTER
+        # =====================
+
+        if (
+
+            "BULLISH_RECLAIM" in flags
+
+            and (
+                "BUYER_ABSORPTION" in flags
+                or "BULLISH_SHIFT" in flags
+            )
+
+        ):
+
+            flags.add("SHORT_TRAP_RISK")
+
+            sweep_score += 2
+
+            sweep_reasons.append(
+                "рынок вернулся после выноса вниз — риск trap для SHORT"
+            )
+
+        if (
+
+            "BEARISH_RECLAIM" in flags
+
+            and (
+                "SELLER_ABSORPTION" in flags
+                or "BEARISH_SHIFT" in flags
+            )
+
+        ):
+
+            flags.add("LONG_TRAP_RISK")
+
+            sweep_score += 2
+
+            sweep_reasons.append(
+                "рынок вернулся после выноса вверх — риск trap для LONG"
+            )
+
+        # =====================
         # LIQUIDITY MAGNET
         # =====================
 
