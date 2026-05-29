@@ -15810,6 +15810,56 @@ def build_signal(instId):
         )
 
     # =====================
+    # SMART TRANSITION BYPASS
+    # =====================
+
+    if (
+
+        signal.get("signal_mode") == "TRANSITION"
+
+        and signal.get("smart_money_state") in (
+
+            "BUILDING_SMART_MONEY",
+            "STRONG_SMART_MONEY"
+
+        )
+
+        and signal.get("flow_state") in (
+
+            "BUILDING_MONEY_FLOW",
+            "STRONG_MONEY_FLOW"
+
+        )
+
+        and signal.get("stop_hunt_state") in (
+
+            "ACTIVE_STOP_HUNT",
+            "PROBABLE_STOP_HUNT"
+
+        )
+
+        and (
+
+            "RANGE_COMPRESSION" in flags
+            or "TIGHT_RANGE" in flags
+            or "COMP_PRO_5M" in flags
+            or "COMP_PRO_15M" in flags
+
+        )
+
+        and ema_distance_pct <= 1.0
+
+    ):
+
+        print(
+            f"[SMART_TRANSITION_BYPASS] "
+            f"{instId}",
+            flush=True
+        )
+
+        return signal
+
+    # =====================
     # HARD BLOCK
     # =====================
     
