@@ -3181,16 +3181,22 @@ def analyze_late_move(signal):
         # =====================
 
         if ema_distance_pct >= 4:
-            score_penalty += 5
-            late_reasons.append("цена слишком далеко ушла от EMA20")
+            score_penalty += 7
+            late_reasons.append(
+                "цена критически далеко ушла от EMA20"
+            )
 
         elif ema_distance_pct >= 3:
-            score_penalty += 3
-            late_reasons.append("движение уже сильно растянуто")
+            score_penalty += 5
+            late_reasons.append(
+                "движение уже сильно растянуто"
+            )
 
         elif ema_distance_pct >= 2:
-            score_penalty += 1
-            late_reasons.append("движение начинает растягиваться")
+            score_penalty += 2
+            late_reasons.append(
+                "движение начинает растягиваться"
+            )
 
         # =====================
         # EXPANSION PENALTY ONLY IF NO RETEST
