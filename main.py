@@ -12998,8 +12998,83 @@ def build_signal(instId):
             flush=True
         )
 
-    
-    
+    # =====================
+    # SMART BUILDUP PRIORITY
+    # =====================
+
+    buildup_score = 0
+
+    buildup_reasons = []
+
+    # compression
+    if (
+        "RANGE_COMPRESSION" in flags
+        or "TIGHT_RANGE" in flags
+        or "COMP_PRO_5M" in flags
+        or "COMP_PRO_15M" in flags
+    ):
+
+        buildup_score += 2
+        buildup_reasons.append("compression")
+
+    # absorption
+    if (
+        "BUYER_ABSORPTION" in flags
+        or "SELLER_ABSORPTION" in flags
+    ):
+
+        buildup_score += 2
+        buildup_reasons.append("absorption")
+
+    # liquidity
+    if (
+        "EQUAL_HIGHS" in flags
+        or "EQUAL_LOWS" in flags
+        or "LIQUIDITY_ABOVE" in flags
+        or "LIQUIDITY_BELOW" in flags
+    ):
+
+        buildup_score += 2
+        buildup_reasons.append("liquidity")
+
+    # pressure shift
+    if (
+        "BULLISH_SHIFT" in flags
+        or "BEARISH_SHIFT" in flags
+    ):
+
+        buildup_score += 2
+        buildup_reasons.append("shift")
+
+    # accumulation
+    if acc_score >= 3:
+
+        buildup_score += 2
+        buildup_reasons.append("accumulation")
+
+    # tight EMA
+    if ema_distance_pct <= 1.2:
+
+        buildup_score += 2
+        buildup_reasons.append("tight_ema")
+
+    # =====================
+    # BUILDUP BONUS
+    # =====================
+
+    if buildup_score >= 8:
+
+        score += 8
+
+        flags.add("SMART_BUILDUP")
+
+        print(
+            f"[SMART_BUILDUP] "
+            f"{instId} "
+            f"score={buildup_score} "
+            f"reasons={buildup_reasons}",
+            flush=True
+        )
     # =====================
     # VOLATILITY CLIMAX
     # =====================
