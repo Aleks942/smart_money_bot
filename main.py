@@ -14406,6 +14406,49 @@ def build_signal(instId):
 
     entry_zone = calc_entry_zone(price, pmeta, flags, direction_code)
 
+    # =====================
+    # TRAP DIRECTION BLOCK
+    # =====================
+
+    if (
+
+        direction_code == "DOWN"
+
+        and "SHORT_TRAP_RISK" in flags
+
+    ):
+
+        print(
+            f"[SHORT_TRAP_BLOCK] "
+            f"{instId}",
+            flush=True
+        )
+
+        flow_ok = False
+
+        score -= 4
+
+        flags.add("TRAP_BLOCKED_SHORT")
+
+    if (
+
+        direction_code == "UP"
+
+        and "LONG_TRAP_RISK" in flags
+
+    ):
+
+        print(
+            f"[LONG_TRAP_BLOCK] "
+            f"{instId}",
+            flush=True
+        )
+
+        flow_ok = False
+
+        score -= 4
+
+        flags.add("TRAP_BLOCKED_LONG")
     
     # =========================
     # MTF DIRECTION BIAS
