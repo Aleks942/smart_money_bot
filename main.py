@@ -13002,7 +13002,7 @@ def build_signal(instId):
     # =====================
     # BUILDUP BONUS
     # =====================
-    buildup_score = float(buildup_score or 0)
+    buildup_score = 0
     if buildup_score >= 8:
 
         score += 8
