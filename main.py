@@ -2483,7 +2483,7 @@ def analyze_liquidity_sweep(signal):
             flags.add("FAILED_BREAKDOWN")
 
         # =====================
-        # RETEST RECLAIM BONUS
+        # SWEEP RECLAIM BONUS
         # =====================
 
         if (
