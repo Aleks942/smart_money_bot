@@ -16224,6 +16224,39 @@ def build_signal(instId):
 
             return signal
 
+        # =====================
+        # BUILDUP SETUP PRESERVE
+        # =====================
+
+        elif (
+
+            signal.get("entry") == "WATCH_BUILDUP"
+
+            and signal.get("flow_state")
+            == "BUILDING_MONEY_FLOW"
+
+            and signal.get("stop_hunt_state")
+            == "PROBABLE_STOP_HUNT"
+
+        ):
+
+            signal["sendable"] = True
+            signal["valid"] = True
+
+            if not signal.get("signal_group"):
+
+                signal["signal_group"] = "PRE_SWING"
+
+            signal["entry_type"] = "BUILDUP_ENTRY"
+
+            print(
+                f"[BUILDUP_SETUP_PRESERVED] "
+                f"{instId}",
+                flush=True
+            )
+
+            return signal
+
         else:
 
             print(
