@@ -15777,14 +15777,43 @@ def build_signal(instId):
             )
         
             if (
-                ep >= 10
-                and acc >= 2
-                and (
-                    pressure_persist
-                    or range_compression
+            
+                (
+            
+                    ep >= 10
+                    and acc >= 2
+            
                 )
+            
+                or (
+            
+                    signal.get("flow_state")
+                    == "BUILDING_MONEY_FLOW"
+            
+                    and signal.get("smart_money_state") in (
+            
+                        "BUILDING_SMART_MONEY",
+                        "STRONG_SMART_MONEY"
+            
+                    )
+            
+                    and signal.get("stop_hunt_state") in (
+            
+                        "PROBABLE_STOP_HUNT",
+                        "ACTIVE_STOP_HUNT"
+            
+                    )
+            
+                )
+            
+            )
+            
+            and (
+            
+                pressure_persist
+                or range_compression
             ):
-        
+                    
                 signal["signal_group"] = "PRE_SWING"
         
                 signal["sendable"] = True
