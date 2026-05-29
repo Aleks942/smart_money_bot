@@ -6221,7 +6221,6 @@ def bybit_get(url, params, retries=5):
 def get_bybit_tickers_linear():
 
     try:
-
         res = bybit_get(
             BYBIT_TICKERS_URL,
             {"category": "linear"}
@@ -6234,14 +6233,70 @@ def get_bybit_tickers_linear():
             return lst
 
     except Exception as e:
-
         print(
             f"[BYBIT_TICKERS_ERROR] {e}",
             flush=True
         )
 
+    # =====================
+    # OKX TICKERS FALLBACK
+    # =====================
+
+    try:
+        print(
+            "[OKX_TICKERS_FALLBACK] loading OKX SWAP tickers",
+            flush=True
+        )
+
+        url = "https://www.okx.com/api/v5/market/tickers"
+        params = {
+            "instType": "SWAP"
+        }
+
+        r = requests.get(
+            url,
+            params=params,
+            timeout=TIMEOUT
+        )
+
+        data = r.json()
+        rows = data.get("data") or []
+
+        out = []
+
+        for x in rows:
+            inst = str(x.get("instId") or "")
+
+            if not inst.endswith("-USDT-SWAP"):
+                continue
+
+            symbol = (
+                inst.replace("-USDT-SWAP", "USDT")
+                .replace("-", "")
+            )
+
+            out.append({
+                "symbol": symbol,
+                "turnover24h": str(x.get("volCcy24h") or x.get("vol24h") or "0"),
+                "price24hPcnt": str(x.get("sodUtc8") or "0"),
+            })
+
+        if out:
+            print(
+                f"[OKX_TICKERS_OK] count={len(out)}",
+                flush=True
+            )
+
+            return out
+
+    except Exception as e:
+        print(
+            f"[OKX_TICKERS_FAILED] {e}",
+            flush=True
+        )
+
     print(
-        "[BYBIT_TICKERS_FALLBACK] using fixed core symbols",
+        "[TICKERS_EMERGENCY_FALLBACK] using fixed core symbols",
         flush=True
     )
 
@@ -6257,8 +6312,6 @@ def get_bybit_tickers_linear():
         {"symbol": "ARBUSDT", "turnover24h": "150000000", "price24hPcnt": "0"},
         {"symbol": "TONUSDT", "turnover24h": "150000000", "price24hPcnt": "0"},
     ]
-
-
 def get_bybit_candles(symbol: str, interval: str, limit: int = 200):
     try:
         res = bybit_get(
