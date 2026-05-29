@@ -15742,13 +15742,22 @@ def build_signal(instId):
         # =====================
         
         if (
-        
+
             (
                 signal.get("signal_mode") == "EXPANSION"
                 or "EXPANSION" in stage
             )
         
             and ep >= 10
+        
+            and not signal.get("late_move")
+        
+            and signal.get("smart_money_state") in (
+        
+                "BUILDING_SMART_MONEY",
+                "STRONG_SMART_MONEY"
+        
+            )
         
         ):
         
