@@ -2304,7 +2304,6 @@ def analyze_stop_hunt(signal):
         if (
             "EQUAL_LOWS" in flags
             and "LIQUIDITY_BELOW" in flags
-            and "PRESSURE_DOWN" in flags
             and has_compression
         ):
 
@@ -2316,6 +2315,19 @@ def analyze_stop_hunt(signal):
             )
 
             flags.add("PROBABLE_STOP_HUNT_DOWN")
+
+            # EARLY PRESSURE BONUS
+
+            if (
+                "PRESSURE_DOWN" in flags
+                or "ACCELERATION_DOWN" in flags
+            ):
+
+                stop_hunt_score += 2
+
+                stop_hunt_reasons.append(
+                    "давление вниз усиливает вероятность sweep"
+                )
 
             if "NEAR_LIQUIDITY_BELOW" in flags:
 
