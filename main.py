@@ -2210,8 +2210,17 @@ def analyze_flow_snapshot(sig):
         sig["flow_state"] = flow_state
         sig["flow_reasons"] = flow_reasons
 
-        old_flags = list(sig.get("flags") or [])
-        sig["flags"] = list(set(old_flags + flow_flags))
+        all_flags = set(
+            sig.get("flags") or []
+        )
+        
+        all_flags.update(flow_flags)
+        
+        # VERY IMPORTANT
+        # сохраняем liquidity/build-up flags
+        all_flags.update(flags)
+        
+        sig["flags"] = list(all_flags)
 
         return sig
 
