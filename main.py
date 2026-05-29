@@ -15815,7 +15815,7 @@ def build_signal(instId):
             
                 )
             
-            )
+            ):
             
             and (
             
