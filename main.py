@@ -13004,9 +13004,7 @@ def build_signal(instId):
     # VOLATILITY CLIMAX
     # =====================
     
-    oi = float(
-        oi_change or 0
-    )
+    oi = 0.0
 
     volatility_climax_long = (
 
