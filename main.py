@@ -16237,6 +16237,11 @@ def build_signal(instId):
 
             and signal.get("stop_hunt_state")
             == "PROBABLE_STOP_HUNT"
+            
+            and signal.get("smart_money_state") in (
+                "BUILDING_SMART_MONEY",
+                "STRONG_SMART_MONEY"
+            )
 
         ):
 
