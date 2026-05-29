@@ -3317,7 +3317,7 @@ def analyze_retest_reclaim(signal):
             )
 
         # =====================
-        # RECLAIM BONUS
+        # RETEST RECLAIM BONUS
         # =====================
 
         if (
