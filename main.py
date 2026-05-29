@@ -15970,6 +15970,8 @@ def build_signal(instId):
             )
         
             and ep >= 10
+
+            and expansion_quality
         
             and not signal.get("late_move")
         
