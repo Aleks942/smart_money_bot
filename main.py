@@ -16003,7 +16003,7 @@ def build_signal(instId):
             # SMART BUILDUP ROUTING
             # =====================
     
-            elif (
+            if (
     
                 signal.get("smart_money_state")
                 == "STRONG_SMART_MONEY"
