@@ -6171,10 +6171,44 @@ def bybit_get(url, params, retries=5):
 
 
 def get_bybit_tickers_linear():
-    res = bybit_get(BYBIT_TICKERS_URL, {"category": "linear"})
-    result = res.get("result") or {}
-    lst = result.get("list") or []
-    return lst
+
+    try:
+
+        res = bybit_get(
+            BYBIT_TICKERS_URL,
+            {"category": "linear"}
+        )
+
+        result = res.get("result") or {}
+        lst = result.get("list") or []
+
+        if lst:
+            return lst
+
+    except Exception as e:
+
+        print(
+            f"[BYBIT_TICKERS_ERROR] {e}",
+            flush=True
+        )
+
+    print(
+        "[BYBIT_TICKERS_FALLBACK] using fixed core symbols",
+        flush=True
+    )
+
+    return [
+        {"symbol": "BTCUSDT", "turnover24h": "1000000000", "price24hPcnt": "0"},
+        {"symbol": "ETHUSDT", "turnover24h": "800000000", "price24hPcnt": "0"},
+        {"symbol": "SOLUSDT", "turnover24h": "500000000", "price24hPcnt": "0"},
+        {"symbol": "BNBUSDT", "turnover24h": "400000000", "price24hPcnt": "0"},
+        {"symbol": "XRPUSDT", "turnover24h": "300000000", "price24hPcnt": "0"},
+        {"symbol": "AVAXUSDT", "turnover24h": "200000000", "price24hPcnt": "0"},
+        {"symbol": "LINKUSDT", "turnover24h": "200000000", "price24hPcnt": "0"},
+        {"symbol": "INJUSDT", "turnover24h": "150000000", "price24hPcnt": "0"},
+        {"symbol": "ARBUSDT", "turnover24h": "150000000", "price24hPcnt": "0"},
+        {"symbol": "TONUSDT", "turnover24h": "150000000", "price24hPcnt": "0"},
+    ]
 
 
 def get_bybit_candles(symbol: str, interval: str, limit: int = 200):
