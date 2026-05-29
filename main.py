@@ -15902,7 +15902,62 @@ def build_signal(instId):
                 signal["valid"] = True
                 signal["sendable"] = True
     
-       
+
+        # =====================
+        # EXPANSION QUALITY FILTER
+        # =====================
+
+        expansion_quality = False
+
+        if (
+
+            signal.get("smart_money_state") in (
+
+                "BUILDING_SMART_MONEY",
+                "STRONG_SMART_MONEY"
+
+            )
+
+            and signal.get("flow_state") in (
+
+                "BUILDING_MONEY_FLOW",
+                "STRONG_MONEY_FLOW"
+
+            )
+
+            and signal.get("stop_hunt_state") in (
+
+                "PROBABLE_STOP_HUNT",
+                "ACTIVE_STOP_HUNT"
+
+            )
+
+            and (
+
+                "RANGE_COMPRESSION" in flags
+                or "COMP_PRO_5M" in flags
+                or "COMP_PRO_15M" in flags
+                or "ENERGY_BUILDUP" in flags
+
+            )
+
+        ):
+
+            expansion_quality = True
+
+            print(
+                f"[EXPANSION_QUALITY_OK] "
+                f"{instId}",
+                flush=True
+            )
+
+        else:
+
+            print(
+                f"[EXPANSION_QUALITY_BAD] "
+                f"{instId}",
+                flush=True
+            )
         # =====================
         # FORCE EXPANSION ROUTE
         # =====================
