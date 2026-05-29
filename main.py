@@ -2492,6 +2492,42 @@ def analyze_liquidity_sweep(signal):
             flags.add("BEARISH_RECLAIM")
 
         # =====================
+        # LIQUIDITY MAGNET
+        # =====================
+
+        if (
+            "PRESSURE_UP" in flags
+            and "ACCELERATION_UP" in flags
+            and "NEAR_LIQUIDITY_ABOVE" in flags
+        ):
+
+            sweep_score += 2
+
+            sweep_reasons.append(
+                "цена ускоряется к ликвидности сверху"
+            )
+
+            flags.add(
+                "LIQUIDITY_MAGNET_UP"
+            )
+
+        if (
+            "PRESSURE_DOWN" in flags
+            and "ACCELERATION_DOWN" in flags
+            and "NEAR_LIQUIDITY_BELOW" in flags
+        ):
+
+            sweep_score += 2
+
+            sweep_reasons.append(
+                "цена ускоряется к ликвидности снизу"
+            )
+
+            flags.add(
+                "LIQUIDITY_MAGNET_DOWN"
+            )
+
+        # =====================
         # FINAL STATE
         # =====================
 
