@@ -14993,6 +14993,23 @@ def build_signal(instId):
             f"{e}",
             flush=True
         )
+
+    # =========================
+    # LIQUIDITY SWEEP ENGINE
+    # =========================
+    
+    try:
+    
+        signal = analyze_liquidity_sweep(signal)
+    
+    except Exception as e:
+    
+        print(
+            f"[SWEEP_ENGINE_PIPELINE_ERROR] "
+            f"{signal.get('instId')} "
+            f"{e}",
+            flush=True
+        )
     # =========================
     # OI CLASSIFIER
     # =========================
