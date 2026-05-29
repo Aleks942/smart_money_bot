@@ -16175,9 +16175,23 @@ def build_signal(instId):
             or (
 
                 signal.get("signal_mode") == "PREMOVE"
-
-                and ep >= 7
-
+            
+                and (
+            
+                    ep >= 7
+            
+                    or (
+            
+                        signal.get("flow_state")
+                        == "BUILDING_MONEY_FLOW"
+            
+                        and signal.get("stop_hunt_state")
+                        == "PROBABLE_STOP_HUNT"
+            
+                    )
+            
+                )
+            
                 and (
                     "PRESSURE_UP" in flags
                     or "PRESSURE_DOWN" in flags
