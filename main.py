@@ -2387,6 +2387,156 @@ def analyze_stop_hunt(signal):
         signal["stop_hunt_reasons"] = []
 
         return signal
+
+# =========================
+# SWEEP DETECTION ENGINE
+# =========================
+
+def analyze_liquidity_sweep(signal):
+
+    try:
+
+        flags = set(signal.get("flags", []))
+
+        candles = signal.get("candles") or []
+
+        if len(candles) < 5:
+            return signal
+
+        last = candles[-1]
+
+        try:
+            high = float(last[2])
+            low = float(last[3])
+            close = float(last[4])
+
+        except:
+            return signal
+
+        liquidity_above = signal.get("liquidity_above")
+        liquidity_below = signal.get("liquidity_below")
+
+        sweep_score = 0
+        sweep_state = "NO_SWEEP"
+        sweep_side = "NEUTRAL"
+        sweep_reasons = []
+
+        # =====================
+        # SWEEP ABOVE
+        # =====================
+
+        if (
+            liquidity_above
+            and high > liquidity_above
+            and close < liquidity_above
+        ):
+
+            sweep_score += 4
+            sweep_side = "UP"
+
+            sweep_reasons.append(
+                "цена забрала ликвидность сверху и вернулась обратно"
+            )
+
+            flags.add("SWEEP_ABOVE")
+            flags.add("FAILED_BREAKOUT")
+
+        # =====================
+        # SWEEP BELOW
+        # =====================
+
+        if (
+            liquidity_below
+            and low < liquidity_below
+            and close > liquidity_below
+        ):
+
+            sweep_score += 4
+            sweep_side = "DOWN"
+
+            sweep_reasons.append(
+                "цена забрала ликвидность снизу и вернулась обратно"
+            )
+
+            flags.add("SWEEP_BELOW")
+            flags.add("FAILED_BREAKDOWN")
+
+        # =====================
+        # RECLAIM BONUS
+        # =====================
+
+        if (
+            sweep_side == "DOWN"
+            and "BUYER_ABSORPTION" in flags
+        ):
+
+            sweep_score += 2
+
+            sweep_reasons.append(
+                "покупатели удержали sweep снизу"
+            )
+
+            flags.add("BULLISH_RECLAIM")
+
+        if (
+            sweep_side == "UP"
+            and "SELLER_ABSORPTION" in flags
+        ):
+
+            sweep_score += 2
+
+            sweep_reasons.append(
+                "продавцы удержали sweep сверху"
+            )
+
+            flags.add("BEARISH_RECLAIM")
+
+        # =====================
+        # FINAL STATE
+        # =====================
+
+        if sweep_score >= 5:
+
+            sweep_state = "ACTIVE_SWEEP"
+
+        elif sweep_score >= 3:
+
+            sweep_state = "PROBABLE_SWEEP"
+
+        signal["sweep_score"] = sweep_score
+        signal["sweep_state"] = sweep_state
+        signal["sweep_side"] = sweep_side
+        signal["sweep_reasons"] = sweep_reasons
+
+        signal["flags"] = list(flags)
+
+        print(
+            f"[SWEEP_ENGINE] "
+            f"{signal.get('instId')} "
+            f"state={sweep_state} "
+            f"side={sweep_side} "
+            f"score={sweep_score} "
+            f"reasons={sweep_reasons}",
+            flush=True
+        )
+
+        return signal
+
+    except Exception as e:
+
+        print(
+            f"[SWEEP_ENGINE_ERROR] "
+            f"{signal.get('instId')} "
+            f"{e}",
+            flush=True
+        )
+
+        signal["sweep_score"] = 0
+        signal["sweep_state"] = "SWEEP_ERROR"
+        signal["sweep_side"] = "NEUTRAL"
+        signal["sweep_reasons"] = []
+
+        return signal
 # =========================
 # OI BEHAVIOR CLASSIFIER
 # =========================
