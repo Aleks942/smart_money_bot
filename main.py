@@ -15998,6 +15998,45 @@ def build_signal(instId):
                     f"{symbol}",
                     flush=True
                 )
+
+            # =====================
+            # SMART BUILDUP ROUTING
+            # =====================
+    
+            elif (
+    
+                signal.get("smart_money_state")
+                == "STRONG_SMART_MONEY"
+    
+                and signal.get("flow_state") in (
+                    "STRONG_MONEY_FLOW",
+                    "BUILDING_MONEY_FLOW"
+                )
+    
+                and signal.get("stop_hunt_state") in (
+                    "ACTIVE_STOP_HUNT",
+                    "PROBABLE_STOP_HUNT"
+                )
+    
+                and (
+                    "RANGE_COMPRESSION" in flags
+                    or "TIGHT_RANGE" in flags
+                    or "COMP_PRO_5M" in flags
+                    or "COMP_PRO_15M" in flags
+                )
+    
+            ):
+    
+                signal["signal_group"] = "PRE_SWING"
+    
+                signal["sendable"] = True
+                signal["valid"] = True
+    
+                print(
+                    f"[SMART_BUILDUP_ROUTE] "
+                    f"{instId}",
+                    flush=True
+                )
         
             else:
         
