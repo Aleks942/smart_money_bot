@@ -19908,9 +19908,9 @@ def build_market_interpretation(sig):
 
        if "MTF_LONG_ALIGN" in flags:
         
-            thoughts.append(
-                "👑 покупатели контролируют ситуацию"
-            )
+           thoughts.append(
+               "👑 покупатели контролируют ситуацию"
+           )
         
         elif "MTF_SHORT_ALIGN" in flags:
         
