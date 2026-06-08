@@ -22261,7 +22261,18 @@ if __name__ == "__main__":
                     f"stage={sig.get('stage')}",
                     flush=True
                 )
-            
+
+                # =====================
+                # LOW SCORE FILTER
+                # =====================
+                if score < 40:
+                    print(
+                        f"[EARLY_SKIP_LOW_SCORE] "
+                        f"{instId} score={score}",
+                        flush=True
+                    )
+                    continue
+                    
                 early_ok = (
             
                     ep_score >= 5
