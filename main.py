@@ -16999,11 +16999,21 @@ def get_market_candidates_bybit():
                 continue
 
         instId = sym
+
+        print(
+            f"[SCAN_STATS] "
+            f"symbols={len(symbols)} "
+            f"raw_candidates={len(raw_candidates)}",
+            flush=True
+        )
         raw_candidates.append((instId, vol_usdt, pct))
+
+    
 
     # =====================
     # ВНЕ ЦИКЛА
     # =====================
+    
     print(f"[DEBUG] raw_candidates before filter: {len(raw_candidates)}", flush=True)
 
     if not raw_candidates:
