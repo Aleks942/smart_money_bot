@@ -3545,6 +3545,46 @@ def analyze_entry_quality_v2(signal):
             entry_quality_score += 2
             entry_quality_reasons.append("поток денег формируется")
 
+
+        # =====================
+        # STOP HUNT QUALITY
+        # =====================
+        
+        if signal.get("stop_hunt_state") == "ACTIVE_STOP_HUNT":
+        
+            entry_quality_score += 4
+        
+            entry_quality_reasons.append(
+                "обнаружен активный stop hunt"
+            )
+        
+        elif signal.get("stop_hunt_state") == "PROBABLE_STOP_HUNT":
+        
+            entry_quality_score += 2
+        
+            entry_quality_reasons.append(
+                "возможен stop hunt"
+            )
+        
+        # =====================
+        # LIQUIDITY QUALITY
+        # =====================
+        
+        if "NEAR_LIQUIDITY_ABOVE" in flags:
+        
+            entry_quality_score += 3
+        
+            entry_quality_reasons.append(
+                "ликвидность сверху очень близко"
+            )
+        
+        if "NEAR_LIQUIDITY_BELOW" in flags:
+        
+            entry_quality_score += 3
+        
+            entry_quality_reasons.append(
+                "ликвидность снизу очень близко"
+            )
         # =====================
         # CVD ALIGNMENT
         # =====================
