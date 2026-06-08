@@ -22206,7 +22206,7 @@ if __name__ == "__main__":
             elif score >= 5:
                 sig["tier"] = "🟡 СИГНАЛ"
 
-            elif score >= 1 or ep_score >= 5 or acc_score >= 2:
+            elif score >= 40 or ep_score >= 10 or acc_score >= 3:
                 sig["tier"] = "🟠 РАННИЙ"
 
             else:
