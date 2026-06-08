@@ -3480,16 +3480,22 @@ def analyze_entry_quality_v2(signal):
         # =====================
 
         if smart_money_state == "STRONG_SMART_MONEY":
-            entry_quality_score += 3
-            entry_quality_reasons.append("smart money подтверждает сетап")
-
+            entry_quality_score += 6
+            entry_quality_reasons.append(
+                "smart money подтверждает сетап"
+            )
+        
         elif smart_money_state == "BUILDING_SMART_MONEY":
-            entry_quality_score += 2
-            entry_quality_reasons.append("smart money начинает подтверждать сетап")
-
+            entry_quality_score += 4
+            entry_quality_reasons.append(
+                "smart money начинает подтверждать сетап"
+            )
+        
         elif smart_money_state == "WEAK_SMART_MONEY":
             entry_quality_score -= 3
-            entry_quality_reasons.append("smart money слабый")
+            entry_quality_reasons.append(
+                "smart money слабый"
+            )
 
         # =====================
         # FLOW QUALITY
