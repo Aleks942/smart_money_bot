@@ -15840,6 +15840,10 @@ def build_signal(instId):
     acc = float(
         signal.get("acc_score") or 0
     )
+
+    ema_distance = float(
+        signal.get("ema_distance_pct") or 999
+    )
     # =====================
     # EXPANSION RETEST EXCEPTION
     # =====================
