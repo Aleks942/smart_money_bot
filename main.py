@@ -16644,9 +16644,29 @@ def build_signal(instId):
             or (
 
                 signal.get("signal_mode") == "EXPANSION"
-
-                and ep >= 8
-
+            
+                and (
+            
+                    ep >= 8
+            
+                    or (
+            
+                        signal.get("flow_state")
+                        in (
+                            "BUILDING_MONEY_FLOW",
+                            "STRONG_MONEY_FLOW"
+                        )
+            
+                        and signal.get("smart_money_state")
+                        in (
+                            "BUILDING_SMART_MONEY",
+                            "STRONG_SMART_MONEY"
+                        )
+            
+                    )
+            
+                )
+            
             )
 
             or (
