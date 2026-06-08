@@ -19826,9 +19826,60 @@ def build_market_interpretation(sig):
         oi = float(
             sig.get("oi_change") or 0
         )
-
+        
         thoughts = []
 
+        # =====================
+        # LIQUIDITY TARGET
+        # =====================
+        
+        dist_above = float(
+            sig.get("dist_above_pct") or 999
+        )
+        
+        dist_below = float(
+            sig.get("dist_below_pct") or 999
+        )
+        
+        if dist_above < dist_below:
+        
+            thoughts.append(
+                f"ближайшая ликвидность сверху ({round(dist_above,1)}%)"
+            )
+        
+        elif dist_below < dist_above:
+        
+            thoughts.append(
+                f"ближайшая ликвидность снизу ({round(dist_below,1)}%)"
+            )
+
+        # =====================
+        # LIQUIDITY MAGNET
+        # =====================
+        
+        if (
+        
+            dist_above <= 2
+        
+            and dist_above < dist_below
+        
+        ):
+        
+            thoughts.append(
+                "рынок может тянуться к ликвидности сверху"
+            )
+        
+        elif (
+        
+            dist_below <= 2
+        
+            and dist_below < dist_above
+        
+        ):
+        
+            thoughts.append(
+                "рынок может тянуться к ликвидности снизу"
+            )
         # =====================
         # MARKET CONTROL
         # =====================
