@@ -2902,6 +2902,14 @@ def merge_flow_with_oi(sig):
         flow_state = str(sig.get("flow_state") or "")
         oi_state = str(sig.get("oi_state") or "NEUTRAL")
 
+        real_money_confirm = False
+
+        if oi_state in (
+            "NEW_LONGS",
+            "NEW_SHORTS"
+        ):
+            real_money_confirm = True
+
         direction = str(
             sig.get("direction_code")
             or sig.get("direction")
