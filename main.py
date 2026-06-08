@@ -17001,9 +17001,10 @@ def get_market_candidates_bybit():
         instId = sym
 
         print(
-            f"[SCAN_STATS] "
-            f"symbols={len(symbols)} "
-            f"raw_candidates={len(raw_candidates)}",
+            f"[RAW_ADD] "
+            f"{instId} "
+            f"vol={round(vol_usdt)} "
+            f"pct={round(pct,2)}",
             flush=True
         )
         raw_candidates.append((instId, vol_usdt, pct))
