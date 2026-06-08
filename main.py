@@ -2972,24 +2972,25 @@ def merge_flow_with_oi(sig):
             reasons.append("есть сжатие и удержание цены крупным участником")
             flags.add("SMART_MONEY_ACCUMULATION_CONTEXT")
 
-        if (
-            smart_money_score >= 10
-            and real_money_confirm
-        ):
+        if smart_money_score >= 12:
+
             smart_money_state = "STRONG_SMART_MONEY"
         
-        elif smart_money_score >= 7:
+        elif smart_money_score >= 8:
+        
             smart_money_state = "BUILDING_SMART_MONEY"
         
         elif smart_money_score >= 4:
+        
             smart_money_state = "EARLY_SMART_MONEY"
         
         elif smart_money_score <= 1:
+        
             smart_money_state = "WEAK_SMART_MONEY"
-        elif smart_money_score >= 4:
-            smart_money_state = "EARLY_SMART_MONEY"
-        elif smart_money_score <= 1:
-            smart_money_state = "WEAK_SMART_MONEY"
+                elif smart_money_score >= 4:
+                    smart_money_state = "EARLY_SMART_MONEY"
+                elif smart_money_score <= 1:
+                    smart_money_state = "WEAK_SMART_MONEY"
 
         sig["smart_money_score"] = smart_money_score
         sig["smart_money_state"] = smart_money_state
