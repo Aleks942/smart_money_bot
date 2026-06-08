@@ -2986,10 +2986,10 @@ def merge_flow_with_oi(sig):
         
         elif smart_money_score <= 1:
             smart_money_state = "WEAK_SMART_MONEY"
-                elif smart_money_score >= 4:
-                    smart_money_state = "EARLY_SMART_MONEY"
-                elif smart_money_score <= 1:
-                    smart_money_state = "WEAK_SMART_MONEY"
+        elif smart_money_score >= 4:
+            smart_money_state = "EARLY_SMART_MONEY"
+        elif smart_money_score <= 1:
+            smart_money_state = "WEAK_SMART_MONEY"
 
         sig["smart_money_score"] = smart_money_score
         sig["smart_money_state"] = smart_money_state
