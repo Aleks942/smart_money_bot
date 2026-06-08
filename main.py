@@ -16205,8 +16205,12 @@ def build_signal(instId):
     
             if (
     
-                signal.get("smart_money_state")
-                == "STRONG_SMART_MONEY"
+                signal.get("smart_money_state") in (
+
+                    "BUILDING_SMART_MONEY",
+                    "STRONG_SMART_MONEY"
+                
+                )
     
                 and signal.get("flow_state") in (
                     "STRONG_MONEY_FLOW",
