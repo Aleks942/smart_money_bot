@@ -3002,7 +3002,7 @@ def merge_flow_with_oi(sig):
         
             smart_money_state = "WEAK_SMART_MONEY"
                 
-
+        sig["real_money_confirm"] = real_money_confirm
         sig["smart_money_score"] = smart_money_score
         sig["smart_money_state"] = smart_money_state
         sig["smart_money_reasons"] = reasons
