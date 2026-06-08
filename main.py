@@ -16188,6 +16188,20 @@ def build_signal(instId):
 
             ):
 
+                if signal.get("smart_money_state") not in (
+
+                    "BUILDING_SMART_MONEY",
+                    "STRONG_SMART_MONEY"
+                
+                ):
+                
+                    print(
+                        f"[NO_REAL_MONEY_BLOCK] "
+                        f"{instId}",
+                        flush=True
+                    )
+                
+                    return None
                 signal["signal_group"] = "PRE_SWING"
 
                 signal["sendable"] = True
@@ -16198,7 +16212,7 @@ def build_signal(instId):
                     f"{symbol}",
                     flush=True
                 )
-
+             
             # =====================
             # SMART BUILDUP ROUTING
             # =====================
