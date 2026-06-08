@@ -3497,11 +3497,11 @@ def analyze_entry_quality_v2(signal):
                 "появляются первые признаки smart money"
             )
 
-elif smart_money_state == "WEAK_SMART_MONEY":
-    entry_quality_score -= 4
-    entry_quality_reasons.append(
-        "smart money слабый"
-    )
+        elif smart_money_state == "WEAK_SMART_MONEY":
+            entry_quality_score -= 4
+            entry_quality_reasons.append(
+                "smart money слабый"
+            )
 
         # =====================
         # FLOW QUALITY
