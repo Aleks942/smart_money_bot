@@ -19906,22 +19906,16 @@ def build_market_interpretation(sig):
         # MTF ALIGNMENT
         # =====================
 
-        if "MTF_LONG_ALIGN" in flags:
-
+       if "MTF_LONG_ALIGN" in flags:
+        
             thoughts.append(
-                "📈 старшие таймфреймы поддерживают рост"
+                "👑 покупатели контролируют ситуацию"
             )
-
+        
         elif "MTF_SHORT_ALIGN" in flags:
-
+        
             thoughts.append(
-                "📉 старшие таймфреймы поддерживают снижение"
-            )
-
-        else:
-
-            thoughts.append(
-                "⚠️ между таймфреймами нет единого мнения"
+                "🔻 продавцы контролируют ситуацию"
             )
 
         # =====================
