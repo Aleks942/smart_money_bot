@@ -15906,7 +15906,7 @@ def build_signal(instId):
 
         )
 
-        and ema_distance_pct <= 1.0
+        and ema_distance <= 1.0
 
     ):
 
