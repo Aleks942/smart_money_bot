@@ -16809,18 +16809,29 @@ def build_signal(instId):
         elif (
 
             signal.get("entry") == "WATCH_BUILDUP"
-
-            and signal.get("flow_state")
-            == "BUILDING_MONEY_FLOW"
-
-            and signal.get("stop_hunt_state")
-            == "PROBABLE_STOP_HUNT"
-            
+        
+            and signal.get("flow_state") in (
+                "BUILDING_MONEY_FLOW",
+                "STRONG_MONEY_FLOW"
+            )
+        
             and signal.get("smart_money_state") in (
                 "BUILDING_SMART_MONEY",
                 "STRONG_SMART_MONEY"
             )
-
+        
+            and (
+                signal.get("stop_hunt_state") in (
+                    "PROBABLE_STOP_HUNT",
+                    "ACTIVE_STOP_HUNT"
+                )
+        
+                or "RANGE_COMPRESSION" in flags
+                or "TIGHT_RANGE" in flags
+                or "COMP_PRO_5M" in flags
+                or "COMP_PRO_15M" in flags
+            )
+        
         ):
 
             signal["sendable"] = True
