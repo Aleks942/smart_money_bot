@@ -4237,28 +4237,30 @@ def track_missed_setup(
         )
 
 
+# =========================
+# SIGNAL COOLDOWN
+# =========================
 
-SIGNAL_COOLDOWN = 1800   # 30 минут
+SIGNAL_COOLDOWN = 900   # 15 минут
 
-def can_send(symbol):
+LAST_SENT = {}
+
+def can_send(symbol, sec=SIGNAL_COOLDOWN):
+
     now = time.time()
+
     last = LAST_SENT.get(symbol, 0)
 
-    if now - last < SIGNAL_COOLDOWN:
-
-        print(
-            "[COOLDOWN]",
-            symbol,
-            round(now - last)
-        )
-
+    if now - last < sec:
         return False
 
     LAST_SENT[symbol] = now
+
     return True
 
 
 load_dotenv()
+
 wall_tracker = WallTracker()
 
 # =========================
