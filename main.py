@@ -15976,11 +15976,24 @@ def build_signal(instId):
     
         )
     
-        and signal.get("stop_hunt_state") in (
-    
-            "ACTIVE_STOP_HUNT",
-            "PROBABLE_STOP_HUNT"
-    
+        and (
+
+            signal.get("stop_hunt_state") in (
+        
+                "PROBABLE_STOP_HUNT",
+                "ACTIVE_STOP_HUNT"
+        
+            )
+        
+            or signal.get("retest_state") in (
+        
+                "RETEST_BUILDUP",
+                "STRONG_RETEST"
+        
+            )
+        
+            or signal.get("real_money_confirm") is True
+        
         )
     
         and (
