@@ -16188,14 +16188,14 @@ def build_signal(instId):
         # =====================
         
         if (
-
+        
             (
                 signal.get("signal_mode") == "EXPANSION"
                 or "EXPANSION" in stage
             )
         
             and ep >= 10
-
+        
             and expansion_quality
         
             and not signal.get("late_move")
@@ -16220,7 +16220,7 @@ def build_signal(instId):
             )
         
         if signal.get("signal_group") is None:
-
+        
             pressure_persist = any(
                 x in flags
                 for x in [
@@ -16231,64 +16231,68 @@ def build_signal(instId):
         
             range_compression = (
                 "RANGE_COMPRESSION" in flags
+                or "TIGHT_RANGE" in flags
             )
         
             if (
-
+        
                 (
-
+        
                     ep >= 10
                     and acc >= 2
-
+        
                 )
-
+        
                 or (
-
-                    signal.get("flow_state")
-                    == "BUILDING_MONEY_FLOW"
-
+        
+                    signal.get("flow_state") in (
+        
+                        "BUILDING_MONEY_FLOW",
+                        "STRONG_MONEY_FLOW"
+        
+                    )
+        
                     and signal.get("smart_money_state") in (
-
+        
                         "BUILDING_SMART_MONEY",
                         "STRONG_SMART_MONEY"
-
+        
                     )
-
-                    and signal.get("stop_hunt_state") in (
-
-                        "PROBABLE_STOP_HUNT",
-                        "ACTIVE_STOP_HUNT"
-
+        
+                    and (
+        
+                        signal.get("stop_hunt_state") in (
+        
+                            "PROBABLE_STOP_HUNT",
+                            "ACTIVE_STOP_HUNT"
+        
+                        )
+        
+                        or signal.get("retest_state") in (
+        
+                            "RETEST_BUILDUP",
+                            "STRONG_RETEST"
+        
+                        )
+        
+                        or signal.get("real_money_confirm") is True
+        
                     )
-
+        
                 )
-
+        
             ) and (
-
+        
                 pressure_persist
                 or range_compression
-
+        
             ):
-
-                if signal.get("smart_money_state") not in (
-
-                    "BUILDING_SMART_MONEY",
-                    "STRONG_SMART_MONEY"
-                
-                ):
-                
-                    print(
-                        f"[NO_REAL_MONEY_BLOCK] "
-                        f"{instId}",
-                        flush=True
-                    )
-                
-                    return None
+        
                 signal["signal_group"] = "PRE_SWING"
-
+        
                 signal["sendable"] = True
                 signal["valid"] = True
-
+        
                 print(
                     f"[FORCE_PRE_SWING] "
                     f"{symbol}",
