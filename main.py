@@ -21397,7 +21397,44 @@ if __name__ == "__main__":
                         f"{instId}",
                         flush=True
                     )
+
+                    # =====================
+                    # SMART MONEY A+ FILTER
+                    # =====================
                     
+                    smart_money_a_plus = False
+                    
+                    if (
+                        abs(oi) >= 0.30
+                        and ep >= 15
+                        and sig.get("flow_state") in (
+                            "BUILDING_MONEY_FLOW",
+                            "STRONG_MONEY_FLOW"
+                        )
+                    ):
+                    
+                        smart_money_a_plus = True
+                    
+                    elif (
+                        abs(oi) >= 0.20
+                        and ep >= 20
+                        and energy_stack >= 5
+                    ):
+                    
+                        smart_money_a_plus = True
+                    
+                    sig["smart_money_a_plus"] = smart_money_a_plus
+                    
+                    if smart_money_a_plus:
+                    
+                        print(
+                            f"[SMART_MONEY_A_PLUS] "
+                            f"{instId} "
+                            f"oi={oi} "
+                            f"ep={ep} "
+                            f"stack={energy_stack}",
+                            flush=True
+                        )
                     # =====================
                     # DROP LOW VALUE CLONES
                     # =====================
