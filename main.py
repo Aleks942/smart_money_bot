@@ -21348,7 +21348,7 @@ if __name__ == "__main__":
                     # =====================
                     
                     capital_ok = False
-                    
+
                     if abs(oi) >= 0.50:
                     
                         capital_ok = True
@@ -21365,13 +21365,13 @@ if __name__ == "__main__":
                         and ep >= 15
                         and energy_stack >= 5
                     ):
-
+                    
+                        capital_ok = True
+                    
                     elif (
                         score >= 35
                         and ep >= 15
                     ):
-                        capital_ok = True   
-                        capital_ok = True
                     
                         capital_ok = True
                     
