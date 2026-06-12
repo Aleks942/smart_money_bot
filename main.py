@@ -20845,12 +20845,14 @@ if __name__ == "__main__":
 
                     if acc >= 4:
                         quality_points += 4
-
+                    
                     elif acc >= 3:
                         quality_points += 3
-
+                    
                     elif acc >= 2:
-
+                        quality_points += 1
+                    
+                    else:
                         quality_points -= 1
 
                     # =====================
@@ -20874,7 +20876,7 @@ if __name__ == "__main__":
 
                     else:
 
-                        quality_points -= 3
+                        quality_points -= 1
 
                         print(
                             f"[LOW_OI_PENALTY] "
@@ -21065,9 +21067,9 @@ if __name__ == "__main__":
                             flush=True
                         )
 
-                    elif energy_stack >= 5:
+                    elif energy_stack >= 4:
 
-                        quality_points += 2
+                        quality_points += 1
 
                         print(
                             f"[ENERGY_STACK_STRONG] "
