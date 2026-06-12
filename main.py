@@ -18343,11 +18343,20 @@ def msg_pre_swing(sig):
         oi_text = "нет данных"
 
     else:
-    
-        oi_text = f"{oi}%"
-    
-    interpretation = build_market_interpretation(sig)
-    return f"""
+
+    oi_text = f"{oi}%"
+
+a_plus = sig.get("smart_money_a_plus")
+
+a_plus_text = ""
+
+if a_plus:
+
+    a_plus_text = "\n🏆 Smart Money A+"
+
+interpretation = build_market_interpretation(sig)
+
+return f"""
 {level_icon} <b>{level_text} — {symbol}</b>
 
 🧭 Направление: {side}
@@ -18355,7 +18364,9 @@ def msg_pre_swing(sig):
 📊 Score: {round(score, 1)}
 ⚡ EP: {ep}
 🧱 Accumulation: {acc}
+
 🟡 OI: {oi_text}
+{a_plus_text}
 
 🎯 Entry:
 {entry}
