@@ -21268,6 +21268,7 @@ if __name__ == "__main__":
                         f"entry={entry}",
                         flush=True
                     )
+                    
                     # =====================
                     # LIQUIDATION BONUS
                     # =====================
@@ -21331,35 +21332,44 @@ if __name__ == "__main__":
                             f"{instId}",
                             flush=True
                         )
+                    
+                    print(
+                        f"[BEFORE_CAPITAL_GATE] "
+                        f"{instId} "
+                        f"group={sig.get('signal_group')} "
+                        f"valid={sig.get('valid')} "
+                        f"sendable={sig.get('sendable')} "
+                        f"score={score}",
+                        flush=True
+                    )
+                    
                     # =====================
                     # CAPITAL GATE FILTER
                     # =====================
-
+                    
                     capital_ok = False
-
-                    if (
-                        abs(oi) >= 0.50
-                    ):
-
+                    
+                    if abs(oi) >= 0.50:
+                    
                         capital_ok = True
-
+                    
                     elif (
                         abs(oi) >= 0.25
                         and quality_points >= 10
                     ):
-
+                    
                         capital_ok = True
-
+                    
                     elif (
                         acc >= 3
                         and ep >= 20
                         and energy_stack >= 5
                     ):
-
+                    
                         capital_ok = True
-
+                    
                     if not capital_ok:
-
+                    
                         print(
                             f"[CAPITAL_GATE_SKIP] "
                             f"{instId} "
@@ -21370,8 +21380,15 @@ if __name__ == "__main__":
                             f"stack={energy_stack}",
                             flush=True
                         )
-
+                    
                         continue
+                    
+                    print(
+                        f"[AFTER_CAPITAL_GATE] "
+                        f"{instId}",
+                        flush=True
+                    )
+                    
                     # =====================
                     # DROP LOW VALUE CLONES
                     # =====================
