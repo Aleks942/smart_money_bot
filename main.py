@@ -20753,39 +20753,57 @@ if __name__ == "__main__":
                     # =====================
                     # LOW ENERGY FILTER
                     # =====================
-
+                    
                     flags = set(sig.get("flags", []))
-
+                    
                     weak_energy = (
-
+                    
                         "ACCELERATION_UP" not in flags
                         and "ACCELERATION_DOWN" not in flags
-
+                    
                         and "EXPLOSION_READY_UP" not in flags
                         and "EXPLOSION_READY_DOWN" not in flags
-
+                    
                         and "LAUNCH_PROXIMITY_UP" not in flags
                         and "LAUNCH_PROXIMITY_DOWN" not in flags
-
+                    
                         and "MTF_LONG_ALIGN" not in flags
                         and "MTF_SHORT_ALIGN" not in flags
                     )
-
+                    
                     oi = float(sig.get("oi_change") or 0)
-
+                    
                     if weak_energy and abs(oi) < 0.15:
-
-                        print(
-                            f"[SKIP_LOW_ENERGY] "
-                            f"{instId}",
-                            flush=True
-                        )
-
-                        continue
-
+                    
+                        if (
+                            sig.get("signal_mode") == "PREMOVE"
+                            and sig.get("flow_state") in (
+                                "BUILDING_MONEY_FLOW",
+                                "STRONG_MONEY_FLOW"
+                            )
+                            and sig.get("smart_money_state") in (
+                                "BUILDING_SMART_MONEY",
+                                "STRONG_SMART_MONEY"
+                            )
+                        ):
+                    
+                            print(
+                                f"[LOW_ENERGY_PREMOVE_BYPASS] {instId}",
+                                flush=True
+                            )
+                    
+                        else:
+                    
+                            print(
+                                f"[SKIP_LOW_ENERGY] {instId}",
+                                flush=True
+                            )
+                    
+                            continue
+                    
                     # =====================
                     # FINAL QUALITY SELECTOR
-                    # =====================
+                    # ===================== 
 
                     flags = set(sig.get("flags", []))
 
