@@ -21361,10 +21361,17 @@ if __name__ == "__main__":
                         capital_ok = True
                     
                     elif (
-                        acc >= 3
-                        and ep >= 20
+                        acc >= 2
+                        and ep >= 15
                         and energy_stack >= 5
                     ):
+
+                    elif (
+                        score >= 35
+                        and ep >= 15
+                    ):
+                        capital_ok = True   
+                        capital_ok = True
                     
                         capital_ok = True
                     
