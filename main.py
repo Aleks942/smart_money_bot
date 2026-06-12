@@ -21410,6 +21410,28 @@ if __name__ == "__main__":
                     ):
                     
                         capital_ok = True
+
+                    elif (
+                        sig.get("signal_mode") in (
+                            "PREMOVE",
+                            "TRANSITION"
+                        )
+                        and sig.get("flow_state") in (
+                            "BUILDING_MONEY_FLOW",
+                            "STRONG_MONEY_FLOW"
+                        )
+                        and sig.get("smart_money_state") in (
+                            "BUILDING_SMART_MONEY",
+                            "STRONG_SMART_MONEY"
+                        )
+                        and sig.get("retest_state") in (
+                            "RETEST_BUILDUP",
+                            "STRONG_RETEST"
+                        )
+                        and ep >= 8
+                        and acc >= 2
+                    ):
+                        capital_ok = True
                     
                     if not capital_ok:
                     
