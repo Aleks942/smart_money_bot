@@ -20776,7 +20776,10 @@ if __name__ == "__main__":
                     if weak_energy and abs(oi) < 0.15:
                     
                         if (
-                            sig.get("signal_mode") == "PREMOVE"
+                            sig.get("signal_mode") in (
+                                "PREMOVE",
+                                "TRANSITION"
+                            )
                             and sig.get("flow_state") in (
                                 "BUILDING_MONEY_FLOW",
                                 "STRONG_MONEY_FLOW"
