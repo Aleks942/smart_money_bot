@@ -21412,29 +21412,25 @@ if __name__ == "__main__":
                     )
 
                     # =====================
-                    # SMART MONEY A+ FILTER
+                    # SMART MONEY A+
                     # =====================
                     
-                    smart_money_a_plus = False
+                    smart_money_a_plus = (
                     
-                    if (
-                        abs(oi) >= 0.30
-                        and ep >= 15
+                        score >= 35
+                    
+                        and ep >= 18
+                    
+                        and energy_stack >= 5
+                    
                         and sig.get("flow_state") in (
+                    
                             "BUILDING_MONEY_FLOW",
                             "STRONG_MONEY_FLOW"
+                    
                         )
-                    ):
                     
-                        smart_money_a_plus = True
-                    
-                    elif (
-                        abs(oi) >= 0.20
-                        and ep >= 20
-                        and energy_stack >= 5
-                    ):
-                    
-                        smart_money_a_plus = True
+                    )
                     
                     sig["smart_money_a_plus"] = smart_money_a_plus
                     
@@ -21443,7 +21439,7 @@ if __name__ == "__main__":
                         print(
                             f"[SMART_MONEY_A_PLUS] "
                             f"{instId} "
-                            f"oi={oi} "
+                            f"score={score} "
                             f"ep={ep} "
                             f"stack={energy_stack}",
                             flush=True
