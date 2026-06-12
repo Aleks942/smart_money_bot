@@ -18344,7 +18344,7 @@ def msg_pre_swing(sig):
 
     else:
 
-    oi_text = f"{oi}%"
+        oi_text = f"{oi}%"
 
     a_plus = sig.get("smart_money_a_plus")
     
