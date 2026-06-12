@@ -18346,42 +18346,42 @@ def msg_pre_swing(sig):
 
     oi_text = f"{oi}%"
 
-a_plus = sig.get("smart_money_a_plus")
-
-a_plus_text = ""
-
-if a_plus:
-
-    a_plus_text = "\n🏆 Smart Money A+"
-
-interpretation = build_market_interpretation(sig)
-
-return f"""
-{level_icon} <b>{level_text} — {symbol}</b>
-
-🧭 Направление: {side}
-
-📊 Score: {round(score, 1)}
-⚡ EP: {ep}
-🧱 Accumulation: {acc}
-
-🟡 OI: {oi_text}
-{a_plus_text}
-
-🎯 Entry:
-{entry}
-
-🧬 Stage:
-{stage}
-
-🧠 Что происходит:
-{story_text}
-
-🧠 Вывод:
-{interpretation}
-
-⚠️ Это ранняя swing-фаза ДО полноценного импульса.
-""".strip()
+    a_plus = sig.get("smart_money_a_plus")
+    
+    a_plus_text = ""
+    
+    if a_plus:
+    
+        a_plus_text = "\n🏆 Smart Money A+"
+    
+    interpretation = build_market_interpretation(sig)
+    
+    return f"""
+    {level_icon} <b>{level_text} — {symbol}</b>
+    
+    🧭 Направление: {side}
+    
+    📊 Score: {round(score, 1)}
+    ⚡ EP: {ep}
+    🧱 Accumulation: {acc}
+    
+    🟡 OI: {oi_text}
+    {a_plus_text}
+    
+    🎯 Entry:
+    {entry}
+    
+    🧬 Stage:
+    {stage}
+    
+    🧠 Что происходит:
+    {story_text}
+    
+    🧠 Вывод:
+    {interpretation}
+    
+    ⚠️ Это ранняя swing-фаза ДО полноценного импульса.
+    """.strip()
 
 def summary_message(alerts, cycle_info, regime):
 
