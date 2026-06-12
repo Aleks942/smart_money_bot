@@ -22839,7 +22839,14 @@ if __name__ == "__main__":
                     continue
 
                 
-            
+                print(
+                    f"[TG_STAGE] "
+                    f"{sid} "
+                    f"stage={sig.get('stage')} "
+                    f"mode={sig.get('signal_mode')} "
+                    f"entry={sig.get('entry')}",
+                    flush=True
+                )
                 send_telegram(
             
                     f"⚠️ <b>PREMOVE — {sid}</b>\n\n"
