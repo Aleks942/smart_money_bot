@@ -5508,6 +5508,8 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         # OI INTELLIGENCE
         # =====================
         oi = sig.get("oi_change")
+
+        a_plus = sig.get("smart_money_a_plus")
         
         try:
             oi = float(oi)
