@@ -21444,6 +21444,8 @@ if __name__ == "__main__":
                             f"stack={energy_stack}",
                             flush=True
                         )
+
+                    
                     # =====================
                     # DROP LOW VALUE CLONES
                     # =====================
