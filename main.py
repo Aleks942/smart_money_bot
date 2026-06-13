@@ -21748,6 +21748,24 @@ if __name__ == "__main__":
                             )
                         
                             continue
+
+                        signal_icon, signal_title = get_signal_level(sig)
+
+                        if signal_title not in (
+                        
+                            "ОЧЕНЬ СИЛЬНЫЙ СИГНАЛ",
+                            "СИЛЬНЫЙ СИГНАЛ"
+                        
+                        ):
+                        
+                            print(
+                                f"[SKIP_WEAK_TG] "
+                                f"{instId} "
+                                f"level={signal_title}",
+                                flush=True
+                            )
+                        
+                            continue
                         send_telegram(msg)
                 
                         scalp_sent_this_cycle += 1
