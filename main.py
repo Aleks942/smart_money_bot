@@ -21775,6 +21775,20 @@ if __name__ == "__main__":
                             )
                         
                             continue
+
+                        # =========================
+                        # A+ ONLY FILTER
+                        # =========================
+                        
+                        if not sig.get("smart_money_a_plus"):
+                        
+                            print(
+                                f"[SKIP_NOT_A_PLUS] "
+                                f"{instId}",
+                                flush=True
+                            )
+                        
+                            continue
                         send_telegram(msg)
                 
                         scalp_sent_this_cycle += 1
