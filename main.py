@@ -19662,8 +19662,17 @@ def get_signal_level(sig):
         # STRONG
         # =====================
 
-        if elite_score >= 8:
+        
+        if (
 
+            elite_score >= 10
+        
+            and ep >= 15
+        
+            and acc >= 2
+        
+        ):
+        
             return (
                 "🟡",
                 "СИЛЬНЫЙ СИГНАЛ"
