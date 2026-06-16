@@ -21498,15 +21498,15 @@ if __name__ == "__main__":
                             flush=True
                         )
                     
-                        print(
-                            f"[A_PLUS_DEBUG] "
-                            f"{instId} "
-                            f"score={score} "
-                            f"ep={ep} "
-                            f"stack={energy_stack} "
-                            f"flow={sig.get('flow_state')}",
-                            flush=True
-                        )
+                    print(
+                        f"[A_PLUS_DEBUG] "
+                        f"{instId} "
+                        f"score={score} "
+                        f"ep={ep} "
+                        f"stack={energy_stack} "
+                        f"flow={sig.get('flow_state')}",
+                        flush=True
+                    )
                     # =====================
                     # DROP LOW VALUE CLONES
                     # =====================
