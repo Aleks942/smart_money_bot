@@ -21468,10 +21468,12 @@ if __name__ == "__main__":
                     # =====================
                     
                     smart_money_a_plus = (
+
+                        score >= 40
                     
-                        score >= 35
+                        and ep >= 20
                     
-                        and ep >= 18
+                        and acc >= 2
                     
                         and energy_stack >= 5
                     
@@ -21483,7 +21485,6 @@ if __name__ == "__main__":
                         )
                     
                     )
-                    
                     sig["smart_money_a_plus"] = smart_money_a_plus
                     
                     if smart_money_a_plus:
