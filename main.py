@@ -21466,22 +21466,17 @@ if __name__ == "__main__":
                     # =====================
                     # SMART MONEY A+
                     # =====================
-                    
+
                     smart_money_a_plus = (
 
                         score >= 40
-                    
                         and ep >= 20
-                    
                         and acc >= 2
-                    
                         and energy_stack >= 5
                     
-                        and sig.get("flow_state") in (
-                    
-                            "BUILDING_MONEY_FLOW",
-                            "STRONG_MONEY_FLOW"
-                    
+                        and (
+                            abs(oi) >= 0.15
+                            or quality_points >= 14
                         )
                     
                     )
