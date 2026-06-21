@@ -20812,34 +20812,39 @@ if __name__ == "__main__":
                             flush=True
                         )
 
-                    # =====================
-                    # POST BUILD DEBUG
-                    # =====================
-
-                    print(
-                        f"[POST_BUILD] "
-                        f"{instId} "
-                        f"sig={bool(sig)} "
-                        f"group={sig.get('signal_group') if isinstance(sig, dict) else None} "
-                        f"mode={sig.get('signal_mode') if isinstance(sig, dict) else None} "
-                        f"premove={sig.get('premove_confirmed') if isinstance(sig, dict) else None} "
-                        f"scalp={sig.get('scalp_candidate') if isinstance(sig, dict) else None}",
-                        flush=True
-                    )
-
-
                     flags = set(sig.get("flags", []))
 
+                    # =====================
+                    # SKIP LATE EXPANSION
+                    # =====================
+                    
                     if (
                         sig.get("signal_mode") == "EXPANSION"
                         and "COMP_PRO_5M" not in flags
                         and "COMP_PRO_15M" not in flags
                     ):
+                    
+                        score = float(sig.get("score") or 0)
+                        ep = float(sig.get("early_pressure_score") or 0)
+                        oi = abs(float(sig.get("oi_change") or 0))
+                    
+                        if (
+                            score < 25
+                            and ep < 10
+                            and oi < 0.30
+                        ):
+                    
+                            print(
+                                f"[SKIP_LATE_EXPANSION] {instId}",
+                                flush=True
+                            )
+
+                            continue
+                    
                         print(
-                            f"[SKIP_LATE_EXPANSION] {instId}",
+                            f"[EXPANSION_BYPASS] {instId}",
                             flush=True
                         )
-                        continue
                     # =====================
                     # REVERSAL SETUP ENGINE
                     # =====================
