@@ -21571,6 +21571,26 @@ if __name__ == "__main__":
                         and acc >= 2
                     ):
                         capital_ok = True
+
+                    elif (
+                        sig.get("signal_mode") == "WATCH_REVERSAL"
+                        and sig.get("flow_state") in (
+                            "BUILDING_MONEY_FLOW",
+                            "STRONG_MONEY_FLOW"
+                        )
+                        and sig.get("smart_money_state") in (
+                            "BUILDING_SMART_MONEY",
+                            "STRONG_SMART_MONEY"
+                        )
+                        and energy_stack >= 3
+                    ):
+                        capital_ok = True
+                    
+                        print(
+                            f"[WATCH_REVERSAL_CAPITAL_BYPASS] "
+                            f"{instId}",
+                            flush=True
+                        )
                     
                     if not capital_ok:
                     
