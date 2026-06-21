@@ -21668,20 +21668,25 @@ if __name__ == "__main__":
                     # =====================
                     # DROP LOW VALUE CLONES
                     # =====================
-
+                    
+                    is_watch_reversal = (
+                        sig.get("signal_mode") == "WATCH_REVERSAL"
+                    )
+                    
                     if (
                         group == "PRE_SWING"
                         and quality_points < 5
                         and score < 18
+                        and not is_watch_reversal
                     ):
-
+                    
                         print(
                             f"[SKIP_LOW_QUALITY] "
                             f"{instId} "
                             f"qp={quality_points}",
                             flush=True
                         )
-
+                    
                         continue
 
                     # =====================
@@ -21707,13 +21712,17 @@ if __name__ == "__main__":
                     # DROP WEAK PREMOVES
                     # =====================
 
+                    is_watch_reversal = (
+                        sig.get("signal_mode") == "WATCH_REVERSAL"
+                    )
+                    
                     if (
                         is_premove
                         and quality_points < 6
                         and abs(oi) < 0.25
                         and acc < 3
+                        and not is_watch_reversal
                     ):
-
                         print(
                             f"[SKIP_WEAK_PREMOVE_FINAL] "
                             f"{instId} "
