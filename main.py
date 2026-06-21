@@ -21675,8 +21675,8 @@ if __name__ == "__main__":
                     
                     if (
                         group == "PRE_SWING"
-                        and quality_points < 5
-                        and score < 18
+                        and quality_points < 3
+                        and score < 15
                         and not is_watch_reversal
                     ):
                     
