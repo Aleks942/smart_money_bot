@@ -20907,7 +20907,8 @@ if __name__ == "__main__":
                         and abs(oi) < 0.15
                         and sig.get("signal_mode") not in (
                             "PREMOVE",
-                            "TRANSITION"
+                            "TRANSITION",
+                            "WATCH_REVERSAL"
                         )
                     ):
                     
