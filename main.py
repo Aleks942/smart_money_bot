@@ -45,54 +45,79 @@ def classify_signal_mode(sig):
         # =====================
         # PREMOVE FIRST
         # =====================
-
+        
         compression_present = (
-
+        
             "COMP_PRO_5M" in flags
             or "COMP_PRO_15M" in flags
             or "COMP_5M" in flags
             or "COMP_15M" in flags
-
+        
         )
-
+        
+        absorption_present = (
+        
+            "BUYER_ABSORPTION" in flags
+            or "SELLER_ABSORPTION" in flags
+        
+        )
+        
         launch_present = (
-
+        
             "LAUNCH_PROXIMITY_UP" in flags
             or "LAUNCH_PROXIMITY_DOWN" in flags
-
+        
             or "EXPLOSION_READY_UP" in flags
             or "EXPLOSION_READY_DOWN" in flags
-
+        
         )
-
+        
+        # =====================
+        # WATCH REVERSAL
+        # =====================
+        
+        if (
+        
+            compression_present
+            and absorption_present
+            and score >= 10
+        
+        ):
+        
+            return "WATCH_REVERSAL"
+        
         shift_present = (
-
+        
             "BULLISH_SHIFT" in flags
             or "BEARISH_SHIFT" in flags
-
+        
         )
-
+        
+        # =====================
+        # PREMOVE
+        # =====================
+        
         if (
-
+        
             launch_present
-
+        
             or (
-
+        
                 compression_present
                 and shift_present
                 and ep_score >= 8
-
+        
             )
-
+        
             or (
-
+        
                 "ENERGY_BUILDUP" in flags
                 and ep_score >= 10
-
+        
             )
-
+        
         ):
-
+        
             return "PREMOVE"
 
         # =====================
