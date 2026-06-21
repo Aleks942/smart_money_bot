@@ -43,81 +43,56 @@ def classify_signal_mode(sig):
         stage = str(sig.get("stage") or "")
 
         # =====================
-        # PREMOVE FIRST
+        # COMMON FLAGS
         # =====================
-        
+
         compression_present = (
-        
             "COMP_PRO_5M" in flags
             or "COMP_PRO_15M" in flags
             or "COMP_5M" in flags
             or "COMP_15M" in flags
-        
         )
-        
+
         absorption_present = (
-        
             "BUYER_ABSORPTION" in flags
             or "SELLER_ABSORPTION" in flags
-        
         )
-        
+
         launch_present = (
-        
             "LAUNCH_PROXIMITY_UP" in flags
             or "LAUNCH_PROXIMITY_DOWN" in flags
-        
             or "EXPLOSION_READY_UP" in flags
             or "EXPLOSION_READY_DOWN" in flags
-        
         )
-        
-        # =====================
-        # WATCH REVERSAL
-        # =====================
-        
-        if (
-        
-            compression_present
-            and absorption_present
-            and score >= 10
-        
-        ):
-        
-            return "WATCH_REVERSAL"
-        
+
         shift_present = (
-        
             "BULLISH_SHIFT" in flags
             or "BEARISH_SHIFT" in flags
-        
         )
-        
+
+        # =====================
+        # ACCUMULATION = EARLY PREMOVE
+        # =====================
+
+        if "ACCUMULATION" in stage:
+            return "PREMOVE"
+
         # =====================
         # PREMOVE
         # =====================
-        
+
         if (
-        
             launch_present
-        
             or (
-        
                 compression_present
                 and shift_present
                 and ep_score >= 8
-        
             )
-        
             or (
-        
                 "ENERGY_BUILDUP" in flags
                 and ep_score >= 10
-        
             )
-        
         ):
-        
             return "PREMOVE"
 
         # =====================
@@ -134,6 +109,60 @@ def classify_signal_mode(sig):
         if "TRANSITION" in stage:
             return "TRANSITION"
 
+        # =====================
+        # CONFIRMED
+        # =====================
+
+        if (
+            "BREAKOUT_CONFIRM_UP" in flags
+            or "BREAKOUT_CONFIRM_DOWN" in flags
+            or "BOS_UP" in flags
+            or "BOS_DOWN" in flags
+        ):
+            return "CONFIRMED"
+
+        # =====================
+        # CONTINUATION
+        # =====================
+
+        if (
+            "CONTINUATION_UP" in flags
+            or "CONTINUATION_DOWN" in flags
+            or "STRONG_CONTINUATION_UP" in flags
+            or "STRONG_CONTINUATION_DOWN" in flags
+        ):
+            return "CONTINUATION"
+
+        # =====================
+        # WATCH REVERSAL
+        # =====================
+
+        if (
+            compression_present
+            and absorption_present
+            and score >= 10
+            and not launch_present
+            and not shift_present
+        ):
+            return "WATCH_REVERSAL"
+
+        # =====================
+        # WATCH
+        # =====================
+
+        if score >= 6:
+            return "WATCH"
+
+        return "NO_MODE"
+
+    except Exception as e:
+
+        print(
+            f"[SIGNAL_MODE_ERROR] {e}",
+            flush=True
+        )
+
+        return "NO_MODE"
         # =====================
         # ACCUMULATION
         # =====================
@@ -171,23 +200,7 @@ def classify_signal_mode(sig):
 
             return "CONTINUATION"
 
-        # =====================
-        # WATCH
-        # =====================
-
-        if score >= 6:
-            return "WATCH"
-
-        return "NO_MODE"
-
-    except Exception as e:
-
-        print(
-            f"[SIGNAL_MODE_ERROR] {e}",
-            flush=True
-        )
-
-        return "NO_MODE"
+        
 
 
 
