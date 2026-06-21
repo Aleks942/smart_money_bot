@@ -20759,6 +20759,59 @@ if __name__ == "__main__":
                         f"scalp={sig.get('scalp_candidate') if isinstance(sig, dict) else None}",
                         flush=True
                     )
+
+                    # =====================
+                    # REVERSAL SETUP ENGINE
+                    # =====================
+                    
+                    flags = set(sig.get("flags", []))
+                    
+                    has_shift = (
+                        "BULLISH_SHIFT" in flags
+                        or "BEARISH_SHIFT" in flags
+                    )
+                    
+                    has_pressure = (
+                        "PRESSURE_UP" in flags
+                        or "PRESSURE_DOWN" in flags
+                    )
+                    
+                    has_absorption = (
+                        "BUYER_ABSORPTION" in flags
+                        or "SELLER_ABSORPTION" in flags
+                    )
+                    
+                    has_compression = (
+                        "COMP_PRO_5M" in flags
+                        or "COMP_PRO_15M" in flags
+                        or "RANGE_COMPRESSION" in flags
+                        or "TIGHT_RANGE" in flags
+                    )
+                    
+                    reversal_setup = (
+                        has_shift
+                        and has_pressure
+                        and has_absorption
+                        and has_compression
+                        and sig.get("signal_mode") in (
+                            "PREMOVE",
+                            "TRANSITION"
+                        )
+                    )
+                    
+                    sig["reversal_setup"] = reversal_setup
+                    
+                    if reversal_setup:
+                    
+                        print(
+                            f"[REVERSAL_SETUP] "
+                            f"{instId} "
+                            f"mode={sig.get('signal_mode')} "
+                            f"score={sig.get('score')} "
+                            f"ep={sig.get('early_pressure_score')} "
+                            f"acc={sig.get('acc_score')}",
+                            flush=True
+                        )
                     # =====================
                     # LOW ENERGY FILTER
                     # =====================
