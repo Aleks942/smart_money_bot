@@ -21797,7 +21797,7 @@ if __name__ == "__main__":
                             f"{sig.get('entry')}"
                         )
 
-                        if not can_send(symbol_key, 1800):
+                        if not can_send(symbol_key, 600):
 
                             print(
                                 f"[GLOBAL_COOLDOWN_SKIP] "
