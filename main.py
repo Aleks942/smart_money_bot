@@ -16268,7 +16268,7 @@ def build_signal(instId):
         
                 (
         
-                    ep >= 10
+                    ep >= 8
                     and acc >= 2
         
                 )
@@ -16312,10 +16312,16 @@ def build_signal(instId):
                 )
         
             ) and (
-        
+
                 pressure_persist
                 or range_compression
-        
+            
+                or "LAUNCH_PROXIMITY_UP" in flags
+                or "LAUNCH_PROXIMITY_DOWN" in flags
+            
+                or "EXPLOSION_READY_UP" in flags
+                or "EXPLOSION_READY_DOWN" in flags
+            
             ):
         
                 signal["signal_group"] = "PRE_SWING"
