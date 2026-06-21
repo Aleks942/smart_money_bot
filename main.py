@@ -20877,7 +20877,14 @@ if __name__ == "__main__":
                     
                     oi = float(sig.get("oi_change") or 0)
                     
-                    if weak_energy and abs(oi) < 0.15:
+                    if (
+                        weak_energy
+                        and abs(oi) < 0.15
+                        and sig.get("signal_mode") not in (
+                            "PREMOVE",
+                            "TRANSITION"
+                        )
+                    ):
                     
                         if (
                             sig.get("signal_mode") in (
