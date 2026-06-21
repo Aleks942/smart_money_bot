@@ -21872,6 +21872,7 @@ if __name__ == "__main__":
                             and sig.get("signal_mode") not in (
                                 "PREMOVE",
                                 "TRANSITION",
+                                "WATCH_REVERSAL"
                             )
                         ):
                         
