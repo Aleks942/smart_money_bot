@@ -20879,10 +20879,12 @@ if __name__ == "__main__":
                                 "TRANSITION"
                             )
                             and sig.get("flow_state") in (
+                                "EARLY_MONEY_FLOW",
                                 "BUILDING_MONEY_FLOW",
                                 "STRONG_MONEY_FLOW"
                             )
                             and sig.get("smart_money_state") in (
+                                "EARLY_SMART_MONEY",
                                 "BUILDING_SMART_MONEY",
                                 "STRONG_SMART_MONEY"
                             )
