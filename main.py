@@ -20783,6 +20783,19 @@ if __name__ == "__main__":
                         flush=True
                     )
 
+
+                    flags = set(sig.get("flags", []))
+
+                    if (
+                        sig.get("signal_mode") == "EXPANSION"
+                        and "COMP_PRO_5M" not in flags
+                        and "COMP_PRO_15M" not in flags
+                    ):
+                        print(
+                            f"[SKIP_LATE_EXPANSION] {instId}",
+                            flush=True
+                        )
+                        continue
                     # =====================
                     # REVERSAL SETUP ENGINE
                     # =====================
