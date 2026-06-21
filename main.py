@@ -34,30 +34,84 @@ def log(msg, symbol=None, level="INFO"):
 # SIGNAL MODE CLASSIFIER
 # =========================
 def classify_signal_mode(sig):
-    """
-    Определяет тип сигнала:
-    PREMOVE      — подготовка движения
-    TRANSITION   — смена контроля
-    CONFIRMED    — подтверждённое движение
-    CONTINUATION — продолжение уже начатого движения
-    WATCH        — просто наблюдение
-    """
 
     try:
+
         flags = set(sig.get("flags", []))
         score = float(sig.get("score") or 0)
         ep_score = float(sig.get("early_pressure_score") or 0)
         stage = str(sig.get("stage") or "")
 
+        # =====================
+        # PREMOVE FIRST
+        # =====================
+
+        compression_present = (
+
+            "COMP_PRO_5M" in flags
+            or "COMP_PRO_15M" in flags
+            or "COMP_5M" in flags
+            or "COMP_15M" in flags
+
+        )
+
+        launch_present = (
+
+            "LAUNCH_PROXIMITY_UP" in flags
+            or "LAUNCH_PROXIMITY_DOWN" in flags
+
+            or "EXPLOSION_READY_UP" in flags
+            or "EXPLOSION_READY_DOWN" in flags
+
+        )
+
+        shift_present = (
+
+            "BULLISH_SHIFT" in flags
+            or "BEARISH_SHIFT" in flags
+
+        )
+
+        if (
+
+            launch_present
+
+            or (
+
+                compression_present
+                and shift_present
+                and ep_score >= 8
+
+            )
+
+            or (
+
+                "ENERGY_BUILDUP" in flags
+                and ep_score >= 10
+
+            )
+
+        ):
+
+            return "PREMOVE"
 
         # =====================
-        # STAGE FIRST
+        # EXPANSION
         # =====================
+
         if "EXPANSION" in stage:
             return "EXPANSION"
 
+        # =====================
+        # TRANSITION
+        # =====================
+
         if "TRANSITION" in stage:
             return "TRANSITION"
+
+        # =====================
+        # ACCUMULATION
+        # =====================
 
         if "ACCUMULATION" in stage:
             return "PREMOVE"
@@ -65,80 +119,49 @@ def classify_signal_mode(sig):
         # =====================
         # CONFIRMED
         # =====================
+
         if (
+
             "BREAKOUT_CONFIRM_UP" in flags
             or "BREAKOUT_CONFIRM_DOWN" in flags
             or "BOS_UP" in flags
             or "BOS_DOWN" in flags
+
         ):
+
             return "CONFIRMED"
 
         # =====================
         # CONTINUATION
         # =====================
+
         if (
+
             "CONTINUATION_UP" in flags
             or "CONTINUATION_DOWN" in flags
             or "STRONG_CONTINUATION_UP" in flags
             or "STRONG_CONTINUATION_DOWN" in flags
+
         ):
+
             return "CONTINUATION"
-
-        # =====================
-        # PREMOVE
-        # =====================
-        compression_present = (
-            "COMP_PRO_5M" in flags
-            or "COMP_PRO_15M" in flags
-            or "COMP_5M" in flags
-            or "COMP_15M" in flags
-        )
-
-        absorption_present = (
-            "BUYER_ABSORPTION" in flags
-            or "SELLER_ABSORPTION" in flags
-        )
-
-        launch_present = (
-            "LAUNCH_PROXIMITY_UP" in flags
-            or "LAUNCH_PROXIMITY_DOWN" in flags
-            or "EXPLOSION_READY_UP" in flags
-            or "EXPLOSION_READY_DOWN" in flags
-        )
-
-        if (
-            "ENERGY_BUILDUP" in flags
-            and (
-                launch_present
-                or (
-                    compression_present
-                    and absorption_present
-                )
-            )
-            and ep_score >= 5
-        ):
-            return "PREMOVE"
-
-        # =====================
-        # TRANSITION
-        # =====================
-        if (
-            "BULLISH_SHIFT" in flags
-            or "BEARISH_SHIFT" in flags
-            or ep_score >= 6
-        ):
-            return "TRANSITION"
 
         # =====================
         # WATCH
         # =====================
+
         if score >= 6:
             return "WATCH"
 
         return "NO_MODE"
-        
+
     except Exception as e:
-        print(f"[SIGNAL_MODE_ERROR] {e}", flush=True)
+
+        print(
+            f"[SIGNAL_MODE_ERROR] {e}",
+            flush=True
+        )
+
         return "NO_MODE"
 
 
