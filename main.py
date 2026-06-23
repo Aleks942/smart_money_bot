@@ -20846,15 +20846,28 @@ if __name__ == "__main__":
                             flush=True
                         )
 
+                    # =====================
+                    # SKIP LATE PREMOVE
+                    # =====================
+                    
                     if (
                         sig.get("signal_mode") == "PREMOVE"
                         and ep > 18
-                        and "LAUNCH_PROXIMITY_UP" in flags
+                        and score < 35
+                        and (
+                            "LAUNCH_PROXIMITY_UP" in flags
+                            or "LAUNCH_PROXIMITY_DOWN" in flags
+                        )
                     ):
+                    
                         print(
-                            f"[LATE_PREMOVE_SKIP] {instId}",
+                            f"[LATE_PREMOVE_SKIP] "
+                            f"{instId} "
+                            f"score={score} "
+                            f"ep={ep}",
                             flush=True
                         )
+                    
                         continue
                     # =====================
                     # REVERSAL SETUP ENGINE
