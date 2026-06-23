@@ -83,16 +83,21 @@ def classify_signal_mode(sig):
 
        if (
             launch_present
-            or (
-                compression_present
-                and shift_present
-                and ep_score >= 8
-            )
-            or (
-                compression_present
-                and "ENERGY_BUILDUP" in flags
-                and ep_score >= 10
-            )
+            and compression_present
+        ):
+            return "PREMOVE"
+        
+        if (
+            compression_present
+            and shift_present
+            and ep_score >= 8
+        ):
+            return "PREMOVE"
+        
+        if (
+            compression_present
+            and "ENERGY_BUILDUP" in flags
+            and ep_score >= 10
         ):
             return "PREMOVE"
 
