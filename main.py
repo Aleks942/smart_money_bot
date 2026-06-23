@@ -20845,6 +20845,17 @@ if __name__ == "__main__":
                             f"[EXPANSION_BYPASS] {instId}",
                             flush=True
                         )
+
+                    if (
+                        sig.get("signal_mode") == "PREMOVE"
+                        and ep > 18
+                        and "LAUNCH_PROXIMITY_UP" in flags
+                    ):
+                        print(
+                            f"[LATE_PREMOVE_SKIP] {instId}",
+                            flush=True
+                        )
+                        continue
                     # =====================
                     # REVERSAL SETUP ENGINE
                     # =====================
