@@ -81,7 +81,7 @@ def classify_signal_mode(sig):
         # PREMOVE
         # =====================
 
-       if (
+        if (
             launch_present
             and compression_present
         ):
