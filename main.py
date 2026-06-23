@@ -21659,7 +21659,34 @@ if __name__ == "__main__":
                             f"{instId}",
                             flush=True
                         )
+
+                    # =====================
+                    # ACCUMULATION BYPASS
+                    # =====================
+
+                    print(
+                    f"[ENTRY_DEBUG] "
+                    f"{instId} "
+                    f"entry_type={sig.get('entry_type')} "
+                    f"entry={sig.get('entry')}",
+                    flush=True
+                )
+                    if (
+                        sig.get("entry_type") in (
+                            "ACCUMULATION_LONG",
+                            "ACCUMULATION_SHORT"
+                        )
+                        and sig.get("flow_state") == "STRONG_MONEY_FLOW"
+                        and acc >= 3
+                        and ep >= 10
+                    ):
+                        capital_ok = True
                     
+                        print(
+                            f"[ACCUMULATION_CAPITAL_BYPASS] "
+                            f"{instId}",
+                            flush=True
+                        )
                     if not capital_ok:
                     
                         print(
