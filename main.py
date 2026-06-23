@@ -17115,8 +17115,18 @@ def get_market_candidates_bybit():
         normal_move_ok = abs_pct >= SCAN_MIN_PCT_24H
         prebreak_move_ok = PREBREAK_SCAN_MIN_PCT_24H <= abs_pct <= PREBREAK_SCAN_MAX_PCT_24H
 
+        accumulation_candidate = (
+            vol_usdt >= SCAN_MIN_VOL_USDT
+            and abs_pct >= 0.20
+        )
+
         if not ACCUMULATION_MODE:
-            if not (normal_move_ok or prebreak_move_ok):
+
+            if not (
+                normal_move_ok
+                or prebreak_move_ok
+                or accumulation_candidate
+            ):
                 continue
 
         instId = sym
