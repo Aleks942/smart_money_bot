@@ -16689,30 +16689,11 @@ def build_signal(instId):
         ):
     
             signal["signal_group"] = "SWING"
-    # =====================
-    # PRE SWING
-    # =====================
+        # =====================
+        # PRE SWING
+        # =====================
     
-    if (
-    
-        signal.get("signal_mode") in (
-            "TRANSITION",
-            "PREMOVE",
-            "EXPANSION",
-        )
-    
-        and ep >= 6
-        and score >= 10
-    
-        and (
-            signal.get("entry") not in (
-                "NO_ENTRY",
-                "PREMOVE_CONFLICT",
-            )
-        )
-    
-    ):
-    
+
         signal["signal_group"] = "PRE_SWING"
 
         signal["sendable"] = True
