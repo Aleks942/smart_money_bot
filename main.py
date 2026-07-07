@@ -21729,6 +21729,115 @@ if __name__ == "__main__":
                         f"flow={sig.get('flow_state')}",
                         flush=True
                     )
+
+                    # =====================
+                    # FINAL QUALITY ENGINE
+                    # =====================
+                    
+                    quality = 0
+                    
+                    score = float(sig.get("score") or 0)
+                    ep = float(sig.get("early_pressure_score") or 0)
+                    acc = float(sig.get("acc_score") or 0)
+                    oi = abs(float(sig.get("oi_change") or 0))
+                    
+                    flags = set(sig.get("flags", []))
+                    
+                    # ---------------------
+                    # SCORE
+                    # ---------------------
+                    
+                    if score >= 25:
+                        quality += 2
+                    
+                    elif score >= 18:
+                        quality += 1
+                    
+                    # ---------------------
+                    # EARLY PRESSURE
+                    # ---------------------
+                    
+                    if ep >= 16:
+                        quality += 2
+                    
+                    elif ep >= 10:
+                        quality += 1
+                    
+                    # ---------------------
+                    # ACC
+                    # ---------------------
+                    
+                    if acc >= 3:
+                        quality += 2
+                    
+                    elif acc >= 2:
+                        quality += 1
+                    
+                    # ---------------------
+                    # MONEY FLOW
+                    # ---------------------
+                    
+                    if sig.get("flow_state") == "STRONG_MONEY_FLOW":
+                        quality += 2
+                    
+                    elif sig.get("flow_state") == "BUILDING_MONEY_FLOW":
+                        quality += 1
+                    
+                    # ---------------------
+                    # SMART MONEY
+                    # ---------------------
+                    
+                    if "SMART_MONEY_FLOW_OK" in flags:
+                        quality += 2
+                    
+                    # ---------------------
+                    # MTF
+                    # ---------------------
+                    
+                    if (
+                        "MTF_LONG_ALIGN" in flags
+                        or "MTF_SHORT_ALIGN" in flags
+                    ):
+                        quality += 2
+                    
+                    # ---------------------
+                    # ABSORPTION
+                    # ---------------------
+                    
+                    if (
+                        "BUYER_ABSORPTION" in flags
+                        or "SELLER_ABSORPTION" in flags
+                    ):
+                        quality += 1
+                    
+                    # ---------------------
+                    # COMPRESSION
+                    # ---------------------
+                    
+                    if (
+                        "COMP_PRO_5M" in flags
+                        or "COMP_PRO_15M" in flags
+                    ):
+                        quality += 1
+                    
+                    # ---------------------
+                    # OI
+                    # ---------------------
+                    
+                    if oi >= 0.30:
+                        quality += 2
+                    
+                    elif oi >= 0.15:
+                        quality += 1
+                    
+                    sig["quality"] = quality
+                    
+                    print(
+                        f"[FINAL_QUALITY] "
+                        f"{instId} "
+                        f"quality={quality}",
+                        flush=True
+                    )
                     # =====================
                     # DROP LOW VALUE CLONES
                     # =====================
