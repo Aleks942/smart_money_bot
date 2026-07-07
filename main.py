@@ -2122,22 +2122,33 @@ def analyze_flow_snapshot(sig):
                     "BEARISH_BUILDUP"
                 )
 
-        # 1) OI + давление
-        if oi >= 0.30:
-            flow_score += 3
-            flow_reasons.append("OI растёт — в рынок заходят новые позиции")
-            flow_flags.append("FLOW_OI_BUILDUP")
-
-        elif oi >= 0.10:
-            flow_score += 1
-            flow_reasons.append("OI умеренно растёт")
-            flow_flags.append("FLOW_OI_GROWING")
-
+        # =====================
+        # OI BUILDUP
+        # =====================
+        
+        if oi >= 0.10:
+        
+            flow_score += 2
+        
+            flow_reasons.append(
+                "появляется приток капитала"
+            )
+        
+            flow_flags.append(
+                "FLOW_OI_BUILDUP"
+            )
+        
         elif oi <= -0.30:
+        
             flow_score -= 2
-            flow_reasons.append("OI падает — часть денег выходит")
-            flow_flags.append("FLOW_OI_EXIT")
-
+        
+            flow_reasons.append(
+                "капитал выходит из рынка"
+            )
+        
+            flow_flags.append(
+                "FLOW_OI_EXIT"
+            )
         # 2) Накопление
         if acc >= 3:
             flow_score += 2
