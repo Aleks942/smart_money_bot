@@ -15975,8 +15975,6 @@ def build_signal(instId):
                 f"score_after={signal.get('score')}",
                 flush=True
             )
-
-        signal["score"] += signal.get("cvd_bonus", 0)
     
     except Exception as e:
     
