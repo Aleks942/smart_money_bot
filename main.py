@@ -2979,8 +2979,36 @@ def merge_flow_with_oi(sig):
         flow_score = float(sig.get("flow_score") or 0)
         flow_state = str(sig.get("flow_state") or "")
         oi_state = str(sig.get("oi_state") or "NEUTRAL")
-
-        real_money_confirm = False
+        
+        # =====================
+        # FLOW MUST EXIST FIRST
+        # =====================
+        
+        flow_confirm = flow_state in (
+        
+            "EARLY_MONEY_FLOW",
+        
+            "BUILDING_MONEY_FLOW",
+        
+            "STRONG_MONEY_FLOW"
+        
+        )
+        
+        real_money_confirm = (
+        
+            flow_confirm
+        
+            and
+        
+            oi_state in (
+        
+                "NEW_LONGS",
+        
+                "NEW_SHORTS"
+        
+            )
+        
+        )
 
         if oi_state in (
             "NEW_LONGS",
