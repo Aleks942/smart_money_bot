@@ -3098,14 +3098,13 @@ def merge_flow_with_oi(sig):
 
                 flags.add("SMART_MONEY_SHORT_WEAK_EXIT")
 
+
             else:
 
-                smart_money_score += 2
-
                 reasons.append(
-                    "FLOW есть, но OI пока не дал сильного подтверждения"
+                    "FLOW есть, но OI пока не подтвердил движение"
                 )
-
+            
                 flags.add("SMART_MONEY_WAIT_OI_CONFIRM")
 
             # =====================
