@@ -3063,11 +3063,21 @@ def merge_flow_with_oi(sig):
             reasons.append("падение похоже на выход LONG, а не на новый SHORT")
             flags.add("SMART_MONEY_SHORT_WEAK_EXIT")
 
-        # Сильный базовый flow
-        if flow_state in ("STRONG_MONEY_FLOW", "BUILDING_MONEY_FLOW"):
+        # =====================
+        # FLOW CONFIRMATION
+        # =====================
+        
+        if flow_confirm:
+        
             smart_money_score += 2
-            reasons.append("есть качественный поток денег")
-            flags.add("SMART_MONEY_FLOW_OK")
+        
+            reasons.append(
+                "FLOW подтвердил начало движения капитала"
+            )
+        
+            flags.add(
+                "SMART_MONEY_FLOW_CONFIRMED"
+            )
 
         # Абсорбция + сжатие
         if (
