@@ -15795,7 +15795,7 @@ def build_signal(instId):
     
         if sm_state == "STRONG_SMART_MONEY":
     
-            signal["score"] += 4
+            signal["smart_money_bonus"] = 4
     
             print(
                 f"[SMART_MONEY_BOOST] "
@@ -15812,7 +15812,7 @@ def build_signal(instId):
     
         elif sm_state == "BUILDING_SMART_MONEY":
     
-            signal["score"] += 2
+            signal["smart_money_bonus"] = 2
     
             print(
                 f"[SMART_MONEY_BOOST] "
@@ -15829,7 +15829,7 @@ def build_signal(instId):
     
         elif sm_state == "WEAK_SMART_MONEY":
     
-            signal["score"] -= 4
+            signal["smart_money_bonus"] = -4
     
             print(
                 f"[SMART_MONEY_PENALTY] "
@@ -15846,7 +15846,7 @@ def build_signal(instId):
     
         if "SMART_MONEY_LONG_WEAK_COVERING" in signal.get("flags", []):
     
-            signal["score"] -= 2
+            signal["smart_money_bonus"] = -2
     
             print(
                 f"[SMART_MONEY_COVERING_PENALTY] "
@@ -15854,20 +15854,24 @@ def build_signal(instId):
                 f"LONG covering weakness",
                 flush=True
             )
+
+        signal["score"] += signal.get("smart_money_bonus", 0)
     
         # =====================
         # SHORT EXIT WEAKNESS
         # =====================
         if "SMART_MONEY_SHORT_WEAK_EXIT" in signal.get("flags", []):
-
-            signal["score"] -= 2
-
+        
+            signal["smart_money_bonus"] -= 2
+        
             print(
                 f"[SMART_MONEY_EXIT_PENALTY] "
                 f"{signal.get('instId')} "
                 f"SHORT weak exit",
                 flush=True
             )
+        
+        signal["score"] += signal.get("smart_money_bonus", 0)
 
     except Exception as e:
 
