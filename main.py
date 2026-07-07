@@ -15884,6 +15884,8 @@ def build_signal(instId):
     # =========================
     # CVD SCORE IMPACT
     # =========================
+
+    signal["cvd_bonus"] = 0
     
     try:
     
@@ -15906,7 +15908,7 @@ def build_signal(instId):
     
             bonus = 3 if cvd_state == "STRONG_BUY_CVD" else 2
     
-            signal["score"] += bonus
+            signal["cvd_bonus"] += bonus
     
             print(
                 f"[CVD_BOOST] "
@@ -15925,7 +15927,7 @@ def build_signal(instId):
     
             bonus = 3 if cvd_state == "STRONG_SELL_CVD" else 2
     
-            signal["score"] += bonus
+            signal["cvd_bonus"] += bonus
     
             print(
                 f"[CVD_BOOST] "
@@ -15944,7 +15946,7 @@ def build_signal(instId):
     
             penalty = 4 if cvd_state == "STRONG_SELL_CVD" else 2
     
-            signal["score"] -= penalty
+            signal["cvd_bonus"] -= penalty
     
             print(
                 f"[CVD_PENALTY] "
@@ -15963,7 +15965,7 @@ def build_signal(instId):
     
             penalty = 4 if cvd_state == "STRONG_BUY_CVD" else 2
     
-            signal["score"] -= penalty
+            signal["cvd_bonus"] -= penalty
     
             print(
                 f"[CVD_PENALTY] "
@@ -15973,6 +15975,8 @@ def build_signal(instId):
                 f"score_after={signal.get('score')}",
                 flush=True
             )
+
+        signal["score"] += signal.get("cvd_bonus", 0)
     
     except Exception as e:
     
