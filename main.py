@@ -2277,7 +2277,11 @@ def analyze_flow_snapshot(sig):
 
         if (
             flow_score >= 8
-            and "FLOW_BUILDUP" in flow_flags
+            and (
+                "FLOW_BUILDUP" in flow_flags
+                or "FLOW_COMPRESSION" in flow_flags
+                or "FLOW_ABSORPTION" in flow_flags
+            )
         ):
             flow_state = "STRONG_MONEY_FLOW"
         
