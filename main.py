@@ -3044,8 +3044,7 @@ def merge_flow_with_oi(sig):
 
         else:
 
-            smart_money_score += 3
-
+            smart_money_score += 2
             reasons.append(
                 "FLOW подтвердил начало движения капитала"
             )
