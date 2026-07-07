@@ -15775,6 +15775,8 @@ def build_signal(instId):
     # SMART MONEY SCORE IMPACT
     # =========================
     
+    signal["smart_money_bonus"] = 0
+    
     try:
     
         sm_state = str(
