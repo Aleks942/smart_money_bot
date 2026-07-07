@@ -3088,14 +3088,7 @@ def merge_flow_with_oi(sig):
             )
 
         # Абсорбция + сжатие
-        if (
-            "FLOW_ABSORPTION" in flags
-            and "FLOW_COMPRESSION" in flags
-        ):
-            smart_money_score += 2
-            reasons.append("есть сжатие и удержание цены крупным участником")
-            flags.add("SMART_MONEY_ACCUMULATION_CONTEXT")
-
+      
         if (
             smart_money_score >= 12
             and oi_state in (
