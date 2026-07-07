@@ -11906,6 +11906,31 @@ def detect_liquidity_zones(candles, lookback=40, tolerance_pct=0.45):
 # =========================
 # MAIN SIGNAL BUILDER
 # =========================
+
+# =====================
+# TREND CANDIDATE ENGINE
+# =====================
+
+def is_trend_candidate(instId, ticker):
+
+    try:
+
+        last = float(ticker.get("lastPrice") or 0)
+        prev = float(ticker.get("prevPrice24h") or 0)
+
+        if prev <= 0:
+            return False
+
+        pct24 = abs((last - prev) / prev * 100)
+
+        if pct24 >= 8:
+            return True
+
+        return False
+
+    except Exception:
+
+        return False
 def build_signal(instId):
     print(f"[BUILD_SIGNAL_ENTER] {instId}", flush=True)
     
