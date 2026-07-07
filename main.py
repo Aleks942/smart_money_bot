@@ -17148,6 +17148,15 @@ def get_market_candidates_bybit():
 
         instId = sym
 
+        if not is_trend_candidate(instId, t):
+
+            print(
+                f"[TREND_SKIP] {instId}",
+                flush=True
+            )
+        
+            continue
+
         print(
             f"[RAW_ADD] "
             f"{instId} "
