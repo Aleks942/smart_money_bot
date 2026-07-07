@@ -3024,7 +3024,15 @@ def merge_flow_with_oi(sig):
         ).upper()
 
         smart_money_score = flow_score
+
+        # =====================
+        # FLOW BASE
+        # =====================
+        
+        sig["flow_confirm"] = flow_confirm
+
         smart_money_state = "NEUTRAL_SMART_MONEY"
+
         reasons = []
 
         # LONG подтверждается новыми деньгами
