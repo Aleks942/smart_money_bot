@@ -78,6 +78,20 @@ def classify_signal_mode(sig):
             return "PREMOVE"
 
         # =====================
+        # TRUE EXPANSION FIRST
+        # =====================
+        
+        if (
+            "ACCELERATION_UP" in flags
+            or "ACCELERATION_DOWN" in flags
+            or "LAUNCH_PROXIMITY_UP" in flags
+            or "LAUNCH_PROXIMITY_DOWN" in flags
+            or "EXPLOSION_READY_UP" in flags
+            or "EXPLOSION_READY_DOWN" in flags
+        ):
+            return "EXPANSION" 
+
+        # =====================
         # PREMOVE
         # =====================
         
