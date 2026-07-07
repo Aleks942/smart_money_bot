@@ -2969,52 +2969,15 @@ def analyze_real_oi_flow(instId, price, oi):
 
 def merge_flow_with_oi(sig):
     """
-    Объединяет FLOW и OI.
-    Помогает понять: это настоящий вход денег или движение без поддержки капитала.
+    SMART MONEY V3.
+    Проверяет: подтверждает ли OI поток капитала, найденный FLOW.
     """
 
     try:
         flags = set(sig.get("flags", []))
 
-        flow_score = float(sig.get("flow_score") or 0)
         flow_state = str(sig.get("flow_state") or "")
         oi_state = str(sig.get("oi_state") or "NEUTRAL")
-        
-        # =====================
-        # FLOW MUST EXIST FIRST
-        # =====================
-        
-        flow_confirm = flow_state in (
-        
-            "EARLY_MONEY_FLOW",
-        
-            "BUILDING_MONEY_FLOW",
-        
-            "STRONG_MONEY_FLOW"
-        
-        )
-        
-        real_money_confirm = (
-        
-            flow_confirm
-        
-            and
-        
-            oi_state in (
-        
-                "NEW_LONGS",
-        
-                "NEW_SHORTS"
-        
-            )
-        
-        )
-
-        if oi_state in (
-            "NEW_LONGS",
-            "NEW_SHORTS"
-        ):
-            real_money_confirm = True
 
         direction = str(
             sig.get("direction_code")
@@ -3023,102 +2986,148 @@ def merge_flow_with_oi(sig):
             or ""
         ).upper()
 
-        smart_money_score = flow_score
+        # =====================
+        # FLOW CONFIRM
+        # =====================
 
-        # =====================
-        # FLOW BASE
-        # =====================
-        
+        flow_confirm = flow_state in (
+            "EARLY_MONEY_FLOW",
+            "BUILDING_MONEY_FLOW",
+            "STRONG_MONEY_FLOW"
+        )
+
         sig["flow_confirm"] = flow_confirm
 
+        smart_money_score = 0
         smart_money_state = "NEUTRAL_SMART_MONEY"
-
+        real_money_confirm = False
         reasons = []
 
-        # LONG подтверждается новыми деньгами
-        if (
-            ("LONG" in direction or "UP" in direction or "BUY" in direction)
-            and oi_state == "NEW_LONGS"
-        ):
-            smart_money_score += 4
-            reasons.append("LONG поддержан новым ростом OI")
-            flags.add("SMART_MONEY_LONG_CONFIRM")
-
-        # SHORT подтверждается новыми деньгами
-        if (
-            ("SHORT" in direction or "DOWN" in direction or "SELL" in direction)
-            and oi_state == "NEW_SHORTS"
-        ):
-            smart_money_score += 4
-            reasons.append("SHORT поддержан новым ростом OI")
-            flags.add("SMART_MONEY_SHORT_CONFIRM")
-
-        # LONG без новых денег
-        if (
-            ("LONG" in direction or "UP" in direction or "BUY" in direction)
-            and oi_state == "SHORT_COVERING"
-        ):
-            smart_money_score -= 3
-            reasons.append("рост похож на закрытие SHORT, а не на новый LONG")
-            flags.add("SMART_MONEY_LONG_WEAK_COVERING")
-
-        # SHORT без новых денег
-        if (
-            ("SHORT" in direction or "DOWN" in direction or "SELL" in direction)
-            and oi_state == "LONG_EXIT"
-        ):
-            smart_money_score -= 3
-            reasons.append("падение похоже на выход LONG, а не на новый SHORT")
-            flags.add("SMART_MONEY_SHORT_WEAK_EXIT")
-
         # =====================
-        # FLOW CONFIRMATION
+        # NO FLOW = NO SMART MONEY
         # =====================
-        
-        if flow_confirm:
-        
-            smart_money_score += 2
-        
+
+        if not flow_confirm:
+
+            smart_money_score = 0
+            smart_money_state = "WEAK_SMART_MONEY"
+
+            reasons.append(
+                "FLOW не подтвердил начало движения капитала"
+            )
+
+            flags.add("SMART_MONEY_NO_FLOW")
+
+        else:
+
+            smart_money_score += 3
+
             reasons.append(
                 "FLOW подтвердил начало движения капитала"
             )
-        
-            flags.add(
-                "SMART_MONEY_FLOW_CONFIRMED"
-            )
 
-        # Абсорбция + сжатие
-      
-        if (
-            smart_money_score >= 12
-            and oi_state in (
-                "NEW_LONGS",
-                "NEW_SHORTS"
-            )
-        ):
-            smart_money_state = "STRONG_SMART_MONEY"
-        
-        elif smart_money_score >= 8:
-            smart_money_state = "BUILDING_SMART_MONEY"
-        
-        elif smart_money_score >= 4:
-            smart_money_state = "EARLY_SMART_MONEY"
-        
-        elif smart_money_score <= 1:
-            smart_money_state = "WEAK_SMART_MONEY"
-        
-        elif smart_money_score >= 8:
-        
-            smart_money_state = "BUILDING_SMART_MONEY"
-        
-        elif smart_money_score >= 4:
-        
-            smart_money_state = "EARLY_SMART_MONEY"
-        
-        elif smart_money_score <= 1:
-        
-            smart_money_state = "WEAK_SMART_MONEY"
-                
+            flags.add("SMART_MONEY_FLOW_CONFIRMED")
+
+            # =====================
+            # LONG CONFIRM
+            # =====================
+
+            if (
+                ("LONG" in direction or "UP" in direction or "BUY" in direction)
+                and oi_state == "NEW_LONGS"
+            ):
+
+                smart_money_score += 5
+                real_money_confirm = True
+
+                reasons.append(
+                    "LONG подтверждён новыми позициями"
+                )
+
+                flags.add("SMART_MONEY_LONG_CONFIRM")
+
+            # =====================
+            # SHORT CONFIRM
+            # =====================
+
+            elif (
+                ("SHORT" in direction or "DOWN" in direction or "SELL" in direction)
+                and oi_state == "NEW_SHORTS"
+            ):
+
+                smart_money_score += 5
+                real_money_confirm = True
+
+                reasons.append(
+                    "SHORT подтверждён новыми позициями"
+                )
+
+                flags.add("SMART_MONEY_SHORT_CONFIRM")
+
+            # =====================
+            # WEAK LONG
+            # =====================
+
+            elif (
+                ("LONG" in direction or "UP" in direction or "BUY" in direction)
+                and oi_state == "SHORT_COVERING"
+            ):
+
+                smart_money_score += 1
+
+                reasons.append(
+                    "рост больше похож на закрытие SHORT, чем на новый LONG"
+                )
+
+                flags.add("SMART_MONEY_LONG_WEAK_COVERING")
+
+            # =====================
+            # WEAK SHORT
+            # =====================
+
+            elif (
+                ("SHORT" in direction or "DOWN" in direction or "SELL" in direction)
+                and oi_state == "LONG_EXIT"
+            ):
+
+                smart_money_score += 1
+
+                reasons.append(
+                    "падение больше похоже на выход LONG, чем на новый SHORT"
+                )
+
+                flags.add("SMART_MONEY_SHORT_WEAK_EXIT")
+
+            else:
+
+                smart_money_score += 2
+
+                reasons.append(
+                    "FLOW есть, но OI пока не дал сильного подтверждения"
+                )
+
+                flags.add("SMART_MONEY_WAIT_OI_CONFIRM")
+
+            # =====================
+            # FINAL STATE
+            # =====================
+
+            if real_money_confirm and smart_money_score >= 8:
+
+                smart_money_state = "STRONG_SMART_MONEY"
+
+            elif smart_money_score >= 5:
+
+                smart_money_state = "BUILDING_SMART_MONEY"
+
+            elif smart_money_score >= 3:
+
+                smart_money_state = "EARLY_SMART_MONEY"
+
+            else:
+
+                smart_money_state = "WEAK_SMART_MONEY"
+
         sig["real_money_confirm"] = real_money_confirm
         sig["smart_money_score"] = smart_money_score
         sig["smart_money_state"] = smart_money_state
@@ -3130,10 +3139,26 @@ def merge_flow_with_oi(sig):
             f"{sig.get('instId')} "
             f"state={smart_money_state} "
             f"score={smart_money_score} "
+            f"real_money={real_money_confirm} "
             f"oi_state={oi_state} "
             f"flow={flow_state}",
             flush=True
         )
+
+        return sig
+
+    except Exception as e:
+        print(
+            f"[SMART_MONEY_MERGE_ERROR] "
+            f"{sig.get('instId')} "
+            f"{e}",
+            flush=True
+        )
+
+        sig["real_money_confirm"] = False
+        sig["smart_money_score"] = 0
+        sig["smart_money_state"] = "SMART_MONEY_ERROR"
+        sig["smart_money_reasons"] = [str(e)]
 
         return sig
 
