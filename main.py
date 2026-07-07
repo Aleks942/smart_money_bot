@@ -2149,11 +2149,21 @@ def analyze_flow_snapshot(sig):
             flow_flags.append(
                 "FLOW_OI_EXIT"
             )
-        # 2) Накопление
-        if acc >= 3:
-            flow_score += 2
-            flow_reasons.append("есть признаки накопления")
-            flow_flags.append("FLOW_ACCUMULATION")
+        # =====================
+        # ACCUMULATION CONFIRM
+        # =====================
+        
+        if acc >= 3 and "FLOW_BUILDUP" in flow_flags:
+        
+            flow_score += 1
+        
+            flow_reasons.append(
+                "накопление подтверждает buildup"
+            )
+        
+            flow_flags.append(
+                "FLOW_ACCUMULATION_CONFIRM"
+            )
 
         # 3) Раннее давление
         if ep >= 10:
