@@ -15795,7 +15795,7 @@ def build_signal(instId):
     
         if sm_state == "STRONG_SMART_MONEY":
     
-            signal["smart_money_bonus"] = 4
+            signal["smart_money_bonus"] += 4
     
             print(
                 f"[SMART_MONEY_BOOST] "
@@ -15812,7 +15812,7 @@ def build_signal(instId):
     
         elif sm_state == "BUILDING_SMART_MONEY":
     
-            signal["smart_money_bonus"] = 2
+            signal["smart_money_bonus"] += 2
     
             print(
                 f"[SMART_MONEY_BOOST] "
@@ -15829,7 +15829,7 @@ def build_signal(instId):
     
         elif sm_state == "WEAK_SMART_MONEY":
     
-            signal["smart_money_bonus"] = -4
+            signal["smart_money_bonus"] -= 4
     
             print(
                 f"[SMART_MONEY_PENALTY] "
