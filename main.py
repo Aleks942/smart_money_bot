@@ -2092,20 +2092,11 @@ def analyze_flow_snapshot(sig):
         
         has_buildup = (
         
-            (
-                "COMP_PRO_5M" in flags
-                or "COMP_PRO_15M" in flags
-                or "RANGE_COMPRESSION" in flags
-                or "TIGHT_RANGE" in flags
-            )
+            "COMP_PRO_5M" in flags
+            or "COMP_PRO_15M" in flags
+            or "RANGE_COMPRESSION" in flags
+            or "TIGHT_RANGE" in flags
         
-            and
-        
-            (
-                "ENERGY_BUILDUP" in flags
-                or "RANGE_HOLD_HIGH" in flags
-                or "RANGE_HOLD_LOW" in flags
-            )
         )
         
         if has_buildup:
@@ -2113,25 +2104,10 @@ def analyze_flow_snapshot(sig):
             flow_score += 2
         
             flow_reasons.append(
-                "рынок находится в buildup phase"
+                "рынок находится в фазе накопления"
             )
         
-            flags.add(
-                "BUILDUP_CONTEXT"
-            )
-        
-            # LONG BUILDUP
-        
-            if (
-                "EMA_BULL" in flags
-                or "STRUCTURE_HH_HL" in flags
-            ):
-        
-                flow_score += 1
-        
-                flags.add(
-                    "BULLISH_BUILDUP"
-                )
+            flow_flags.append("FLOW_BUILDUP")
         
             # SHORT BUILDUP
         
