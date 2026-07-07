@@ -17151,7 +17151,9 @@ def get_market_candidates_bybit():
         if not is_trend_candidate(instId, t):
 
             print(
-                f"[TREND_SKIP] {instId}",
+                f"[TREND_SKIP] "
+                f"{instId} "
+                f"pct={round(pct, 2)}",
                 flush=True
             )
         
