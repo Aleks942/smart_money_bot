@@ -21872,7 +21872,10 @@ if __name__ == "__main__":
                     # SMART MONEY
                     # ---------------------
                     
-                    if "SMART_MONEY_FLOW_OK" in flags:
+                    if (
+                        "SMART_MONEY_FLOW_CONFIRMED" in flags
+                        or "SMART_MONEY_FLOW_OK" in flags
+                    ):
                         quality += 2
                     
                     # ---------------------
