@@ -3165,22 +3165,25 @@ def merge_flow_with_oi(sig):
             # =====================
             # FINAL STATE
             # =====================
-
-            if real_money_confirm and smart_money_score >= 8:
-
-                smart_money_state = "STRONG_SMART_MONEY"
-
-            elif smart_money_score >= 5:
-
-                smart_money_state = "BUILDING_SMART_MONEY"
-
-            elif smart_money_score >= 3:
-
-                smart_money_state = "EARLY_SMART_MONEY"
-
-            else:
-
+            
+            if not flow_confirm:
+            
                 smart_money_state = "WEAK_SMART_MONEY"
+            
+            elif real_money_confirm:
+            
+                smart_money_state = "STRONG_SMART_MONEY"
+            
+            elif oi_state in (
+                "SHORT_COVERING",
+                "LONG_EXIT"
+            ):
+            
+                smart_money_state = "WEAK_SMART_MONEY"
+            
+            else:
+            
+                smart_money_state = "EARLY_SMART_MONEY"
 
         sig["real_money_confirm"] = real_money_confirm
         sig["smart_money_score"] = smart_money_score
