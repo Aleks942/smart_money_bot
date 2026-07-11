@@ -2008,8 +2008,16 @@ def analyze_capital_flow(signal):
                 "FLOW_OI_BUILDUP"
             )
         elif oi <= -0.30:
+
             capital_score -= 2
-            reasons.append("открытый интерес снижается — часть позиций выходит")
+        
+            flow_reasons.append(
+                "капитал выходит из рынка"
+            )
+        
+            flow_flags.append(
+                "FLOW_OI_EXIT"
+            )
 
         if ep >= 15:
             capital_score += 2
