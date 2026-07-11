@@ -3170,8 +3170,8 @@ def merge_flow_with_oi(sig):
             
                 smart_money_state = "WEAK_SMART_MONEY"
             
-            elif real_money_confirm:
-            
+            elif real_money_confirm and smart_money_score >= 5:
+
                 smart_money_state = "STRONG_SMART_MONEY"
             
             elif oi_state in (
