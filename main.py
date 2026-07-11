@@ -6285,6 +6285,8 @@ def fetch_market_caps_usd(base_coins):
     base_coins = sorted({str(x).upper().strip() for x in base_coins if x})
     if not base_coins:
         return {}
+
+    now = time.time()      # ← вернуть сюда
     
     
     
