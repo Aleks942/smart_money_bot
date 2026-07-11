@@ -3216,12 +3216,7 @@ def merge_flow_with_oi(sig):
 
         return sig
 
-    except Exception as e:
-        print(f"[SMART_MONEY_MERGE_ERROR] {e}", flush=True)
-        sig["smart_money_score"] = 0
-        sig["smart_money_state"] = "SMART_MONEY_ERROR"
-        sig["smart_money_reasons"] = []
-        return sig
+    
 
 # =========================
 # CVD ENGINE V1
