@@ -2306,9 +2306,9 @@ def analyze_flow_snapshot(sig):
                 or "FLOW_ABSORPTION" in flow_flags
             )
         ):
-        
+
             flow_state = "STRONG_MONEY_FLOW"
-        
+
         elif (
             total_flow >= 5
             and capital_score >= 1
@@ -2318,9 +2318,9 @@ def analyze_flow_snapshot(sig):
                 or "FLOW_ABSORPTION" in flow_flags
             )
         ):
-        
+
             flow_state = "BUILDING_MONEY_FLOW"
-        
+
         elif (
             flow_score >= 2
             and (
@@ -2329,32 +2329,33 @@ def analyze_flow_snapshot(sig):
                 or "FLOW_ABSORPTION" in flow_flags
             )
         ):
-        
+
             flow_state = "EARLY_MONEY_FLOW"
-        
+
         else:
+
             flow_state = "WEAK_OR_NO_FLOW"
 
-            sig["flow_score"] = flow_score
-            sig["capital_flow_score"] = capital_score
-            sig["flow_total_score"] = total_flow
-            sig["flow_state"] = flow_state
-            sig["flow_reasons"] = flow_reasons
-            
-            all_flags = set(
-                sig.get("flags") or []
-            )
-            
-            all_flags.update(flow_flags)
-            
-            all_flags.update(flags)
-            
-            sig["flags"] = list(all_flags)
-            
-            return sig
-           
-        
-        
+        # =====================================
+        # СОХРАНЯЕМ РЕЗУЛЬТАТ ДЛЯ ЛЮБОГО FLOW_STATE
+        # =====================================
+
+        sig["flow_score"] = flow_score
+        sig["capital_flow_score"] = capital_score
+        sig["flow_total_score"] = total_flow
+        sig["flow_state"] = flow_state
+        sig["flow_reasons"] = flow_reasons
+
+        all_flags = set(
+            sig.get("flags") or []
+        )
+
+        all_flags.update(flow_flags)
+        all_flags.update(flags)
+
+        sig["flags"] = list(all_flags)
+
+        return sig
 
     except Exception as e:
         print(f"[FLOW_SNAPSHOT_ERROR] {e}", flush=True)
