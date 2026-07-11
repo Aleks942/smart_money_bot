@@ -15794,7 +15794,7 @@ def build_signal(instId):
     # SMART MONEY SCORE IMPACT
     # =========================
     
-    signal["smart_money_bonus"] = 0
+    signal["smart_money_bonus"] = 4
     
     try:
     
@@ -15865,7 +15865,7 @@ def build_signal(instId):
     
         if "SMART_MONEY_LONG_WEAK_COVERING" in signal.get("flags", []):
     
-            signal["smart_money_bonus"] = -2
+            signal["smart_money_bonus"] -= 2
     
             print(
                 f"[SMART_MONEY_COVERING_PENALTY] "
@@ -15874,7 +15874,7 @@ def build_signal(instId):
                 flush=True
             )
 
-        signal["score"] += signal.get("smart_money_bonus", 0)
+        
     
         # =====================
         # SHORT EXIT WEAKNESS
