@@ -2291,24 +2291,34 @@ def analyze_flow_snapshot(sig):
             flow_reasons.append("движение может быть уже поздним — нет накопления")
             flow_flags.append("FLOW_LATE_RISK")
 
+        # =====================
+        # FINAL FLOW STATE
+        # =====================
+        
+        total_flow = flow_score + capital_score
+        
         if (
-            flow_score >= 8
+            total_flow >= 8
+            and capital_score >= 3
             and (
                 "FLOW_BUILDUP" in flow_flags
                 or "FLOW_COMPRESSION" in flow_flags
                 or "FLOW_ABSORPTION" in flow_flags
             )
         ):
+        
             flow_state = "STRONG_MONEY_FLOW"
         
         elif (
-            flow_score >= 5
+            total_flow >= 5
+            and capital_score >= 1
             and (
                 "FLOW_BUILDUP" in flow_flags
                 or "FLOW_COMPRESSION" in flow_flags
                 or "FLOW_ABSORPTION" in flow_flags
             )
         ):
+        
             flow_state = "BUILDING_MONEY_FLOW"
         
         elif (
@@ -2319,9 +2329,11 @@ def analyze_flow_snapshot(sig):
                 or "FLOW_ABSORPTION" in flow_flags
             )
         ):
+        
             flow_state = "EARLY_MONEY_FLOW"
         
         else:
+        
             flow_state = "WEAK_OR_NO_FLOW"
 
         sig["flow_score"] = flow_score
