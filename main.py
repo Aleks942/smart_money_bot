@@ -2085,6 +2085,7 @@ def analyze_flow_snapshot(sig):
         flow_score = 0
         flow_reasons = []
         flow_flags = []
+        capital_score = 0
 
         # =====================
         # BUILDUP CONTEXT
