@@ -6286,23 +6286,18 @@ def fetch_market_caps_usd(base_coins):
     if not base_coins:
         return {}
     
-    # 🔥 быстрый фильтр — берем только новые монеты (экономим API)
+    
+    
+    # 🔥 быстрый фильтр — берем только новые монеты
     if _market_cap_cache["data"]:
         missing = [c for c in base_coins if c not in _market_cap_cache["data"]]
     else:
         missing = base_coins.copy()
     
-    # если всё уже есть в кеше — сразу отдаём
-    # если всё есть в кеше И кеш свежий — используем его
-    if not missing and (now - _market_cap_cache["ts"] < MARKET_CAP_CACHE_TTL_SEC):
-        return _market_cap_cache["data"]
-    now = time.time()
-
-    market_cap_fail_cooldown_sec = int(os.getenv("MARKET_CAP_FAIL_COOLDOWN_SEC", "1800"))
-
-    last_fail_ts = float(_market_cap_cache.get("last_fail_ts", 0) or 0)
-    if last_fail_ts and (now - last_fail_ts < market_cap_fail_cooldown_sec):
-        print("[MARKET_CAP] cooldown → cache")
+    # если всё уже есть в кеше
+    if not missing and (
+        now - _market_cap_cache["ts"] < MARKET_CAP_CACHE_TTL_SEC
+    ):
         return _market_cap_cache["data"]
 
     
