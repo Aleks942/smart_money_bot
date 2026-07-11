@@ -15674,13 +15674,60 @@ def build_signal(instId):
     # FLOW SNAPSHOT
     # =========================
     
-    signal = analyze_flow_snapshot(signal)
+    signal_before_flow = signal
+    
+    try:
+    
+        flow_result = analyze_flow_snapshot(signal)
+    
+        if isinstance(flow_result, dict):
+    
+            signal = flow_result
+    
+        else:
+    
+            print(
+                f"[FLOW_RETURN_INVALID] "
+                f"{instId} "
+                f"result={flow_result}",
+                flush=True
+            )
+    
+            # Не ломаем весь scan — используем исходный signal
+            signal = signal_before_flow
+    
+            signal["flow_score"] = 0
+            signal["capital_flow_score"] = 0
+            signal["flow_total_score"] = 0
+            signal["flow_state"] = "FLOW_ERROR"
+            signal["flow_reasons"] = [
+                "FLOW вернул некорректный результат"
+            ]
+    
+    except Exception as e:
+    
+        print(
+            f"[FLOW_PIPELINE_ERROR] "
+            f"{instId} "
+            f"{e}",
+            flush=True
+        )
+    
+        signal = signal_before_flow
+    
+        signal["flow_score"] = 0
+        signal["capital_flow_score"] = 0
+        signal["flow_total_score"] = 0
+        signal["flow_state"] = "FLOW_ERROR"
+        signal["flow_reasons"] = [str(e)]
     
     print(
         f"[FLOW] "
         f"{signal.get('instId')} "
         f"state={signal.get('flow_state')} "
-        f"score={signal.get('flow_score')} "
+        f"pressure={signal.get('flow_score')} "
+        f"capital={signal.get('capital_flow_score')} "
+        f"total={signal.get('flow_total_score')} "
         f"reasons={signal.get('flow_reasons')}",
         flush=True
     )
