@@ -1997,9 +1997,16 @@ def analyze_capital_flow(signal):
             reasons.append("в рынок заметно заходят новые позиции")
 
         elif oi >= 0.10:
-            capital_score += 1
-            reasons.append("в рынок умеренно заходят новые позиции")
 
+            capital_score += 2
+        
+            flow_reasons.append(
+                "появляется приток капитала"
+            )
+        
+            flow_flags.append(
+                "FLOW_OI_BUILDUP"
+            )
         elif oi <= -0.30:
             capital_score -= 2
             reasons.append("открытый интерес снижается — часть позиций выходит")
