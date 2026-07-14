@@ -14172,7 +14172,18 @@ def build_signal(instId):
         market_exhaustion = "NO_EXHAUSTION"
         exhaustion_score = 0
         exhaustion_reasons = []
-    
+
+        # =====================
+        # EXHAUSTION FEATURES
+        # =====================
+        
+        price_stalling = False
+        range_contracting = False
+        volume_fading = False
+        high_stop = False
+        low_stop = False
+        atr_fading = False
+        compression_after_trend = False
         try:
     
             candles_ex = list(c5 or [])
