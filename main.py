@@ -295,13 +295,37 @@ def detect_market_phase(df_h1):
         if spread > 0.2:
             trend_score += 1
 
-        # 📊 КЛАССИФИКАЦИЯ
-        if trend_score >= 3:
-            phase = "TREND"
-        elif trend_score == 2:
-            phase = "TRANSITION"
+        if (
+            spread > 0.25
+            and spread_delta > 0
+            and atr_delta > 0
+        ):
+        
+            phase = "STRONG_TREND"
+        
+        elif (
+            spread > 0.15
+            and slope != 0
+        ):
+        
+            phase = "EARLY_TREND"
+        
+        elif (
+            spread > 0.15
+            and spread_delta < 0
+            and atr_delta < 0
+            and volume_delta < 0
+        ):
+        
+            phase = "EXHAUSTION"
+        
+        elif spread < 0.10:
+        
+            phase = "ACCUMULATION"
+        
         else:
-            phase = "FLAT"
+        
+            phase = "TRANSITION"
 
         log(f"phase={phase} score={trend_score}")
 
