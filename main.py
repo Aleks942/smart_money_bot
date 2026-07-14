@@ -249,9 +249,99 @@ def detect_market_phase(df_h1):
 
         log(f"price={last_price} ema20={ema20_last} ema50={ema50_last}")
 
-        # 📊 СПРЕД И НАКЛОН
-        spread = abs(ema20_last - ema50_last) / last_price * 100
-        slope = ema20.iloc[-1] - ema20.iloc[-5]
+        # =====================
+        # СПРЕД И НАКЛОН EMA
+        # =====================
+        
+        spread = (
+            abs(ema20_last - ema50_last)
+            / last_price
+            * 100
+        )
+        
+        slope = (
+            float(ema20.iloc[-1])
+            - float(ema20.iloc[-5])
+        )
+        
+        # Расстояние между EMA пять свечей назад
+        prev_price = float(close.iloc[-5])
+        
+        prev_spread = (
+            abs(
+                float(ema20.iloc[-5])
+                - float(ema50.iloc[-5])
+            )
+            / prev_price
+            * 100
+            if prev_price > 0
+            else spread
+        )
+        
+        # Положительное значение:
+        # EMA продолжают расходиться.
+        #
+        # Отрицательное значение:
+        # тренд начинает выдыхаться.
+        spread_delta = spread - prev_spread
+        
+        # =====================
+        # ATR / ВОЛАТИЛЬНОСТЬ
+        # =====================
+        
+        high = df_h1["high"].astype(float)
+        low = df_h1["low"].astype(float)
+        
+        candle_range = high - low
+        atr = candle_range.rolling(14).mean()
+        
+        atr_now = float(atr.iloc[-1])
+        atr_prev = float(atr.iloc[-5])
+        
+        atr_delta = atr_now - atr_prev
+        
+        # =====================
+        # ОБЪЁМ
+        # =====================
+        
+        if "volume" in df_h1.columns:
+        
+            volume = df_h1["volume"].astype(float)
+        
+        elif "vol" in df_h1.columns:
+        
+            volume = df_h1["vol"].astype(float)
+        
+        else:
+        
+            volume = None
+        
+        if volume is not None:
+        
+            volume_now = float(
+                volume.tail(5).mean()
+            )
+        
+            volume_prev = float(
+                volume.iloc[-15:-5].mean()
+            )
+        
+            volume_delta = volume_now - volume_prev
+        
+        else:
+        
+            volume_now = 0.0
+            volume_prev = 0.0
+            volume_delta = 0.0
+        
+        log(
+            f"spread={spread:.3f} "
+            f"prev_spread={prev_spread:.3f} "
+            f"spread_delta={spread_delta:.3f} "
+            f"slope={slope:.6f} "
+            f"atr_delta={atr_delta:.6f} "
+            f"volume_delta={volume_delta:.2f}"
+        )
 
         prev_spread = abs(
             float(ema20.iloc[-5]) -
