@@ -253,6 +253,30 @@ def detect_market_phase(df_h1):
         spread = abs(ema20_last - ema50_last) / last_price * 100
         slope = ema20.iloc[-1] - ema20.iloc[-5]
 
+        prev_spread = abs(
+            float(ema20.iloc[-5]) -
+            float(ema50.iloc[-5])
+        ) / float(close.iloc[-5]) * 100
+
+        high = df_h1["high"]
+        low = df_h1["low"]
+        
+        atr = (high - low).rolling(14).mean()
+        
+        atr_now = float(atr.iloc[-1])
+        atr_prev = float(atr.iloc[-5])
+        
+        atr_delta = atr_now - atr_prev
+
+        volume = df_h1["volume"]
+
+        vol_now = volume.tail(5).mean()
+        vol_prev = volume.iloc[-15:-5].mean()
+        
+        volume_delta = vol_now - vol_prev
+        
+        spread_delta = spread - prev_spread
+
         log(f"spread={spread:.3f} slope={slope:.6f}")
 
         trend_score = 0
