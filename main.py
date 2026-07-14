@@ -249,123 +249,9 @@ def detect_market_phase(df_h1):
 
         log(f"price={last_price} ema20={ema20_last} ema50={ema50_last}")
 
-        # =====================
-        # СПРЕД И НАКЛОН EMA
-        # =====================
-        
-        spread = (
-            abs(ema20_last - ema50_last)
-            / last_price
-            * 100
-        )
-        
-        slope = (
-            float(ema20.iloc[-1])
-            - float(ema20.iloc[-5])
-        )
-        
-        # Расстояние между EMA пять свечей назад
-        prev_price = float(close.iloc[-5])
-        
-        prev_spread = (
-            abs(
-                float(ema20.iloc[-5])
-                - float(ema50.iloc[-5])
-            )
-            / prev_price
-            * 100
-            if prev_price > 0
-            else spread
-        )
-        
-        # Положительное значение:
-        # EMA продолжают расходиться.
-        #
-        # Отрицательное значение:
-        # тренд начинает выдыхаться.
-        spread_delta = spread - prev_spread
-        
-        # =====================
-        # ATR / ВОЛАТИЛЬНОСТЬ
-        # =====================
-        
-        high = df_h1["high"].astype(float)
-        low = df_h1["low"].astype(float)
-        
-        candle_range = high - low
-        atr = candle_range.rolling(14).mean()
-        
-        atr_now = float(atr.iloc[-1])
-        atr_prev = float(atr.iloc[-5])
-        
-        atr_delta = atr_now - atr_prev
-        
-        # =====================
-        # ОБЪЁМ
-        # =====================
-        
-        if "volume" in df_h1.columns:
-        
-            volume = df_h1["volume"].astype(float)
-        
-        elif "vol" in df_h1.columns:
-        
-            volume = df_h1["vol"].astype(float)
-        
-        else:
-        
-            volume = None
-        
-        if volume is not None:
-        
-            volume_now = float(
-                volume.tail(5).mean()
-            )
-        
-            volume_prev = float(
-                volume.iloc[-15:-5].mean()
-            )
-        
-            volume_delta = volume_now - volume_prev
-        
-        else:
-        
-            volume_now = 0.0
-            volume_prev = 0.0
-            volume_delta = 0.0
-        
-        log(
-            f"spread={spread:.3f} "
-            f"prev_spread={prev_spread:.3f} "
-            f"spread_delta={spread_delta:.3f} "
-            f"slope={slope:.6f} "
-            f"atr_delta={atr_delta:.6f} "
-            f"volume_delta={volume_delta:.2f}"
-        )
-
-        prev_spread = abs(
-            float(ema20.iloc[-5]) -
-            float(ema50.iloc[-5])
-        ) / float(close.iloc[-5]) * 100
-
-        high = df_h1["high"]
-        low = df_h1["low"]
-        
-        atr = (high - low).rolling(14).mean()
-        
-        atr_now = float(atr.iloc[-1])
-        atr_prev = float(atr.iloc[-5])
-        
-        atr_delta = atr_now - atr_prev
-
-        volume = df_h1["volume"]
-
-        vol_now = volume.tail(5).mean()
-        vol_prev = volume.iloc[-15:-5].mean()
-        
-        volume_delta = vol_now - vol_prev
-        
-        spread_delta = spread - prev_spread
+        # 📊 СПРЕД И НАКЛОН
+        spread = abs(ema20_last - ema50_last) / last_price * 100
+        slope = ema20.iloc[-1] - ema20.iloc[-5]
 
         log(f"spread={spread:.3f} slope={slope:.6f}")
 
@@ -385,37 +271,13 @@ def detect_market_phase(df_h1):
         if spread > 0.2:
             trend_score += 1
 
-        if (
-            spread > 0.25
-            and spread_delta > 0
-            and atr_delta > 0
-        ):
-        
-            phase = "STRONG_TREND"
-        
-        elif (
-            spread > 0.15
-            and slope != 0
-        ):
-        
-            phase = "EARLY_TREND"
-        
-        elif (
-            spread > 0.15
-            and spread_delta < 0
-            and atr_delta < 0
-            and volume_delta < 0
-        ):
-        
-            phase = "EXHAUSTION"
-        
-        elif spread < 0.10:
-        
-            phase = "ACCUMULATION"
-        
-        else:
-        
+        # 📊 КЛАССИФИКАЦИЯ
+        if trend_score >= 3:
+            phase = "TREND"
+        elif trend_score == 2:
             phase = "TRANSITION"
+        else:
+            phase = "FLAT"
 
         log(f"phase={phase} score={trend_score}")
 
@@ -14289,484 +14151,84 @@ def build_signal(instId):
         flush=True
     )
 
+    # =====================
+    # MARKET EXHAUSTION
+    # =====================
 
-        # =====================
-        # MARKET EXHAUSTION V2
-        # =====================
-        #
-        # Задача:
-        # 1. Найти предыдущее направленное движение.
-        # 2. Проверить, что оно перестало развиваться.
-        # 3. Увидеть сокращение диапазона и объёма.
-        # 4. Подтвердить остановку через compression / absorption.
-        #
-        # LONG_EXHAUSTION:
-        # рост выдохся — покупатели перестали продвигать цену выше.
-        #
-        # SHORT_EXHAUSTION:
-        # падение выдохлось — продавцы перестали продвигать цену ниже.
-        # =====================
-    
-        market_exhaustion = "NO_EXHAUSTION"
-        exhaustion_score = 0
-        exhaustion_reasons = []
+    market_exhaustion = "NO_EXHAUSTION"
 
-        # =====================
-        # EXHAUSTION FEATURES
-        # =====================
-        
-        price_stalling = False
-        range_contracting = False
-        volume_fading = False
-        high_stop = False
-        low_stop = False
-        atr_fading = False
-        compression_after_trend = False
-        try:
-    
-            candles_ex = list(c5 or [])
-    
-            # Для анализа нужно достаточно свечей:
-            # старый импульс + последние свечи остановки
-            if len(candles_ex) >= 20:
-    
-                # =====================
-                # CANDLE VALUE READER
-                # =====================
-    
-                def _ex_value(row, names, list_index, default=0.0):
-    
-                    try:
-    
-                        if isinstance(row, dict):
-    
-                            for name in names:
-    
-                                value = row.get(name)
-    
-                                if value is not None:
-    
-                                    return float(value)
-    
-                        elif isinstance(row, (list, tuple)):
-    
-                            if len(row) > list_index:
-    
-                                return float(row[list_index])
-    
-                    except Exception:
-    
-                        pass
-    
-                    return float(default)
-    
-                def _ex_open(row):
-    
-                    return _ex_value(
-                        row,
-                        ("open", "o", "openPrice"),
-                        1
-                    )
-    
-                def _ex_high(row):
-    
-                    return _ex_value(
-                        row,
-                        ("high", "h", "highPrice"),
-                        2
-                    )
-    
-                def _ex_low(row):
-    
-                    return _ex_value(
-                        row,
-                        ("low", "l", "lowPrice"),
-                        3
-                    )
-    
-                def _ex_close(row):
-    
-                    return _ex_value(
-                        row,
-                        ("close", "c", "closePrice"),
-                        4
-                    )
-    
-                def _ex_volume(row):
-    
-                    return _ex_value(
-                        row,
-                        ("volume", "vol", "v", "baseVolume"),
-                        5
-                    )
-    
-                # =====================
-                # ANALYSIS WINDOWS
-                # =====================
-    
-                # Последние 24 свечи:
-                # 18 свечей предыдущего движения
-                # 6 свечей текущей остановки
-                analysis_window = candles_ex[-24:]
-    
-                impulse_part = analysis_window[:-6]
-                stop_part = analysis_window[-6:]
-    
-                impulse_start = _ex_close(impulse_part[0])
-                impulse_end = _ex_close(impulse_part[-1])
-    
-                recent_start = _ex_close(stop_part[0])
-                recent_end = _ex_close(stop_part[-1])
-    
-                # Защита от нулевых цен
-                if impulse_start > 0 and recent_start > 0:
-    
-                    impulse_change_pct = (
-                        (impulse_end - impulse_start)
-                        / impulse_start
-                        * 100.0
-                    )
-    
-                    recent_change_pct = (
-                        (recent_end - recent_start)
-                        / recent_start
-                        * 100.0
-                    )
-    
-                    # =====================
-                    # RANGE CONTRACTION
-                    # =====================
-    
-                    impulse_ranges = []
-    
-                    for row in impulse_part:
-    
-                        high = _ex_high(row)
-                        low = _ex_low(row)
-    
-                        if high > 0 and low > 0:
-    
-                            impulse_ranges.append(
-                                max(high - low, 0.0)
-                            )
-    
-                    recent_ranges = []
-    
-                    for row in stop_part:
-    
-                        high = _ex_high(row)
-                        low = _ex_low(row)
-    
-                        if high > 0 and low > 0:
-    
-                            recent_ranges.append(
-                                max(high - low, 0.0)
-                            )
-    
-                    impulse_range_avg = (
-                        sum(impulse_ranges) / len(impulse_ranges)
-                        if impulse_ranges
-                        else 0.0
-                    )
-    
-                    recent_range_avg = (
-                        sum(recent_ranges) / len(recent_ranges)
-                        if recent_ranges
-                        else 0.0
-                    )
-    
-                    range_contracting = (
-                        impulse_range_avg > 0
-                        and recent_range_avg
-                        <= impulse_range_avg * 0.75
-                    )
-    
-                    # =====================
-                    # VOLUME COOLING
-                    # =====================
-    
-                    impulse_volumes = [
-                        _ex_volume(row)
-                        for row in impulse_part
-                        if _ex_volume(row) > 0
-                    ]
-    
-                    recent_volumes = [
-                        _ex_volume(row)
-                        for row in stop_part
-                        if _ex_volume(row) > 0
-                    ]
-    
-                    impulse_volume_avg = (
-                        sum(impulse_volumes) / len(impulse_volumes)
-                        if impulse_volumes
-                        else 0.0
-                    )
-    
-                    recent_volume_avg = (
-                        sum(recent_volumes) / len(recent_volumes)
-                        if recent_volumes
-                        else 0.0
-                    )
-    
-                    volume_cooling = (
-                        impulse_volume_avg > 0
-                        and recent_volume_avg
-                        <= impulse_volume_avg * 0.80
-                    )
-    
-                    # =====================
-                    # EXTREME PROGRESS
-                    # =====================
-    
-                    impulse_high = max(
-                        _ex_high(row)
-                        for row in impulse_part
-                    )
-    
-                    impulse_low = min(
-                        _ex_low(row)
-                        for row in impulse_part
-                    )
-    
-                    recent_high = max(
-                        _ex_high(row)
-                        for row in stop_part
-                    )
-    
-                    recent_low = min(
-                        _ex_low(row)
-                        for row in stop_part
-                    )
-    
-                    # После роста цена почти не обновляет максимум
-                    no_new_high = (
-                        impulse_high > 0
-                        and recent_high
-                        <= impulse_high * 1.003
-                    )
-    
-                    # После падения цена почти не обновляет минимум
-                    no_new_low = (
-                        impulse_low > 0
-                        and recent_low
-                        >= impulse_low * 0.997
-                    )
-    
-                    # Последние свечи почти стоят
-                    movement_stopped = (
-                        abs(recent_change_pct) <= 1.20
-                    )
-    
-                    # =====================
-                    # EXISTING CONTEXT
-                    # =====================
-    
-                    compression_present = any(
-                        flag in flags
-                        for flag in (
-                            "COMP_5M",
-                            "COMP_15M",
-                            "COMP_PRO_5M",
-                            "COMP_PRO_15M",
-                            "RANGE_COMPRESSION",
-                            "TIGHT_RANGE"
-                        )
-                    )
-    
-                    # После падения покупатель начинает удерживать пролив
-                    buyer_stabilization = (
-                        "BUYER_ABSORPTION" in flags
-                        or "RANGE_HOLD_LOW" in flags
-                    )
-    
-                    # После роста продавец начинает удерживать вершину
-                    seller_stabilization = (
-                        "SELLER_ABSORPTION" in flags
-                        or "RANGE_HOLD_HIGH" in flags
-                    )
-    
-                    # =====================
-                    # PREVIOUS UP MOVE EXHAUSTED
-                    # =====================
-    
-                    if impulse_change_pct >= 3.0:
-    
-                        long_exhaustion_score = 0
-                        long_reasons = []
-    
-                        # Предыдущий рост действительно был
-                        long_exhaustion_score += 1
-                        long_reasons.append(
-                            f"предыдущий рост {impulse_change_pct:.2f}%"
-                        )
-    
-                        if movement_stopped:
-    
-                            long_exhaustion_score += 1
-                            long_reasons.append(
-                                "последние свечи почти перестали двигаться"
-                            )
-    
-                        if no_new_high:
-    
-                            long_exhaustion_score += 2
-                            long_reasons.append(
-                                "цена перестала уверенно обновлять максимум"
-                            )
-    
-                        if range_contracting:
-    
-                            long_exhaustion_score += 2
-                            long_reasons.append(
-                                "диапазон свечей сокращается"
-                            )
-    
-                        if volume_cooling:
-    
-                            long_exhaustion_score += 1
-                            long_reasons.append(
-                                "объём предыдущего роста затухает"
-                            )
-    
-                        if compression_present:
-    
-                            long_exhaustion_score += 2
-                            long_reasons.append(
-                                "после роста формируется сжатие"
-                            )
-    
-                        if seller_stabilization:
-    
-                            long_exhaustion_score += 2
-                            long_reasons.append(
-                                "продавец начинает удерживать верх диапазона"
-                            )
-    
-                        if long_exhaustion_score >= 5:
-    
-                            market_exhaustion = "LONG_EXHAUSTION"
-                            exhaustion_score = long_exhaustion_score
-                            exhaustion_reasons = long_reasons
-    
-                            flags.add("LONG_EXHAUSTION")
-                            flags.add("MARKET_EXHAUSTION_CONFIRMED")
-                            flags.add("MARKET_STOPPED_AFTER_RISE")
+    # =====================
+    # LONG EXHAUSTION
+    # =====================
 
-                    # =====================
-                    # PREVIOUS DOWN MOVE EXHAUSTED
-                    # =====================
-    
-                    elif impulse_change_pct <= -3.0:
-    
-                        short_exhaustion_score = 0
-                        short_reasons = []
-    
-                        # Предыдущее падение действительно было
-                        short_exhaustion_score += 1
-                        short_reasons.append(
-                            f"предыдущее падение {impulse_change_pct:.2f}%"
-                        )
-    
-                        if movement_stopped:
-    
-                            short_exhaustion_score += 1
-                            short_reasons.append(
-                                "последние свечи почти перестали двигаться"
-                            )
-    
-                        if no_new_low:
-    
-                            short_exhaustion_score += 2
-                            short_reasons.append(
-                                "цена перестала уверенно обновлять минимум"
-                            )
-    
-                        if range_contracting:
-    
-                            short_exhaustion_score += 2
-                            short_reasons.append(
-                                "диапазон свечей сокращается"
-                            )
-    
-                        if volume_cooling:
-    
-                            short_exhaustion_score += 1
-                            short_reasons.append(
-                                "объём предыдущего падения затухает"
-                            )
-    
-                        if compression_present:
-    
-                            short_exhaustion_score += 2
-                            short_reasons.append(
-                                "после падения формируется сжатие"
-                            )
-    
-                        if buyer_stabilization:
-    
-                            short_exhaustion_score += 2
-                            short_reasons.append(
-                                "покупатель начинает удерживать низ диапазона"
-                            )
-    
-                        if short_exhaustion_score >= 5:
-    
-                            market_exhaustion = "SHORT_EXHAUSTION"
-                            exhaustion_score = short_exhaustion_score
-                            exhaustion_reasons = short_reasons
-    
-                            flags.add("SHORT_EXHAUSTION")
-                            flags.add("MARKET_EXHAUSTION_CONFIRMED")
-                            flags.add("MARKET_STOPPED_AFTER_DROP")
-    
-                    # =====================
-                    # DEBUG DATA
-                    # =====================
-    
-                    sig_market_exhaustion_impulse_pct = round(
-                        impulse_change_pct,
-                        3
-                    )
-    
-                    sig_market_exhaustion_recent_pct = round(
-                        recent_change_pct,
-                        3
-                    )
-    
-                    sig_market_exhaustion_range_contract = (
-                        range_contracting
-                    )
-    
-                    sig_market_exhaustion_volume_cooling = (
-                        volume_cooling
-                    )
-    
-        except Exception as e:
-    
-            market_exhaustion = "EXHAUSTION_ERROR"
-            exhaustion_score = 0
-            exhaustion_reasons = [str(e)]
-    
-            print(
-                f"[MARKET_EXHAUSTION_ERROR] "
-                f"{instId} "
-                f"{e}",
-                flush=True
-            )
-    
-        sig_market_exhaustion = market_exhaustion
-        sig_market_exhaustion_score = exhaustion_score
-        sig_market_exhaustion_reasons = exhaustion_reasons
-    
-        print(
-            f"[MARKET_EXHAUSTION] "
-            f"{instId} "
-            f"state={market_exhaustion} "
-            f"score={exhaustion_score} "
-            f"reasons={exhaustion_reasons}",
-            flush=True
+    if (
+
+        "ACCELERATION_UP"
+        in flags
+
+        and (
+            "BREAKOUT_UP"
+            in flags
+            or
+            "BREAKOUT_CONFIRM_UP"
+            in flags
         )
+
+        and flow_quality == "WEAK_FLOW"
+
+        and not (
+            "OI_BUILDUP_LONG"
+            in flags
+        )
+
+    ):
+
+        market_exhaustion = "LONG_EXHAUSTION"
+
+        flags.add(
+            "LONG_EXHAUSTION"
+        )
+
+    # =====================
+    # SHORT EXHAUSTION
+    # =====================
+
+    elif (
+
+        "ACCELERATION_DOWN"
+        in flags
+
+        and (
+            "BREAKOUT_DOWN"
+            in flags
+            or
+            "BREAKOUT_CONFIRM_DOWN"
+            in flags
+        )
+
+        and flow_quality == "WEAK_FLOW"
+
+        and not (
+            "OI_BUILDUP_SHORT"
+            in flags
+        )
+
+    ):
+
+        market_exhaustion = "SHORT_EXHAUSTION"
+
+        flags.add(
+            "SHORT_EXHAUSTION"
+        )
+
+    sig_market_exhaustion = market_exhaustion
+
+    print(
+        f"[MARKET_EXHAUSTION] "
+        f"{instId} "
+        f"{market_exhaustion}",
+        flush=True
+    )
     # =====================
     # SMART MONEY INTENT
     # =====================
