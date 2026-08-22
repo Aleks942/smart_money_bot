@@ -914,11 +914,45 @@ def detect_smart_money_cycle(signal, emit_log=True):
             or setup_class == "EXPANSION"
         )
         
-        expansion = bool(
+        # ====================================================
+        # PRICE EXPANSION
+        #
+        # Цена действительно начала ускоряться / пробивать.
+        # Но это еще НЕ доказывает Smart Money.
+        # ====================================================
+        
+        price_expansion = bool(
             acceleration
             and (
                 breakout_confirmed
                 or launch
+            )
+        )
+        
+        # ====================================================
+        # SMART MONEY EXPANSION
+        #
+        # EXPANSION Smart Cycle разрешаем только если:
+        #
+        # 1) движение уже прошло POSITION_BUILDUP / PREMOVE
+        #    ИЛИ
+        #
+        # 2) мы могли пропустить ранние стадии, но прямо сейчас
+        #    есть реальные новые позиции + FLOW + CVD.
+        #
+        # Просто сильная цена сюда НЕ проходит.
+        # ====================================================
+        
+        expansion = bool(
+            price_expansion
+            and (
+                premove
+                or position_buildup
+                or (
+                    oi_confirmed
+                    and flow_confirmed
+                    and cvd_confirmed
+                )
             )
         )
 
