@@ -16,6 +16,7 @@ from ai_scoring import get_ai_multiplier
 from market_context import apply_market_context
 from ta_sniper import analyze_ta_sniper
 from retest_filter import retest_ok
+from smart_money_cycle import detect_smart_money_cycle
 from pathlib import Path
 
 # =========================
