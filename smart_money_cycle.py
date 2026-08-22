@@ -36,6 +36,105 @@ def _safe_bool(value):
 
 
 def _normalize_direction(signal):
+    """
+    Определяем направление будущего движения.
+
+    Приоритет:
+    1. Реальный ENTRY, который уже выбрал основной движок.
+    2. Набор directional flags.
+    3. CVD.
+    4. Старые direction_code / direction / side только как fallback.
+    """
+
+    # ====================================================
+    # 1. ENTRY — самый прямой источник направления
+    # ====================================================
+
+    entry = str(
+        signal.get("entry")
+        or signal.get("entry_type")
+        or ""
+    ).upper()
+
+    if "SHORT" in entry or "SELL" in entry:
+        return "SHORT"
+
+    if "LONG" in entry or "BUY" in entry:
+        return "LONG"
+
+    # ====================================================
+    # 2. DIRECTIONAL FLAGS
+    # ====================================================
+
+    flags = set(signal.get("flags") or [])
+
+    long_flags = {
+        "PRESSURE_UP",
+        "STRUCTURE_HH_HL",
+        "EMA_BULL",
+        "EMA_BULL_STRONG",
+        "BREAKOUT_UP",
+        "BREAKOUT_CONFIRM_UP",
+        "ACCELERATION_UP",
+        "BULLISH_SHIFT",
+        "MTF_LONG_ALIGN",
+        "BOS_UP",
+    }
+
+    short_flags = {
+        "PRESSURE_DOWN",
+        "STRUCTURE_LH_LL",
+        "EMA_BEAR",
+        "EMA_BEAR_STRONG",
+        "BREAKOUT_DOWN",
+        "BREAKOUT_CONFIRM_DOWN",
+        "ACCELERATION_DOWN",
+        "BEARISH_SHIFT",
+        "MTF_SHORT_ALIGN",
+        "BOS_DOWN",
+    }
+
+    long_score = sum(
+        1 for flag in long_flags
+        if flag in flags
+    )
+
+    short_score = sum(
+        1 for flag in short_flags
+        if flag in flags
+    )
+
+    if long_score > short_score:
+        return "LONG"
+
+    if short_score > long_score:
+        return "SHORT"
+
+    # ====================================================
+    # 3. CVD — fallback при равенстве структуры
+    # ====================================================
+
+    cvd_state = str(
+        signal.get("cvd_state")
+        or ""
+    ).upper()
+
+    if cvd_state in {
+        "BUY_CVD",
+        "STRONG_BUY_CVD",
+    }:
+        return "LONG"
+
+    if cvd_state in {
+        "SELL_CVD",
+        "STRONG_SELL_CVD",
+    }:
+        return "SHORT"
+
+    # ====================================================
+    # 4. Старые direction fields — только последний fallback
+    # ====================================================
+
     raw = str(
         signal.get("direction_code")
         or signal.get("direction")
@@ -43,10 +142,20 @@ def _normalize_direction(signal):
         or ""
     ).upper()
 
-    if any(x in raw for x in ("LONG", "UP", "BUY", "BULL")):
+    if (
+        "LONG" in raw
+        or "UP" in raw
+        or "BUY" in raw
+        or "ВВЕРХ" in raw
+    ):
         return "LONG"
 
-    if any(x in raw for x in ("SHORT", "DOWN", "SELL", "BEAR")):
+    if (
+        "SHORT" in raw
+        or "DOWN" in raw
+        or "SELL" in raw
+        or "ВНИЗ" in raw
+    ):
         return "SHORT"
 
     return "NEUTRAL"
