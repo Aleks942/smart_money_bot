@@ -906,19 +906,19 @@ def detect_smart_money_cycle(signal, emit_log=True):
             breakout_confirmed = False
             launch = False
 
+        # Старый stage/setup_class сохраняем только для сравнения.
+        # Он НЕ имеет права автоматически назначать Smart Cycle EXPANSION.
+        
         old_stage_expansion = (
             "EXPANSION" in stage_old
             or setup_class == "EXPANSION"
         )
-
+        
         expansion = bool(
-            old_stage_expansion
-            or (
-                acceleration
-                and (
-                    breakout_confirmed
-                    or launch
-                )
+            acceleration
+            and (
+                breakout_confirmed
+                or launch
             )
         )
 
