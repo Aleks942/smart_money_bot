@@ -15855,6 +15855,14 @@ def build_signal(instId):
     )
 
     # =========================
+    # SMART MONEY CYCLE V1
+    # DIAGNOSTIC ONLY
+    # =========================
+
+    signal = detect_smart_money_cycle(signal)
+
+
+    # =========================
     # RETEST + RECLAIM ENGINE
     # =========================
     
