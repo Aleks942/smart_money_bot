@@ -488,6 +488,22 @@ def detect_smart_money_cycle(signal, emit_log=True):
             reasons.append("EXHAUSTION")
 
         # ====================================================
+        # EXHAUSTION DIAGNOSTIC
+        # ====================================================
+        
+        exhaustion_debug = {
+            "price_stalling": explicit_price_stalling,
+            "range_contracting": explicit_range_contracting,
+            "volume_fading": explicit_volume_fading,
+            "high_stop": explicit_high_stop,
+            "low_stop": explicit_low_stop,
+            "atr_fading": explicit_atr_fading,
+            "compression_after_trend": explicit_compression_after_trend,
+            "old_exhaustion": old_exhaustion,
+            "evidence": exhaustion_evidence,
+        }
+
+        # ====================================================
         # 5. STOPPING
         #
         # Приоритет:
