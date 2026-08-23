@@ -15866,6 +15866,8 @@ def build_signal(instId):
         emit_log=True,
     )
 
+    signal.update(exhaustion_v2)
+
     # =========================
     # SMART MONEY CYCLE V1
     # DIAGNOSTIC ONLY
