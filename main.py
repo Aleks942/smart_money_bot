@@ -15323,6 +15323,7 @@ def build_signal(instId, preloaded_oi=None):
         "instId": instId,
         "symbol": instId,
         "price": price,
+        "price_change_pct": price_change_pct,
         "oi_change": preloaded_oi,
         "oi_available": preloaded_oi is not None,
 
