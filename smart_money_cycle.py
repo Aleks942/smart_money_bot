@@ -479,10 +479,37 @@ def detect_smart_money_cycle(signal, emit_log=True):
             explicit_compression_after_trend,
         ])
 
-        exhaustion = bool(
-            old_exhaustion
-            or exhaustion_evidence >= 3
+        # ====================================================
+        # MARKET EXHAUSTION SOURCE
+        #
+        # Если подключен Market Exhaustion V2 —
+        # доверяем его финальному решению.
+        #
+        # V2 дополнительно проверяет наличие реального
+        # предыдущего движения и не позволяет простому
+        # сжатию рынка стать EXHAUSTION.
+        #
+        # Старую эвристику оставляем только как fallback.
+        # ====================================================
+        
+        v2_exhaustion_available = (
+            str(
+                signal.get("market_exhaustion_version")
+                or ""
+            ).upper().startswith("V2")
         )
+        
+        v2_exhaustion = _safe_bool(
+            signal.get("exhaustion")
+        )
+        
+        if v2_exhaustion_available:
+            exhaustion = v2_exhaustion
+        else:
+            exhaustion = bool(
+                old_exhaustion
+                or exhaustion_evidence >= 3
+            )
 
         if exhaustion:
             reasons.append("EXHAUSTION")
