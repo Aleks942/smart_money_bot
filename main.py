@@ -19507,6 +19507,18 @@ def get_open_interest_change(symbol):
 
         now_oi = float(rows[0]["openInterest"])
         prev_oi = float(rows[1]["openInterest"])
+        # =====================
+        # ABSOLUTE OI SNAPSHOT
+        # =====================
+
+        ABS_OI_MEMORY[symbol] = now_oi
+
+        print(
+            f"[ABS_OI] "
+            f"{symbol} "
+            f"current={now_oi}",
+            flush=True
+        )
 
         if prev_oi <= 0:
             return None
