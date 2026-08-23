@@ -1053,6 +1053,7 @@ def detect_smart_money_cycle(signal, emit_log=True):
         result["smart_cycle_previous_move"] = previous_move
 
         result["smart_cycle_exhaustion"] = exhaustion
+        result["smart_cycle_exhaustion_debug"] = exhaustion_debug
         result["smart_cycle_exhaustion_evidence"] = (
             exhaustion_evidence
         )
@@ -1174,6 +1175,22 @@ def detect_smart_money_cycle(signal, emit_log=True):
                 f"seq={sequence_count}/{sequence_total}",
                 flush=True,
             )
+            
+            if compression or absorption or acc >= 3 or ep >= 15:
+                print(
+                    f"[SMART_CYCLE_EXHAUST] "
+                    f"{symbol} "
+                    f"price_stalling={explicit_price_stalling} "
+                    f"range_contracting={explicit_range_contracting} "
+                    f"volume_fading={explicit_volume_fading} "
+                    f"high_stop={explicit_high_stop} "
+                    f"low_stop={explicit_low_stop} "
+                    f"atr_fading={explicit_atr_fading} "
+                    f"compression_after_trend={explicit_compression_after_trend} "
+                    f"old_exhaustion={old_exhaustion} "
+                    f"evidence={exhaustion_evidence}",
+                    flush=True,
+                )
 
             if flow_capital_gap:
                 print(
