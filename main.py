@@ -3018,7 +3018,9 @@ def analyze_real_oi_flow(instId, price, oi):
             f"{instId} "
             f"state={oi_state} "
             f"price_delta={round(price_delta, 6)} "
-            f"oi_delta={round(oi_delta, 6)}",
+            f"price_pct={round(price_delta_pct, 4)}% "
+            f"oi_delta={round(oi_delta, 6)} "
+            f"oi_pct={round(oi_delta_pct, 4)}%",
             flush=True
         )
 
