@@ -20876,7 +20876,6 @@ if __name__ == "__main__":
                         os.getenv("OI_CACHE_TTL_SEC", "1800")
                     )
                     
-                    new_oi = get_open_interest_change(instId)
                     
                     print(
                         f"[OI_DEBUG_RAW] "
