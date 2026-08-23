@@ -12057,7 +12057,9 @@ def is_trend_candidate(instId, ticker):
     except Exception:
 
         return False
-def build_signal(instId):
+
+
+def build_signal(instId, preloaded_oi=None):
     print(f"[BUILD_SIGNAL_ENTER] {instId}", flush=True)
     
     flags = set()
