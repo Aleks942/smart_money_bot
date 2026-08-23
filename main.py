@@ -15862,7 +15862,7 @@ def build_signal(instId):
 
     exhaustion_v2 = detect_market_exhaustion_v2(
         c5,
-        symbol=symbol,
+        symbol=signal.get("instId") or "UNKNOWN",
         emit_log=True,
     )
 
