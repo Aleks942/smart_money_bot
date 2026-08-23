@@ -15835,31 +15835,31 @@ def build_signal(instId, preloaded_oi=None):
     
     try:
         abs_oi = ABS_OI_MEMORY.get(
-        signal.get("instId")
-    )
-    
-    if abs_oi is not None:
-    
-        real_oi_data = analyze_real_oi_flow(
-            signal.get("instId"),
-            float(signal.get("price") or 0),
-            float(abs_oi)
+            signal.get("instId")
         )
-    
-    else:
-    
-        real_oi_data = {
-            "oi_state": "NO_OI_DATA",
-            "oi_score": 0,
-            "oi_reason": "нет абсолютного OI",
-            "oi_side": "NEUTRAL"
-        }
-    
+
+        if abs_oi is not None:
+
+            real_oi_data = analyze_real_oi_flow(
+                signal.get("instId"),
+                float(signal.get("price") or 0),
+                float(abs_oi)
+            )
+
+        else:
+
+            real_oi_data = {
+                "oi_state": "NO_OI_DATA",
+                "oi_score": 0,
+                "oi_reason": "нет абсолютного OI",
+                "oi_side": "NEUTRAL"
+            }
+
         signal["real_oi_state"] = real_oi_data.get("oi_state")
         signal["real_oi_score"] = real_oi_data.get("oi_score")
         signal["real_oi_reason"] = real_oi_data.get("oi_reason")
         signal["real_oi_side"] = real_oi_data.get("oi_side")
-    
+
         print(
             f"[REAL_OI_V2] "
             f"{signal.get('instId')} "
@@ -15869,10 +15869,12 @@ def build_signal(instId, preloaded_oi=None):
             f"reason={signal.get('real_oi_reason')}",
             flush=True
         )
-    
+
     except Exception as e:
         print(
-            f"[REAL_OI_V2_ERROR] {signal.get('instId')} {e}",
+            f"[REAL_OI_V2_ERROR] "
+            f"{signal.get('instId')} "
+            f"{e}",
             flush=True
         )
     # =========================
