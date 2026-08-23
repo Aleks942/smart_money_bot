@@ -20740,7 +20740,35 @@ if __name__ == "__main__":
 
                 try:
 
-                    sig = build_signal(instId)
+                    # =====================
+                    # PRELOAD OPEN INTEREST
+                    # =====================
+                
+                    try:
+                        new_oi = get_open_interest_change(instId)
+                
+                        print(
+                            f"[OI_PRELOAD] "
+                            f"{instId} "
+                            f"oi={new_oi}",
+                            flush=True
+                        )
+                
+                    except Exception as e:
+                
+                        new_oi = None
+                
+                        print(
+                            f"[OI_PRELOAD_ERROR] "
+                            f"{instId} "
+                            f"{e}",
+                            flush=True
+                        )
+                
+                    sig = build_signal(
+                        instId,
+                        preloaded_oi=new_oi
+                    )
 
                     # =====================
                     # INVALID CHECK
