@@ -12088,6 +12088,43 @@ def build_signal(instId, preloaded_oi=None):
         price = float(c5[-1][4])
 
     # =========================
+    # 5M PRICE CHANGE
+    # =========================
+
+    price_change_pct = 0.0
+
+    if len(c5) >= 2:
+        try:
+            prev_close = float(c5[-2][4])
+            last_close = float(c5[-1][4])
+
+            if prev_close > 0:
+                price_change_pct = (
+                    (last_close - prev_close)
+                    / prev_close
+                    * 100
+                )
+
+            price_change_pct = round(price_change_pct, 4)
+
+            print(
+                f"[PRICE_CHANGE_5M] "
+                f"{instId} "
+                f"change={price_change_pct}%",
+                flush=True
+            )
+
+        except Exception as e:
+            price_change_pct = 0.0
+
+            print(
+                f"[PRICE_CHANGE_5M_ERROR] "
+                f"{instId} "
+                f"{e}",
+                flush=True
+            )
+
+    # =========================
     # EMA
     # =========================
     ema_meta = get_ema_trend(c15) if c15 else {}
