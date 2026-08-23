@@ -15286,6 +15286,9 @@ def build_signal(instId, preloaded_oi=None):
         "instId": instId,
         "symbol": instId,
         "price": price,
+        "oi_change": preloaded_oi,
+        "oi_available": preloaded_oi is not None,
+
         "score": score,
 
         "candles": c5,
