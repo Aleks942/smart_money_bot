@@ -644,24 +644,34 @@ def detect_smart_money_cycle(signal, emit_log=True):
         meaningful_primary = primary_direction != "NEUTRAL"
         meaningful_real = real_direction != "NEUTRAL"
 
-        oi_conflict = bool(
+        # =========================
+        # REAL OI = DIAGNOSTIC ONLY
+        # =========================
+
+        real_oi_conflict = bool(
             meaningful_primary
             and meaningful_real
             and primary_direction != real_direction
         )
 
-        # Два OI-классификатора работают на немного разных срезах.
-        # Поэтому подтверждение принимаем от любого из них,
-        # НО не принимаем при явном конфликте.
+        # Основной 5m PRICE + OI классификатор —
+        # единственный источник торгового OI подтверждения.
         oi_confirmed = bool(
-            (oi_primary_confirmed or oi_real_confirmed)
-            and not oi_conflict
+            oi_primary_confirmed
         )
 
         oi_weak = bool(
             oi_primary_weak
-            or oi_real_weak
         )
+
+        # REAL_OI пока не имеет права блокировать основной OI.
+        oi_conflict = False
+
+        if real_oi_conflict:
+            reasons.append(
+                f"REAL_OI_DIAGNOSTIC_CONFLICT:"
+                f"{oi_state}/{real_oi_state}"
+            )
 
         if oi_confirmed:
             reasons.append(
