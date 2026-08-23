@@ -15856,6 +15856,17 @@ def build_signal(instId):
     )
 
     # =========================
+    # MARKET EXHAUSTION V2
+    # DIAGNOSTIC ONLY
+    # =========================
+
+    exhaustion_v2 = detect_market_exhaustion_v2(
+        c5,
+        symbol=symbol,
+        emit_log=True,
+    )
+
+    # =========================
     # SMART MONEY CYCLE V1
     # DIAGNOSTIC ONLY
     # =========================
