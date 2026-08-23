@@ -2936,6 +2936,22 @@ def analyze_real_oi_flow(instId, price, oi):
         price_delta = price - prev_price
         oi_delta = oi - prev_oi
 
+        # =====================
+        # REAL OI % DIAGNOSTIC
+        # =====================
+
+        price_delta_pct = (
+            price_delta / prev_price * 100
+            if prev_price != 0
+            else 0.0
+        )
+
+        oi_delta_pct = (
+            oi_delta / prev_oi * 100
+            if prev_oi != 0
+            else 0.0
+        )
+
         oi_state = "NEUTRAL"
         oi_score = 0
         oi_reason = ""
