@@ -566,8 +566,11 @@ def detect_smart_money_cycle(signal, emit_log=True):
         )
 
         stopping = bool(
-            explicit_stopping
-            or proxy_stopping
+            exhaustion
+            and (
+                explicit_stopping
+                or proxy_stopping
+            )
         )
 
         stopping_source = "NONE"
