@@ -2142,18 +2142,23 @@ def analyze_flow_snapshot(sig):
         
             flow_flags.append("FLOW_BUILDUP")
         
-            # SHORT BUILDUP
-        
+            # DIRECTIONAL BUILDUP
+
             if (
                 "EMA_BEAR" in flags
                 or "STRUCTURE_LH_LL" in flags
             ):
-        
+            
                 flow_score += 1
-        
-                flags.add(
-                    "BEARISH_BUILDUP"
-                )
+                flags.add("BEARISH_BUILDUP")
+            
+            elif (
+                "EMA_BULL" in flags
+                or "STRUCTURE_HH_HL" in flags
+            ):
+            
+                flow_score += 1
+                flags.add("BULLISH_BUILDUP")
 
         # =====================
         # OI BUILDUP
