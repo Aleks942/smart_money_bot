@@ -20470,41 +20470,61 @@ def build_market_interpretation(sig):
                 "рынок может тянуться к ликвидности снизу"
             )
         # =====================
-        # MARKET CONTROL
+        # MARKET CONTROL + MTF
         # =====================
-
-        if (
+        
+        bull_control = (
             "PRESSURE_UP" in flags
             or "BULLISH_SHIFT" in flags
-        ):
-
+        )
+        
+        bear_control = (
+            "PRESSURE_DOWN" in flags
+            or "BEARISH_SHIFT" in flags
+        )
+        
+        mtf_long = (
+            "MTF_LONG_ALIGN" in flags
+        )
+        
+        mtf_short = (
+            "MTF_SHORT_ALIGN" in flags
+        )
+        
+        if bull_control and mtf_long:
+        
+            thoughts.append(
+                "👑 покупатели контролируют ситуацию, MTF подтверждает LONG"
+            )
+        
+        elif bear_control and mtf_short:
+        
+            thoughts.append(
+                "👑 продавцы контролируют ситуацию, MTF подтверждает SHORT"
+            )
+        
+        elif bull_control:
+        
             thoughts.append(
                 "👑 покупатели контролируют ситуацию"
             )
-
-        elif (
-            "PRESSURE_DOWN" in flags
-            or "BEARISH_SHIFT" in flags
-        ):
-
+        
+        elif bear_control:
+        
             thoughts.append(
                 "👑 продавцы контролируют ситуацию"
             )
-
-        # =====================
-        # MTF ALIGNMENT
-        # =====================
-
-        if "MTF_LONG_ALIGN" in flags:
+        
+        elif mtf_long:
         
             thoughts.append(
-               "👑 покупатели контролируют ситуацию"
+                "📈 таймфреймы поддерживают LONG"
             )
         
-        elif "MTF_SHORT_ALIGN" in flags:
+        elif mtf_short:
         
             thoughts.append(
-                "🔻 продавцы контролируют ситуацию"
+                "📉 таймфреймы поддерживают SHORT"
             )
 
         # =====================
