@@ -2101,9 +2101,25 @@ def analyze_flow_snapshot(sig):
         flow_score = 0
         flow_reasons = []
         flow_flags = []
-        capital_score = 0
+        
+        capital_data = analyze_capital_flow(sig)
+        
+        capital_score = float(
+            capital_data.get("capital_score") or 0
+        )
+        
+        sig["capital_state"] = capital_data.get(
+            "capital_state",
+            "NEUTRAL_CAPITAL_FLOW"
+        )
+        
+        sig["capital_reasons"] = capital_data.get(
+            "capital_reasons",
+            []
+        )
+        
 
-        # =====================
+        # ====================
         # BUILDUP CONTEXT
         # =====================
         
