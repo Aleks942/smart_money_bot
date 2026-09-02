@@ -2281,15 +2281,15 @@ def analyze_flow_snapshot(sig):
                 )
                 flow_flags.append("FLOW_ABSORPTION_CONFLICT")
         
-                # 6) Ликвидации
-                if (
-                    "SHORT_SQUEEZE" in flags
-                    or "LONG_FLUSH" in flags
-                    or "LIQUIDATION_CASCADE_ACTIVE" in flags
-                ):
-                    flow_score += 2
-                    flow_reasons.append("ликвидации начинают усиливать движение")
-                    flow_flags.append("FLOW_LIQUIDATION_PRESSURE")
+        # 6) Ликвидации
+        if (
+            "SHORT_SQUEEZE" in flags
+            or "LONG_FLUSH" in flags
+            or "LIQUIDATION_CASCADE_ACTIVE" in flags
+        ):
+            flow_score += 2
+            flow_reasons.append("ликвидации начинают усиливать движение")
+            flow_flags.append("FLOW_LIQUIDATION_PRESSURE")
 
         # =====================
         # LIQUIDITY MAP
