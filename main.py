@@ -20364,15 +20364,44 @@ def build_smart_story(sig):
 
         if "BUYER_ABSORPTION" in flags:
 
-            story.append(
-                "• крупный покупатель удерживает цену"
-            )
+            if is_long_signal:
+
+                story.append(
+                    "• крупный покупатель удерживает цену — поддержка LONG"
+                )
+
+            elif is_short_signal:
+
+                story.append(
+                    "⚠️ крупный покупатель удерживает цену — сопротивление SHORT"
+                )
+
+            else:
+
+                story.append(
+                    "• крупный покупатель удерживает цену"
+                )
+
 
         if "SELLER_ABSORPTION" in flags:
 
-            story.append(
-                "• крупный продавец удерживает цену"
-            )
+            if is_short_signal:
+
+                story.append(
+                    "• крупный продавец удерживает цену — поддержка SHORT"
+                )
+
+            elif is_long_signal:
+
+                story.append(
+                    "⚠️ крупный продавец удерживает цену — сопротивление LONG"
+                )
+
+            else:
+
+                story.append(
+                    "• крупный продавец удерживает цену"
+                )
 
         # =====================
         # MTF
