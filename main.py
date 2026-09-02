@@ -2226,23 +2226,48 @@ def analyze_flow_snapshot(sig):
             flow_flags.append("FLOW_COMPRESSION")
 
         # 5) Абсорбция
-        if (
-            "BUYER_ABSORPTION" in flags
-            or "SELLER_ABSORPTION" in flags
-        ):
-            flow_score += 2
-            flow_reasons.append("есть абсорбция — крупный участник удерживает цену")
-            flow_flags.append("FLOW_ABSORPTION")
-
-        # 6) Ликвидации
-        if (
-            "SHORT_SQUEEZE" in flags
-            or "LONG_FLUSH" in flags
-            or "LIQUIDATION_CASCADE_ACTIVE" in flags
-        ):
-            flow_score += 2
-            flow_reasons.append("ликвидации начинают усиливать движение")
-            flow_flags.append("FLOW_LIQUIDATION_PRESSURE")
+        if "BUYER_ABSORPTION" in flags:
+        
+            if is_long_signal:
+                flow_score += 2
+                flow_reasons.append(
+                    "покупатель удерживает цену — абсорбция поддерживает LONG"
+                )
+                flow_flags.append("FLOW_ABSORPTION")
+        
+            elif is_short_signal:
+                flow_score -= 1
+                flow_reasons.append(
+                    "покупатель удерживает цену — это против SHORT"
+                )
+                flow_flags.append("FLOW_ABSORPTION_CONFLICT")
+        
+        
+        if "SELLER_ABSORPTION" in flags:
+        
+            if is_short_signal:
+                flow_score += 2
+                flow_reasons.append(
+                    "продавец удерживает цену — абсорбция поддерживает SHORT"
+                )
+                flow_flags.append("FLOW_ABSORPTION")
+        
+            elif is_long_signal:
+                flow_score -= 1
+                flow_reasons.append(
+                    "продавец удерживает цену — это против LONG"
+                )
+                flow_flags.append("FLOW_ABSORPTION_CONFLICT")
+        
+                # 6) Ликвидации
+                if (
+                    "SHORT_SQUEEZE" in flags
+                    or "LONG_FLUSH" in flags
+                    or "LIQUIDATION_CASCADE_ACTIVE" in flags
+                ):
+                    flow_score += 2
+                    flow_reasons.append("ликвидации начинают усиливать движение")
+                    flow_flags.append("FLOW_LIQUIDATION_PRESSURE")
 
         # =====================
         # LIQUIDITY MAP
