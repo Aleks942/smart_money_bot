@@ -2098,6 +2098,28 @@ def analyze_flow_snapshot(sig):
         ep = float(sig.get("early_pressure_score") or 0)
         acc = float(sig.get("acc_score") or 0)
 
+        entry = str(
+            sig.get("entry")
+            or sig.get("entry_type")
+            or ""
+        ).upper()
+
+        direction_code = str(
+            sig.get("direction_code")
+            or sig.get("direction")
+            or ""
+        ).upper()
+
+        is_long_signal = (
+            direction_code in ("UP", "LONG")
+            or "LONG" in entry
+        )
+
+        is_short_signal = (
+            direction_code in ("DOWN", "SHORT")
+            or "SHORT" in entry
+        )
+        
         flow_score = 0
         flow_reasons = []
         flow_flags = []
