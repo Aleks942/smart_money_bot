@@ -20521,104 +20521,150 @@ def build_market_interpretation(sig):
 
             price_change = 0
 
-        # =====================
-        # REAL MONEY LONG
-        # =====================
 
+        # =====================
+        # PRICE + OI INTERPRETATION
+        # =====================
+        
         if (
             price_change > 0
             and oi >= 0.25
         ):
-
+        
             thoughts.append(
-                "💰 в рынок заходят новые деньги"
+                "💰 в рынок заходят новые позиции"
             )
-
-            thoughts.append(
-                "🚀 покупатели открывают новые позиции"
-            )
-
-            thoughts.append(
-                "✅ рост поддерживается реальным капиталом"
-            )
-
-        # =====================
-        # REAL MONEY SHORT
-        # =====================
-
+        
+            if is_long_signal:
+        
+                thoughts.append(
+                    "🚀 OI подтверждает LONG — покупатели набирают позиции"
+                )
+        
+                thoughts.append(
+                    "✅ рост поддерживается новым капиталом"
+                )
+        
+            elif is_short_signal:
+        
+                thoughts.append(
+                    "⚠️ OI конфликтует с SHORT — рост поддерживается новыми позициями"
+                )
+        
+            else:
+        
+                thoughts.append(
+                    "🚀 рост сопровождается ростом открытого интереса"
+                )
+        
+        
         elif (
             price_change < 0
             and oi >= 0.25
         ):
-
+        
             thoughts.append(
-                "💰 в рынок заходят новые деньги"
+                "💰 в рынок заходят новые позиции"
             )
-
-            thoughts.append(
-                "🔻 продавцы открывают новые позиции"
-            )
-
-            thoughts.append(
-                "✅ давление вниз поддерживается капиталом"
-            )
-
+        
+            if is_short_signal:
+        
+                thoughts.append(
+                    "🔻 OI подтверждает SHORT — продавцы набирают позиции"
+                )
+        
+                thoughts.append(
+                    "✅ снижение поддерживается новым капиталом"
+                )
+        
+            elif is_long_signal:
+        
+                thoughts.append(
+                    "⚠️ OI конфликтует с LONG — снижение поддерживается новыми позициями"
+                )
+        
+            else:
+        
+                thoughts.append(
+                    "🔻 снижение сопровождается ростом открытого интереса"
+                )
+        
+        
         # =====================
-        # SHORT SQUEEZE
+        # SHORT COVERING / SQUEEZE
         # =====================
-
+        
         elif (
             price_change > 0
             and oi <= -0.25
         ):
-
+        
             thoughts.append(
-                "⚠️ шортисты закрывают позиции"
+                "⚠️ открытый интерес снижается на росте"
             )
-
+        
             thoughts.append(
-                "⚠️ рост может быть вызван ликвидацией шортов"
+                "⚠️ часть движения может идти за счёт закрытия SHORT"
             )
-
-            thoughts.append(
-                "⚠️ это не самый сильный тип роста"
-            )
-
+        
+            if is_long_signal:
+        
+                thoughts.append(
+                    "⚠️ LONG пока слабее подтверждён новым капиталом"
+                )
+        
+            elif is_short_signal:
+        
+                thoughts.append(
+                    "⚠️ идёт движение против SHORT-сценария"
+                )
+        
+        
         # =====================
-        # LONG FLUSH
+        # LONG CLOSING / FLUSH
         # =====================
-
+        
         elif (
             price_change < 0
             and oi <= -0.25
         ):
-
+        
             thoughts.append(
-                "⚠️ лонгисты выходят из рынка"
+                "⚠️ открытый интерес снижается на падении"
             )
-
+        
             thoughts.append(
-                "⚠️ интерес покупателей ослабевает"
+                "⚠️ часть снижения может идти за счёт закрытия LONG"
             )
-
-            thoughts.append(
-                "⚠️ снижение может быть вызвано выходом из позиций"
-            )
-
+        
+            if is_short_signal:
+        
+                thoughts.append(
+                    "⚠️ SHORT пока слабее подтверждён новым капиталом"
+                )
+        
+            elif is_long_signal:
+        
+                thoughts.append(
+                    "⚠️ идёт давление против LONG-сценария"
+                )
+        
+        
         # =====================
         # LOW MONEY FLOW
         # =====================
-
+        
         elif abs(oi) < 0.10:
-
+        
             thoughts.append(
                 "💰 новых денег почти нет"
             )
-
+        
             thoughts.append(
                 "⚠️ движение пока больше техническое"
             )
 
+        
         # =====================
         # ENERGY
         # =====================
