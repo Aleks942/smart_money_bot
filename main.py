@@ -804,6 +804,12 @@ def analyze_signal_strength(sig):
     score = sig.get("score", 0)
     oi = sig.get("oi_change", 0)
 
+    instId = (
+        sig.get("instId")
+        or sig.get("symbol")
+        or "UNKNOWN"
+    )
+
     reasons = []
     strength = 0
 
