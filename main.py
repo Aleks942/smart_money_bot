@@ -22457,6 +22457,7 @@ if __name__ == "__main__":
                     )
                     
                     if (
+    
                         is_premove
                         and quality_points < 6
                         and abs(oi) < 0.25
@@ -22558,6 +22559,30 @@ if __name__ == "__main__":
                             elite_ok, elite_reason = (
                                 is_elite_pre_swing(sig)
                             )
+
+                            # =========================
+                            # ELITE PRE-SWING OI GATE
+                            # =========================
+                            
+                            oi_value = float(sig.get("oi_change") or 0)
+                            real_money = bool(sig.get("real_money_confirm"))
+                            
+                            oi_blocked = (
+                                abs(oi_value) < 0.10
+                                and not real_money
+                            )
+                            
+                            if oi_blocked:
+                                elite_ok = False
+                                elite_reason = "weak_oi_no_real_money"
+                            
+                                print(
+                                    f"[ELITE_PRE_SWING_OI_BLOCK] "
+                                    f"{instId} "
+                                    f"oi={oi_value} "
+                                    f"real_money={real_money}",
+                                    flush=True
+                                )
                         
                             print(
                                 f"[ELITE_PRE_SWING] "
@@ -22570,7 +22595,8 @@ if __name__ == "__main__":
                             if not elite_ok:
 
                                 if (
-                                    sig.get("sendable") is True
+                                    not oi_blocked
+                                    and sig.get("sendable") is True
                                     and float(sig.get("score") or 0) >= 20
                                     and float(sig.get("early_pressure_score") or 0) >= 12
                                     and float(sig.get("acc_score") or 0) >= 3
