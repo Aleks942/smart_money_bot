@@ -999,54 +999,7 @@ def analyze_signal_strength(sig):
                 flush=True
             )
 
-            # =====================
-            # REAL OI FLOW
-            # =====================
-
-            try:
-
-                price_change_pct = float(
-                    signal.get("price_change_pct") or 0
-                )
-
-            except:
-
-                price_change_pct = 0
-
-            oi_data = analyze_oi_flow(
-
-                instId,
-
-                price_change_pct,
-
-                oi
-
-            )
-
-            signal["oi_score"] = (
-                oi_data["oi_score"]
-            )
-
-            signal["oi_label"] = (
-                oi_data["oi_label"]
-            )
-
-            signal["oi_reason"] = (
-                oi_data["oi_reason"]
-            )
-
-            signal["oi_side"] = (
-                oi_data["oi_side"]
-            )
-
-            print(
-                f"[REAL_OI] "
-                f"{instId} "
-                f"label={oi_data['oi_label']} "
-                f"score={oi_data['oi_score']} "
-                f"side={oi_data['oi_side']}",
-                flush=True
-            )
+          
     
             # =====================
             # STRONG OI BUILDUP
