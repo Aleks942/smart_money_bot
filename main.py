@@ -11751,6 +11751,13 @@ def detect_late_entry(sig):
 
         distance_pct = abs(price - ema20) / ema20 * 100
 
+        # Критически далеко от EMA — поздний вход
+        # независимо от стадии рынка
+        if distance_pct >= 4.0:
+
+            return True, f"late_entry_distance_{round(distance_pct, 2)}%"
+
+        # Для EXPANSION / CONFIRM используем более строгий порог
         if (
             distance_pct >= 2.5
             and (
