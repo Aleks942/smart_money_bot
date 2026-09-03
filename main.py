@@ -2994,6 +2994,8 @@ def analyze_real_oi_flow(instId, price, oi):
             if prev_oi != 0
             else 0.0
         )
+        # Минимальное значимое изменение реального OI
+        REAL_OI_MIN_PCT = 0.05
 
         oi_state = "NEUTRAL"
         oi_score = 0
@@ -3006,7 +3008,7 @@ def analyze_real_oi_flow(instId, price, oi):
 
         if (
             price_delta > 0
-            and oi_delta > 0
+            and oi_delta_pct >= REAL_OI_MIN_PCT
         ):
 
             oi_state = "NEW_LONGS"
@@ -3020,7 +3022,7 @@ def analyze_real_oi_flow(instId, price, oi):
 
         elif (
             price_delta < 0
-            and oi_delta > 0
+            and oi_delta_pct >= REAL_OI_MIN_PCT
         ):
 
             oi_state = "NEW_SHORTS"
@@ -3034,7 +3036,7 @@ def analyze_real_oi_flow(instId, price, oi):
 
         elif (
             price_delta > 0
-            and oi_delta < 0
+            and oi_delta_pct <= -REAL_OI_MIN_PCT
         ):
 
             oi_state = "SHORT_COVERING"
@@ -3048,7 +3050,7 @@ def analyze_real_oi_flow(instId, price, oi):
 
         elif (
             price_delta < 0
-            and oi_delta < 0
+            and oi_delta_pct <= -REAL_OI_MIN_PCT
         ):
 
             oi_state = "LONG_EXIT"
