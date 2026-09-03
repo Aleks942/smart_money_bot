@@ -1143,21 +1143,44 @@ def analyze_signal_strength(sig):
 
     if strength >= 12:
         rating = "A+"
-
     elif strength >= 9:
         rating = "A"
-
     elif strength >= 6:
         rating = "B"
-
     elif strength >= 3:
         rating = "C"
-
     else:
         rating = "D"
-
+    
+    
+    # =====================
+    # A+ REAL MONEY GATE
+    # =====================
+    
+    real_money_confirm = bool(
+        sig.get("real_money_confirm")
+    )
+    
+    if (
+        rating == "A+"
+        and not real_money_confirm
+    ):
+        rating = "A"
+    
+        reasons.append(
+            "A+ заблокирован — нет подтверждения нового капитала"
+        )
+    
+        print(
+            f"[A_PLUS_DOWNGRADE] "
+            f"{instId} "
+            f"strength={strength} "
+            f"real_money={real_money_confirm}",
+            flush=True
+        )
+    
+    
     return rating, reasons, strength
-
 
 # =========================
 # ANTI-SPAM TELEGRAM
