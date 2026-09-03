@@ -15745,18 +15745,7 @@ def build_signal(instId, preloaded_oi=None):
         flush=True
     )
 
-    # =====================
-    # SIGNAL STRENGTH
-    # =====================
-    rating, reasons_strength, strength = analyze_signal_strength({
-        "flags": signal.get("flags", []),
-        "score": signal.get("score", 0),
-        "oi_change": signal.get("oi_change")
-    })
     
-    signal["rating"] = rating
-    signal["strength"] = strength
-    signal["strength_reasons"] = reasons_strength
     
     
     # =========================
@@ -15927,6 +15916,38 @@ def build_signal(instId, preloaded_oi=None):
         f"state={signal.get('smart_money_state')} "
         f"score={signal.get('smart_money_score')} "
         f"reasons={signal.get('smart_money_reasons')}",
+        flush=True
+    )
+
+    # =====================
+    # SIGNAL STRENGTH
+    # =====================
+    rating, reasons_strength, strength = analyze_signal_strength({
+        "instId": signal.get("instId"),
+        "symbol": signal.get("symbol"),
+        "flags": signal.get("flags", []),
+        "score": signal.get("score", 0),
+        "oi_change": signal.get("oi_change"),
+        "oi_state": signal.get("oi_state"),
+        "real_oi_state": signal.get("real_oi_state"),
+        "real_oi_score": signal.get("real_oi_score"),
+        "real_money_confirm": signal.get("real_money_confirm"),
+        "smart_money_state": signal.get("smart_money_state"),
+    })
+
+    signal["rating"] = rating
+    signal["strength"] = strength
+    signal["strength_reasons"] = reasons_strength
+
+    print(
+        f"[SIGNAL_STRENGTH] "
+        f"{signal.get('instId')} "
+        f"rating={rating} "
+        f"strength={strength} "
+        f"oi={signal.get('oi_change')} "
+        f"oi_state={signal.get('oi_state')} "
+        f"real_oi={signal.get('real_oi_state')} "
+        f"real_money={signal.get('real_money_confirm')}",
         flush=True
     )
     
