@@ -15992,7 +15992,7 @@ def build_signal(instId, preloaded_oi=None):
     # SMART MONEY SCORE IMPACT
     # =========================
     
-    signal["smart_money_bonus"] = 4
+    signal["smart_money_bonus"] = 0
     
     try:
     
