@@ -17206,13 +17206,11 @@ def build_signal(instId, preloaded_oi=None):
         elif (
 
             premove_override
-
-            or signal.get("sendable") is True
-
+        
             or (
-
+        
                 signal.get("signal_mode") == "EXPANSION"
-            
+                    
                 and (
             
                     (
