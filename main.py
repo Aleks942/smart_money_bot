@@ -16548,8 +16548,7 @@ def build_signal(instId, preloaded_oi=None):
             flush=True
         )
     
-        signal["valid"] = True
-        signal["sendable"] = True
+       
 
         # =====================
         # EXPANSION PASS
