@@ -17215,7 +17215,11 @@ def build_signal(instId, preloaded_oi=None):
             
                 and (
             
-                    ep >= 8
+                    (
+                        ep >= 8
+                        and signal.get("smart_money_state")
+                        != "WEAK_SMART_MONEY"
+                    )
             
                     or (
             
