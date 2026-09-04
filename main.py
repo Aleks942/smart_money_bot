@@ -11779,47 +11779,6 @@ def detect_late_entry(sig):
         
         return False, "late_entry_error"
 
-# =========================
-# TEST LATE ENTRY
-# =========================
-
-if __name__ == "__main__":
-
-    test_cases = [
-        {
-            "name": "TRANSITION_4.5",
-            "price": 104.5,
-            "ema20": 100,
-            "stage": "TRANSITION",
-            "entry": "TRANSITION_LONG",
-        },
-        {
-            "name": "EXPANSION_2.1",
-            "price": 102.1,
-            "ema20": 100,
-            "stage": "EXPANSION",
-            "entry": "EXPANSION_LONG",
-        },
-        {
-            "name": "EXPANSION_2.7",
-            "price": 102.7,
-            "ema20": 100,
-            "stage": "EXPANSION",
-            "entry": "EXPANSION_LONG",
-        },
-    ]
-
-    for test in test_cases:
-
-        late, reason = detect_late_entry(test)
-
-        print(
-            f"[LATE_ENTRY_TEST] "
-            f"{test['name']} "
-            f"late={late} "
-            f"reason={reason}",
-            flush=True
-        )
 
 # =========================
 # RETEST DETECTOR
