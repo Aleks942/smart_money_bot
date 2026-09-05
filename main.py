@@ -16499,11 +16499,17 @@ def build_signal(instId, preloaded_oi=None):
     if "TRANSITION" in stage:
     
         elite_transition_ok = (
-    
+
             ep >= 7
-    
+        
+            and float(signal.get("score") or 0) >= 10
+        
+            and str(signal.get("smart_money_state") or "") != "WEAK_SMART_MONEY"
+        
+            and str(signal.get("flow_state") or "") != "WEAK_OR_NO_FLOW"
+        
             and (
-    
+            
                 "PRESSURE_UP" in flags
                 or "PRESSURE_DOWN" in flags
     
