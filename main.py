@@ -11779,52 +11779,6 @@ def detect_late_entry(sig):
         
         return False, "late_entry_error"
 
-# =========================
-# TEST LATE ENTRY
-# =========================
-
-_test_cases = [
-    {
-        "name": "1pct_transition",
-        "price": 101.0,
-        "ema20": 100.0,
-        "stage": "TRANSITION",
-        "entry": "TRANSITION_LONG",
-    },
-    {
-        "name": "2_8pct_transition",
-        "price": 102.8,
-        "ema20": 100.0,
-        "stage": "TRANSITION",
-        "entry": "TRANSITION_LONG",
-    },
-    {
-        "name": "2_8pct_expansion",
-        "price": 102.8,
-        "ema20": 100.0,
-        "stage": "EXPANSION",
-        "entry": "SMART_EXPANSION_LONG",
-    },
-    {
-        "name": "4_75pct_transition",
-        "price": 104.75,
-        "ema20": 100.0,
-        "stage": "TRANSITION",
-        "entry": "TRANSITION_LONG",
-    },
-]
-
-for _case in _test_cases:
-
-    _late, _reason = detect_late_entry(_case)
-
-    print(
-        f"[LATE_ENTRY_TEST] "
-        f"{_case['name']} "
-        f"late={_late} "
-        f"reason={_reason}",
-        flush=True
-    )
 
 
 # =========================
