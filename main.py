@@ -16106,8 +16106,8 @@ def build_signal(instId, preloaded_oi=None):
         # =====================
     
         elif sm_state == "WEAK_SMART_MONEY":
-    
-            signal["smart_money_bonus"] = 0
+
+            signal["smart_money_bonus"] = -4
     
             print(
                 f"[SMART_MONEY_PENALTY] "
