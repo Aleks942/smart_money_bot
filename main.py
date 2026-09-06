@@ -21672,6 +21672,9 @@ if __name__ == "__main__":
 
                     flags = set(sig.get("flags", []))
 
+                    score = float(sig.get("score") or 0)
+                    ep = float(sig.get("early_pressure_score") or 0)
+
                     # =====================
                     # SKIP LATE EXPANSION
                     # =====================
