@@ -20143,6 +20143,7 @@ def get_signal_level(sig):
             and acc >= 2
             and ep >= 9
             and "EXPANSION" in stage
+            and bool(sig.get("real_money_confirm"))
         ):
         
             return (
