@@ -22283,10 +22283,8 @@ if __name__ == "__main__":
                         and acc >= 2
                         and energy_stack >= 5
                     
-                        and (
-                            abs(oi) >= 0.15
-                            or quality_points >= 14
-                        )
+                        and oi >= 0.15
+                        and bool(sig.get("real_money_confirm"))
                     
                     )
                     sig["smart_money_a_plus"] = smart_money_a_plus
