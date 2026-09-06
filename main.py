@@ -3290,6 +3290,117 @@ def merge_flow_with_oi(sig):
 
         return sig
 
+# =========================
+# REAL SPOT CVD — OKX
+# =========================
+
+def get_okx_spot_cvd(symbol, limit=300):
+
+    try:
+
+        # ZECUSDT -> ZEC-USDT
+        if symbol.endswith("USDT") and "-" not in symbol:
+            base = symbol[:-4]
+            spot_symbol = f"{base}-USDT"
+        else:
+            spot_symbol = symbol.replace("-SWAP", "")
+
+        trades = okx_get(
+            "https://www.okx.com/api/v5/market/trades",
+            {
+                "instId": spot_symbol,
+                "limit": str(limit)
+            }
+        )
+
+        if not trades:
+            return {
+                "spot_cvd": 0.0,
+                "spot_cvd_ratio": 0.0,
+                "spot_cvd_state": "SPOT_CVD_NO_DATA"
+            }
+
+        buy_volume = 0.0
+        sell_volume = 0.0
+
+        for trade in trades:
+
+            try:
+                side = str(trade.get("side") or "").lower()
+                price = float(trade.get("px") or 0)
+                size = float(trade.get("sz") or 0)
+
+                # переводим объём примерно в USDT
+                notional = price * size
+
+                if side == "buy":
+                    buy_volume += notional
+
+                elif side == "sell":
+                    sell_volume += notional
+
+            except Exception:
+                continue
+
+        total_volume = buy_volume + sell_volume
+
+        if total_volume <= 0:
+            return {
+                "spot_cvd": 0.0,
+                "spot_cvd_ratio": 0.0,
+                "spot_cvd_state": "SPOT_CVD_NEUTRAL"
+            }
+
+        spot_cvd = buy_volume - sell_volume
+
+        spot_cvd_ratio = (
+            spot_cvd / total_volume
+        )
+
+        if spot_cvd_ratio >= 0.15:
+            state = "STRONG_SPOT_BUY"
+
+        elif spot_cvd_ratio >= 0.05:
+            state = "SPOT_BUY"
+
+        elif spot_cvd_ratio <= -0.15:
+            state = "STRONG_SPOT_SELL"
+
+        elif spot_cvd_ratio <= -0.05:
+            state = "SPOT_SELL"
+
+        else:
+            state = "SPOT_CVD_NEUTRAL"
+
+        print(
+            f"[SPOT_CVD] "
+            f"{symbol} "
+            f"state={state} "
+            f"ratio={round(spot_cvd_ratio * 100, 2)}% "
+            f"buy={round(buy_volume, 2)} "
+            f"sell={round(sell_volume, 2)}",
+            flush=True
+        )
+
+        return {
+            "spot_cvd": spot_cvd,
+            "spot_cvd_ratio": spot_cvd_ratio,
+            "spot_cvd_state": state
+        }
+
+    except Exception as e:
+
+        print(
+            f"[SPOT_CVD_ERROR] {symbol} {e}",
+            flush=True
+        )
+
+        return {
+            "spot_cvd": 0.0,
+            "spot_cvd_ratio": 0.0,
+            "spot_cvd_state": "SPOT_CVD_ERROR"
+        }
+
     
 
 # =========================
