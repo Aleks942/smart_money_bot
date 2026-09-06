@@ -16112,6 +16112,29 @@ def build_signal(instId, preloaded_oi=None):
     )
 
     # =========================
+    # REAL SPOT CVD
+    # =========================
+    
+    spot_cvd_data = get_okx_spot_cvd(
+        signal.get("instId") or ""
+    )
+    
+    signal["spot_cvd"] = spot_cvd_data.get(
+        "spot_cvd",
+        0.0
+    )
+    
+    signal["spot_cvd_ratio"] = spot_cvd_data.get(
+        "spot_cvd_ratio",
+        0.0
+    )
+    
+    signal["spot_cvd_state"] = spot_cvd_data.get(
+        "spot_cvd_state",
+        "SPOT_CVD_NO_DATA"
+    )
+
+    # =========================
     # LATE MOVE FILTER
     # =========================
     
