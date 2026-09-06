@@ -16387,14 +16387,147 @@ def build_signal(instId, preloaded_oi=None):
                 f"score_after={signal.get('score')}",
                 flush=True
             )
-    
+            
+        signal["score"] += signal.get("cvd_bonus", 0)
+
     except Exception as e:
     
         print(
             f"[CVD_SCORE_ERROR] {e}",
             flush=True
         )
+
+
+    # =========================
+    # SPOT CVD SCORE IMPACT
+    # =========================
     
+    signal["spot_cvd_bonus"] = 0
+    
+    try:
+    
+        spot_state = str(
+            signal.get("spot_cvd_state") or ""
+        )
+    
+        direction = str(
+            signal.get("direction_code")
+            or signal.get("direction")
+            or signal.get("side")
+            or ""
+        ).upper()
+    
+        spot_bonus = 0
+        spot_reason = ""
+    
+        flags = set(
+            signal.get("flags", [])
+        )
+    
+        # =====================
+        # LONG
+        # =====================
+    
+        if (
+            "LONG" in direction
+            or "UP" in direction
+            or "BUY" in direction
+        ):
+    
+            if spot_state == "STRONG_SPOT_BUY":
+    
+                spot_bonus = 2
+                spot_reason = "сильные покупки на SPOT подтверждают LONG"
+    
+                flags.add("SPOT_CONFIRM_LONG")
+    
+            elif spot_state == "SPOT_BUY":
+    
+                spot_bonus = 1
+                spot_reason = "покупки на SPOT подтверждают LONG"
+    
+                flags.add("SPOT_CONFIRM_LONG")
+    
+            elif spot_state == "STRONG_SPOT_SELL":
+    
+                spot_bonus = -2
+                spot_reason = "сильные продажи на SPOT против LONG"
+    
+                flags.add("SPOT_CONFLICT_LONG")
+    
+            elif spot_state == "SPOT_SELL":
+    
+                spot_bonus = -1
+                spot_reason = "продажи на SPOT против LONG"
+    
+                flags.add("SPOT_CONFLICT_LONG")
+    
+    
+        # =====================
+        # SHORT
+        # =====================
+    
+        elif (
+            "SHORT" in direction
+            or "DOWN" in direction
+            or "SELL" in direction
+        ):
+    
+            if spot_state == "STRONG_SPOT_SELL":
+    
+                spot_bonus = 2
+                spot_reason = "сильные продажи на SPOT подтверждают SHORT"
+    
+                flags.add("SPOT_CONFIRM_SHORT")
+    
+            elif spot_state == "SPOT_SELL":
+    
+                spot_bonus = 1
+                spot_reason = "продажи на SPOT подтверждают SHORT"
+    
+                flags.add("SPOT_CONFIRM_SHORT")
+    
+            elif spot_state == "STRONG_SPOT_BUY":
+    
+                spot_bonus = -2
+                spot_reason = "сильные покупки на SPOT против SHORT"
+    
+                flags.add("SPOT_CONFLICT_SHORT")
+    
+            elif spot_state == "SPOT_BUY":
+    
+                spot_bonus = -1
+                spot_reason = "покупки на SPOT против SHORT"
+    
+                flags.add("SPOT_CONFLICT_SHORT")
+    
+    
+        signal["spot_cvd_bonus"] = spot_bonus
+        signal["spot_cvd_reason"] = spot_reason
+        signal["flags"] = list(flags)
+    
+        # ВАЖНО: реально применяем к итоговому score
+        signal["score"] += spot_bonus
+    
+        print(
+            f"[SPOT_CVD_IMPACT] "
+            f"{signal.get('instId')} "
+            f"state={spot_state} "
+            f"bonus={spot_bonus} "
+            f"score={signal.get('score')} "
+            f"reason={spot_reason}",
+            flush=True
+        )
+    
+    except Exception as e:
+    
+        print(
+            f"[SPOT_CVD_IMPACT_ERROR] {e}",
+            flush=True
+        )
+    
+        signal["spot_cvd_bonus"] = 0
+        signal["spot_cvd_reason"] = ""
     
     # =========================
     # FINAL QUALITY FILTER
