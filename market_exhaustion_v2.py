@@ -1317,6 +1317,7 @@ def detect_market_exhaustion_v2(
                 f"{symbol or 'UNKNOWN'} "
                 f"prev={previous_move} "
                 f"move_atr={previous['move_atr']} "
+                f"eff={previous['efficiency']} "
                 f"stall={price_stalling} "
                 f"range_contract={range_contracting} "
                 f"volume_fade={volume_fading} "
