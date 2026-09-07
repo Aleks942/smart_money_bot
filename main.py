@@ -16307,6 +16307,8 @@ def build_signal(instId, preloaded_oi=None):
             signal.get("direction_code")
             or signal.get("direction")
             or signal.get("side")
+            or signal.get("entry")
+            or signal.get("entry_type")
             or ""
         ).upper()
     
