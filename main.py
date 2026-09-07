@@ -20408,6 +20408,17 @@ def get_signal_level(sig):
         # =====================
         
         stage = str(sig.get("stage") or "")
+
+        print(
+            f"[SIGNAL_LEVEL_DEBUG] "
+            f"{sig.get('instId') or sig.get('symbol')} "
+            f"elite={elite_score} "
+            f"acc={acc} "
+            f"ep={ep} "
+            f"stage={stage} "
+            f"real_money={bool(sig.get('real_money_confirm'))}",
+            flush=True
+        )
         
         if (
             elite_score >= 18
