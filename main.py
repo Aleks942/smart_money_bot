@@ -11863,12 +11863,14 @@ def detect_late_entry(sig):
             sig.get("previous_move") or "UNKNOWN"
         ).upper()
 
+        exhaustion_debug = sig.get("exhaustion_debug") or {}
+
         previous_move_atr = float(
-            sig.get("previous_move_atr") or 0
+            exhaustion_debug.get("previous_move_atr") or 0
         )
 
         previous_move_efficiency = float(
-            sig.get("previous_move_efficiency") or 0
+            exhaustion_debug.get("previous_move_efficiency") or 0
         )
 
         if price <= 0 or ema20 <= 0:
