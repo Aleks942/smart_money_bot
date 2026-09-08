@@ -11876,6 +11876,37 @@ def detect_late_entry(sig):
 
         distance_pct = abs(price - ema20) / ema20 * 100
 
+        direction = str(
+            sig.get("direction_code")
+            or sig.get("direction")
+            or entry
+            or ""
+        ).upper()
+
+        same_direction_previous_move = (
+            (
+                previous_move == "UP"
+                and ("UP" in direction or "LONG" in direction or "BUY" in direction)
+            )
+            or
+            (
+                previous_move == "DOWN"
+                and ("DOWN" in direction or "SHORT" in direction or "SELL" in direction)
+            )
+        )
+
+        if (
+            same_direction_previous_move
+            and previous_move_atr >= 2.5
+            and previous_move_efficiency >= 0.50
+        ):
+            return True, (
+                f"late_previous_impulse_"
+                f"{previous_move}_"
+                f"{round(previous_move_atr, 2)}ATR_"
+                f"eff{round(previous_move_efficiency, 2)}"
+            )
+
         # Критически далеко от EMA — поздний вход
         # независимо от стадии рынка
         if distance_pct >= 4.0:
