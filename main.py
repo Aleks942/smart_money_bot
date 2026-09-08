@@ -11859,6 +11859,18 @@ def detect_late_entry(sig):
         stage = str(sig.get("stage") or "")
         entry = str(sig.get("entry") or "")
 
+        previous_move = str(
+            sig.get("previous_move") or "UNKNOWN"
+        ).upper()
+
+        previous_move_atr = float(
+            sig.get("previous_move_atr") or 0
+        )
+
+        previous_move_efficiency = float(
+            sig.get("previous_move_efficiency") or 0
+        )
+
         if price <= 0 or ema20 <= 0:
             return False, "no_ema_data"
 
