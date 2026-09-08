@@ -16713,15 +16713,61 @@ def build_signal(instId, preloaded_oi=None):
     ema_distance = float(
         signal.get("ema_distance_pct") or 999
     )
+
+
     # =====================
     # EXPANSION RETEST EXCEPTION
     # =====================
+
+    spot_cvd_state = str(
+        signal.get("spot_cvd_state")
+        or ""
+    ).upper()
+
+    real_money_confirm = bool(
+        signal.get("real_money_confirm")
+    )
+
+    direction_code = str(
+        signal.get("direction_code")
+        or signal.get("direction")
+        or signal.get("entry")
+        or ""
+    ).upper()
+
+    spot_against_direction = (
+        (
+            ("LONG" in direction_code or "UP" in direction_code)
+            and spot_cvd_state == "STRONG_SPOT_SELL"
+        )
+        or
+        (
+            ("SHORT" in direction_code or "DOWN" in direction_code)
+            and spot_cvd_state == "STRONG_SPOT_BUY"
+        )
+    )
+
+    expansion_retest_money_block = (
+        not real_money_confirm
+        and spot_against_direction
+    )
+
+    if expansion_retest_money_block:
+        print(
+            f"[EXPANSION_RETEST_MONEY_BLOCK] "
+            f"{instId} "
+            f"real_money={real_money_confirm} "
+            f"spot_cvd={spot_cvd_state}",
+            flush=True
+        )
 
     if (
 
         signal.get("signal_mode") == "EXPANSION"
 
         and ep >= 10
+
+        and not expansion_retest_money_block
 
         and (
             "ACCELERATION_UP" in flags
@@ -16740,6 +16786,10 @@ def build_signal(instId, preloaded_oi=None):
             f"{instId}",
             flush=True
         )
+
+    # =====================
+    # SMART TRANSITION BYPASS
+    # =====================
 
     # =====================
     # SMART TRANSITION BYPASS
