@@ -20,6 +20,8 @@ from smart_money_cycle import detect_smart_money_cycle
 from market_exhaustion_v2 import detect_market_exhaustion_v2
 from pathlib import Path
 
+STATS_FILE = os.getenv("STATS_FILE", "stats.json")
+
 # =========================
 # LOG SYSTEM (вставить в начало файла, после импортов)
 # =========================
