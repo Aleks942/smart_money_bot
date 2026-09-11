@@ -12,7 +12,7 @@ DB_FILE = os.getenv("SIGNALS_DB_FILE", "signals.db")
 
 def init_db():
 
-    conn = sqlite3.connect("signals.db")
+    conn = sqlite3.connect(DB_FILE)
     cur = conn.cursor()
 
     cur.execute("""
