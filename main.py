@@ -8037,7 +8037,7 @@ def show_stats():
 def is_profitable(signal):
 
     try:
-        with open("stats.json", "r") as f:
+        with open(STATS_FILE, "r") as f:
             stats = json.load(f)
     except:
         return True  # если нет данных — не блокируем
