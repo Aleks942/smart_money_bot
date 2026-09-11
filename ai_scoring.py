@@ -1,7 +1,7 @@
 import sqlite3
+import os
 
-DB_FILE = "signals.db"
-
+DB_FILE = os.getenv("SIGNALS_DB_FILE", "signals.db")
 
 def get_setup_stats():
 
