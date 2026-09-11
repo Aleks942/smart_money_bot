@@ -23121,8 +23121,40 @@ if __name__ == "__main__":
                         #     )
                         #
                         #     continue
+
                         send_telegram(msg)
-                
+
+                        # =========================
+                        # SAVE ACTUALLY SENT SIGNAL
+                        # =========================
+                        same_side_open = has_open_similar_signal(sig)
+                        any_open_same_symbol = has_any_open_signal_for_symbol(instId)
+                        
+                        if same_side_open:
+                        
+                            print(
+                                f"[SAVE_SKIP] {instId} "
+                                f"same-side open signal already exists",
+                                flush=True
+                            )
+                        
+                        elif ONE_OPEN_SIGNAL_PER_SYMBOL and any_open_same_symbol:
+                        
+                            print(
+                                f"[SAVE_SKIP] {instId} "
+                                f"open signal already exists for this symbol",
+                                flush=True
+                            )
+                        
+                        else:
+                        
+                            save_signal(sig)
+                        
+                            print(
+                                f"[SAVE_OK] {instId} saved after Telegram send",
+                                flush=True
+                            )
+                        
                         scalp_sent_this_cycle += 1
                 
                         print(
