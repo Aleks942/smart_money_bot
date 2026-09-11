@@ -19868,13 +19868,26 @@ def check_signal_results():
         if direction_code == "DOWN":
             move_pct = -move_pct
 
-        if move_pct >= 1.0:
-            result = "HIT"
-        elif move_pct <= -1.0:
-            result = "FAIL"
-        else:
-            result = "NEUTRAL"
+        signal_age = time.time() - created_at
 
+        if move_pct >= 1.0:
+        
+            result = "HIT"
+        
+        elif move_pct <= -1.0:
+        
+            result = "FAIL"
+        
+        elif signal_age >= 14400:
+        
+            # 4 часа без движения ±1%
+            result = "NEUTRAL"
+        
+        else:
+        
+            # сигнал ещё развивается — не закрываем
+            continue
+        
         close_signal(signal_id, move_pct, result)
         update_stats(result, move_pct, s)
 
