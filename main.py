@@ -9162,7 +9162,7 @@ def entry_engine(score, flags, direction_text, up_w, down_w, rsi7, ema_state, pr
     # FALLBACK DIRECTION
     # =========================
     
-    if not direction_code:
+    if direction_code == "FLAT":
     
         if "PRESSURE_UP" in flags:
             direction_code = "UP"
