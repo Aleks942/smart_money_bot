@@ -19894,7 +19894,7 @@ def check_signal_results():
         update_stats(result, move_pct, s)
 
         try:
-            with open("stats.json", "r") as f:
+            with open(STATS_FILE, "r") as f:
                 stats = json.load(f)
 
             resolved = stats.get("resolved", stats.get("hit", 0) + stats.get("fail", 0))
