@@ -15001,7 +15001,7 @@ def build_signal(instId, preloaded_oi=None):
     # HARD DIRECTION FIX
     # =========================
     
-    if not direction_code:
+    if direction_code == "FLAT":
     
         if (
             "BREAKOUT_UP" in flags
