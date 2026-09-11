@@ -1,8 +1,9 @@
 import sqlite3
 import time
+import os
 from datetime import datetime
 
-DB_FILE = "signals.db"
+DB_FILE = os.getenv("SIGNALS_DB_FILE", "signals.db")
 
 
 # ==============================
