@@ -7994,12 +7994,12 @@ def update_stats(result, move_pct, signal):
     else:
         stats["by_stage"][stage]["neutral"] += 1
 
-    with open("stats.json", "w") as f:
+    with open(STATS_FILE, "w") as f:
         json.dump(stats, f, indent=2)
 def show_stats():
 
     try:
-        with open("stats.json", "r") as f:
+        with open(STATS_FILE, "r") as f:
             stats = json.load(f)
     except:
         return "Нет данных"
