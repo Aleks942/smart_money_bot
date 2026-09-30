@@ -24055,65 +24055,7 @@ if __name__ == "__main__":
             sent_start_now = False
             sent_early_now = False
 
-            # =========================
-            # FINAL OI FIREWALL
-            # =========================
-            
-            entry_name = str(
-                sig.get("entry_reason")
-                or sig.get("entry_type")
-                or sig.get("entry")
-                or ""
-            ).upper()
-            
-            oi_state = str(
-                sig.get("oi_state")
-                or "NEUTRAL"
-            ).upper()
-            
-            is_long_entry = "LONG" in entry_name
-            is_short_entry = "SHORT" in entry_name
-            
-            oi_conflict_long = (
-                is_long_entry
-                and oi_state in (
-                    "NEW_SHORTS",
-                    "LONG_EXIT",
-                )
-            )
-            
-            oi_conflict_short = (
-                is_short_entry
-                and oi_state in (
-                    "NEW_LONGS",
-                    "SHORT_COVERING",
-                )
-            )
-            
-            print(
-                f"[FINAL_OI_CHECK] "
-                f"{instId} "
-                f"entry={entry_name} "
-                f"oi_state={oi_state} "
-                f"long={is_long_entry} "
-                f"short={is_short_entry} "
-                f"conflict_long={oi_conflict_long} "
-                f"conflict_short={oi_conflict_short}",
-                flush=True
-            )
-            
-            if oi_conflict_long or oi_conflict_short:
-            
-                print(
-                    f"[FINAL_OI_BLOCK] "
-                    f"{instId} "
-                    f"entry={entry_name} "
-                    f"oi_state={oi_state} "
-                    f"score={score}",
-                    flush=True
-                )
-            
-                continue
+           
 
             if early_ready:
                 if sig.get("early_pressure_side") == "BUY":
