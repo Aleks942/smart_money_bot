@@ -23795,10 +23795,15 @@ if __name__ == "__main__":
             # =====================
             # SCALP TELEGRAM
             # =====================
-            if sig.get("signal_group") == "SCALP":   
-                symbol = sig.get("instId")
 
+            if sig.get("signal_group") == "SCALP":
+
+                symbol = sig.get("instId")
                 current_ts = time.time()
+
+                # =====================
+                # SCALP CACHE
+                # =====================
 
                 if symbol in scalp_sent_cache:
 
@@ -23814,28 +23819,28 @@ if __name__ == "__main__":
 
                         continue
 
-            # =====================
-            # ELITE SCALP FILTER
-            # =====================
+                # =====================
+                # ELITE SCALP FILTER
+                # =====================
 
-            elite_ok, elite_reason = is_elite_scalp(sig)
-
-            print(
-                f"[ELITE_CHECK] "
-                f"{instId} "
-                f"ok={elite_ok} "
-                f"reason={elite_reason}",
-                flush=True
-            )
-
-            if not elite_ok:
+                elite_ok, elite_reason = is_elite_scalp(sig)
 
                 print(
-                    f"[ELITE_BLOCK] {instId}",
+                    f"[ELITE_CHECK] "
+                    f"{instId} "
+                    f"ok={elite_ok} "
+                    f"reason={elite_reason}",
                     flush=True
                 )
 
-                continue
+                if not elite_ok:
+
+                    print(
+                        f"[ELITE_BLOCK] {instId}",
+                        flush=True
+                    )
+
+                    continue
 
                 # =====================
                 # SCALP LIMITER
@@ -23849,7 +23854,6 @@ if __name__ == "__main__":
                     )
 
                     continue
-                
 
                 # =====================
                 # SCALP QUALITY FILTER
@@ -23868,19 +23872,24 @@ if __name__ == "__main__":
 
                     continue
 
-                # cooldown
+                # =====================
+                # SCALP COOLDOWN
+                # =====================
+
                 if not should_alert_symbol(state, sig):
+
                     print(
                         f"[SCALP_COOLDOWN_SKIP] {instId}",
                         flush=True
                     )
+
                     continue
 
                 scalp_msg = msg_scalp(sig)
 
                 send_telegram(scalp_msg)
-                
-                scalp_sent_cache[symbol] = now_ts
+
+                scalp_sent_cache[symbol] = current_ts
 
                 print(
                     f"[SCALP_SENT] {instId}",
@@ -23888,11 +23897,12 @@ if __name__ == "__main__":
                 )
 
                 alerts.append(sig)
-
                 mark_alert_sent(state, sig)
 
                 continue
 
+
+            
             # =====================
             # SWING ELITE TELEGRAM
             # =====================
