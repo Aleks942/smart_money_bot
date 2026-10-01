@@ -110,6 +110,45 @@ def save_signal(signal):
     conn.commit()
     conn.close()
 
+# ==============================
+# OI FIREWALL MARK
+# ==============================
+
+def mark_oi_firewall_blocked(signal, reason):
+
+    conn = sqlite3.connect(DB_FILE)
+    cur = conn.cursor()
+
+    symbol = signal.get("instId")
+
+    entry_price = signal.get(
+        "entry_price",
+        signal.get("price")
+    )
+
+    cur.execute("""
+        UPDATE signals
+        SET
+            oi_firewall_blocked = 1,
+            oi_firewall_reason = ?
+        WHERE id = (
+            SELECT id
+            FROM signals
+            WHERE symbol = ?
+              AND entry_price = ?
+              AND result = 'OPEN'
+            ORDER BY id DESC
+            LIMIT 1
+        )
+    """, (
+        reason,
+        symbol,
+        entry_price
+    ))
+
+    conn.commit()
+    conn.close()
+
 
 # ==============================
 # ОБНОВЛЕНИЕ РЕЗУЛЬТАТА
