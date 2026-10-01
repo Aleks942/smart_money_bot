@@ -31,7 +31,9 @@ def init_db():
         expected_move_min REAL,
         expected_move_max REAL,
         result TEXT,
-        move_pct REAL
+        move_pct REAL,
+        oi_firewall_blocked INTEGER DEFAULT 0,
+        oi_firewall_reason TEXT
     )
     """)
 
@@ -42,6 +44,22 @@ def init_db():
 
     try:
         cur.execute("ALTER TABLE signals ADD COLUMN entry_type TEXT")
+    except:
+        pass
+
+    try:
+        cur.execute(
+            "ALTER TABLE signals "
+            "ADD COLUMN oi_firewall_blocked INTEGER DEFAULT 0"
+        )
+    except:
+        pass
+
+    try:
+        cur.execute(
+            "ALTER TABLE signals "
+            "ADD COLUMN oi_firewall_reason TEXT"
+        )
     except:
         pass
 
