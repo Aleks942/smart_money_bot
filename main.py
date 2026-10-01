@@ -11,7 +11,13 @@ from wall_detector import WallTracker
 from continuation_engine import continuation_engine
 from signal_tier import get_signal_tier
 from sniper_engine import sniper_signal
-from signal_analyst import init_db, save_signal, get_open_signals, close_signal
+from signal_analyst import (
+    init_db,
+    save_signal,
+    get_open_signals,
+    close_signal,
+    mark_oi_firewall_blocked,
+)
 from ai_scoring import get_ai_multiplier
 from market_context import apply_market_context
 from ta_sniper import analyze_ta_sniper
