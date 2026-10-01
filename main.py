@@ -196,47 +196,7 @@ def classify_signal_mode(sig):
         )
 
         return "NO_MODE"
-        # =====================
-        # ACCUMULATION
-        # =====================
-
-        if "ACCUMULATION" in stage:
-            return "PREMOVE"
-
-        # =====================
-        # CONFIRMED
-        # =====================
-
-        if (
-
-            "BREAKOUT_CONFIRM_UP" in flags
-            or "BREAKOUT_CONFIRM_DOWN" in flags
-            or "BOS_UP" in flags
-            or "BOS_DOWN" in flags
-
-        ):
-
-            return "CONFIRMED"
-
-        # =====================
-        # CONTINUATION
-        # =====================
-
-        if (
-
-            "CONTINUATION_UP" in flags
-            or "CONTINUATION_DOWN" in flags
-            or "STRONG_CONTINUATION_UP" in flags
-            or "STRONG_CONTINUATION_DOWN" in flags
-
-        ):
-
-            return "CONTINUATION"
-
         
-
-
-
 # =========================
 # BTC MARKET REGIME (V2 FIXED + LOG)
 # =========================
