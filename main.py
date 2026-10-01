@@ -23805,7 +23805,7 @@ if __name__ == "__main__":
                 flush=True
             )
             
-    if oi_conflict_long or oi_conflict_short:
+        if oi_conflict_long or oi_conflict_short:
 
         firewall_reason = (
             f"{entry_name}:{oi_state}"
