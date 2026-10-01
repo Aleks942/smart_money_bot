@@ -23805,45 +23805,45 @@ if __name__ == "__main__":
                 flush=True
             )
             
-        if oi_conflict_long or oi_conflict_short:
+            if oi_conflict_long or oi_conflict_short:
 
-            firewall_reason = (
-                f"{entry_name}:{oi_state}"
-            )
-        
-            print(
-                f"[FINAL_OI_BLOCK] "
-                f"{instId} "
-                f"entry={entry_name} "
-                f"oi_state={oi_state} "
-                f"score={sig.get('score')} "
-                f"reason={firewall_reason}",
-                flush=True
-            )
-        
-            try:
-                mark_oi_firewall_blocked(
-                    sig,
-                    firewall_reason
+                firewall_reason = (
+                    f"{entry_name}:{oi_state}"
                 )
-        
+            
                 print(
-                    f"[OI_FIREWALL_DB_MARK] "
+                    f"[FINAL_OI_BLOCK] "
                     f"{instId} "
+                    f"entry={entry_name} "
+                    f"oi_state={oi_state} "
+                    f"score={sig.get('score')} "
                     f"reason={firewall_reason}",
                     flush=True
                 )
-        
-            except Exception as e:
-        
-                print(
-                    f"[OI_FIREWALL_DB_ERROR] "
-                    f"{instId} "
-                    f"{e}",
-                    flush=True
-                )
-        
-            continue
+            
+                try:
+                    mark_oi_firewall_blocked(
+                        sig,
+                        firewall_reason
+                    )
+            
+                    print(
+                        f"[OI_FIREWALL_DB_MARK] "
+                        f"{instId} "
+                        f"reason={firewall_reason}",
+                        flush=True
+                    )
+            
+                except Exception as e:
+            
+                    print(
+                        f"[OI_FIREWALL_DB_ERROR] "
+                        f"{instId} "
+                        f"{e}",
+                        flush=True
+                    )
+            
+                continue
             
             # =====================
             # SCALP TELEGRAM
