@@ -3264,6 +3264,12 @@ def merge_flow_with_oi(sig):
 # REAL SPOT CVD — OKX
 # =========================
 
+SPOT_CVD_WINDOW_SEC = max(
+    10,
+    int(os.getenv("SPOT_CVD_WINDOW_SEC") or "60"),
+)
+
+
 def _spot_symbol_okx(symbol):
     raw = str(symbol or "").upper().strip()
 
@@ -3283,23 +3289,49 @@ def _spot_symbol_plain(symbol):
     )
 
 
-def _spot_cvd_from_trades(trades, source):
-    """
-    Convert normalized trades into one Spot CVD snapshot.
+def _spot_ts_ms(value):
+    try:
+        ts = float(value or 0.0)
 
-    Each trade must provide:
-      side: buy/sell
-      price: quote price
-      size: base size
+        # Some APIs expose seconds, others milliseconds.
+        if 0 < ts < 10_000_000_000:
+            ts *= 1000.0
+
+        return ts
+
+    except Exception:
+        return 0.0
+
+
+def _spot_cvd_from_trades(trades, source, cutoff_ms):
+    """
+    Calculate one exchange Spot CVD only from trades inside the common
+    time window.
     """
     buy_volume = 0.0
     sell_volume = 0.0
+    used_trades = 0
 
     for trade in trades or []:
         try:
-            side = str(trade.get("side") or "").lower()
-            price = float(trade.get("price") or 0.0)
-            size = float(trade.get("size") or 0.0)
+            ts_ms = _spot_ts_ms(
+                trade.get("ts")
+            )
+
+            if ts_ms <= 0 or ts_ms < cutoff_ms:
+                continue
+
+            side = str(
+                trade.get("side") or ""
+            ).lower()
+
+            price = float(
+                trade.get("price") or 0.0
+            )
+
+            size = float(
+                trade.get("size") or 0.0
+            )
 
             if price <= 0 or size <= 0:
                 continue
@@ -3308,9 +3340,11 @@ def _spot_cvd_from_trades(trades, source):
 
             if side == "buy":
                 buy_volume += notional
+                used_trades += 1
 
             elif side == "sell":
                 sell_volume += notional
+                used_trades += 1
 
         except Exception:
             continue
@@ -3326,6 +3360,7 @@ def _spot_cvd_from_trades(trades, source):
             "total_volume": 0.0,
             "spot_cvd": 0.0,
             "spot_cvd_ratio": 0.0,
+            "window_trades": used_trades,
         }
 
     spot_cvd = buy_volume - sell_volume
@@ -3339,18 +3374,85 @@ def _spot_cvd_from_trades(trades, source):
         "total_volume": total_volume,
         "spot_cvd": spot_cvd,
         "spot_cvd_ratio": spot_cvd_ratio,
+        "window_trades": used_trades,
     }
 
 
-def _fetch_okx_spot_cvd(symbol, limit):
+def _spot_source_coverage(source_data, now_ms, target_window_sec):
+    """
+    Decide whether the fetched recent-trade page fully covers the target
+    window. If the response hit its requested limit while the oldest trade
+    is still newer than the cutoff, older trades may be missing, so that
+    venue is marked partial instead of being allowed to overweight CVD.
+    """
+    trades = source_data.get("trades") or []
+
+    timestamps = [
+        _spot_ts_ms(x.get("ts"))
+        for x in trades
+        if _spot_ts_ms(x.get("ts")) > 0
+    ]
+
+    if not timestamps:
+        source_data["window_complete"] = False
+        source_data["coverage_sec"] = 0.0
+        source_data["oldest_ts"] = None
+        return source_data
+
+    oldest_ts = min(timestamps)
+
+    requested_limit = max(
+        1,
+        int(source_data.get("requested_limit") or len(trades) or 1),
+    )
+
+    saturated = (
+        len(trades) >= requested_limit
+    )
+
+    target_cutoff_ms = (
+        now_ms
+        - float(target_window_sec) * 1000.0
+    )
+
+    if (
+        oldest_ts <= target_cutoff_ms
+        or not saturated
+    ):
+        coverage_sec = float(target_window_sec)
+        window_complete = True
+
+    else:
+        coverage_sec = max(
+            0.1,
+            (now_ms - oldest_ts) / 1000.0,
+        )
+        window_complete = False
+
+    source_data["window_complete"] = window_complete
+    source_data["coverage_sec"] = round(
+        coverage_sec,
+        3,
+    )
+    source_data["oldest_ts"] = oldest_ts
+    source_data["raw_trades"] = len(trades)
+
+    return source_data
+
+
+def _fetch_okx_spot_trades(symbol, limit):
     spot_symbol = _spot_symbol_okx(symbol)
+    requested_limit = max(
+        1,
+        min(int(limit), 500),
+    )
 
     try:
         rows = okx_get(
             "https://www.okx.com/api/v5/market/trades",
             {
                 "instId": spot_symbol,
-                "limit": str(limit),
+                "limit": str(requested_limit),
             },
         )
 
@@ -3361,15 +3463,16 @@ def _fetch_okx_spot_cvd(symbol, limit):
                 "side": str(row.get("side") or "").lower(),
                 "price": row.get("px"),
                 "size": row.get("sz"),
+                "ts": row.get("ts"),
             })
 
-        result = _spot_cvd_from_trades(
-            trades,
-            "OKX",
-        )
-
-        result["instrument"] = spot_symbol
-        return result
+        return {
+            "source": "OKX",
+            "instrument": spot_symbol,
+            "fetch_ok": True,
+            "requested_limit": requested_limit,
+            "trades": trades,
+        }
 
     except Exception as e:
         print(
@@ -3382,18 +3485,19 @@ def _fetch_okx_spot_cvd(symbol, limit):
         return {
             "source": "OKX",
             "instrument": spot_symbol,
-            "available": False,
-            "buy_volume": 0.0,
-            "sell_volume": 0.0,
-            "total_volume": 0.0,
-            "spot_cvd": 0.0,
-            "spot_cvd_ratio": 0.0,
+            "fetch_ok": False,
+            "requested_limit": requested_limit,
+            "trades": [],
             "error": str(e),
         }
 
 
-def _fetch_bybit_spot_cvd(symbol, limit):
+def _fetch_bybit_spot_trades(symbol, limit):
     spot_symbol = _spot_symbol_plain(symbol)
+    requested_limit = max(
+        1,
+        min(int(limit), 1000),
+    )
 
     try:
         data = bybit_get(
@@ -3401,12 +3505,16 @@ def _fetch_bybit_spot_cvd(symbol, limit):
             {
                 "category": "spot",
                 "symbol": spot_symbol,
-                "limit": str(min(int(limit), 1000)),
+                "limit": str(requested_limit),
             },
             retries=2,
         )
 
-        rows = (((data or {}).get("result") or {}).get("list") or [])
+        rows = (
+            ((data or {}).get("result") or {}).get("list")
+            or []
+        )
+
         trades = []
 
         for row in rows:
@@ -3414,15 +3522,16 @@ def _fetch_bybit_spot_cvd(symbol, limit):
                 "side": str(row.get("side") or "").lower(),
                 "price": row.get("price"),
                 "size": row.get("size"),
+                "ts": row.get("time"),
             })
 
-        result = _spot_cvd_from_trades(
-            trades,
-            "BYBIT",
-        )
-
-        result["instrument"] = spot_symbol
-        return result
+        return {
+            "source": "BYBIT",
+            "instrument": spot_symbol,
+            "fetch_ok": True,
+            "requested_limit": requested_limit,
+            "trades": trades,
+        }
 
     except Exception as e:
         print(
@@ -3435,25 +3544,26 @@ def _fetch_bybit_spot_cvd(symbol, limit):
         return {
             "source": "BYBIT",
             "instrument": spot_symbol,
-            "available": False,
-            "buy_volume": 0.0,
-            "sell_volume": 0.0,
-            "total_volume": 0.0,
-            "spot_cvd": 0.0,
-            "spot_cvd_ratio": 0.0,
+            "fetch_ok": False,
+            "requested_limit": requested_limit,
+            "trades": [],
             "error": str(e),
         }
 
 
-def _fetch_binance_spot_cvd(symbol, limit):
+def _fetch_binance_spot_trades(symbol, limit):
     spot_symbol = _spot_symbol_plain(symbol)
+    requested_limit = max(
+        1,
+        min(int(limit), 1000),
+    )
 
     try:
         r = S.get(
             "https://api.binance.com/api/v3/trades",
             params={
                 "symbol": spot_symbol,
-                "limit": str(min(int(limit), 1000)),
+                "limit": str(requested_limit),
             },
             timeout=TIMEOUT,
         )
@@ -3486,15 +3596,16 @@ def _fetch_binance_spot_cvd(symbol, limit):
                 ),
                 "price": row.get("price"),
                 "size": row.get("qty"),
+                "ts": row.get("time"),
             })
 
-        result = _spot_cvd_from_trades(
-            trades,
-            "BINANCE",
-        )
-
-        result["instrument"] = spot_symbol
-        return result
+        return {
+            "source": "BINANCE",
+            "instrument": spot_symbol,
+            "fetch_ok": True,
+            "requested_limit": requested_limit,
+            "trades": trades,
+        }
 
     except Exception as e:
         print(
@@ -3507,54 +3618,74 @@ def _fetch_binance_spot_cvd(symbol, limit):
         return {
             "source": "BINANCE",
             "instrument": spot_symbol,
-            "available": False,
-            "buy_volume": 0.0,
-            "sell_volume": 0.0,
-            "total_volume": 0.0,
-            "spot_cvd": 0.0,
-            "spot_cvd_ratio": 0.0,
+            "fetch_ok": False,
+            "requested_limit": requested_limit,
+            "trades": [],
             "error": str(e),
         }
 
 
 def get_okx_spot_cvd(symbol, limit=300):
     """
-    Aggregated Spot CVD across Binance + OKX + Bybit.
+    Aggregated Spot CVD across Binance + OKX + Bybit using one common
+    clock window.
 
-    The final ratio is naturally volume-weighted because exchange buy/sell
-    notionals are summed before the ratio is calculated. If one venue is
-    unavailable (for example Binance HTTP 451 or a missing spot listing),
-    the remaining venues continue to contribute.
+    Normal path:
+      - target = SPOT_CVD_WINDOW_SEC (60s by default);
+      - only venues whose fetched trade page fully covers that window are
+        included in the volume-weighted aggregate;
+      - a venue that hit its API page limit before reaching the cutoff is
+        marked PARTIAL and excluded, preventing a few seconds of Binance
+        activity from being compared with a full minute on another venue.
+
+    Safety fallback:
+      - if every available venue is partial, all are recalculated on the
+        shortest common coverage window instead of mixing unequal periods.
     """
-
-    source_limit = max(
-        50,
-        min(int(limit), 300),
+    target_window_sec = float(
+        SPOT_CVD_WINDOW_SEC
     )
 
-    sources = [
-        _fetch_binance_spot_cvd(
+    # Keep the existing call signature but allow enough recent trades for
+    # a useful one-minute window without adding extra HTTP requests.
+    base_limit = max(
+        100,
+        int(limit),
+    )
+
+    now_ms = time.time() * 1000.0
+
+    raw_sources = [
+        _fetch_binance_spot_trades(
             symbol,
-            source_limit,
+            min(max(base_limit, 500), 1000),
         ),
-        _fetch_okx_spot_cvd(
+        _fetch_okx_spot_trades(
             symbol,
-            source_limit,
+            min(max(base_limit, 300), 500),
         ),
-        _fetch_bybit_spot_cvd(
+        _fetch_bybit_spot_trades(
             symbol,
-            source_limit,
+            min(max(base_limit, 500), 1000),
         ),
     ]
 
-    available = [
-        item
-        for item in sources
-        if item.get("available")
-        and float(item.get("total_volume") or 0.0) > 0
-    ]
+    fetched_sources = []
 
-    if not available:
+    for item in raw_sources:
+        if (
+            item.get("fetch_ok")
+            and item.get("trades")
+        ):
+            fetched_sources.append(
+                _spot_source_coverage(
+                    item,
+                    now_ms,
+                    target_window_sec,
+                )
+            )
+
+    if not fetched_sources:
         print(
             f"[SPOT_CVD_NO_DATA] "
             f"{symbol} "
@@ -3567,7 +3698,130 @@ def get_okx_spot_cvd(symbol, limit=300):
             "spot_cvd_ratio": 0.0,
             "spot_cvd_state": "SPOT_CVD_NO_DATA",
             "spot_cvd_source": "NONE",
-            "spot_cvd_sources": sources,
+            "spot_cvd_sources": raw_sources,
+            "spot_cvd_window_sec": target_window_sec,
+        }
+
+    complete_sources = [
+        item
+        for item in fetched_sources
+        if item.get("window_complete")
+    ]
+
+    partial_sources = [
+        item
+        for item in fetched_sources
+        if not item.get("window_complete")
+    ]
+
+    if complete_sources:
+        selected_raw = complete_sources
+        effective_window_sec = target_window_sec
+
+        if partial_sources:
+            print(
+                f"[SPOT_CVD_PARTIAL_EXCLUDED] "
+                f"{symbol} "
+                f"target={round(target_window_sec, 1)}s "
+                f"excluded="
+                + ",".join(
+                    f"{x.get('source')}:{x.get('coverage_sec')}s"
+                    for x in partial_sources
+                ),
+                flush=True,
+            )
+
+    else:
+        # Every venue hit its recent-trade page limit before the requested
+        # cutoff. Use the shortest common fully-observed period.
+        effective_window_sec = min(
+            float(x.get("coverage_sec") or 0.1)
+            for x in partial_sources
+        )
+
+        effective_window_sec = max(
+            0.1,
+            effective_window_sec,
+        )
+
+        selected_raw = partial_sources
+
+        print(
+            f"[SPOT_CVD_WINDOW_SHRINK] "
+            f"{symbol} "
+            f"target={round(target_window_sec, 1)}s "
+            f"effective={round(effective_window_sec, 2)}s",
+            flush=True,
+        )
+
+    cutoff_ms = (
+        now_ms
+        - effective_window_sec * 1000.0
+    )
+
+    source_summaries = []
+
+    selected_ids = {
+        id(item)
+        for item in selected_raw
+    }
+
+    for item in raw_sources:
+        if id(item) not in selected_ids:
+            source_summaries.append({
+                "source": item.get("source"),
+                "instrument": item.get("instrument"),
+                "available": False,
+                "excluded": (
+                    bool(item.get("fetch_ok"))
+                    and bool(item.get("trades"))
+                ),
+                "window_complete": item.get("window_complete"),
+                "coverage_sec": item.get("coverage_sec"),
+                "raw_trades": len(item.get("trades") or []),
+                "error": item.get("error"),
+            })
+            continue
+
+        summary = _spot_cvd_from_trades(
+            item.get("trades") or [],
+            item.get("source"),
+            cutoff_ms,
+        )
+
+        summary["instrument"] = item.get("instrument")
+        summary["window_complete"] = item.get("window_complete")
+        summary["coverage_sec"] = item.get("coverage_sec")
+        summary["raw_trades"] = len(item.get("trades") or [])
+        summary["excluded"] = False
+
+        source_summaries.append(
+            summary
+        )
+
+    available = [
+        item
+        for item in source_summaries
+        if item.get("available")
+        and not item.get("excluded")
+        and float(item.get("total_volume") or 0.0) > 0
+    ]
+
+    if not available:
+        print(
+            f"[SPOT_CVD_NO_DATA] "
+            f"{symbol} "
+            f"window={round(effective_window_sec, 2)}s",
+            flush=True,
+        )
+
+        return {
+            "spot_cvd": 0.0,
+            "spot_cvd_ratio": 0.0,
+            "spot_cvd_state": "SPOT_CVD_NO_DATA",
+            "spot_cvd_source": "NONE",
+            "spot_cvd_sources": source_summaries,
+            "spot_cvd_window_sec": effective_window_sec,
         }
 
     buy_volume = sum(
@@ -3581,32 +3835,27 @@ def get_okx_spot_cvd(symbol, limit=300):
     )
 
     total_volume = buy_volume + sell_volume
+    spot_cvd = buy_volume - sell_volume
+    spot_cvd_ratio = (
+        spot_cvd / total_volume
+        if total_volume > 0
+        else 0.0
+    )
 
-    if total_volume <= 0:
-        spot_cvd = 0.0
-        spot_cvd_ratio = 0.0
-        state = "SPOT_CVD_NEUTRAL"
+    if spot_cvd_ratio >= 0.15:
+        state = "STRONG_SPOT_BUY"
+
+    elif spot_cvd_ratio >= 0.05:
+        state = "SPOT_BUY"
+
+    elif spot_cvd_ratio <= -0.15:
+        state = "STRONG_SPOT_SELL"
+
+    elif spot_cvd_ratio <= -0.05:
+        state = "SPOT_SELL"
 
     else:
-        spot_cvd = buy_volume - sell_volume
-        spot_cvd_ratio = (
-            spot_cvd / total_volume
-        )
-
-        if spot_cvd_ratio >= 0.15:
-            state = "STRONG_SPOT_BUY"
-
-        elif spot_cvd_ratio >= 0.05:
-            state = "SPOT_BUY"
-
-        elif spot_cvd_ratio <= -0.15:
-            state = "STRONG_SPOT_SELL"
-
-        elif spot_cvd_ratio <= -0.05:
-            state = "SPOT_SELL"
-
-        else:
-            state = "SPOT_CVD_NEUTRAL"
+        state = "SPOT_CVD_NEUTRAL"
 
     source_names = ",".join(
         item.get("source")
@@ -3615,16 +3864,25 @@ def get_okx_spot_cvd(symbol, limit=300):
 
     source_parts = []
 
-    for item in sources:
+    for item in source_summaries:
         src = item.get("source")
-        if item.get("available"):
+
+        if item.get("excluded"):
+            source_parts.append(
+                f"{src}:EXCLUDED"
+            )
+
+        elif item.get("available"):
             ratio_pct = (
                 float(item.get("spot_cvd_ratio") or 0.0)
                 * 100
             )
+
             source_parts.append(
                 f"{src}:{round(ratio_pct, 2)}%"
+                f"/{item.get('window_trades', 0)}t"
             )
+
         else:
             source_parts.append(
                 f"{src}:NA"
@@ -3633,6 +3891,7 @@ def get_okx_spot_cvd(symbol, limit=300):
     print(
         f"[SPOT_CVD_AGG] "
         f"{symbol} "
+        f"window={round(effective_window_sec, 2)}s "
         f"state={state} "
         f"ratio={round(spot_cvd_ratio * 100, 2)}% "
         f"buy={round(buy_volume, 2)} "
@@ -3647,7 +3906,8 @@ def get_okx_spot_cvd(symbol, limit=300):
         "spot_cvd_ratio": spot_cvd_ratio,
         "spot_cvd_state": state,
         "spot_cvd_source": source_names,
-        "spot_cvd_sources": sources,
+        "spot_cvd_sources": source_summaries,
+        "spot_cvd_window_sec": effective_window_sec,
     }
 
 
@@ -16436,6 +16696,11 @@ def build_signal(instId, preloaded_oi=None):
     signal["spot_cvd_sources"] = spot_cvd_data.get(
         "spot_cvd_sources",
         []
+    )
+
+    signal["spot_cvd_window_sec"] = spot_cvd_data.get(
+        "spot_cvd_window_sec",
+        SPOT_CVD_WINDOW_SEC
     )
 
     # =========================
