@@ -1,4 +1,5 @@
 import sqlite3
+import json
 import time
 import os
 from datetime import datetime
@@ -32,6 +33,7 @@ def init_db():
         expected_move_max REAL,
         result TEXT,
         move_pct REAL,
+        snapshot_json TEXT,
         oi_firewall_blocked INTEGER DEFAULT 0,
         oi_firewall_reason TEXT
     )
@@ -63,6 +65,14 @@ def init_db():
     except:
         pass
 
+    try:
+        cur.execute(
+            "ALTER TABLE signals "
+            "ADD COLUMN snapshot_json TEXT"
+        )
+    except:
+        pass
+
     conn.commit()
     conn.close()
 
@@ -79,18 +89,63 @@ def save_signal(signal):
     ts = signal.get("ts", int(time.time()))
     time_str = datetime.utcfromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
 
+    snapshot = {
+        "direction_code": signal.get("direction_code"),
+        "direction": signal.get("direction"),
+        "entry": signal.get("entry"),
+        "entry_type": signal.get("entry_type"),
+        "signal_group": signal.get("signal_group"),
+        "signal_mode": signal.get("signal_mode"),
+        "score": signal.get("score"),
+        "rating": signal.get("rating"),
+        "strength": signal.get("strength"),
+        "legacy_confidence": signal.get("legacy_confidence"),
+        "legacy_confidence_score": signal.get("legacy_confidence_score"),
+        "context_grade": signal.get("context_grade"),
+        "acc_score": signal.get("acc_score"),
+        "early_pressure_score": signal.get("early_pressure_score"),
+        "stage": signal.get("stage"),
+        "oi_change": signal.get("oi_change"),
+        "oi_state": signal.get("oi_state"),
+        "real_oi_state": signal.get("real_oi_state"),
+        "real_money_confirm": signal.get("real_money_confirm"),
+        "flow_state": signal.get("flow_state"),
+        "flow_score": signal.get("flow_score"),
+        "capital_flow_score": signal.get("capital_flow_score"),
+        "smart_money_state": signal.get("smart_money_state"),
+        "smart_money_score": signal.get("smart_money_score"),
+        "cvd_state": signal.get("cvd_state"),
+        "spot_cvd_state": signal.get("spot_cvd_state"),
+        "spot_cvd_ratio": signal.get("spot_cvd_ratio"),
+        "spot_cvd_source": signal.get("spot_cvd_source"),
+        "spot_cvd_window_sec": signal.get("spot_cvd_window_sec"),
+        "late_move_penalty": signal.get("late_move_penalty"),
+        "retest_state": signal.get("retest_state"),
+        "smart_cycle_stage": signal.get("smart_cycle_stage"),
+        "smart_cycle_sequence_pct": signal.get("smart_cycle_sequence_pct"),
+        "flags": signal.get("flags", []),
+    }
+
+    snapshot_json = json.dumps(
+        snapshot,
+        ensure_ascii=False,
+        separators=(",", ":"),
+        default=str,
+    )
+
     cur.execute("""
     INSERT INTO signals (
         symbol, ts, time_str,
-        entry_price,entry_type, direction,
+        entry_price, entry_type, direction,
         score, acc_score,
         stage,
         expected_move_min,
         expected_move_max,
         result,
-        move_pct
+        move_pct,
+        snapshot_json
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
         signal["instId"],
         ts,
@@ -104,11 +159,13 @@ def save_signal(signal):
         signal["exp_move_min"],
         signal["exp_move_max"],
         "OPEN",
-        0.0
+        0.0,
+        snapshot_json,
     ))
 
     conn.commit()
     conn.close()
+
 
 # ==============================
 # OI FIREWALL MARK
