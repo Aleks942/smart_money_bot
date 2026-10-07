@@ -7753,12 +7753,22 @@ def get_open_interest(symbol):
         return None
 
 def direction_code_from_text(direction_text: str) -> str:
-    txt = str(direction_text)
+    txt = str(direction_text or "").strip().upper()
 
-    if "ВВЕРХ" in txt:
+    if (
+        txt in ("UP", "LONG", "BUY")
+        or "ВВЕРХ" in txt
+        or "LONG" in txt
+        or "BUY" in txt
+    ):
         return "UP"
 
-    if "ВНИЗ" in txt:
+    if (
+        txt in ("DOWN", "SHORT", "SELL")
+        or "ВНИЗ" in txt
+        or "SHORT" in txt
+        or "SELL" in txt
+    ):
         return "DOWN"
 
     return "FLAT"
@@ -8349,7 +8359,19 @@ def has_open_similar_signal(sig):
         return False
 
     symbol = sig.get("symbol") or sig.get("instId")
-    direction_code = sig.get("direction_code") or direction_code_from_text(sig.get("direction", ""))
+
+    effective_direction = get_effective_trade_direction(sig)
+
+    if effective_direction == "LONG":
+        direction_code = "UP"
+    elif effective_direction == "SHORT":
+        direction_code = "DOWN"
+    else:
+        direction_code = direction_code_from_text(
+            sig.get("direction_code")
+            or sig.get("direction", "")
+        )
+
     entry_type = sig.get("entry_type", sig.get("entry", "UNKNOWN"))
 
     for s in open_signals:
@@ -8378,6 +8400,57 @@ def has_any_open_signal_for_symbol(symbol: str) -> bool:
             return True
 
     return False
+
+
+def save_sent_signal_once(sig, context="UNKNOWN"):
+    """
+    Journal only alerts that actually reached a Telegram send path.
+    Keep one-open-signal-per-symbol semantics and immediate deduplication.
+    """
+    try:
+        inst_id = (
+            sig.get("instId")
+            or sig.get("symbol")
+            or "UNKNOWN"
+        )
+
+        if has_open_similar_signal(sig):
+            print(
+                f"[SAVE_SENT_SKIP] {inst_id} "
+                f"context={context} reason=same-side-open",
+                flush=True,
+            )
+            return False
+
+        if (
+            ONE_OPEN_SIGNAL_PER_SYMBOL
+            and has_any_open_signal_for_symbol(inst_id)
+        ):
+            print(
+                f"[SAVE_SENT_SKIP] {inst_id} "
+                f"context={context} reason=symbol-open",
+                flush=True,
+            )
+            return False
+
+        save_signal(sig)
+
+        print(
+            f"[SAVE_SENT_OK] {inst_id} "
+            f"context={context}",
+            flush=True,
+        )
+        return True
+
+    except Exception as e:
+        print(
+            f"[SAVE_SENT_ERROR] "
+            f"{sig.get('instId') or sig.get('symbol')} "
+            f"context={context} "
+            f"{type(e).__name__}: {e}",
+            flush=True,
+        )
+        return False
 
 # =========================
 # PRE-BREAKOUT BUILD-UP
@@ -23805,34 +23878,11 @@ if __name__ == "__main__":
                         # =========================
                         # SAVE ACTUALLY SENT SIGNAL
                         # =========================
-                        same_side_open = has_open_similar_signal(sig)
-                        any_open_same_symbol = has_any_open_signal_for_symbol(instId)
-                        
-                        if same_side_open:
-                        
-                            print(
-                                f"[SAVE_SKIP] {instId} "
-                                f"same-side open signal already exists",
-                                flush=True
-                            )
-                        
-                        elif ONE_OPEN_SIGNAL_PER_SYMBOL and any_open_same_symbol:
-                        
-                            print(
-                                f"[SAVE_SKIP] {instId} "
-                                f"open signal already exists for this symbol",
-                                flush=True
-                            )
-                        
-                        else:
-                        
-                            save_signal(sig)
-                        
-                            print(
-                                f"[SAVE_OK] {instId} saved after Telegram send",
-                                flush=True
-                            )
-                        
+                        save_sent_signal_once(
+                            sig,
+                            context=f"{group}_EARLY_PATH",
+                        )
+
                         scalp_sent_this_cycle += 1
                 
                         print(
@@ -24415,36 +24465,9 @@ if __name__ == "__main__":
                     )
             
             # =====================
-            # SAVE ENTRY SIGNAL
+            # SIGNAL JOURNAL
             # =====================
-            
-            entry_ok_for_save = is_entry_signal(sig)
-            
-            same_side_open = has_open_similar_signal(sig)
-            
-            any_open_same_symbol = has_any_open_signal_for_symbol(instId)
-            
-            if entry_ok_for_save:
-            
-                if same_side_open:
-            
-                    print(
-                        f"[SAVE_SKIP] {instId} "
-                        f"same-side open signal already exists"
-                    )
-            
-                elif ONE_OPEN_SIGNAL_PER_SYMBOL and any_open_same_symbol:
-            
-                    print(
-                        f"[SAVE_SKIP] {instId} "
-                        f"open signal already exists for this symbol"
-                    )
-            
-                else:
-            
-                    save_signal(sig)
-            
-                    print(f"[SAVE_OK] {instId} saved")
+            # Journal only after the final firewall and an actual send path.
 
             print(
                 f"[SCALP_GROUP_DEBUG] "
@@ -24641,6 +24664,10 @@ if __name__ == "__main__":
                 scalp_msg = msg_scalp(sig)
 
                 send_telegram(scalp_msg)
+                save_sent_signal_once(
+                    sig,
+                    context="SCALP",
+                )
 
                 scalp_sent_cache[symbol] = current_ts
 
@@ -24695,6 +24722,10 @@ if __name__ == "__main__":
 
                     continue
                 send_telegram(swing_msg)
+                save_sent_signal_once(
+                    sig,
+                    context="ELITE_SWING",
+                )
 
                 print(
                     f"[SWING_SENT] {instId}",
@@ -24759,6 +24790,10 @@ if __name__ == "__main__":
             if tier in ["🟢🟢 СИЛЬНЫЙ ВХОД", "🟢 СИЛЬНЫЙ СИГНАЛ"]:
                 if entry_ok and can_alert_now:
                     send_telegram(msg_full(sig))
+                    save_sent_signal_once(
+                        sig,
+                        context="MAIN_STRONG",
+                    )
                     sent_main_now = True
                     mark_alert_sent(state, sig)
                     alerts.append(sig)
@@ -24766,6 +24801,10 @@ if __name__ == "__main__":
             elif tier == "🟡 СИГНАЛ":
                 if entry_ok and can_alert_now:
                     send_telegram(msg_medium(sig))
+                    save_sent_signal_once(
+                        sig,
+                        context="MAIN_MEDIUM",
+                    )
                     sent_main_now = True
                     mark_alert_sent(state, sig)
                     alerts.append(sig)
@@ -24825,6 +24864,10 @@ if __name__ == "__main__":
                     print(f"[TG_SEND_TRY] {instId}", flush=True)
             
                     send_telegram(msg_medium(sig))
+                    save_sent_signal_once(
+                        sig,
+                        context="MAIN_EARLY",
+                    )
             
                     print(f"[TG_SEND_OK] {instId}", flush=True)
             
@@ -24879,6 +24922,10 @@ if __name__ == "__main__":
             ):
                 if pro_edge_filter(sig, regime) and entry_ok:
                     send_telegram(msg_priority(sig))
+                    save_sent_signal_once(
+                        sig,
+                        context="PRIORITY",
+                    )
                     mark_priority(state, instId)
 
             if (
