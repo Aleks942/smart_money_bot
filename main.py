@@ -16167,6 +16167,9 @@ def build_signal(instId, preloaded_oi=None):
         "oi_available": preloaded_oi is not None,
 
         "score": score,
+        "legacy_confidence": sig_signal_confidence,
+        "legacy_confidence_score": confidence_score,
+        "context_grade": sig_context_grade,
 
         "candles": c5,
 
