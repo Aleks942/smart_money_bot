@@ -19954,43 +19954,90 @@ def confirm_grade(sig):
         return "SKIP"
 
 def get_open_interest_change(symbol):
+    """
+    Load 5m Bybit Open Interest change and keep a fresh absolute OI snapshot.
+
+    Important:
+    - use the shared Bybit retry/error handler instead of a silent raw request;
+    - ask only for the two points we actually need;
+    - never overwrite the last good absolute OI with bad/empty data;
+    - log the exact failure so NO_OI_DATA can be diagnosed from Railway.
+    """
+    symbol = str(symbol or "").upper().strip()
+
+    if not symbol:
+        print("[OI_FETCH_ERROR] empty symbol", flush=True)
+        return None
+
+    url = "https://api.bybit.com/v5/market/open-interest"
+    params = {
+        "category": "linear",
+        "symbol": symbol,
+        "intervalTime": "5min",
+        "limit": "2",
+    }
+
     try:
-        url = "https://api.bybit.com/v5/market/open-interest"
-        params = {
-            "category": "linear",
-            "symbol": symbol,
-            "intervalTime": "5min"
-        }
+        data = bybit_get(
+            url,
+            params,
+            retries=2,
+        )
 
-        r = requests.get(url, params=params, timeout=8)
-        data = r.json()
+        rows = (((data or {}).get("result") or {}).get("list") or [])
 
-        rows = data["result"]["list"]
         if len(rows) < 2:
+            print(
+                f"[OI_FETCH_EMPTY] "
+                f"{symbol} rows={len(rows)}",
+                flush=True,
+            )
             return None
 
-        now_oi = float(rows[0]["openInterest"])
-        prev_oi = float(rows[1]["openInterest"])
-        # =====================
-        # ABSOLUTE OI SNAPSHOT
-        # =====================
+        now_oi = float(rows[0].get("openInterest") or 0.0)
+        prev_oi = float(rows[1].get("openInterest") or 0.0)
 
+        if now_oi <= 0 or prev_oi <= 0:
+            print(
+                f"[OI_FETCH_INVALID] "
+                f"{symbol} now={now_oi} prev={prev_oi}",
+                flush=True,
+            )
+            return None
+
+        # Store only a validated, fresh absolute OI snapshot.
         ABS_OI_MEMORY[symbol] = now_oi
 
         print(
             f"[ABS_OI] "
             f"{symbol} "
             f"current={now_oi}",
-            flush=True
+            flush=True,
         )
 
-        if prev_oi <= 0:
-            return None
+        change = (now_oi - prev_oi) / prev_oi * 100.0
+        change = round(change, 4)
 
-        change = (now_oi - prev_oi) / prev_oi * 100
-        return round(change, 2)
+        print(
+            f"[OI_FETCH_OK] "
+            f"{symbol} "
+            f"change_5m={change}%",
+            flush=True,
+        )
 
-    except:
+        return change
+
+    except Exception as e:
+        has_cached_abs = symbol in ABS_OI_MEMORY
+
+        print(
+            f"[OI_FETCH_ERROR] "
+            f"{symbol} "
+            f"{type(e).__name__}: {e} "
+            f"cached_abs={has_cached_abs}",
+            flush=True,
+        )
+
         return None
 
 def is_best_only_signal(sig):
