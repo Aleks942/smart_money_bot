@@ -3063,6 +3063,99 @@ def analyze_real_oi_flow(instId, price, oi):
 # FLOW + OI MERGE ENGINE
 # =========================
 
+def get_effective_trade_direction(sig):
+    """
+    Return one authoritative trade direction for downstream confirmation.
+
+    Priority:
+    1) the actual selected entry (EARLY LONG/SHORT, etc.);
+    2) legacy direction_code/direction/side as fallback.
+
+    This keeps OI/Smart Money and Spot CVD aligned with the side the entry
+    engine actually selected, instead of scoring opposite directions.
+    """
+    entry = str(
+        sig.get("entry")
+        or sig.get("entry_type")
+        or sig.get("entry_reason")
+        or ""
+    ).upper()
+
+    if "SHORT" in entry or "SELL" in entry:
+        effective = "SHORT"
+
+    elif "LONG" in entry or "BUY" in entry:
+        effective = "LONG"
+
+    else:
+        raw = str(
+            sig.get("direction_code")
+            or sig.get("direction")
+            or sig.get("side")
+            or ""
+        ).upper()
+
+        if (
+            "SHORT" in raw
+            or "DOWN" in raw
+            or "SELL" in raw
+            or "ВНИЗ" in raw
+        ):
+            effective = "SHORT"
+
+        elif (
+            "LONG" in raw
+            or "UP" in raw
+            or "BUY" in raw
+            or "ВВЕРХ" in raw
+        ):
+            effective = "LONG"
+
+        else:
+            effective = "NEUTRAL"
+
+    raw_direction = str(
+        sig.get("direction_code")
+        or sig.get("direction")
+        or sig.get("side")
+        or ""
+    ).upper()
+
+    raw_normalized = "NEUTRAL"
+
+    if (
+        "SHORT" in raw_direction
+        or "DOWN" in raw_direction
+        or "SELL" in raw_direction
+        or "ВНИЗ" in raw_direction
+    ):
+        raw_normalized = "SHORT"
+
+    elif (
+        "LONG" in raw_direction
+        or "UP" in raw_direction
+        or "BUY" in raw_direction
+        or "ВВЕРХ" in raw_direction
+    ):
+        raw_normalized = "LONG"
+
+    if (
+        effective in ("LONG", "SHORT")
+        and raw_normalized in ("LONG", "SHORT")
+        and effective != raw_normalized
+    ):
+        print(
+            f"[DIRECTION_ALIGN] "
+            f"{sig.get('instId') or sig.get('symbol')} "
+            f"entry={entry} "
+            f"raw={raw_normalized} "
+            f"effective={effective}",
+            flush=True,
+        )
+
+    return effective
+
+
 def merge_flow_with_oi(sig):
     """
     SMART MONEY V3.
@@ -3075,12 +3168,9 @@ def merge_flow_with_oi(sig):
         flow_state = str(sig.get("flow_state") or "")
         oi_state = str(sig.get("oi_state") or "NEUTRAL")
 
-        direction = str(
-            sig.get("direction_code")
-            or sig.get("direction")
-            or sig.get("side")
-            or ""
-        ).upper()
+        direction = get_effective_trade_direction(
+            sig
+        )
 
         # =====================
         # FLOW CONFIRM
@@ -4347,12 +4437,9 @@ def analyze_entry_quality_v2(signal):
         entry_quality_reasons = []
 
         entry = str(signal.get("entry") or "")
-        direction = str(
-            signal.get("direction_code")
-            or signal.get("direction")
-            or signal.get("side")
-            or ""
-        ).upper()
+        direction = get_effective_trade_direction(
+            signal
+        )
 
         ema_distance = float(signal.get("ema_distance_pct") or 0)
         late_penalty = float(signal.get("late_move_penalty") or 0)
@@ -17250,12 +17337,9 @@ def build_signal(instId, preloaded_oi=None):
         signal.get("real_money_confirm")
     )
 
-    direction_code = str(
-        signal.get("direction_code")
-        or signal.get("direction")
-        or signal.get("entry")
-        or ""
-    ).upper()
+    direction_code = get_effective_trade_direction(
+        signal
+    )
 
     spot_against_direction = (
         (
