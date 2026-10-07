@@ -133,6 +133,41 @@ def save_signal(signal):
         default=str,
     )
 
+    entry_name = str(
+        signal.get("entry_type")
+        or signal.get("entry")
+        or signal.get("entry_reason")
+        or ""
+    ).upper()
+
+    if "LONG" in entry_name or "BUY" in entry_name:
+        persisted_direction = "UP"
+    elif "SHORT" in entry_name or "SELL" in entry_name:
+        persisted_direction = "DOWN"
+    else:
+        raw_direction = str(
+            signal.get("direction_code")
+            or signal.get("direction")
+            or ""
+        ).upper()
+
+        if (
+            raw_direction in ("DOWN", "SHORT", "SELL")
+            or "SHORT" in raw_direction
+            or "SELL" in raw_direction
+            or "ВНИЗ" in raw_direction
+        ):
+            persisted_direction = "DOWN"
+        elif (
+            raw_direction in ("UP", "LONG", "BUY")
+            or "LONG" in raw_direction
+            or "BUY" in raw_direction
+            or "ВВЕРХ" in raw_direction
+        ):
+            persisted_direction = "UP"
+        else:
+            persisted_direction = "FLAT"
+
     cur.execute("""
     INSERT INTO signals (
         symbol, ts, time_str,
@@ -152,7 +187,7 @@ def save_signal(signal):
         time_str,
         signal.get("entry_price", signal["price"]),
         signal.get("entry_type", signal.get("entry", "UNKNOWN")),
-        signal.get("direction_code", signal["direction"]),
+        persisted_direction,
         signal["score"],
         signal["acc_score"],
         signal["stage"],
