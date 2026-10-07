@@ -8339,7 +8339,12 @@ def liquidity_pressure(candles, lookback=PRESSURE_LOOKBACK, zone=PRESSURE_ZONE, 
 # =========================
 def has_open_similar_signal(sig):
     try:
-        open_signals = get_open_signals()
+        # Duplicate protection must see ALL open rows immediately.
+        # get_open_signals() defaults to 300s because the analyst waits
+        # before evaluating outcomes; that delay is wrong for dedup.
+        open_signals = get_open_signals(
+            older_than_sec=0
+        )
     except Exception:
         return False
 
@@ -8359,7 +8364,11 @@ def has_open_similar_signal(sig):
 
 def has_any_open_signal_for_symbol(symbol: str) -> bool:
     try:
-        open_signals = get_open_signals()
+        # See brand-new OPEN signals too; otherwise the same symbol can
+        # be inserted repeatedly during the first five minutes.
+        open_signals = get_open_signals(
+            older_than_sec=0
+        )
     except Exception:
         return False
 
