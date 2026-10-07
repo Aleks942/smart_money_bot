@@ -3264,65 +3264,331 @@ def merge_flow_with_oi(sig):
 # REAL SPOT CVD — OKX
 # =========================
 
-def get_okx_spot_cvd(symbol, limit=300):
+def _spot_symbol_okx(symbol):
+    raw = str(symbol or "").upper().strip()
+
+    if raw.endswith("USDT") and "-" not in raw:
+        return f"{raw[:-4]}-USDT"
+
+    return raw.replace("-SWAP", "")
+
+
+def _spot_symbol_plain(symbol):
+    return (
+        str(symbol or "")
+        .upper()
+        .replace("-USDT-SWAP", "USDT")
+        .replace("-USDT", "USDT")
+        .replace("-", "")
+    )
+
+
+def _spot_cvd_from_trades(trades, source):
+    """
+    Convert normalized trades into one Spot CVD snapshot.
+
+    Each trade must provide:
+      side: buy/sell
+      price: quote price
+      size: base size
+    """
+    buy_volume = 0.0
+    sell_volume = 0.0
+
+    for trade in trades or []:
+        try:
+            side = str(trade.get("side") or "").lower()
+            price = float(trade.get("price") or 0.0)
+            size = float(trade.get("size") or 0.0)
+
+            if price <= 0 or size <= 0:
+                continue
+
+            notional = price * size
+
+            if side == "buy":
+                buy_volume += notional
+
+            elif side == "sell":
+                sell_volume += notional
+
+        except Exception:
+            continue
+
+    total_volume = buy_volume + sell_volume
+
+    if total_volume <= 0:
+        return {
+            "source": source,
+            "available": False,
+            "buy_volume": 0.0,
+            "sell_volume": 0.0,
+            "total_volume": 0.0,
+            "spot_cvd": 0.0,
+            "spot_cvd_ratio": 0.0,
+        }
+
+    spot_cvd = buy_volume - sell_volume
+    spot_cvd_ratio = spot_cvd / total_volume
+
+    return {
+        "source": source,
+        "available": True,
+        "buy_volume": buy_volume,
+        "sell_volume": sell_volume,
+        "total_volume": total_volume,
+        "spot_cvd": spot_cvd,
+        "spot_cvd_ratio": spot_cvd_ratio,
+    }
+
+
+def _fetch_okx_spot_cvd(symbol, limit):
+    spot_symbol = _spot_symbol_okx(symbol)
 
     try:
-
-        # ZECUSDT -> ZEC-USDT
-        if symbol.endswith("USDT") and "-" not in symbol:
-            base = symbol[:-4]
-            spot_symbol = f"{base}-USDT"
-        else:
-            spot_symbol = symbol.replace("-SWAP", "")
-
-        trades = okx_get(
+        rows = okx_get(
             "https://www.okx.com/api/v5/market/trades",
             {
                 "instId": spot_symbol,
-                "limit": str(limit)
-            }
+                "limit": str(limit),
+            },
         )
 
-        if not trades:
-            return {
-                "spot_cvd": 0.0,
-                "spot_cvd_ratio": 0.0,
-                "spot_cvd_state": "SPOT_CVD_NO_DATA"
-            }
+        trades = []
 
-        buy_volume = 0.0
-        sell_volume = 0.0
+        for row in rows or []:
+            trades.append({
+                "side": str(row.get("side") or "").lower(),
+                "price": row.get("px"),
+                "size": row.get("sz"),
+            })
 
-        for trade in trades:
+        result = _spot_cvd_from_trades(
+            trades,
+            "OKX",
+        )
 
-            try:
-                side = str(trade.get("side") or "").lower()
-                price = float(trade.get("px") or 0)
-                size = float(trade.get("sz") or 0)
+        result["instrument"] = spot_symbol
+        return result
 
-                # переводим объём примерно в USDT
-                notional = price * size
+    except Exception as e:
+        print(
+            f"[SPOT_CVD_SOURCE_ERROR] "
+            f"{symbol} source=OKX "
+            f"{type(e).__name__}: {e}",
+            flush=True,
+        )
 
-                if side == "buy":
-                    buy_volume += notional
+        return {
+            "source": "OKX",
+            "instrument": spot_symbol,
+            "available": False,
+            "buy_volume": 0.0,
+            "sell_volume": 0.0,
+            "total_volume": 0.0,
+            "spot_cvd": 0.0,
+            "spot_cvd_ratio": 0.0,
+            "error": str(e),
+        }
 
-                elif side == "sell":
-                    sell_volume += notional
 
-            except Exception:
-                continue
+def _fetch_bybit_spot_cvd(symbol, limit):
+    spot_symbol = _spot_symbol_plain(symbol)
 
-        total_volume = buy_volume + sell_volume
+    try:
+        data = bybit_get(
+            "https://api.bybit.com/v5/market/recent-trade",
+            {
+                "category": "spot",
+                "symbol": spot_symbol,
+                "limit": str(min(int(limit), 1000)),
+            },
+            retries=2,
+        )
 
-        if total_volume <= 0:
-            return {
-                "spot_cvd": 0.0,
-                "spot_cvd_ratio": 0.0,
-                "spot_cvd_state": "SPOT_CVD_NEUTRAL"
-            }
+        rows = (((data or {}).get("result") or {}).get("list") or [])
+        trades = []
 
+        for row in rows:
+            trades.append({
+                "side": str(row.get("side") or "").lower(),
+                "price": row.get("price"),
+                "size": row.get("size"),
+            })
+
+        result = _spot_cvd_from_trades(
+            trades,
+            "BYBIT",
+        )
+
+        result["instrument"] = spot_symbol
+        return result
+
+    except Exception as e:
+        print(
+            f"[SPOT_CVD_SOURCE_ERROR] "
+            f"{symbol} source=BYBIT "
+            f"{type(e).__name__}: {e}",
+            flush=True,
+        )
+
+        return {
+            "source": "BYBIT",
+            "instrument": spot_symbol,
+            "available": False,
+            "buy_volume": 0.0,
+            "sell_volume": 0.0,
+            "total_volume": 0.0,
+            "spot_cvd": 0.0,
+            "spot_cvd_ratio": 0.0,
+            "error": str(e),
+        }
+
+
+def _fetch_binance_spot_cvd(symbol, limit):
+    spot_symbol = _spot_symbol_plain(symbol)
+
+    try:
+        r = S.get(
+            "https://api.binance.com/api/v3/trades",
+            params={
+                "symbol": spot_symbol,
+                "limit": str(min(int(limit), 1000)),
+            },
+            timeout=TIMEOUT,
+        )
+
+        if r.status_code != 200:
+            raise RuntimeError(
+                f"BINANCE HTTP {r.status_code}"
+            )
+
+        rows = r.json()
+
+        if not isinstance(rows, list):
+            raise RuntimeError(
+                f"BINANCE bad response: {str(rows)[:200]}"
+            )
+
+        trades = []
+
+        for row in rows:
+            # Binance: isBuyerMaker=True means the aggressive side was SELL.
+            is_buyer_maker = bool(
+                row.get("isBuyerMaker")
+            )
+
+            trades.append({
+                "side": (
+                    "sell"
+                    if is_buyer_maker
+                    else "buy"
+                ),
+                "price": row.get("price"),
+                "size": row.get("qty"),
+            })
+
+        result = _spot_cvd_from_trades(
+            trades,
+            "BINANCE",
+        )
+
+        result["instrument"] = spot_symbol
+        return result
+
+    except Exception as e:
+        print(
+            f"[SPOT_CVD_SOURCE_ERROR] "
+            f"{symbol} source=BINANCE "
+            f"{type(e).__name__}: {e}",
+            flush=True,
+        )
+
+        return {
+            "source": "BINANCE",
+            "instrument": spot_symbol,
+            "available": False,
+            "buy_volume": 0.0,
+            "sell_volume": 0.0,
+            "total_volume": 0.0,
+            "spot_cvd": 0.0,
+            "spot_cvd_ratio": 0.0,
+            "error": str(e),
+        }
+
+
+def get_okx_spot_cvd(symbol, limit=300):
+    """
+    Aggregated Spot CVD across Binance + OKX + Bybit.
+
+    The final ratio is naturally volume-weighted because exchange buy/sell
+    notionals are summed before the ratio is calculated. If one venue is
+    unavailable (for example Binance HTTP 451 or a missing spot listing),
+    the remaining venues continue to contribute.
+    """
+
+    source_limit = max(
+        50,
+        min(int(limit), 300),
+    )
+
+    sources = [
+        _fetch_binance_spot_cvd(
+            symbol,
+            source_limit,
+        ),
+        _fetch_okx_spot_cvd(
+            symbol,
+            source_limit,
+        ),
+        _fetch_bybit_spot_cvd(
+            symbol,
+            source_limit,
+        ),
+    ]
+
+    available = [
+        item
+        for item in sources
+        if item.get("available")
+        and float(item.get("total_volume") or 0.0) > 0
+    ]
+
+    if not available:
+        print(
+            f"[SPOT_CVD_NO_DATA] "
+            f"{symbol} "
+            f"sources=BINANCE,OKX,BYBIT",
+            flush=True,
+        )
+
+        return {
+            "spot_cvd": 0.0,
+            "spot_cvd_ratio": 0.0,
+            "spot_cvd_state": "SPOT_CVD_NO_DATA",
+            "spot_cvd_source": "NONE",
+            "spot_cvd_sources": sources,
+        }
+
+    buy_volume = sum(
+        float(item.get("buy_volume") or 0.0)
+        for item in available
+    )
+
+    sell_volume = sum(
+        float(item.get("sell_volume") or 0.0)
+        for item in available
+    )
+
+    total_volume = buy_volume + sell_volume
+
+    if total_volume <= 0:
+        spot_cvd = 0.0
+        spot_cvd_ratio = 0.0
+        state = "SPOT_CVD_NEUTRAL"
+
+    else:
         spot_cvd = buy_volume - sell_volume
-
         spot_cvd_ratio = (
             spot_cvd / total_volume
         )
@@ -3342,36 +3608,49 @@ def get_okx_spot_cvd(symbol, limit=300):
         else:
             state = "SPOT_CVD_NEUTRAL"
 
-        print(
-            f"[SPOT_CVD] "
-            f"{symbol} "
-            f"state={state} "
-            f"ratio={round(spot_cvd_ratio * 100, 2)}% "
-            f"buy={round(buy_volume, 2)} "
-            f"sell={round(sell_volume, 2)}",
-            flush=True
-        )
+    source_names = ",".join(
+        item.get("source")
+        for item in available
+    )
 
-        return {
-            "spot_cvd": spot_cvd,
-            "spot_cvd_ratio": spot_cvd_ratio,
-            "spot_cvd_state": state
-        }
+    source_parts = []
 
-    except Exception as e:
+    for item in sources:
+        src = item.get("source")
+        if item.get("available"):
+            ratio_pct = (
+                float(item.get("spot_cvd_ratio") or 0.0)
+                * 100
+            )
+            source_parts.append(
+                f"{src}:{round(ratio_pct, 2)}%"
+            )
+        else:
+            source_parts.append(
+                f"{src}:NA"
+            )
 
-        print(
-            f"[SPOT_CVD_ERROR] {symbol} {e}",
-            flush=True
-        )
+    print(
+        f"[SPOT_CVD_AGG] "
+        f"{symbol} "
+        f"state={state} "
+        f"ratio={round(spot_cvd_ratio * 100, 2)}% "
+        f"buy={round(buy_volume, 2)} "
+        f"sell={round(sell_volume, 2)} "
+        f"sources={source_names} "
+        f"detail={' '.join(source_parts)}",
+        flush=True,
+    )
 
-        return {
-            "spot_cvd": 0.0,
-            "spot_cvd_ratio": 0.0,
-            "spot_cvd_state": "SPOT_CVD_ERROR"
-        }
+    return {
+        "spot_cvd": spot_cvd,
+        "spot_cvd_ratio": spot_cvd_ratio,
+        "spot_cvd_state": state,
+        "spot_cvd_source": source_names,
+        "spot_cvd_sources": sources,
+    }
 
-    
+
 
 # =========================
 # CVD ENGINE V1
@@ -16147,6 +16426,16 @@ def build_signal(instId, preloaded_oi=None):
     signal["spot_cvd_state"] = spot_cvd_data.get(
         "spot_cvd_state",
         "SPOT_CVD_NO_DATA"
+    )
+
+    signal["spot_cvd_source"] = spot_cvd_data.get(
+        "spot_cvd_source",
+        "NONE"
+    )
+
+    signal["spot_cvd_sources"] = spot_cvd_data.get(
+        "spot_cvd_sources",
+        []
     )
 
     # =========================
