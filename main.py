@@ -16241,6 +16241,52 @@ def build_signal(instId, preloaded_oi=None):
     entry_price, stop, entry_reason = decide_entry(stage, flags, price, c5)
 
     # =========================
+    # ENTRY DIRECTION = SOURCE OF TRUTH
+    # =========================
+    # direction_hint() describes the broad flag balance. decide_entry()
+    # selects the actual executable LONG/SHORT setup. When mixed flags are
+    # present these can disagree, so downstream trade fields must follow the
+    # selected entry while the raw analytical direction is kept for diagnostics.
+    raw_direction_code = direction_code
+    raw_direction_text = direction_text
+
+    entry_direction = str(
+        entry_reason or ""
+    ).upper()
+
+    if "LONG" in entry_direction or "BUY" in entry_direction:
+        direction_code = "UP"
+        direction_text = "⬆️ ВВЕРХ"
+
+    elif "SHORT" in entry_direction or "SELL" in entry_direction:
+        direction_code = "DOWN"
+        direction_text = "⬇️ ВНИЗ"
+
+    if (
+        direction_code in ("UP", "DOWN")
+        and raw_direction_code in ("UP", "DOWN")
+        and direction_code != raw_direction_code
+    ):
+        print(
+            f"[ENTRY_DIRECTION_SYNC] "
+            f"{instId} "
+            f"entry={entry_reason} "
+            f"raw={raw_direction_code} "
+            f"final={direction_code}",
+            flush=True,
+        )
+
+    # Recalculate the direction-dependent entry zone after the final entry
+    # side is known. This prevents a LONG entry from carrying a SHORT zone
+    # (or vice versa).
+    entry_zone = calc_entry_zone(
+        price,
+        pmeta,
+        flags,
+        direction_code,
+    )
+
+    # =========================
     # TEMP TARGET
     # =========================
     
@@ -16300,6 +16346,8 @@ def build_signal(instId, preloaded_oi=None):
         "strong_setup": strong_setup,
         "direction": direction_text,
         "direction_code": direction_code,
+        "raw_direction": raw_direction_text,
+        "raw_direction_code": raw_direction_code,
         "dir_reasons": reasons,
         "up_w": up_w,
         "down_w": down_w,
