@@ -11,6 +11,7 @@ from wall_detector import WallTracker
 from continuation_engine import continuation_engine
 from signal_tier import get_signal_tier
 from sniper_engine import sniper_signal
+from outcome_audit import audit_bybit_1m
 from signal_analyst import (
     init_db,
     save_signal,
@@ -20685,6 +20686,23 @@ def check_signal_results():
             send_telegram(show_stats())
 
         snapshot = s.get("snapshot") or {}
+
+        # Read-only shadow audit: does not change historical HIT/FAIL or trading.
+        candle_audit = audit_bybit_1m(
+            symbol, entry, direction_code, created_at,
+            checked_at=int(time.time()),
+        )
+        print(
+            f"[FIRST_TOUCH_AUDIT] {symbol} "
+            f"signal_id={signal_id} "
+            f"status={candle_audit.get('status')} "
+            f"bars={candle_audit.get('bars')} "
+            f"first_ts={candle_audit.get('first_ts')} "
+            f"mfe={candle_audit.get('mfe_pct')} "
+            f"mae={candle_audit.get('mae_pct')} "
+            f"legacy={result}",
+            flush=True,
+        )
 
         print(
             f"[ANALYST] {symbol} "
