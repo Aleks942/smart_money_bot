@@ -24,6 +24,7 @@ def first_touch_from_1m(candles, entry_price, direction, created_at, checked_at)
         if checked <= created:
             return {**base, "status": "NOT_READY"}
         # Only complete candles *after* the signal minute can be trusted.
+        entry_ms = (created // 60) * 60000
         first_ms = (created // 60 + 1) * 60000
         last_ms = (checked // 60 - 1) * 60000
         if last_ms < first_ms:
@@ -34,6 +35,7 @@ def first_touch_from_1m(candles, entry_price, direction, created_at, checked_at)
         else:
             tp, sl = price * 0.99, price * 1.01
 
+        entry_bar = None
         ordered = []
         for raw in candles or ():
             try:
@@ -43,8 +45,23 @@ def first_touch_from_1m(candles, entry_price, direction, created_at, checked_at)
                     continue
             except (TypeError, ValueError, IndexError):
                 continue
+            if ts == entry_ms:
+                entry_bar = (hi, lo)
             if first_ms <= ts <= last_ms:
                 ordered.append((ts, hi, lo))
+
+        # The entry-minute OHLC includes trades before and after the
+        # alert timestamp. A touched boundary cannot be ordered reliably.
+        if entry_bar is None:
+            return {**base, "status": "INCOMPLETE_HISTORY"}
+        entry_high, entry_low = entry_bar
+        if side == "UP":
+            entry_may_touch = entry_high >= tp or entry_low <= sl
+        else:
+            entry_may_touch = entry_low <= tp or entry_high >= sl
+        if entry_may_touch:
+            return {**base, "status": "ENTRY_MINUTE_AMBIGUOUS",
+                    "first_ts": entry_ms // 1000}
 
         ordered.sort(key=lambda x: x[0])
         if not ordered or ordered[0][0] != first_ms:
