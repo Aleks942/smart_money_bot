@@ -21437,7 +21437,7 @@ LAST_SIGNAL_CACHE = {}
 # ANTI REPEAT ENGINE
 # =========================
 
-def is_repeat_signal(sig):
+def _legacy_is_repeat_signal_unused(sig):
 
     try:
 
