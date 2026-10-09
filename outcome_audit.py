@@ -113,6 +113,7 @@ def audit_bybit_1m(symbol, entry_price, direction, created_at,
         response = requests.get(
             "https://api.bybit.com/v5/market/kline",
             params={"category": "linear", "symbol": symbol, "interval": "1",
+                    "end": str(checked * 1000),
                     "limit": str(min(1000, max(60, age_minutes + 5)))},
             timeout=timeout,
         )

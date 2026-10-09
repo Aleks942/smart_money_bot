@@ -436,6 +436,10 @@ def save_outcome_audit(signal_id, legacy_result, audit):
                     bars=excluded.bars,
                     mfe_pct=excluded.mfe_pct,
                     mae_pct=excluded.mae_pct
+                WHERE outcome_audits.verdict IN (
+                    'NO_TOUCH', 'NOT_READY', 'FETCH_ERROR',
+                    'INCOMPLETE_HISTORY', 'DATA_GAP'
+                )
             """, (
                 int(signal_id), int(time.time()), "bybit-1m-v2",
                 verdict, str(legacy_result),
