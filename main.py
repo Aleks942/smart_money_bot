@@ -3660,6 +3660,18 @@ def _fetch_binance_spot_trades(symbol, limit):
         )
 
         if r.status_code != 200:
+            # Only -1121 definitively identifies an unlisted Binance pair.
+            # Other HTTP 400 responses are transient/diagnostic errors.
+            if r.status_code == 400:
+                try:
+                    error_body = r.json()
+                except ValueError:
+                    error_body = {}
+                if (
+                    isinstance(error_body, dict)
+                    and str(error_body.get("code")) == "-1121"
+                ):
+                    raise RuntimeError("BINANCE_INVALID_SYMBOL_-1121")
             raise RuntimeError(
                 f"BINANCE HTTP {r.status_code}"
             )
@@ -3716,6 +3728,54 @@ def _fetch_binance_spot_trades(symbol, limit):
         }
 
 
+# Short, bounded negative cache for definitively unlisted SPOT pairs only.
+# It does not cache outages, partial data, empty trade windows, or CVD values.
+_SPOT_CVD_UNSUPPORTED_UNTIL = {}
+_SPOT_CVD_UNSUPPORTED_TTL_SEC = 600
+_SPOT_CVD_UNSUPPORTED_MAX = 1024
+
+
+def _spot_cvd_fetch_source(symbol, source, limit, fetcher):
+    key = (source, _spot_symbol_plain(symbol))
+    now = time.monotonic()
+    expires = _SPOT_CVD_UNSUPPORTED_UNTIL.get(key)
+
+    if expires is not None and expires > now:
+        return {
+            "source": source,
+            "instrument": key[1],
+            "fetch_ok": False,
+            "requested_limit": limit,
+            "trades": [],
+            "error": "SPOT_SYMBOL_UNSUPPORTED_CACHED",
+        }
+
+    if expires is not None:
+        _SPOT_CVD_UNSUPPORTED_UNTIL.pop(key, None)
+
+    result = fetcher(symbol, limit)
+    error = str(result.get("error") or "").lower()
+    definitely_unlisted = (
+        (source == "BINANCE" and "binance_invalid_symbol_-1121" in error)
+        or (source == "OKX" and "51001" in error and "doesn't exist" in error)
+        or (source == "BYBIT" and "10001" in error and "not supported symbols" in error)
+    )
+    if definitely_unlisted:
+        if len(_SPOT_CVD_UNSUPPORTED_UNTIL) >= _SPOT_CVD_UNSUPPORTED_MAX:
+            for old_key, old_exp in tuple(_SPOT_CVD_UNSUPPORTED_UNTIL.items()):
+                if old_exp <= now:
+                    _SPOT_CVD_UNSUPPORTED_UNTIL.pop(old_key, None)
+            if len(_SPOT_CVD_UNSUPPORTED_UNTIL) >= _SPOT_CVD_UNSUPPORTED_MAX:
+                _SPOT_CVD_UNSUPPORTED_UNTIL.clear()
+        _SPOT_CVD_UNSUPPORTED_UNTIL[key] = now + _SPOT_CVD_UNSUPPORTED_TTL_SEC
+        print(
+            f"[SPOT_UNSUPPORTED_TTL] {symbol} source={source} "
+            f"ttl={_SPOT_CVD_UNSUPPORTED_TTL_SEC}s",
+            flush=True,
+        )
+    return result
+
+
 def get_okx_spot_cvd(symbol, limit=300):
     """
     Aggregated Spot CVD across Binance + OKX + Bybit using one common
@@ -3747,17 +3807,20 @@ def get_okx_spot_cvd(symbol, limit=300):
     now_ms = time.time() * 1000.0
 
     raw_sources = [
-        _fetch_binance_spot_trades(
-            symbol,
+        _spot_cvd_fetch_source(
+            symbol, "BINANCE",
             min(max(base_limit, 500), 1000),
+            _fetch_binance_spot_trades,
         ),
-        _fetch_okx_spot_trades(
-            symbol,
+        _spot_cvd_fetch_source(
+            symbol, "OKX",
             min(max(base_limit, 300), 500),
+            _fetch_okx_spot_trades,
         ),
-        _fetch_bybit_spot_trades(
-            symbol,
+        _spot_cvd_fetch_source(
+            symbol, "BYBIT",
             min(max(base_limit, 500), 1000),
+            _fetch_bybit_spot_trades,
         ),
     ]
 
