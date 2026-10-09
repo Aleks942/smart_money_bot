@@ -11,6 +11,7 @@ from wall_detector import WallTracker
 from continuation_engine import continuation_engine
 from signal_tier import get_signal_tier
 from sniper_engine import sniper_signal
+from shadow_profit_report import print_shadow_profit_report
 from shadow_audit_runner import audit_pending_saved_signals
 from outcome_audit import audit_bybit_1m
 from signal_analyst import (
@@ -22307,7 +22308,13 @@ if __name__ == "__main__":
     # =====================
     scalp_sent_cache = {}
 
+    # Purely diagnostic; rate-limit the report to once per hour.
+    _shadow_profit_report_last_ts = 0.0
+
     while True:
+        if time.monotonic() - _shadow_profit_report_last_ts >= 3600:
+            print_shadow_profit_report()
+            _shadow_profit_report_last_ts = time.monotonic()
 
         # Two best-effort shadow audits per scan, independent of dispatch.
         try:
