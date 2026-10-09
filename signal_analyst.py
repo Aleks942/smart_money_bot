@@ -73,6 +73,21 @@ def init_db():
     except:
         pass
 
+    # Separate shadow results; never overwrite the legacy signals/stats.
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS outcome_audits (
+        signal_id INTEGER PRIMARY KEY,
+        checked_at INTEGER NOT NULL,
+        audit_version TEXT NOT NULL,
+        verdict TEXT NOT NULL,
+        legacy_result TEXT,
+        first_touch_ts INTEGER,
+        bars INTEGER,
+        mfe_pct REAL,
+        mae_pct REAL
+    )
+    """)
+
     conn.commit()
     conn.close()
 
@@ -379,3 +394,41 @@ def close_signal(signal_id, move_pct, result):
 
 
  
+
+# ==============================
+# INDEPENDENT SHADOW AUDIT STORAGE
+# ==============================
+
+def save_outcome_audit(signal_id, legacy_result, audit):
+    """Store an independent candle verdict without touching legacy statistics."""
+    try:
+        verdict = str(audit.get("status") or "UNKNOWN")
+        with sqlite3.connect(DB_FILE, timeout=10) as conn:
+            conn.execute("""
+                INSERT INTO outcome_audits (
+                    signal_id, checked_at, audit_version, verdict,
+                    legacy_result, first_touch_ts, bars, mfe_pct, mae_pct
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(signal_id) DO UPDATE SET
+                    checked_at=excluded.checked_at,
+                    audit_version=excluded.audit_version,
+                    verdict=excluded.verdict,
+                    legacy_result=excluded.legacy_result,
+                    first_touch_ts=excluded.first_touch_ts,
+                    bars=excluded.bars,
+                    mfe_pct=excluded.mfe_pct,
+                    mae_pct=excluded.mae_pct
+            """, (
+                int(signal_id), int(time.time()), "bybit-1m-v2",
+                verdict, str(legacy_result),
+                audit.get("first_ts"), audit.get("bars"),
+                audit.get("mfe_pct"), audit.get("mae_pct"),
+            ))
+        return True
+    except Exception as exc:
+        print(
+            f"[FIRST_TOUCH_AUDIT_DB_ERROR] signal_id={signal_id} "
+            f"{type(exc).__name__}: {exc}",
+            flush=True,
+        )
+        return False

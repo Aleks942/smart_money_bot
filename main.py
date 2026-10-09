@@ -17,6 +17,7 @@ from signal_analyst import (
     save_signal,
     get_open_signals,
     close_signal,
+    save_outcome_audit,
     mark_oi_firewall_blocked,
 )
 from ai_scoring import get_ai_multiplier
@@ -20755,6 +20756,7 @@ def check_signal_results():
             symbol, entry, direction_code, created_at,
             checked_at=int(time.time()),
         )
+        audit_saved = save_outcome_audit(signal_id, result, candle_audit)
         print(
             f"[FIRST_TOUCH_AUDIT] {symbol} "
             f"signal_id={signal_id} "
@@ -20763,7 +20765,8 @@ def check_signal_results():
             f"first_ts={candle_audit.get('first_ts')} "
             f"mfe={candle_audit.get('mfe_pct')} "
             f"mae={candle_audit.get('mae_pct')} "
-            f"legacy={result}",
+            f"legacy={result} "
+            f"saved={audit_saved}",
             flush=True,
         )
 
