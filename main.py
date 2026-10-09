@@ -11,6 +11,7 @@ from wall_detector import WallTracker
 from continuation_engine import continuation_engine
 from signal_tier import get_signal_tier
 from sniper_engine import sniper_signal
+from shadow_audit_runner import audit_pending_saved_signals
 from outcome_audit import audit_bybit_1m
 from signal_analyst import (
     init_db,
@@ -22307,6 +22308,12 @@ if __name__ == "__main__":
     scalp_sent_cache = {}
 
     while True:
+
+        # Two best-effort shadow audits per scan, independent of dispatch.
+        try:
+            audit_pending_saved_signals()
+        except Exception as audit_error:
+            print(f"[SHADOW_AUDIT_LOOP_ERROR] {audit_error}", flush=True)
 
         check_signal_results()
         t0 = time.time()
