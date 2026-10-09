@@ -7669,8 +7669,15 @@ S.headers.update({"User-Agent": "smart-money-radar/PRO-EDGE-4.0"})
 # TELEGRAM
 # =========================
 def send_telegram(text: str):
+    """
+    Send one Telegram message and return True only when Telegram confirms it.
+
+    Existing callers may ignore the return value. Trade-alert paths use it to
+    avoid journaling or cooling down signals that never reached Telegram.
+    """
     if not BOT_TOKEN or not CHAT_ID:
-        return
+        print("[TELEGRAM_SEND_FAILED] missing BOT_TOKEN/CHAT_ID", flush=True)
+        return False
 
     try:
         url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
@@ -7678,7 +7685,7 @@ def send_telegram(text: str):
         # защита от слишком длинных сообщений
         text = str(text)[:4000]
 
-        S.post(
+        response = S.post(
             url,
             data={
                 "chat_id": CHAT_ID,
@@ -7688,8 +7695,40 @@ def send_telegram(text: str):
             timeout=10
         )
 
+        if response.status_code != 200:
+            print(
+                f"[TELEGRAM_SEND_FAILED] "
+                f"http={response.status_code} "
+                f"body={response.text[:200]}",
+                flush=True,
+            )
+            return False
+
+        try:
+            payload = response.json()
+        except Exception:
+            print(
+                "[TELEGRAM_SEND_FAILED] invalid JSON response",
+                flush=True,
+            )
+            return False
+
+        if not bool(payload.get("ok")):
+            print(
+                f"[TELEGRAM_SEND_FAILED] api={str(payload)[:250]}",
+                flush=True,
+            )
+            return False
+
+        return True
+
     except Exception as e:
-        print(f"TELEGRAM ERROR: {e}")
+        print(
+            f"[TELEGRAM_SEND_FAILED] "
+            f"{type(e).__name__}: {e}",
+            flush=True,
+        )
+        return False
 
 # =========================
 # STATE
@@ -23873,7 +23912,15 @@ if __name__ == "__main__":
                         #
                         #     continue
 
-                        send_telegram(msg)
+                        telegram_ok = send_telegram(msg)
+
+                        if not telegram_ok:
+                            print(
+                                f"[TG_SEND_FAILED] {instId} "
+                                f"context={group}_EARLY_PATH",
+                                flush=True,
+                            )
+                            continue
 
                         # =========================
                         # SAVE ACTUALLY SENT SIGNAL
@@ -24663,7 +24710,15 @@ if __name__ == "__main__":
 
                 scalp_msg = msg_scalp(sig)
 
-                send_telegram(scalp_msg)
+                telegram_ok = send_telegram(scalp_msg)
+
+                if not telegram_ok:
+                    print(
+                        f"[TG_SEND_FAILED] {instId} context=SCALP",
+                        flush=True,
+                    )
+                    continue
+
                 save_sent_signal_once(
                     sig,
                     context="SCALP",
@@ -24721,7 +24776,15 @@ if __name__ == "__main__":
                 if is_repeat_signal(sig):
 
                     continue
-                send_telegram(swing_msg)
+                telegram_ok = send_telegram(swing_msg)
+
+                if not telegram_ok:
+                    print(
+                        f"[TG_SEND_FAILED] {instId} context=ELITE_SWING",
+                        flush=True,
+                    )
+                    continue
+
                 save_sent_signal_once(
                     sig,
                     context="ELITE_SWING",
@@ -24789,25 +24852,39 @@ if __name__ == "__main__":
 
             if tier in ["🟢🟢 СИЛЬНЫЙ ВХОД", "🟢 СИЛЬНЫЙ СИГНАЛ"]:
                 if entry_ok and can_alert_now:
-                    send_telegram(msg_full(sig))
-                    save_sent_signal_once(
-                        sig,
-                        context="MAIN_STRONG",
-                    )
-                    sent_main_now = True
-                    mark_alert_sent(state, sig)
-                    alerts.append(sig)
+                    telegram_ok = send_telegram(msg_full(sig))
+
+                    if telegram_ok:
+                        save_sent_signal_once(
+                            sig,
+                            context="MAIN_STRONG",
+                        )
+                        sent_main_now = True
+                        mark_alert_sent(state, sig)
+                        alerts.append(sig)
+                    else:
+                        print(
+                            f"[TG_SEND_FAILED] {instId} context=MAIN_STRONG",
+                            flush=True,
+                        )
 
             elif tier == "🟡 СИГНАЛ":
                 if entry_ok and can_alert_now:
-                    send_telegram(msg_medium(sig))
-                    save_sent_signal_once(
-                        sig,
-                        context="MAIN_MEDIUM",
-                    )
-                    sent_main_now = True
-                    mark_alert_sent(state, sig)
-                    alerts.append(sig)
+                    telegram_ok = send_telegram(msg_medium(sig))
+
+                    if telegram_ok:
+                        save_sent_signal_once(
+                            sig,
+                            context="MAIN_MEDIUM",
+                        )
+                        sent_main_now = True
+                        mark_alert_sent(state, sig)
+                        alerts.append(sig)
+                    else:
+                        print(
+                            f"[TG_SEND_FAILED] {instId} context=MAIN_MEDIUM",
+                            flush=True,
+                        )
 
             
             elif tier == "🟠 РАННИЙ":
@@ -24863,21 +24940,28 @@ if __name__ == "__main__":
             
                     print(f"[TG_SEND_TRY] {instId}", flush=True)
             
-                    send_telegram(msg_medium(sig))
-                    save_sent_signal_once(
-                        sig,
-                        context="MAIN_EARLY",
-                    )
-            
-                    print(f"[TG_SEND_OK] {instId}", flush=True)
-            
-                    sent_main_now = True
-            
-                    mark_alert_sent(state, sig)
-            
-                    alerts.append(sig)
-            
-                    print(f"[EARLY_SENT] {instId}", flush=True)
+                    telegram_ok = send_telegram(msg_medium(sig))
+
+                    if not telegram_ok:
+                        print(
+                            f"[TG_SEND_FAILED] {instId} context=MAIN_EARLY",
+                            flush=True,
+                        )
+                    else:
+                        save_sent_signal_once(
+                            sig,
+                            context="MAIN_EARLY",
+                        )
+
+                        print(f"[TG_SEND_OK] {instId}", flush=True)
+
+                        sent_main_now = True
+
+                        mark_alert_sent(state, sig)
+
+                        alerts.append(sig)
+
+                        print(f"[EARLY_SENT] {instId}", flush=True)
 
             summary_ok = (
                 score >= 0
@@ -24921,12 +25005,19 @@ if __name__ == "__main__":
                 and priority_allowed(state, instId)
             ):
                 if pro_edge_filter(sig, regime) and entry_ok:
-                    send_telegram(msg_priority(sig))
-                    save_sent_signal_once(
-                        sig,
-                        context="PRIORITY",
-                    )
-                    mark_priority(state, instId)
+                    telegram_ok = send_telegram(msg_priority(sig))
+
+                    if telegram_ok:
+                        save_sent_signal_once(
+                            sig,
+                            context="PRIORITY",
+                        )
+                        mark_priority(state, instId)
+                    else:
+                        print(
+                            f"[TG_SEND_FAILED] {instId} context=PRIORITY",
+                            flush=True,
+                        )
 
             if (
                 MANIP_ALERT_ENABLED
