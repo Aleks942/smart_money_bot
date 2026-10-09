@@ -20688,6 +20688,9 @@ def check_signal_results():
 
         print(
             f"[ANALYST] {symbol} "
+            f"signal_id={signal_id} "
+            f"created_at={int(created_at)} "
+            f"age_min={round(signal_age / 60.0, 1)} "
             f"result={result} "
             f"move={round(move_pct,2)}% "
             f"entry={s.get('entry_type')} "
