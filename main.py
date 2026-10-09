@@ -23126,16 +23126,8 @@ if __name__ == "__main__":
                             flush=True
                         )
 
-                    # =====================
-                    # LAUNCH
-                    # =====================
-
-                    if (
-                        has_acceleration
-                        and abs(oi) >= 0.15
-                    ):
-
-                        energy_stack += 1
+                    # energy_stack is initialized and calculated in the
+                    # ENERGY STACK block below; no increment before then.
 
                     # =====================
                     # ACCELERATION
