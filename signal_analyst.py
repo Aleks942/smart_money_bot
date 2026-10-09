@@ -89,6 +89,24 @@ def init_db():
     """)
 
     conn.commit()
+
+    # Read-only startup health check; never interrupt trading on report failure.
+    try:
+        rows = cur.execute("""
+            SELECT verdict, COUNT(*) FROM outcome_audits GROUP BY verdict
+        """).fetchall()
+        summary = {verdict: count for verdict, count in rows}
+        print(
+            f"[OUTCOME_AUDIT_DB_READY] rows={sum(summary.values())} "
+            f"verdicts={summary}",
+            flush=True,
+        )
+    except Exception as exc:
+        print(
+            f"[OUTCOME_AUDIT_DB_CHECK_ERROR] {type(exc).__name__}: {exc}",
+            flush=True,
+        )
+
     conn.close()
 
 
