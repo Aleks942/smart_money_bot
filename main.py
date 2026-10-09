@@ -20684,7 +20684,28 @@ def check_signal_results():
         if s["id"] % 10 == 0:
             send_telegram(show_stats())
 
-        print(f"[ANALYST] {symbol} result={result} move={round(move_pct,2)}%")
+        snapshot = s.get("snapshot") or {}
+
+        print(
+            f"[ANALYST] {symbol} "
+            f"result={result} "
+            f"move={round(move_pct,2)}% "
+            f"entry={s.get('entry_type')} "
+            f"dir={direction_code} "
+            f"score={snapshot.get('score')} "
+            f"rating={snapshot.get('rating')} "
+            f"legacy_conf={snapshot.get('legacy_confidence')} "
+            f"oi={snapshot.get('oi_change')} "
+            f"oi_state={snapshot.get('oi_state')} "
+            f"real_money={snapshot.get('real_money_confirm')} "
+            f"flow={snapshot.get('flow_state')} "
+            f"cvd={snapshot.get('cvd_state')} "
+            f"spot={snapshot.get('spot_cvd_state')} "
+            f"spot_ratio={snapshot.get('spot_cvd_ratio')} "
+            f"retest={snapshot.get('retest_state')} "
+            f"cycle={snapshot.get('smart_cycle_stage')}",
+            flush=True,
+        )
 
         send_telegram(
             f"📊 RESULT {symbol}\n"

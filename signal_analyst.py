@@ -311,7 +311,7 @@ def get_open_signals(older_than_sec=300):
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT id, symbol, entry_price, entry_type, direction, stage, ts
+        SELECT id, symbol, entry_price, entry_type, direction, stage, ts, snapshot_json
         FROM signals
         WHERE result='OPEN'
     """)
@@ -323,7 +323,24 @@ def get_open_signals(older_than_sec=300):
 
     for r in rows:
 
-        signal_id, symbol, entry, entry_type, direction, stage, ts = r
+        (
+            signal_id,
+            symbol,
+            entry,
+            entry_type,
+            direction,
+            stage,
+            ts,
+            snapshot_json,
+        ) = r
+
+        snapshot = {}
+
+        if snapshot_json:
+            try:
+                snapshot = json.loads(snapshot_json)
+            except Exception:
+                snapshot = {}
 
         if now - ts >= older_than_sec:
 
@@ -334,7 +351,8 @@ def get_open_signals(older_than_sec=300):
                 "entry_type": entry_type,
                 "direction": direction,
                 "stage": stage,
-                "created_at": ts
+                "created_at": ts,
+                "snapshot": snapshot,
             })
 
     return signals
