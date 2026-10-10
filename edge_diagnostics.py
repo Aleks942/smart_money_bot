@@ -183,36 +183,53 @@ def _print_structural_report(conn, since):
         """, (since, _MAX_ROWS)
     ).fetchall()
 
+    terminal = ("TP_FIRST", "SL_FIRST", "TIMEOUT_MARKET_CLOSE")
     counts = Counter()
-    buckets = defaultdict(lambda: [0, 0, 0, 0.0])
+    # n, TP, SL, time-exit, terminal-with-net, total-net, net-winners
+    buckets = defaultdict(lambda: [0, 0, 0, 0, 0, 0.0, 0])
+    total = [0, 0, 0, 0, 0, 0.0, 0]
     rr_over_six = 0
-    for sid, entry_type, entry, verdict, stop, tp, rr, modeled in rows:
+
+    for _sid, _type, entry, verdict, stop, _tp, rr, modeled in rows:
         counts[verdict] += 1
         try:
-            if rr is not None and float(rr) > 6.0:
+            if rr is not None and math.isfinite(float(rr)) and float(rr) > 6:
                 rr_over_six += 1
-            e, s = float(entry), float(stop)
-            if not (math.isfinite(e) and math.isfinite(s) and e > 0 and s > 0):
+            e, stop_px = float(entry), float(stop)
+            if not (math.isfinite(e) and math.isfinite(stop_px)
+                    and e > 0 and stop_px > 0):
                 continue
-            pct = abs(e - s) / e * 100.0
-        except (ValueError, TypeError):
+            stop_width = abs(e - stop_px) / e * 100.0
+            if not math.isfinite(stop_width):
+                continue
+        except (TypeError, ValueError, OverflowError):
             continue
-        if not math.isfinite(pct):
+
+        bucket = buckets[_stop_bucket(stop_width)]
+        for item in (bucket, total):
+            item[0] += 1
+            if verdict == "TP_FIRST":
+                item[1] += 1
+            elif verdict == "SL_FIRST":
+                item[2] += 1
+            elif verdict == "TIMEOUT_MARKET_CLOSE":
+                item[3] += 1
+
+        # Only finalized trades with a finite modeled net outcome count in
+        # expectancy. Exclude pending signals, ambiguous bars and bad costs.
+        if verdict not in terminal or modeled is None:
             continue
-        key = _stop_bucket(pct)
-        item = buckets[key]
-        item[0] += 1
-        if verdict == "TP_FIRST":
-            item[1] += 1
-        elif verdict == "SL_FIRST":
-            item[2] += 1
-        if verdict in ("TP_FIRST", "SL_FIRST") and modeled is not None:
-            try:
-                value = float(modeled)
-                if math.isfinite(value):
-                    item[3] += value
-            except (TypeError, ValueError):
-                pass
+        try:
+            modeled_net = float(modeled)
+            if not math.isfinite(modeled_net):
+                continue
+        except (TypeError, ValueError, OverflowError):
+            continue
+        for item in (bucket, total):
+            item[4] += 1
+            item[5] += modeled_net
+            if modeled_net > 0:
+                item[6] += 1
 
     print(
         f"[STRUCT_EDGE] total={len(rows)} "
@@ -227,14 +244,31 @@ def _print_structural_report(conn, since):
         f"status=EARLY_STRUCTURAL_RESULTS_NO_TRADING_INFERENCE",
         flush=True,
     )
-    for bucket, values in sorted(buckets.items()):
-        n, tp, sl, summed_net = values
-        resolved = tp + sl
-        mean_net = summed_net / resolved if resolved else None
+
+    structural_n, tp_n, sl_n, timeout_n, priced_n, net_sum, net_wins = total
+    terminal_n = tp_n + sl_n + timeout_n
+    mean_net = net_sum / priced_n if priced_n else None
+    status = "EARLY_SAMPLE" if priced_n < 30 else "REQUIRES_FORWARD_VALIDATION"
+    print(
+        f"[STRUCT_EDGE_PNL] valid_levels={structural_n} "
+        f"terminal={terminal_n} priced={priced_n} "
+        f"unpriced_terminal={terminal_n-priced_n} "
+        f"tp={tp_n} sl={sl_n} timeout_close={timeout_n} "
+        f"net_positive={net_wins} "
+        f"mean_net={f'{mean_net:+.4f}%' if mean_net is not None else 'NA'} "
+        f"status={status} "
+        f"model=FROZEN_STRUCTURAL_TP_SL_4H_CLOSE_COST_ESTIMATE",
+        flush=True,
+    )
+    for bucket, (n, tp, sl, timed, priced, total_net, win) in sorted(buckets.items()):
+        mean = total_net / priced if priced else None
+        terminal_count = tp + sl + timed
         print(
             f"[STRUCT_EDGE_BUCKET] stop_width={bucket} n={n} "
-            f"resolved={resolved} tp={tp} sl={sl} "
-            f"mean_net={f'{mean_net:+.4f}%' if mean_net is not None else 'NA'}",
+            f"terminal={terminal_count} priced={priced} "
+            f"tp={tp} sl={sl} timeout_close={timed} "
+            f"net_positive={win} "
+            f"mean_net={f'{mean:+.4f}%' if mean is not None else 'NA'}",
             flush=True,
         )
 
