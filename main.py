@@ -11,6 +11,7 @@ from wall_detector import WallTracker
 from continuation_engine import continuation_engine
 from signal_tier import get_signal_tier
 from sniper_engine import sniper_signal
+from edge_diagnostics import print_edge_diagnostics
 from shadow_profit_report import print_shadow_profit_report
 from structural_audit import run_structural_audit
 from shadow_audit_runner import audit_pending_saved_signals
@@ -22315,6 +22316,7 @@ if __name__ == "__main__":
     while True:
         if time.monotonic() - _shadow_profit_report_last_ts >= 3600:
             print_shadow_profit_report()
+            print_edge_diagnostics()
             _shadow_profit_report_last_ts = time.monotonic()
 
         # Two best-effort shadow audits per scan, independent of dispatch.
