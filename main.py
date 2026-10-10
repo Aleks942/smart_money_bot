@@ -12,6 +12,7 @@ from continuation_engine import continuation_engine
 from signal_tier import get_signal_tier
 from sniper_engine import sniper_signal
 from shadow_profit_report import print_shadow_profit_report
+from structural_audit import run_structural_audit
 from shadow_audit_runner import audit_pending_saved_signals
 from outcome_audit import audit_bybit_1m
 from signal_analyst import (
@@ -22321,6 +22322,12 @@ if __name__ == "__main__":
             audit_pending_saved_signals()
         except Exception as audit_error:
             print(f"[SHADOW_AUDIT_LOOP_ERROR] {audit_error}", flush=True)
+
+        # One bounded structural audit per scan; never gates trading.
+        try:
+            run_structural_audit()
+        except Exception as struct_exc:
+            print(f"[STRUCTURAL_AUDIT_LOOP_ERROR] {struct_exc}",flush=True)
 
         check_signal_results()
         t0 = time.time()
