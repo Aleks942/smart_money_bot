@@ -32,7 +32,7 @@ def _cost_pct():
 
 def _net(tp, sl, cost):
     n = tp + sl
-    return (tp - sl) / n * 100.0 - cost if n else None
+    return (tp - sl) / n - cost if n else None
 
 
 def _side_alignment(direction, state, positive, negative):
