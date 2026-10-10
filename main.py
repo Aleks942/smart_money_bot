@@ -11,6 +11,7 @@ from wall_detector import WallTracker
 from continuation_engine import continuation_engine
 from signal_tier import get_signal_tier
 from sniper_engine import sniper_signal
+from trade_plan import telegram_plan
 from forward_experiment import register_forward_experiment, print_forward_experiment
 from edge_diagnostics import print_edge_diagnostics
 from shadow_profit_report import print_shadow_profit_report
@@ -19356,6 +19357,8 @@ def msg_medium(sig):
         for n in interp[:12]:
             lines.append(f"• {n}")
 
+    lines.append("")
+    lines.append(telegram_plan(sig))
     return "\n".join(lines)
 
 def oi_badge(oi):
@@ -19519,6 +19522,8 @@ def msg_full(sig):
         for n in interp[:16]:
             lines.append(f"• {n}")
 
+    lines.append("")
+    lines.append(telegram_plan(sig))
     return "\n".join(lines)
 
 
@@ -19986,7 +19991,7 @@ def msg_scalp(sig):
 ⚠️ Ранний сигнал ДО сильного движения.
 """.strip()
 
-    return msg
+    return msg + "\n\n" + telegram_plan(sig)
 
 # =========================
 # PRE SWING MESSAGE
@@ -20408,6 +20413,8 @@ def msg_priority(sig):
         fl = ", ".join(sig["flags"][:10])
         lines.append(f"Flags: {fl}")
 
+    lines.append("")
+    lines.append(telegram_plan(sig))
     return "\n".join(lines)
 
 # =========================
