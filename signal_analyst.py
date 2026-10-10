@@ -88,6 +88,26 @@ def init_db():
     )
     """)
 
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS structural_outcome_audits (
+        signal_id INTEGER PRIMARY KEY,
+        checked_at INTEGER NOT NULL,
+        audit_version TEXT NOT NULL,
+        verdict TEXT NOT NULL,
+        first_touch_ts INTEGER,
+        bars INTEGER,
+        entry_price REAL,
+        stop_price REAL,
+        tp_price REAL,
+        tp2_price REAL,
+        tp_source TEXT,
+        rr REAL,
+        gross_pct REAL,
+        modeled_net_pct REAL,
+        reason TEXT
+    )
+    """)
+
     conn.commit()
 
     # Read-only startup health check; never interrupt trading on report failure.
@@ -127,6 +147,13 @@ def save_signal(signal):
         "direction": signal.get("direction"),
         "entry": signal.get("entry"),
         "entry_type": signal.get("entry_type"),
+        # Frozen at journal write (after confirmed Telegram send).
+        "level_snapshot_version": "frozen-v1",
+        "journal_saved_at": int(time.time()),
+        "stop": signal.get("stop"),
+        "target": signal.get("target"),
+        "tp1": signal.get("tp1"),
+        "tp2": signal.get("tp2"),
         "signal_group": signal.get("signal_group"),
         "signal_mode": signal.get("signal_mode"),
         "score": signal.get("score"),
@@ -450,6 +477,59 @@ def save_outcome_audit(signal_id, legacy_result, audit):
     except Exception as exc:
         print(
             f"[FIRST_TOUCH_AUDIT_DB_ERROR] signal_id={signal_id} "
+            f"{type(exc).__name__}: {exc}",
+            flush=True,
+        )
+        return False
+
+# ==============================
+# INDEPENDENT STRUCTURAL LEVELS AUDIT
+# ==============================
+
+def save_structural_outcome_audit(signal_id, audit):
+    """Persist shadow structural result, without updating signals or fixed ±1% audits."""
+    try:
+        with sqlite3.connect(DB_FILE, timeout=5) as conn:
+            cur = conn.execute("""
+                INSERT INTO structural_outcome_audits (
+                    signal_id, checked_at, audit_version, verdict,
+                    first_touch_ts, bars, entry_price, stop_price,
+                    tp_price, tp2_price, tp_source, rr,
+                    gross_pct, modeled_net_pct, reason
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(signal_id) DO UPDATE SET
+                    checked_at=excluded.checked_at,
+                    audit_version=excluded.audit_version,
+                    verdict=excluded.verdict,
+                    first_touch_ts=excluded.first_touch_ts,
+                    bars=excluded.bars,
+                    entry_price=excluded.entry_price,
+                    stop_price=excluded.stop_price,
+                    tp_price=excluded.tp_price,
+                    tp2_price=excluded.tp2_price,
+                    tp_source=excluded.tp_source,
+                    rr=excluded.rr,
+                    gross_pct=excluded.gross_pct,
+                    modeled_net_pct=excluded.modeled_net_pct,
+                    reason=excluded.reason
+                WHERE structural_outcome_audits.verdict IN (
+                    'NO_TOUCH', 'NOT_READY', 'FETCH_ERROR',
+                    'INCOMPLETE_HISTORY', 'DATA_GAP'
+                )
+            """, (
+                int(signal_id), int(time.time()), "structural-1m-v1",
+                str(audit.get("status") or "UNKNOWN"),
+                audit.get("first_ts"), audit.get("bars"),
+                audit.get("entry_price"), audit.get("stop_price"),
+                audit.get("tp_price"), audit.get("tp2_price"),
+                audit.get("tp_source"), audit.get("rr"),
+                audit.get("gross_pct"), audit.get("modeled_net_pct"),
+                audit.get("reason"),
+            ))
+        return cur.rowcount > 0
+    except Exception as exc:
+        print(
+            f"[STRUCTURAL_AUDIT_DB_ERROR] signal_id={signal_id} "
             f"{type(exc).__name__}: {exc}",
             flush=True,
         )
