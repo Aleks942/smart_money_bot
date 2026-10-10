@@ -152,7 +152,7 @@ def _print_factor_report(conn, since, cost):
         print(
             f"[EDGE_FACTOR] cohort={cohort} key={factor} value={state} "
             f"n={nt+ns} tp={nt} sl={ns} "
-            f"old_n={ot+os_} old_net={historic:+.4f}% "
+            f"old_n={ot+os_} old_net={f'{historic:+.4f}%' if historic is not None else 'NA'} "
             f"recent_n={rt+rs} "
             f"recent_net={f'{recent:+.4f}%' if recent is not None else 'NA'} "
             f"all_net={combined:+.4f}% "
