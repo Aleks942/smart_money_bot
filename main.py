@@ -18577,6 +18577,22 @@ def build_signal(instId, preloaded_oi=None):
                 f"entry={signal.get('entry')}",
                 flush=True
             )
+            # Diagnostics only: preserve all existing entry and send filters.
+            # Full decision context is printed only for a rejected candidate.
+            print(
+                f"[SIGNAL_REJECT_DIAG] symbol={instId} "
+                f"score={score} ep={ep} acc={acc} "
+                f"mode={signal.get('signal_mode')} "
+                f"group={signal.get('signal_group')} "
+                f"flow={signal.get('flow_state')} "
+                f"smart_money={signal.get('smart_money_state')} "
+                f"retest={signal.get('retest_state')} "
+                f"entry={signal.get('entry')} "
+                f"filter_ok={ok} filter_reason={reason} "
+                f"premove_override={premove_override} "
+                f"flags={sorted(str(flag) for flag in flags)}",
+                flush=True
+            )
             return None
 
     print(
