@@ -219,7 +219,9 @@ def _print_structural_report(conn, since):
         f"legacy_no_levels={counts['LEVELS_NOT_RECORDED']} "
         f"invalid={counts['INVALID_LEVELS']} "
         f"tp={counts['TP_FIRST']} sl={counts['SL_FIRST']} "
-        f"no_touch={counts['NO_TOUCH']} timeout={counts['TIMEOUT_NO_TOUCH']} "
+        f"no_touch={counts['NO_TOUCH']} "
+        f"timeout_close={counts['TIMEOUT_MARKET_CLOSE']} "
+        f"timeout_unpriced={counts['TIMEOUT_NO_CLOSE_DATA']+counts['TIMEOUT_NO_TOUCH']} "
         f"ambiguous={counts['ENTRY_MINUTE_AMBIGUOUS']+counts['SAME_MINUTE']} "
         f"rr_gt_6={rr_over_six} "
         f"status=EARLY_STRUCTURAL_RESULTS_NO_TRADING_INFERENCE",
