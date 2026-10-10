@@ -32,21 +32,24 @@ def evaluate(candles, entry, stop, tp, direction, created, checked):
             try:
                 ts = int(bar[0])
                 hi, lo = float(bar[2]), float(bar[3])
-                if math.isfinite(hi) and math.isfinite(lo) and 0 < lo <= hi:
-                    raw[ts] = (hi, lo)
+                close = float(bar[4])
+                if (math.isfinite(hi) and math.isfinite(lo)
+                        and math.isfinite(close) and 0 < lo <= close <= hi):
+                    raw[ts] = (hi, lo, close)
             except (ValueError, TypeError, IndexError):
                 continue
         if start not in raw:
             return {**base, "status": "INCOMPLETE_HISTORY"}
-        hi, lo = raw[start]
+        hi, lo, _close = raw[start]
         if hi >= (tp if side == "UP" else stop) or lo <= (stop if side == "UP" else tp):
             return {**base, "status": "ENTRY_MINUTE_AMBIGUOUS", "first_ts": start // 1000}
         ts = first
         bars = 0
+        last_close = None
         while ts <= last:
             if ts not in raw:
                 return {**base, "status": "DATA_GAP", "bars": bars}
-            hi, lo = raw[ts]
+            hi, lo, last_close = raw[ts]
             bars += 1
             tp_hit = hi >= tp if side == "UP" else lo <= tp
             sl_hit = lo <= stop if side == "UP" else hi >= stop
@@ -60,7 +63,8 @@ def evaluate(candles, entry, stop, tp, direction, created, checked):
                 return {"status": verdict, "first_ts": ts // 1000,
                         "bars": bars, "gross_pct": round(gross, 6) if gross is not None else None}
             ts += 60000
-        return {"status": "NO_TOUCH", "first_ts": None, "bars": bars}
+        return {"status": "NO_TOUCH", "first_ts": None, "bars": bars,
+                "last_close": last_close}
     except (TypeError, ValueError, OverflowError):
         return base
 
@@ -130,7 +134,15 @@ def run_structural_audit():
                         except Exception as exc:
                             data.update(status="FETCH_ERROR",reason=str(exc)[:100])
                     if data.get("status") == "NO_TOUCH" and now >= created+_HORIZON+120:
-                        data["status"] = "TIMEOUT_NO_TOUCH"
+                        close = data.get("last_close")
+                        if close is not None:
+                            gross = ((float(close)/ep-1) if side == "UP"
+                                     else (1-float(close)/ep))*100
+                            data["gross_pct"] = round(gross, 6)
+                            data["status"] = "TIMEOUT_MARKET_CLOSE"
+                            data["reason"] = "full_4h_1m_candles_close_model"
+                        else:
+                            data["status"] = "TIMEOUT_NO_CLOSE_DATA"
                     if data.get("gross_pct") is not None:
                         try:
                             fee=float(os.getenv("SHADOW_FEE_BPS_SIDE","6"))
