@@ -396,6 +396,15 @@ def _cleanup(now):
           f"max_rows={MAX_ROWS} retention_days=30",flush=True)
     _edge_report(now)
     _cohort_report(now)
+    # Extra observational matching uses only the existing SQLite research
+    # tables. A reporting error cannot stop either prospective audit worker.
+    try:
+        from candidate_matched_audit import print_comparison
+        with _connect() as db:
+            print_comparison(db, now, TTL_SEC)
+    except Exception as exc:
+        print(f"[MATCHED_COHORT_ERROR] kind={type(exc).__name__}",
+              flush=True)
 
 
 def _tick():
