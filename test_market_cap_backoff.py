@@ -2,6 +2,7 @@
 import ast
 import os
 import time
+import math
 import unittest
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
@@ -9,7 +10,7 @@ from unittest.mock import Mock, patch
 from market_cap_backoff import remaining_seconds, register_429
 
 
-def load_scoped_market_cap(requests_fake, cached=None):
+def load_scoped_market_cap(requests_fake, cached=None, fallback=None):
     with open("main.py", "r", encoding="utf-8") as stream:
         tree = ast.parse(stream.read())
     keep = {"_chunked", "_get_coingecko_headers", "fetch_market_caps_usd"}
@@ -24,6 +25,7 @@ def load_scoped_market_cap(requests_fake, cached=None):
         "_market_cap_cache": {"ts": 0, "data": dict(cached or {}),
                               "last_fail_ts": 0},
         "_cg_cooldown": remaining_seconds, "_cg_note_429": register_429,
+        "fetch_coinpaprika_caps": fallback or (lambda symbols: {}), "math": math,
     }
     exec(compile(ast.Module(body=nodes, type_ignores=[]), "main.py",
                  "exec"), namespace)
@@ -43,15 +45,15 @@ class MarketCapCooldownTests(unittest.TestCase):
     def test_one_429_not_retried_and_missing_caps_stay_unapproved(self):
         blocked = Mock(status_code=429, headers={"Retry-After": "120"})
         request = Mock(get=Mock(return_value=blocked))
-        ns = load_scoped_market_cap(request, cached={"BTC": 100_000_000_000})
-        with patch.dict(os.environ, {"MARKET_CAP_MAX_RETRIES": "2",
-                                     "MARKET_CAP_REQUEST_SLEEP_SEC": "0"}):
-            caps = ns["fetch_market_caps_usd"](["BTC", "ETH"])
-            again = ns["fetch_market_caps_usd"](["BTC", "ETH"])
+        backup = Mock(return_value={"BTC": 100_000_000_000})
+        ns = load_scoped_market_cap(request, fallback=backup)
+        caps = ns["fetch_market_caps_usd"](["BTC", "ETH"])
+        again = ns["fetch_market_caps_usd"](["BTC", "ETH"])
         self.assertEqual(caps, {"BTC": 100_000_000_000})
         self.assertEqual(again, caps)
         self.assertNotIn("ETH", caps)
         self.assertEqual(request.get.call_count, 1)
+        backup.assert_called_once()
         self.assertGreater(remaining_seconds(ns["_market_cap_cache"]), 0)
 
     def test_success_after_cooldown_expires(self):
