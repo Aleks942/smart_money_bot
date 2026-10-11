@@ -1,5 +1,7 @@
 """Network-free regression coverage for the prospective rejection study."""
+import io
 import os
+from contextlib import redirect_stdout
 import tempfile
 import time
 import unittest
@@ -105,6 +107,34 @@ class RejectStudyTests(unittest.TestCase):
         before = req.call_count
         study._tick()
         self.assertEqual(req.call_count, before)
+
+    def test_edge_report_is_grouped_and_observational(self):
+        now = time.time()
+        with study._connect() as db:
+            study._setup(db)
+            for i in range(20):
+                sample = 0.5 if i < 12 else -0.4
+                db.execute("""INSERT INTO rejects (
+                    symbol,bucket,ts,side,price,score,ep,acc,flow,
+                    smart_money,spot_conflict,oi_wait,state,p5,p10,p30
+                ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    (f"T{i}USDT", int(now//1800), now-2000, "LONG",
+                     100, 22 if i < 12 else 8, 5, 1, "WEAK",
+                     "WEAK_SMART_MONEY" if i < 12 else "EARLY",
+                     int(i < 12), int(i < 12),
+                     "DONE", sample, sample, sample))
+        output = io.StringIO()
+        with redirect_stdout(output):
+            study._edge_report(now)
+        report=output.getvalue()
+        self.assertIn("group=ALL side=LONG horizon=5m n=20", report)
+        self.assertIn("group=SPOT_CONFLICT side=LONG horizon=30m n=12", report)
+        self.assertIn("group=OI_WAIT side=LONG horizon=10m n=12", report)
+        self.assertIn("positive_after_ref_cost=12/20", report)
+        self.assertIn("overlapping_groups=true", report)
+        with study._connect() as db:
+            self.assertEqual(db.execute(
+                "SELECT COUNT(*) FROM rejects").fetchone()[0],20)
 
     def test_cleanup_bounded_does_not_touch_other_databases(self):
         with patch.object(study, "MAX_ROWS", 2):
