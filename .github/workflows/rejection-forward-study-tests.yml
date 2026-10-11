@@ -1,0 +1,22 @@
+name: Rejection forward study tests
+on:
+  push:
+    branches:
+      - feature/rejection-forward-study-20261010
+  pull_request:
+    paths:
+      - 'rejection_forward_study.py'
+      - 'test_rejection_forward_study.py'
+      - 'main.py'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install requests
+      - run: python -m py_compile main.py rejection_forward_study.py
+      - run: python -m unittest -v test_rejection_forward_study.py

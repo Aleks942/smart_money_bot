@@ -18593,6 +18593,23 @@ def build_signal(instId, preloaded_oi=None):
                 f"flags={sorted(str(flag) for flag in flags)}",
                 flush=True
             )
+            try:
+                from rejection_forward_study import record as record_rejection
+                rejected_side = str(signal.get("direction_code") or "").upper()
+                rejected_side = {"UP": "LONG", "DOWN": "SHORT",
+                                 "BUY": "LONG", "SELL": "SHORT"}.get(
+                                     rejected_side, rejected_side)
+                record_rejection(
+                    instId, rejected_side, signal.get("price"),
+                    score, ep, acc, signal.get("flow_state"),
+                    signal.get("smart_money_state"), flags,
+                )
+            except Exception as reject_study_error:
+                print(
+                    f"[REJECT_STUDY_ERROR] stage=hook "
+                    f"kind={type(reject_study_error).__name__}",
+                    flush=True,
+                )
             return None
 
     print(
