@@ -180,6 +180,56 @@ def _evaluate(row):
               flush=True)
 
 
+def _edge_report(now):
+    """Descriptive forward outcomes of previously BLOCKED candidates.
+
+    These are overlapping groups and observational paper moves. They do NOT
+    establish that relaxing an individual filter would improve trading.
+    """
+    from statistics import mean, median
+    with _connect() as db:
+        rows = db.execute("""SELECT ts,side,score,spot_conflict,oi_wait,
+            smart_money,p5,p10,p30 FROM rejects
+            WHERE state='DONE' AND ts>=? AND p30 IS NOT NULL""",
+            (now-TTL_SEC,)).fetchall()
+    grouped = {}
+    for ts, side, score, spot_conflict, oi_wait, smart_money, p5,p10,p30 in rows:
+        tags = ["ALL"]
+        if spot_conflict:
+            tags.append("SPOT_CONFLICT")
+        if oi_wait:
+            tags.append("OI_WAIT")
+        if "WEAK" in (smart_money or "").upper():
+            tags.append("WEAK_SMART_MONEY")
+        if score >= 20:
+            tags.append("SCORE_GE_20")
+        for name in tags:
+            for horizon, gross in zip(HORIZONS, (p5,p10,p30)):
+                if gross is not None and math.isfinite(float(gross)):
+                    grouped.setdefault((name,side,horizon),[]).append(
+                        (float(gross), int(ts//86400))
+                    )
+    for (name,side,horizon), pairs in sorted(grouped.items()):
+        n = len(pairs)
+        if n < 10:
+            continue
+        moves = [v for v,_day in pairs]
+        days = len({day for _v,day in pairs})
+        # Cost is a fixed reference model, NOT an execution estimate.
+        cost=0.22
+        positive=sum(1 for v in moves if v > cost)
+        print(
+            f"[REJECT_EDGE] group={name} side={side} horizon={horizon}m "
+            f"n={n} days={days} mean_gross={mean(moves):+.4f}% "
+            f"median_gross={median(moves):+.4f}% "
+            f"positive_after_ref_cost={positive}/{n} "
+            f"reference_roundtrip_cost={cost:.2f}% "
+            f"status={'COLLECTING' if n<100 or days<7 else 'NEEDS_OOS_COMPARISON'} "
+            f"model=NEXT_FULL_1M_CLOSE_NO_ORDERS overlapping_groups=true",
+            flush=True,
+        )
+
+
 def _cleanup(now):
     """Only our own study rows; never the existing signal journal."""
     with _connect() as db:
@@ -191,6 +241,7 @@ def _cleanup(now):
             "SELECT state, COUNT(*) FROM rejects GROUP BY state").fetchall())
     print(f"[REJECT_STUDY_SUMMARY] counts={counts} "
           f"max_rows={MAX_ROWS} retention_days=30", flush=True)
+    _edge_report(now)
 
 
 def _tick():
