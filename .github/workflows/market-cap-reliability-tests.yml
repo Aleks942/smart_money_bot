@@ -1,0 +1,25 @@
+name: Market cap reliability and safety
+on:
+  push:
+    branches:
+      - fix/market-cap-failclosed-fallback-20261011
+  pull_request:
+    paths:
+      - main.py
+      - market_cap_backoff.py
+      - market_cap_fallback.py
+      - test_market_cap_backoff.py
+      - test_market_cap_fallback.py
+      - .github/workflows/market-cap-reliability-tests.yml
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install requests
+      - run: python -m py_compile main.py market_cap_backoff.py market_cap_fallback.py
+      - run: python -m unittest -v test_market_cap_backoff.py test_market_cap_fallback.py
