@@ -7,6 +7,7 @@ import traceback
 import pandas as pd
 from dotenv import load_dotenv
 from market_cap_backoff import remaining_seconds as _cg_cooldown, register_429 as _cg_note_429
+from market_cap_fallback import fetch_coinpaprika_caps
 from priority_engine import find_global_priority, should_send_priority
 from wall_detector import WallTracker
 from continuation_engine import continuation_engine
@@ -7154,118 +7155,105 @@ def _get_coingecko_headers():
 
 
 def fetch_market_caps_usd(base_coins):
-    """
-    Возвращает словарь:
-    {
-        "BTC": 1800000000000,
-        "ETH": 420000000000,
-    }
-    """
+    """Verified USD market cap only; missing or stale values never pass.
 
+    One cached query batch per hour, with a public CoinPaprika fallback when
+    CoinGecko rejects or fails. No change to MARKET_CAP_MIN_USD.
+    """
     base_coins = sorted({str(x).upper().strip() for x in base_coins if x})
     if not base_coins:
         return {}
 
-    now = time.time()      # ← вернуть сюда
-    
-    
-    
-    # 🔥 быстрый фильтр — берем только новые монеты
-    if _market_cap_cache["data"]:
-        missing = [c for c in base_coins if c not in _market_cap_cache["data"]]
-    else:
-        missing = base_coins.copy()
-    
-    # если всё уже есть в кеше
-    if not missing and (
-        now - _market_cap_cache["ts"] < MARKET_CAP_CACHE_TTL_SEC
-    ):
-        return _market_cap_cache["data"]
+    now = time.time()
+    ttl = min(21600, max(300, MARKET_CAP_CACHE_TTL_SEC))
+    age = now - float(_market_cap_cache.get("ts") or 0)
+    current = _market_cap_cache.get("data") or {}
+    if current and 0 <= age < ttl:
+        return {c: current[c] for c in base_coins if c in current}
 
-    
+    # Do not re-query a rate-limited service every 50-second scan cycle.
+    last_fail = float(_market_cap_cache.get("last_fail_ts") or 0)
+    if _cg_cooldown(_market_cap_cache, now) > 0 or (
+            last_fail > 0 and 0 <= now - last_fail < 300):
+        # An expired cache is never used as a substitute for fresh verification.
+        return {}
 
-    # cache hit
-    if _market_cap_cache["data"] and (now - _market_cap_cache["ts"] < MARKET_CAP_CACHE_TTL_SEC):
-        cached = _market_cap_cache["data"]
-        if all(c in cached for c in base_coins):
-            return cached
-
-    # A 429 means a quota pause. Keep cached caps but fail closed for unknowns.
-    if _cg_cooldown(_market_cap_cache, now) > 0:
-        return _market_cap_cache["data"]
-
-    fresh = {}
-    chunk_size = 20
-    request_sleep_sec = float(os.getenv("MARKET_CAP_REQUEST_SLEEP_SEC", "3.0"))
-    retry_sleep_sec = float(os.getenv("MARKET_CAP_RETRY_SLEEP_SEC", "8.0"))
-    max_retries = int(os.getenv("MARKET_CAP_MAX_RETRIES", "2"))
-
-    rate_limited = False
-    for chunk in _chunked(missing, chunk_size):
-        success = False
-
-        for attempt in range(max_retries):
-            try:
-                r = requests.get(
-                    "https://api.coingecko.com/api/v3/coins/markets",
-                    params={
-                        "vs_currency": "usd",
-                        "symbols": ",".join(x.lower() for x in chunk),
-                        "include_tokens": "top",
-                        "order": "market_cap_desc",
-                        "per_page": 250,
-                        "page": 1,
-                    },
-                    headers=_get_coingecko_headers(),
-                    timeout=20,
-                )
-
-                if r.status_code == 429:
-                    pause = _cg_note_429(_market_cap_cache, r, time.time())
-                    print(f"[MARKET_CAP_429_COOLDOWN] pause={pause:g}s "
-                          f"cached={len(_market_cap_cache['data'])}", flush=True)
-                    rate_limited = True
-                    break
-
-                r.raise_for_status()
-                rows = r.json()
-
-                for row in rows:
-                    sym = str(row.get("symbol", "")).upper().strip()
-                    mcap = row.get("market_cap")
-
-                    if sym and mcap is not None:
-                        try:
-                            fresh[sym] = float(mcap)
-                        except:
-                            pass
-
-                success = True
+    caps = {}
+    provider_ok = False
+    primary_failed = False
+    for chunk in _chunked(base_coins, 50):
+        try:
+            response = requests.get(
+                "https://api.coingecko.com/api/v3/coins/markets",
+                params={
+                    "vs_currency": "usd",
+                    "symbols": ",".join(x.lower() for x in chunk),
+                    "include_tokens": "top",
+                    "order": "market_cap_desc",
+                    "per_page": 250,
+                    "page": 1,
+                },
+                headers=_get_coingecko_headers(),
+                timeout=15,
+            )
+            if response.status_code == 429:
+                _cg_note_429(_market_cap_cache, response, time.time())
+                primary_failed = True
                 break
+            response.raise_for_status()
+            rows = response.json()
+            if not isinstance(rows, list):
+                raise ValueError("COINGECKO_INVALID_FORMAT")
+            for row in rows:
+                if not isinstance(row, dict):
+                    continue
+                symbol = str(row.get("symbol") or "").upper().strip()
+                if symbol not in chunk:
+                    continue
+                try:
+                    cap = float(row.get("market_cap"))
+                except (ValueError, TypeError, OverflowError):
+                    continue
+                if math.isfinite(cap) and cap > 0:
+                    caps[symbol] = cap
+            provider_ok = True
+        except (requests.RequestException, ValueError) as exc:
+            print(f"[MARKET_CAP_PRIMARY_ERROR] type={type(exc).__name__}",
+                  flush=True)
+            primary_failed = True
+            break
+        if len(base_coins) > 50:
+            time.sleep(1.0)
 
-            except Exception as e:
-                print(f"[MARKET_CAP ERROR] {e}")
-                time.sleep(retry_sleep_sec * (attempt + 1))
+    if primary_failed:
+        try:
+            backup = fetch_coinpaprika_caps(base_coins)
+            # Keep primary data where available. Backup values are used only
+            # for previously unverified, unambiguous symbols.
+            for symbol, market_cap in backup.items():
+                caps.setdefault(symbol, market_cap)
+            provider_ok = provider_ok or bool(backup)
+        except (requests.RequestException, ValueError, TypeError) as exc:
+            print(f"[MARKET_CAP_BACKUP_ERROR] type={type(exc).__name__}",
+                  flush=True)
 
-        if not success:
-            print(f"[MARKET_CAP FAIL] {chunk}")
-        if rate_limited:
-            break  # Do not hammer subsequent chunks after the same 429.
-
-        time.sleep(request_sleep_sec)
-
-    # обновляем кэш
-    if fresh:
-        merged = dict(_market_cap_cache["data"])
-        merged.update(fresh)
-        _market_cap_cache["data"] = merged
+    if provider_ok and caps:
+        _market_cap_cache["data"] = dict(caps)
         _market_cap_cache["ts"] = now
         _market_cap_cache["last_fail_ts"] = 0
-    else:
-        _market_cap_cache["last_fail_ts"] = now
+        print(f"[MARKET_CAP_VERIFIED] symbols={len(caps)} "
+              f"requested={len(base_coins)} "
+              f"provider={'BACKUP_OR_MIXED' if primary_failed else 'COINGECKO'} "
+              f"ttl_sec={ttl}", flush=True)
+        return caps
 
-    # ✅ ВАЖНО — внутри функции
-    return _market_cap_cache["data"]
+    # No valid caps: keep protection on and throttle retries.
+    _market_cap_cache["data"] = {}
+    _market_cap_cache["ts"] = 0
+    _market_cap_cache["last_fail_ts"] = now
+    print("[MARKET_CAP_UNAVAILABLE] verified=0 action=BLOCK_UNKNOWN",
+          flush=True)
+    return {}
 
 
 # =========================
@@ -18820,8 +18808,9 @@ def get_market_candidates_bybit():
     market_caps = fetch_market_caps_usd(base_coins)
 
     if not market_caps:
-        print("[MARKET_CAP] SKIPPED (DEBUG MODE)")
-        return raw_candidates[:SCAN_TOP_N]
+        print("[MARKET_CAP] UNAVAILABLE; blocked_unverified_candidates="
+              f"{len(raw_candidates)}", flush=True)
+        return []
 
     filtered_candidates = []
 
