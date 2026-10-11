@@ -136,6 +136,68 @@ class RejectStudyTests(unittest.TestCase):
             self.assertEqual(db.execute(
                 "SELECT COUNT(*) FROM rejects").fetchone()[0],20)
 
+    def test_accepted_captured_only_for_valid_direction(self):
+        candidate = {"instId":"BTCUSDT","price":100,
+                     "score":19,"direction_code":"UP",
+                     "entry_type":"LONG_CONFIRM"}
+        self.assertTrue(study.record_accepted(candidate,context="SCALP"))
+        self.assertFalse(study.record_accepted(candidate,context="SCALP"))
+        invalid=dict(candidate,direction_code="FLAT",entry_type="UNKNOWN")
+        self.assertFalse(study.record_accepted(invalid,context="SCALP"))
+        with study._connect() as db:
+            found=db.execute("""SELECT symbol,side,score,context
+                                 FROM accepts""").fetchall()
+        self.assertEqual(found,[("BTCUSDT","LONG",19,"SCALP")])
+        with redirect_stdout(io.StringIO()):
+            study._cleanup(time.time())
+
+    @patch("rejection_forward_study.requests.get")
+    def test_accepted_forward_outcome_uses_same_candle_math(self, req):
+        candidate={"instId":"ETHUSDT","price":100,"score":22,
+                   "direction_code":"DOWN","entry_type":"SHORT_CONFIRM"}
+        self.assertTrue(study.record_accepted(candidate,"MAIN"))
+        with study._connect() as db:
+            stamp=time.time()-2050
+            db.execute("UPDATE accepts SET ts=?",(stamp,))
+        class FakeResponse:
+            def raise_for_status(self): pass
+            def json(self): return bybit_bars(
+                req.call_args.kwargs["params"]["start"])
+        req.return_value=FakeResponse()
+        study._tick()
+        with study._connect() as db:
+            status,p5,p10,p30=db.execute(
+                "SELECT state,p5,p10,p30 FROM accepts").fetchone()
+            self.assertEqual(db.execute(
+                "SELECT COUNT(*) FROM rejects").fetchone()[0],0)
+        self.assertEqual((status,p5,p10,p30),("DONE",-0.2,-0.2,-0.2))
+        self.assertEqual(req.call_count,1)
+
+    def test_combined_cohort_reports_not_causal_comparison(self):
+        now=time.time()
+        with study._connect() as db:
+            study._setup(db)
+            for i in range(11):
+                symbol=f"PAIR{i}USDT"
+                record=(symbol,int(now//1800),now-2100,"LONG",100,15)
+                db.execute("""INSERT INTO accepts
+                    (symbol,bucket,ts,side,price,score,state,p5,p10,p30)
+                    VALUES (?,?,?,?,?,?,'DONE',0.4,0.5,0.6)""",record)
+                db.execute("""INSERT INTO rejects
+                    (symbol,bucket,ts,side,price,score,ep,acc,flow,
+                    smart_money,spot_conflict,oi_wait,state,p5,p10,p30)
+                    VALUES (?,?,?,?,?,?,1,1,'NO','WEAK',0,0,'DONE',
+                            -0.1,-0.2,-0.3)""",record)
+        output=io.StringIO()
+        with redirect_stdout(output):
+            study._cohort_report(now)
+        report=output.getvalue()
+        self.assertIn("sent_n=11 blocked_n=11",report)
+        self.assertIn("sent_mean_gross=+0.6000%",report)
+        self.assertIn("blocked_mean_gross=-0.3000%",report)
+        self.assertIn("cohorts_not_matched=true",report)
+        self.assertIn("no_causal_filter_claim=true",report)
+
     def test_cleanup_bounded_does_not_touch_other_databases(self):
         with patch.object(study, "MAX_ROWS", 2):
             for symbol in ("BTCUSDT", "ETHUSDT", "SOLUSDT"):
