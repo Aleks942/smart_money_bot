@@ -6,6 +6,7 @@ import requests
 import traceback
 import pandas as pd
 from dotenv import load_dotenv
+from market_cap_backoff import remaining_seconds as _cg_cooldown, register_429 as _cg_note_429
 from priority_engine import find_global_priority, should_send_priority
 from wall_detector import WallTracker
 from continuation_engine import continuation_engine
@@ -7189,12 +7190,17 @@ def fetch_market_caps_usd(base_coins):
         if all(c in cached for c in base_coins):
             return cached
 
+    # A 429 means a quota pause. Keep cached caps but fail closed for unknowns.
+    if _cg_cooldown(_market_cap_cache, now) > 0:
+        return _market_cap_cache["data"]
+
     fresh = {}
     chunk_size = 20
     request_sleep_sec = float(os.getenv("MARKET_CAP_REQUEST_SLEEP_SEC", "3.0"))
     retry_sleep_sec = float(os.getenv("MARKET_CAP_RETRY_SLEEP_SEC", "8.0"))
     max_retries = int(os.getenv("MARKET_CAP_MAX_RETRIES", "2"))
 
+    rate_limited = False
     for chunk in _chunked(missing, chunk_size):
         success = False
 
@@ -7215,9 +7221,11 @@ def fetch_market_caps_usd(base_coins):
                 )
 
                 if r.status_code == 429:
-                    print(f"[MARKET_CAP] 429 retry {attempt+1}")
-                    time.sleep(retry_sleep_sec * (attempt + 1))
-                    continue
+                    pause = _cg_note_429(_market_cap_cache, r, time.time())
+                    print(f"[MARKET_CAP_429_COOLDOWN] pause={pause:g}s "
+                          f"cached={len(_market_cap_cache['data'])}", flush=True)
+                    rate_limited = True
+                    break
 
                 r.raise_for_status()
                 rows = r.json()
@@ -7241,6 +7249,8 @@ def fetch_market_caps_usd(base_coins):
 
         if not success:
             print(f"[MARKET_CAP FAIL] {chunk}")
+        if rate_limited:
+            break  # Do not hammer subsequent chunks after the same 429.
 
         time.sleep(request_sleep_sec)
 
