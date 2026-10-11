@@ -61,6 +61,19 @@ def _setup(db):
         db.execute("ALTER TABLE rejects ADD COLUMN next_attempt_ts REAL NOT NULL DEFAULT 0")
     db.execute("CREATE INDEX IF NOT EXISTS idx_reject_pending ON rejects(state,next_attempt_ts,ts)")
     db.execute("CREATE INDEX IF NOT EXISTS idx_reject_ts ON rejects(ts)")
+    # A wholly independent study cohort: alerts that were sent AND journaled.
+    # No changes to the existing rejection rows or their primary key.
+    db.execute("""CREATE TABLE IF NOT EXISTS accepts (
+        symbol TEXT NOT NULL, bucket INTEGER NOT NULL, ts REAL NOT NULL,
+        side TEXT NOT NULL, price REAL NOT NULL, score REAL NOT NULL,
+        entry_type TEXT, context TEXT,
+        state TEXT NOT NULL DEFAULT 'PENDING',
+        p5 REAL, p10 REAL, p30 REAL, error TEXT,
+        attempts INTEGER NOT NULL DEFAULT 0,
+        next_attempt_ts REAL NOT NULL DEFAULT 0,
+        PRIMARY KEY(symbol,bucket,side)
+    )""")
+    db.execute("CREATE INDEX IF NOT EXISTS idx_accept_pending ON accepts(state,next_attempt_ts,ts)")
 
 
 def record(symbol, side, price, score, ep, acc, flow, smart_money, flags):
@@ -106,6 +119,64 @@ def record(symbol, side, price, score, ep, acc, flow, smart_money, flags):
         return inserted
     except Exception as exc:
         print(f"[REJECT_STUDY_ERROR] stage=record kind={type(exc).__name__}", flush=True)
+        return False
+
+
+def start_worker():
+    """Resume both research cohorts even after a container restart."""
+    global _started
+    with _LOCK:
+        if _started:
+            return
+        with _connect() as db:
+            _setup(db)
+        thread = threading.Thread(target=_worker,
+                                  name="candidate-forward-study", daemon=True)
+        thread.start()
+        _started = True
+
+
+def record_accepted(signal, context="UNKNOWN"):
+    """Log only *successfully sent and journaled* signals (not candidates).
+
+    Sampling matches the existing rejection journal: one row per symbol,
+    direction and 30-minute bucket. All calculations remain non-trading.
+    """
+    try:
+        symbol = str(signal.get("instId") or signal.get("symbol") or "").upper()
+        code = str(signal.get("direction_code") or signal.get("direction") or "").upper()
+        side = {"UP":"LONG", "DOWN":"SHORT", "BUY":"LONG",
+                "SELL":"SHORT"}.get(code, code)
+        if side not in ("LONG","SHORT"):
+            entry = str(signal.get("entry_type") or signal.get("entry") or "").upper()
+            if "LONG" in entry or "BUY" in entry:
+                side = "LONG"
+            elif "SHORT" in entry or "SELL" in entry:
+                side = "SHORT"
+        price = float(signal.get("price"))
+        score = float(signal.get("score") or 0)
+        if (side not in ("LONG","SHORT") or not symbol.endswith("USDT")
+                or not all(math.isfinite(x) for x in (price,score))
+                or price <= 0):
+            return False
+        now = time.time()
+        with _connect() as db:
+            _setup(db)
+            cursor = db.execute("""INSERT OR IGNORE INTO accepts
+                (symbol,bucket,ts,side,price,score,entry_type,context)
+                VALUES (?,?,?,?,?,?,?,?)""",
+                (symbol,int(now//1800),now,side,price,score,
+                 str(signal.get("entry_type") or signal.get("entry") or ""),
+                 str(context)[:80]))
+            created = cursor.rowcount == 1
+        if created:
+            print(f"[ACCEPT_STUDY_SAVED] {symbol} side={side} "
+                  f"score={score:g} context={str(context)[:40]} "
+                  "model=forward_only_no_orders",flush=True)
+        return created
+    except (ValueError,TypeError,sqlite3.Error,OverflowError) as exc:
+        print(f"[ACCEPT_STUDY_ERROR] stage=record kind={type(exc).__name__}",
+              flush=True)
         return False
 
 
@@ -180,6 +251,80 @@ def _evaluate(row):
               flush=True)
 
 
+def _evaluate_accepted(row):
+    symbol,bucket,ts,side,attempts = row
+    first_ms = (int(ts//60)+1)*60000
+    try:
+        response = requests.get(
+            API,params={"category":"linear","symbol":symbol,
+                        "interval":"1","start":first_ms,
+                        "end":first_ms+30*60000-1,"limit":30}, timeout=8)
+        response.raise_for_status()
+        bars = _parse_candles(response.json(),first_ms)
+        p5,p10,p30 = _forward_closes(side,bars)
+        with _connect() as db:
+            db.execute("""UPDATE accepts SET state='DONE',
+                p5=?,p10=?,p30=?,error=NULL
+                WHERE symbol=? AND bucket=? AND side=? AND state='PENDING'""",
+                (p5,p10,p30,symbol,bucket,side))
+        print(f"[ACCEPT_STUDY_OUTCOME] {symbol} side={side} "
+              f"5m={p5:+.3f}% 10m={p10:+.3f}% 30m={p30:+.3f}% "
+              "model=next_full_minute_open_no_orders_no_costs",flush=True)
+    except Exception as exc:
+        attempts += 1
+        http = getattr(getattr(exc,"response",None),"status_code",None)
+        permanent = isinstance(exc,requests.HTTPError) and http in (400,401,403,404)
+        state = "FAILED" if permanent or attempts >= RETRY_LIMIT else "PENDING"
+        delay = min(3600,RECHECK_SEC*(2**min(attempts-1,4)))
+        with _connect() as db:
+            db.execute("""UPDATE accepts SET state=?,attempts=?,
+                next_attempt_ts=?,error=?
+                WHERE symbol=? AND bucket=? AND side=? AND state='PENDING'""",
+                (state,attempts,time.time()+delay,
+                 f"{type(exc).__name__}:{http or ''}"[:80],
+                 symbol,bucket,side))
+        print(f"[ACCEPT_STUDY_RETRY] {symbol} side={side} "
+              f"status={state} attempts={attempts} "
+              f"reason={type(exc).__name__}",flush=True)
+
+
+def _cohort_report(now):
+    from statistics import mean, median
+    with _connect() as db:
+        groups = {}
+        for table in ("rejects","accepts"):
+            rows = db.execute(f"""SELECT ts,side,p5,p10,p30 FROM {table}
+                WHERE state='DONE' AND ts>=? AND p30 IS NOT NULL""",
+                (now-TTL_SEC,)).fetchall()
+            for ts,side,p5,p10,p30 in rows:
+                for h,value in zip(HORIZONS,(p5,p10,p30)):
+                    if value is not None and math.isfinite(float(value)):
+                        groups.setdefault((table,side,h),[]).append(
+                            (float(value),int(ts//86400)))
+    for side in ("LONG","SHORT"):
+        for horizon in HORIZONS:
+            reject = groups.get(("rejects",side,horizon),[])
+            accept = groups.get(("accepts",side,horizon),[])
+            n_a,n_r = len(accept),len(reject)
+            if not (n_a or n_r):
+                continue
+            n_days=len({d for _,d in accept+reject})
+            mean_a = f"{mean(x for x,_ in accept):+.4f}" if n_a else "NA"
+            mean_r = f"{mean(x for x,_ in reject):+.4f}" if n_r else "NA"
+            median_a = f"{median(x for x,_ in accept):+.4f}" if n_a else "NA"
+            median_r = f"{median(x for x,_ in reject):+.4f}" if n_r else "NA"
+            print(
+                f"[CANDIDATE_COHORT] side={side} horizon={horizon}m "
+                f"sent_n={n_a} blocked_n={n_r} "
+                f"sent_mean_gross={mean_a}% blocked_mean_gross={mean_r}% "
+                f"sent_median_gross={median_a}% blocked_median_gross={median_r}% "
+                f"days={n_days} "
+                f"status={'COLLECTING' if min(n_a,n_r)<30 or n_days<7 else 'NEEDS_MATCHED_OOS'} "
+                "model=next_full_minute_open_no_orders_no_costs "
+                "cohorts_not_matched=true no_causal_filter_claim=true",
+                flush=True)
+
+
 def _edge_report(now):
     """Descriptive forward outcomes of previously BLOCKED candidates.
 
@@ -237,11 +382,20 @@ def _cleanup(now):
         db.execute("""DELETE FROM rejects WHERE rowid IN
             (SELECT rowid FROM rejects ORDER BY ts DESC LIMIT -1 OFFSET ?)""",
                    (MAX_ROWS,))
+        db.execute("DELETE FROM accepts WHERE ts < ?",(now-TTL_SEC,))
+        db.execute("""DELETE FROM accepts WHERE rowid IN
+            (SELECT rowid FROM accepts ORDER BY ts DESC LIMIT -1 OFFSET ?)""",
+            (MAX_ROWS,))
         counts = dict(db.execute(
             "SELECT state, COUNT(*) FROM rejects GROUP BY state").fetchall())
+        accepted_counts = dict(db.execute(
+            "SELECT state, COUNT(*) FROM accepts GROUP BY state").fetchall())
     print(f"[REJECT_STUDY_SUMMARY] counts={counts} "
           f"max_rows={MAX_ROWS} retention_days=30", flush=True)
+    print(f"[ACCEPT_STUDY_SUMMARY] counts={accepted_counts} "
+          f"max_rows={MAX_ROWS} retention_days=30",flush=True)
     _edge_report(now)
+    _cohort_report(now)
 
 
 def _tick():
@@ -253,9 +407,15 @@ def _tick():
               AND next_attempt_ts <= ? AND ts <= ?
             ORDER BY ts ASC LIMIT ?""",
             (now, now-1950, BATCH_SIZE)).fetchall()
+        accepted = db.execute("""SELECT symbol,bucket,ts,side,attempts
+            FROM accepts WHERE state='PENDING'
+              AND next_attempt_ts <= ? AND ts <= ?
+            ORDER BY ts ASC LIMIT 1""",(now,now-1950)).fetchall()
     for row in pending:
         _evaluate(row)
-    return len(pending)
+    for row in accepted:
+        _evaluate_accepted(row)
+    return len(pending)+len(accepted)
 
 
 def _worker():

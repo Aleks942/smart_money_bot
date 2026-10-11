@@ -20,6 +20,10 @@ from shadow_profit_report import print_shadow_profit_report
 from structural_audit import run_structural_audit
 from shadow_audit_runner import audit_pending_saved_signals
 from outcome_audit import audit_bybit_1m
+from rejection_forward_study import (
+    start_worker as start_candidate_study,
+    record_accepted as record_sent_research,
+)
 from signal_analyst import (
     init_db,
     save_signal,
@@ -8542,6 +8546,14 @@ def save_sent_signal_once(sig, context="UNKNOWN"):
             return False
 
         save_signal(sig)
+
+        # Independent observational cohort. Runs ONLY after the original
+        # Telegram-ACK + signal journal path. Never changes send decisions.
+        try:
+            record_sent_research(sig, context=context)
+        except Exception as research_exc:
+            print("[ACCEPT_STUDY_ERROR] stage=hook "
+                  f"kind={type(research_exc).__name__}",flush=True)
 
         print(
             f"[SAVE_SENT_OK] {inst_id} "
@@ -22318,6 +22330,11 @@ def is_repeat_signal(sig):
 if __name__ == "__main__": 
 
     init_db()
+    try:
+        start_candidate_study()
+    except Exception as research_exc:
+        print("[CANDIDATE_STUDY_START_ERROR] "
+              f"{type(research_exc).__name__}",flush=True)
     register_forward_experiment()
 
     print("PROGRAM STARTED V2")
