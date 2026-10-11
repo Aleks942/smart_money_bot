@@ -33,7 +33,7 @@ class RejectStudyTests(unittest.TestCase):
         with study._connect() as db:
             db.execute("UPDATE rejects SET ts=?", (time.time()-2050,))
             return db.execute("""SELECT symbol,bucket,ts,side,attempts
-                                 FROM rejects""").fetchone()
+                                 FROM rejects WHERE side=?""", (side,)).fetchone()
 
     def test_dedup_and_spot_metadata(self):
         self._record_due()
