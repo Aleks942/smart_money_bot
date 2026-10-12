@@ -210,6 +210,13 @@ def consider(sig, now=None):
             db.execute("""INSERT OR IGNORE INTO trend_gate_samples
                 (symbol,side,bucket,ts,band,trend) VALUES (?,?,?,?,?,?)""",
                 (symbol,side,bucket,now,band,direction))
+        # Side research never approves or blocks a Telegram signal.
+        try:
+            from horizon_audit import record as record_horizon_case
+            record_horizon_case(sig, now)
+        except Exception as audit_exc:
+            print("[HORIZON_AUDIT_ERROR] stage=record_hook kind=" +
+                  type(audit_exc).__name__,flush=True)
         print(f"[TREND_GATE_ODDS] {symbol} side={side} band={band} "
               f"n={odds['n']} wins={odds['wins']} days={odds['days']} "
               f"symbols={odds['symbols']} lower_p={odds['lower_p']:.4f} "
