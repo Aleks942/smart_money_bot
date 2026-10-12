@@ -3775,7 +3775,10 @@ def _spot_cvd_fetch_source(symbol, source, limit, fetcher):
     definitely_unlisted = (
         (source == "BINANCE" and "binance_invalid_symbol_-1121" in error)
         or (source == "OKX" and "51001" in error and "doesn't exist" in error)
-        or (source == "BYBIT" and "10001" in error and "not supported symbols" in error)
+        or (source == "BYBIT" and (
+            "bybit_spot_symbol_unsupported_10001" in error
+            or ("10001" in error and "not supported symbols" in error)
+        ))
     )
     if definitely_unlisted:
         if len(_SPOT_CVD_UNSUPPORTED_UNTIL) >= _SPOT_CVD_UNSUPPORTED_MAX:
@@ -7334,6 +7337,14 @@ def bybit_get(url, params, retries=5):
 
             error_text = str(data).lower()
 
+            # A missing pair is deterministic: avoid redundant retries.
+            # Spot CVD caches unsupported venues for a bounded time.
+            if (
+                data.get("retCode") == 10001
+                and "not supported symbols" in error_text
+            ):
+                raise RuntimeError("BYBIT_SPOT_SYMBOL_UNSUPPORTED_10001")
+
             if (
                 data.get("retCode") == 10006
                 or "too frequent" in error_text
@@ -7362,6 +7373,9 @@ def bybit_get(url, params, retries=5):
             )
 
         except Exception as e:
+
+            if str(e) == "BYBIT_SPOT_SYMBOL_UNSUPPORTED_10001":
+                raise
 
             print(
                 f"[BYBIT_GET_ERROR] {e}",
