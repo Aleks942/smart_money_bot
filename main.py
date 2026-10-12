@@ -25413,7 +25413,11 @@ if __name__ == "__main__":
             ][:3]
             
             for sig in premove_alerts:
-            
+                # Never consume the PREMOVE cooldown for an unverified
+                # non-trading observation in strict mode.
+                if SMARTMONEY_TELEGRAM_POLICY != "LEGACY":
+                    continue
+
                 sid = sig.get("instId")
             
                 if sid in sent_ids:
@@ -25484,6 +25488,13 @@ if __name__ == "__main__":
 
                 if sid in sent_sw:
                     continue
+
+                if SMARTMONEY_TELEGRAM_POLICY != "LEGACY":
+                    approved, reason = verify_trend_edge(sig)
+                    if not approved:
+                        print(f"[SM_TG_SILENT] {sid} context=TOP_ALERT "
+                              f"reason={reason}", flush=True)
+                        continue
 
                 sent_ids.add(sid)
 
