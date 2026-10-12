@@ -4,10 +4,13 @@ on:
     branches:
       - feature/rejection-forward-study-20261010
       - research/stratified-cohort-comparison-20261011
+      - feature/trend-confirmed-telegram-20261012
   pull_request:
     paths:
       - 'rejection_forward_study.py'
       - 'candidate_matched_audit.py'
+      - 'trend_confirmation.py'
+      - 'test_trend_confirmation.py'
       - 'test_candidate_matched_audit.py'
       - 'test_rejection_forward_study.py'
       - 'main.py'
@@ -21,5 +24,5 @@ jobs:
         with:
           python-version: '3.11'
       - run: python -m pip install requests
-      - run: python -m py_compile main.py rejection_forward_study.py candidate_matched_audit.py
-      - run: python -m unittest -v test_rejection_forward_study.py test_candidate_matched_audit.py
+      - run: python -m py_compile main.py rejection_forward_study.py candidate_matched_audit.py trend_confirmation.py
+      - run: python -m unittest -v test_rejection_forward_study.py test_candidate_matched_audit.py test_trend_confirmation.py
