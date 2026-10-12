@@ -1,0 +1,21 @@
+name: SmartMoney Spot CVD invalid-symbol handling
+
+on:
+  pull_request:
+    paths:
+      - main.py
+      - test_spot_cvd_backoff.py
+      - .github/workflows/spot-cvd-backoff-tests.yml
+  workflow_dispatch:
+
+jobs:
+  invalid-symbol-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m py_compile main.py test_spot_cvd_backoff.py
+      - run: python -m unittest -v test_spot_cvd_backoff
