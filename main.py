@@ -24,6 +24,10 @@ from rejection_forward_study import (
     start_worker as start_candidate_study,
     record_accepted as record_sent_research,
 )
+from trend_confirmation import (
+    POLICY as SMARTMONEY_TELEGRAM_POLICY,
+    consider as verify_trend_edge,
+)
 from signal_analyst import (
     init_db,
     save_signal,
@@ -7043,7 +7047,16 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         # SEND TELEGRAM
         # =====================
         
-        send_telegram(
+        # A blocked or failed retest must NEVER be marked as delivered.
+        retest_confirmation = {
+            "instId": instId,
+            "direction_code": ("UP" if str(side).upper() in ("LONG", "UP")
+                               else "DOWN" if str(side).upper() in ("SHORT", "DOWN")
+                               else "FLAT"),
+            "score": score,
+            "entry_type": str(side).upper(),
+        }
+        retest_text = (
             f"🎯 <b>RETEST ENTRY — {instId}</b>\n\n"
             f"🧭 Side: <b>{side}</b>\n"
             f"💵 Entry: <b>{entry}</b>\n"
@@ -7052,7 +7065,12 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             f"📊 RR: <b>{round(rr,2)}</b>\n\n"
             f"📌 Причина: {rt.get('reason')}"
         )
-        
+        if not send_trade_telegram(
+            retest_text, retest_confirmation, context="RETEST_ENTRY"
+        ):
+            print(f"[RETEST_NOT_SENT] {instId} strict_or_failed=true", flush=True)
+            return empty
+
         LAST_PREMOVE_SCORE[instId] = score
         print(
             f"[RETEST_SENT] "
@@ -7741,6 +7759,23 @@ S.headers.update({"User-Agent": "smart-money-radar/PRO-EDGE-4.0"})
 # =========================
 # TELEGRAM
 # =========================
+def send_trade_telegram(text, sig, context="TRADING"):
+    """Only corroborated trend+prospective odds reach Telegram.
+
+    Unapproved candidates are stored as silent forward research. A rejected
+    decision MUST NOT alter signal cooldown or signal-journal state.
+    """
+    if SMARTMONEY_TELEGRAM_POLICY == "LEGACY":
+        return send_telegram(text)
+    approved, reason = verify_trend_edge(sig)
+    if not approved:
+        print(f"[SM_TG_SILENT] "
+              f"{sig.get('instId') or sig.get('symbol')} "
+              f"context={context} reason={reason}", flush=True)
+        return False
+    return send_telegram(text)
+
+
 def send_telegram(text: str):
     """
     Send one Telegram message and return True only when Telegram confirms it.
@@ -20797,12 +20832,13 @@ def check_signal_results():
             resolved = stats.get("resolved", stats.get("hit", 0) + stats.get("fail", 0))
 
             if resolved > 0 and resolved % 5 == 0:
-                send_telegram(show_stats())
+                if SMARTMONEY_TELEGRAM_POLICY == "LEGACY":
+                    send_telegram(show_stats())
 
         except:
             pass
 
-        if s["id"] % 10 == 0:
+        if s["id"] % 10 == 0 and SMARTMONEY_TELEGRAM_POLICY == "LEGACY":
             send_telegram(show_stats())
 
         snapshot = s.get("snapshot") or {}
@@ -20850,8 +20886,9 @@ def check_signal_results():
             flush=True,
         )
 
-        send_telegram(
-            f"📊 RESULT {symbol}\n"
+        if SMARTMONEY_TELEGRAM_POLICY == "LEGACY":
+            send_telegram(
+                f"📊 RESULT {symbol}\n"
             f"{result} | {round(move_pct,2)}%"
         )
 
@@ -22359,7 +22396,8 @@ if __name__ == "__main__":
     scan_index = 0
 
     try:
-        send_telegram(f"🚀 SMART MONEY SCANNER — PRO EDGE v4 started ({EXCHANGE} market scan)")
+        if SMARTMONEY_TELEGRAM_POLICY == "LEGACY":
+            send_telegram(f"🚀 SMART MONEY SCANNER — PRO EDGE v4 started ({EXCHANGE} market scan)")
     except Exception as e:
         print("START TELEGRAM ERROR:", e)
 
@@ -24142,7 +24180,8 @@ if __name__ == "__main__":
                         #
                         #     continue
 
-                        telegram_ok = send_telegram(msg)
+                        telegram_ok = send_trade_telegram(
+                            msg, sig, context=f"{group}_EARLY_PATH")
 
                         if not telegram_ok:
                             print(
@@ -24591,8 +24630,9 @@ if __name__ == "__main__":
             
 
             if isinstance(ta, dict) and ta.get("entry") and ta.get("stop") and ta.get("tp1"):
-                send_telegram(
-                    f"🎯 <b>TA SNIPER — {ta.get('symbol')}</b>\n\n"
+                if SMARTMONEY_TELEGRAM_POLICY == "LEGACY":
+                    send_telegram(
+                        f"🎯 <b>TA SNIPER — {ta.get('symbol')}</b>\n\n"
                     f"🧭 Направление: <b>{ta.get('side')}</b>\n"
                     f"💵 Вход: <b>{ta.get('entry')}</b>\n"
                     f"🛑 Стоп: <b>{ta.get('stop')}</b> ({ta.get('stop_pct')}%)\n"
@@ -24940,7 +24980,8 @@ if __name__ == "__main__":
 
                 scalp_msg = msg_scalp(sig)
 
-                telegram_ok = send_telegram(scalp_msg)
+                telegram_ok = send_trade_telegram(
+                    scalp_msg, sig, context="SCALP")
 
                 if not telegram_ok:
                     print(
@@ -25006,7 +25047,8 @@ if __name__ == "__main__":
                 if is_repeat_signal(sig):
 
                     continue
-                telegram_ok = send_telegram(swing_msg)
+                telegram_ok = send_trade_telegram(
+                    swing_msg, sig, context="ELITE_SWING")
 
                 if not telegram_ok:
                     print(
@@ -25082,7 +25124,8 @@ if __name__ == "__main__":
 
             if tier in ["🟢🟢 СИЛЬНЫЙ ВХОД", "🟢 СИЛЬНЫЙ СИГНАЛ"]:
                 if entry_ok and can_alert_now:
-                    telegram_ok = send_telegram(msg_full(sig))
+                    telegram_ok = send_trade_telegram(
+                        msg_full(sig), sig, context="MAIN_STRONG")
 
                     if telegram_ok:
                         save_sent_signal_once(
@@ -25100,7 +25143,8 @@ if __name__ == "__main__":
 
             elif tier == "🟡 СИГНАЛ":
                 if entry_ok and can_alert_now:
-                    telegram_ok = send_telegram(msg_medium(sig))
+                    telegram_ok = send_trade_telegram(
+                        msg_medium(sig), sig, context="MAIN_MEDIUM")
 
                     if telegram_ok:
                         save_sent_signal_once(
@@ -25170,7 +25214,8 @@ if __name__ == "__main__":
             
                     print(f"[TG_SEND_TRY] {instId}", flush=True)
             
-                    telegram_ok = send_telegram(msg_medium(sig))
+                    telegram_ok = send_trade_telegram(
+                        msg_medium(sig), sig, context="MAIN_EARLY")
 
                     if not telegram_ok:
                         print(
@@ -25235,7 +25280,8 @@ if __name__ == "__main__":
                 and priority_allowed(state, instId)
             ):
                 if pro_edge_filter(sig, regime) and entry_ok:
-                    telegram_ok = send_telegram(msg_priority(sig))
+                    telegram_ok = send_trade_telegram(
+                        msg_priority(sig), sig, context="PRIORITY")
 
                     if telegram_ok:
                         save_sent_signal_once(
@@ -25321,7 +25367,7 @@ if __name__ == "__main__":
 
             market_msg = msg_market_pressure(early_buy_symbols, early_sell_symbols)
 
-            if market_msg:
+            if market_msg and SMARTMONEY_TELEGRAM_POLICY == "LEGACY":
                 send_telegram(market_msg)
             
             # msg = summary_message(alerts, cycle_info, regime)
@@ -25367,7 +25413,11 @@ if __name__ == "__main__":
             ][:3]
             
             for sig in premove_alerts:
-            
+                # Never consume the PREMOVE cooldown for an unverified
+                # non-trading observation in strict mode.
+                if SMARTMONEY_TELEGRAM_POLICY != "LEGACY":
+                    continue
+
                 sid = sig.get("instId")
             
                 if sid in sent_ids:
@@ -25404,9 +25454,9 @@ if __name__ == "__main__":
                     f"entry={sig.get('entry')}",
                     flush=True
                 )
-                send_telegram(
-            
-                    f"⚠️ <b>PREMOVE — {sid}</b>\n\n"
+                if SMARTMONEY_TELEGRAM_POLICY == "LEGACY":
+                    send_telegram(
+                        f"⚠️ <b>PREMOVE — {sid}</b>\n\n"
             
                     f"🧭 Side: {sig.get('direction_code')}\n"
                     f"💰 Price: {sig.get('price')}\n"
@@ -25439,13 +25489,21 @@ if __name__ == "__main__":
                 if sid in sent_sw:
                     continue
 
+                if SMARTMONEY_TELEGRAM_POLICY != "LEGACY":
+                    approved, reason = verify_trend_edge(sig)
+                    if not approved:
+                        print(f"[SM_TG_SILENT] {sid} context=TOP_ALERT "
+                              f"reason={reason}", flush=True)
+                        continue
+
                 sent_ids.add(sid)
 
                 if can_send(sid, 3600):
 
                     print(f"[TG_SEND_TRY] {sid}", flush=True)
 
-                    send_telegram(choose_detail_message(sig))
+                    send_trade_telegram(
+                        choose_detail_message(sig), sig, context="TOP_ALERT")
 
             save_state(state)
 
