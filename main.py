@@ -20820,13 +20820,12 @@ def check_signal_results():
 
             if resolved > 0 and resolved % 5 == 0:
                 if SMARTMONEY_TELEGRAM_POLICY == "LEGACY":
-                    if SMARTMONEY_TELEGRAM_POLICY == "LEGACY":
-                send_telegram(show_stats())
+                    send_telegram(show_stats())
 
         except:
             pass
 
-        if s["id"] % 10 == 0:
+        if s["id"] % 10 == 0 and SMARTMONEY_TELEGRAM_POLICY == "LEGACY":
             send_telegram(show_stats())
 
         snapshot = s.get("snapshot") or {}
