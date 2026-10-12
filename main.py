@@ -7047,9 +7047,17 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
         # SEND TELEGRAM
         # =====================
         
-        if SMARTMONEY_TELEGRAM_POLICY == "LEGACY":
-            send_telegram(
-                f"🎯 <b>RETEST ENTRY — {instId}</b>\n\n"
+        # A blocked or failed retest must NEVER be marked as delivered.
+        retest_confirmation = {
+            "instId": instId,
+            "direction_code": ("UP" if str(side).upper() in ("LONG", "UP")
+                               else "DOWN" if str(side).upper() in ("SHORT", "DOWN")
+                               else "FLAT"),
+            "score": score,
+            "entry_type": str(side).upper(),
+        }
+        retest_text = (
+            f"🎯 <b>RETEST ENTRY — {instId}</b>\n\n"
             f"🧭 Side: <b>{side}</b>\n"
             f"💵 Entry: <b>{entry}</b>\n"
             f"🛑 Stop: <b>{stop}</b>\n"
@@ -7057,7 +7065,12 @@ def build_swing_signal(instId: str, h4_ctx: dict, h1_setup: dict, m15_trigger: d
             f"📊 RR: <b>{round(rr,2)}</b>\n\n"
             f"📌 Причина: {rt.get('reason')}"
         )
-        
+        if not send_trade_telegram(
+            retest_text, retest_confirmation, context="RETEST_ENTRY"
+        ):
+            print(f"[RETEST_NOT_SENT] {instId} strict_or_failed=true", flush=True)
+            return empty
+
         LAST_PREMOVE_SCORE[instId] = score
         print(
             f"[RETEST_SENT] "
