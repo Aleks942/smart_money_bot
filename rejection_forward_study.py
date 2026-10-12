@@ -402,6 +402,12 @@ def _cleanup(now):
     except Exception as exc:
         print(f"[TREND_GATE_ERROR] stage=report_hook kind={type(exc).__name__}",
               flush=True)
+    try:
+        from horizon_audit import hourly_report as report_horizon_audit
+        report_horizon_audit(now)
+    except Exception as exc:
+        print(f"[HORIZON_AUDIT_ERROR] stage=report_hook kind={type(exc).__name__}",
+              flush=True)
     # Extra observational matching uses only the existing SQLite research
     # tables. A reporting error cannot stop either prospective audit worker.
     try:
@@ -436,6 +442,12 @@ def _tick():
         advance(now)
     except Exception as exc:
         print(f"[TREND_GATE_ERROR] stage=worker_hook kind={type(exc).__name__}",
+              flush=True)
+    try:
+        from horizon_audit import advance as advance_horizon_audit
+        advance_horizon_audit(now)
+    except Exception as exc:
+        print(f"[HORIZON_AUDIT_ERROR] stage=worker_hook kind={type(exc).__name__}",
               flush=True)
     return len(pending)+len(accepted)
 
