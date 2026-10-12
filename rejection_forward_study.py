@@ -396,6 +396,12 @@ def _cleanup(now):
           f"max_rows={MAX_ROWS} retention_days=30",flush=True)
     _edge_report(now)
     _cohort_report(now)
+    try:
+        from trend_confirmation import report as trend_report
+        trend_report(now)
+    except Exception as exc:
+        print(f"[TREND_GATE_ERROR] stage=report_hook kind={type(exc).__name__}",
+              flush=True)
     # Extra observational matching uses only the existing SQLite research
     # tables. A reporting error cannot stop either prospective audit worker.
     try:
@@ -424,6 +430,13 @@ def _tick():
         _evaluate(row)
     for row in accepted:
         _evaluate_accepted(row)
+    # Share the existing two-minute daemon, no additional background thread.
+    try:
+        from trend_confirmation import advance
+        advance(now)
+    except Exception as exc:
+        print(f"[TREND_GATE_ERROR] stage=worker_hook kind={type(exc).__name__}",
+              flush=True)
     return len(pending)+len(accepted)
 
 
