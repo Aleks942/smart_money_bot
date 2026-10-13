@@ -122,6 +122,42 @@ class TrendConfirmationTests(unittest.TestCase):
                           "UP" if interval == 60 else "UNKNOWN"):
             self.assertEqual(trend.trend("ETHUSDT", NOW), "UNKNOWN")
 
+    def test_forward_quality_report_keeps_aligned_and_flat_h4_distinct(self):
+        from io import StringIO
+        from contextlib import redirect_stdout
+        with study._connect() as db:
+            trend._setup(db)
+            records=[
+                ("UP", "LONG", "DONE", "TP_FIRST", 1.28),
+                ("UP", "LONG", "DONE", "TIME_EXIT", -0.12),
+                ("UP_H4_FLAT", "LONG", "DONE", "SL_FIRST", -1.22),
+                ("UP_H4_FLAT", "LONG", "PENDING", None, None),
+            ]
+            for k, (state,side,status,verdict,net) in enumerate(records):
+                ts=NOW-2*86400+k*5400
+                db.execute("""INSERT INTO trend_gate_samples
+                    (symbol,side,bucket,ts,band,trend,status,verdict,net_pct,evaluated_ts)
+                    VALUES (?,?,?,?,?,?,?,?,?,?)""",
+                    ("COIN"+str(k)+"USDT",side,int(ts//5400),ts,"GE20",
+                     state,status,verdict,net,ts+1800 if status=="DONE" else None))
+            db.commit()
+            stats=trend.regime_quality_snapshot(db)
+            self.assertEqual(len(stats),2)
+            by={x["regime"]:x for x in stats}
+            aligned=by["H1_H4_ALIGNED"]
+            flat=by["H1_H4_FLAT"]
+            self.assertEqual((aligned["seen"],aligned["done"],aligned["tp"],
+                              aligned["positive"]),(2,2,1,1))
+            self.assertAlmostEqual(aligned["mean_net"],(1.28-0.12)/2)
+            self.assertEqual((flat["seen"],flat["done"],flat["pending"],
+                              flat["sl"],flat["positive"]),(2,1,1,1,0))
+            self.assertAlmostEqual(flat["mean_net"],-1.22)
+            output=StringIO()
+            with redirect_stdout(output):
+                trend.report_regime_quality(db)
+            self.assertIn("pooled_bands=true",output.getvalue())
+            self.assertIn("no_trade_approval=true",output.getvalue())
+
     def test_first_touch_and_no_entry_bar_lookahead(self):
         first=(int(NOW//60)+1)*60000
         raw=[[str(first+k*60000),"100","101","99","100"]
