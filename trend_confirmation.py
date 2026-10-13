@@ -314,6 +314,60 @@ def advance(now=None):
               flush=True)
 
 
+def regime_quality_snapshot(db):
+    """Descriptive forward-sample statistics, never a Telegram permission.
+
+    Bands are pooled for diagnostic presentation only. _odds continues to
+    validate each exact side/trend/score-band cohort independently.
+    """
+    data=db.execute("""
+        SELECT trend,side,COUNT(*),
+               SUM(CASE WHEN status='DONE' THEN 1 ELSE 0 END),
+               SUM(CASE WHEN status='PENDING' THEN 1 ELSE 0 END),
+               SUM(CASE WHEN status='MISSING' THEN 1 ELSE 0 END),
+               SUM(CASE WHEN status='DONE' AND verdict='TP_FIRST' THEN 1 ELSE 0 END),
+               SUM(CASE WHEN status='DONE' AND verdict='SL_FIRST' THEN 1 ELSE 0 END),
+               SUM(CASE WHEN status='DONE' AND verdict='TIME_EXIT' THEN 1 ELSE 0 END),
+               SUM(CASE WHEN status='DONE' AND net_pct>0 THEN 1 ELSE 0 END),
+               AVG(CASE WHEN status='DONE' THEN net_pct END),
+               COUNT(DISTINCT CASE WHEN status='DONE' THEN CAST(ts/86400 AS INTEGER) END),
+               COUNT(DISTINCT CASE WHEN status='DONE' THEN symbol END)
+        FROM trend_gate_samples
+        WHERE trend IN ('UP','DOWN','UP_H4_FLAT','DOWN_H4_FLAT')
+        GROUP BY trend,side
+        ORDER BY trend,side
+    """).fetchall()
+    result=[]
+    for (trend,side,seen,done,pending,missing,tp,sl,timeout,positive,
+         avg_net,days,symbols) in data:
+        result.append({
+            "trend":trend, "side":side,
+            "regime":"H1_H4_FLAT" if trend.endswith("_H4_FLAT") else "H1_H4_ALIGNED",
+            "seen":int(seen), "done":int(done or 0),
+            "pending":int(pending or 0), "missing":int(missing or 0),
+            "tp":int(tp or 0), "sl":int(sl or 0),
+            "time_exit":int(timeout or 0), "positive":int(positive or 0),
+            "mean_net":float(avg_net) if avg_net is not None else None,
+            "days":int(days), "symbols":int(symbols),
+        })
+    return result
+
+
+def report_regime_quality(db):
+    for x in regime_quality_snapshot(db):
+        avg="NA" if x["mean_net"] is None else f'{x["mean_net"]:+.4f}%'
+        print(f'[TREND_REGIME_QUALITY] regime={x["regime"]} '
+              f'trend={x["trend"]} side={x["side"]} '
+              f'seen={x["seen"]} done={x["done"]} '
+              f'pending={x["pending"]} missing={x["missing"]} '
+              f'tp={x["tp"]} sl={x["sl"]} time={x["time_exit"]} '
+              f'positive_net={x["positive"]} mean_net={avg} '
+              f'days={x["days"]} symbols={x["symbols"]} '
+              'pooled_bands=true descriptive_only=true '
+              'no_trade_approval=true model=first_touch_after_0p22pct_cost',
+              flush=True)
+
+
 def report(now=None):
     global _last_report_ts
     now=time.time() if now is None else float(now)
@@ -325,6 +379,7 @@ def report(now=None):
             _setup(db)
             counts=dict(db.execute("""SELECT status,COUNT(*) FROM
                 trend_gate_samples GROUP BY status""").fetchall())
+            report_regime_quality(db)
         print(f"[TREND_GATE_SUMMARY] counts={counts} max_rows={MAX_SAMPLES} "
               "reference_cost_pct=0.22 "
               "insufficient_odds_means_silence=true",flush=True)
