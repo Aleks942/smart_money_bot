@@ -39,10 +39,10 @@ def verify_and_ping(token, send_message, policy, expected_username=EXPECTED_BOT_
     print(f"[SM_TELEGRAM_IDENTITY] status=VERIFIED bot=@{expected_username}", flush=True)
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     message = (
-        "🧪 SMARTMONEY MONITOR — ПРОВЕРКА СВЯЗИ\\n\\n"
-        "✅ Бот запущен на Railway.\\n"
-        f"Время: {now}\\n"
-        f"Режим сигналов: {policy}\\n\\n"
+        "🧪 SMARTMONEY MONITOR — ПРОВЕРКА СВЯЗИ\n\n"
+        "✅ Бот запущен на Railway.\n"
+        f"Время: {now}\n"
+        f"Режим сигналов: {policy}\n\n"
         "Это технический тест доставки Telegram, НЕ торговый сигнал. "
         "Торговые фильтры остались включены."
     )
