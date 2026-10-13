@@ -1,4 +1,5 @@
 import os
+from telegram_startup_probe import verify_and_ping
 import time
 import json
 import math
@@ -22394,6 +22395,12 @@ if __name__ == "__main__":
         raise RuntimeError("Missing BOT_TOKEN / CHAT_ID")
 
     print("TOKENS OK")
+
+    # Standalone connectivity test: bypasses trading strategy filters but
+    # verifies Telegram bot identity before sending any message. A failure
+    # never disables the market scanner or loosens trade alert policy.
+    if os.getenv("SMARTMONEY_STARTUP_PING", "1").strip() == "1":
+        verify_and_ping(BOT_TOKEN, send_telegram, SMARTMONEY_TELEGRAM_POLICY)
 
     state = load_state()
     print("STATE LOADED")
