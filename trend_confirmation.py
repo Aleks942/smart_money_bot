@@ -23,7 +23,7 @@ if POLICY not in ("CONFIRMED_ONLY", "LEGACY"):
 
 HORIZON_MIN = 30
 TP_PCT, SL_PCT, COST_PCT = 1.5, 1.0, 0.22
-MIN_N, MIN_DAYS, MIN_SYMBOLS = 100, 7, 20
+MIN_N, MIN_DAYS, MIN_SYMBOLS = 80, 5, 15
 MIN_PROB_BUFFER = 0.03
 MAX_SAMPLES = 2400
 RETENTION_SEC = 30 * 86400
@@ -143,7 +143,14 @@ def trend(symbol, now=None):
     try:
         a=_fetch_trend(symbol,60,now)
         b=_fetch_trend(symbol,240,now)
-        result=a if a == b and a in ("UP","DOWN") else "UNKNOWN"
+        if a == b and a in ("UP","DOWN"):
+            result=a
+        elif a in ("UP","DOWN") and b == "FLAT":
+            # Modest relaxation: strong closed H1, genuinely flat closed H4.
+            # Keep this regime's evidence separate from full H1/H4 alignment.
+            result=f"{a}_H4_FLAT"
+        else:
+            result="UNKNOWN"
     except (requests.RequestException,ValueError,TypeError,OverflowError):
         result="UNKNOWN"
     _trend_cache[symbol]=(now,result)
@@ -197,19 +204,22 @@ def consider(sig, now=None):
         return False,"INVALID_CANDIDATE"
     direction="UP" if side=="LONG" else "DOWN"
     current=trend(symbol,now)
-    if current!=direction:
+    if current not in (direction,f"{direction}_H4_FLAT"):
         print(f"[TREND_GATE_SKIP] {symbol} side={side} trend={current} "
               "reason=TREND_NOT_ALIGNED",flush=True)
         return False,"TREND_NOT_ALIGNED"
     band="GE20" if score>=20 else "LT20"
+    if current==f"{direction}_H4_FLAT":
+        print(f"[TREND_H4_FLAT_RESEARCH] {symbol} side={side} "
+              "separate_cohort=true original_gate_preserved=true",flush=True)
     try:
         with _connect() as db:
             _setup(db)
-            odds=_odds(db,side,direction,band,now)
+            odds=_odds(db,side,current,band,now)
             bucket=int(now//(90*60))
             db.execute("""INSERT OR IGNORE INTO trend_gate_samples
                 (symbol,side,bucket,ts,band,trend) VALUES (?,?,?,?,?,?)""",
-                (symbol,side,bucket,now,band,direction))
+                (symbol,side,bucket,now,band,current))
         # Side research never approves or blocks a Telegram signal.
         try:
             from horizon_audit import record as record_horizon_case

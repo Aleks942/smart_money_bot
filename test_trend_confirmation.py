@@ -89,6 +89,39 @@ class TrendConfirmationTests(unittest.TestCase):
             weakened=trend._odds(db,"LONG","UP","GE20",NOW)
             self.assertFalse(weakened["approved"])
 
+    def test_h1_flat_h4_research_cohort_is_separate_and_not_automatic_alert(self):
+        self.assertEqual((trend.MIN_N, trend.MIN_DAYS, trend.MIN_SYMBOLS),
+                         (80, 5, 15))
+        with patch.object(trend, "_fetch_trend",
+                          side_effect=lambda symbol,interval,now:
+                          "UP" if interval == 60 else "FLAT"):
+            self.assertEqual(trend.trend("ETHUSDT", NOW), "UP_H4_FLAT")
+        with patch.object(trend, "trend", return_value="UP_H4_FLAT"):
+            self.assertEqual(trend.consider(signal(), NOW),
+                             (False, "EDGE_UNPROVEN"))
+        with study._connect() as db:
+            self.assertEqual(db.execute(
+                "SELECT trend FROM trend_gate_samples").fetchone()[0],
+                "UP_H4_FLAT")
+            for k in range(90):
+                ts=NOW-15*86400+k*3*3600
+                db.execute("""INSERT INTO trend_gate_samples
+                    (symbol,side,bucket,ts,band,trend,status,verdict,net_pct,evaluated_ts)
+                    VALUES (?,?,?,?,?,?,'DONE','TP_FIRST',1.28,?)""",
+                    ("COIN"+str(k%25)+"USDT", "LONG", int(ts//5400),
+                     ts, "GE20", "UP", ts+1800))
+            self.assertTrue(trend._odds(
+                db,"LONG","UP","GE20",NOW)["approved"])
+            self.assertFalse(trend._odds(
+                db,"LONG","UP_H4_FLAT","GE20",NOW)["approved"])
+
+        # Unavailable or opposite H4 remains fail-closed.
+        trend._trend_cache.clear()
+        with patch.object(trend, "_fetch_trend",
+                          side_effect=lambda symbol,interval,now:
+                          "UP" if interval == 60 else "UNKNOWN"):
+            self.assertEqual(trend.trend("ETHUSDT", NOW), "UNKNOWN")
+
     def test_first_touch_and_no_entry_bar_lookahead(self):
         first=(int(NOW//60)+1)*60000
         raw=[[str(first+k*60000),"100","101","99","100"]
