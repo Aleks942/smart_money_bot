@@ -518,6 +518,15 @@ def dispatch_ready(sig, sender, now=None):
             return False
         if accepted is not True:
             return False
+        # Delivery is confirmed; persist immutable levels for forward audit.
+        # A journal fault does not turn a delivered Telegram message into a
+        # non-delivery or consume another alert slot.
+        try:
+            from ready_plan_outcomes import record_sent
+            record_sent(plan, now)
+        except Exception as journal_error:
+            print(f"[SM_READY_JOURNAL_ERROR] symbol={plan['symbol']} "
+                  f"kind={type(journal_error).__name__}", flush=True)
         state["count"] += 1
         state["last"] = now
         previous[plan["symbol"]] = now
