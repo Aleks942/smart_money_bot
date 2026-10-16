@@ -28,7 +28,7 @@ _last_summary_ts = 0.0
 
 @contextmanager
 def _connect():
-    path = Path(DB)
+    path = Path(os.getenv("READY_OUTCOME_DB", DB))
     path.parent.mkdir(parents=True, exist_ok=True)
     db = sqlite3.connect(str(path), timeout=6)
     try:
