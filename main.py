@@ -7775,12 +7775,31 @@ S.headers.update({"User-Agent": "smart-money-radar/PRO-EDGE-4.0"})
 # =========================
 # TELEGRAM
 # =========================
+def trade_direction_banner(sig):
+    """Visible direction cue for all Smart Money trade notifications.
+
+    Telegram does not allow arbitrary colored fonts: green/red emoji
+    provide reliable directional markers across its clients.
+    """
+    if not isinstance(sig, dict):
+        return ""
+    code = str(sig.get("direction_code") or sig.get("side") or "").upper()
+    if code in ("UP", "LONG", "BUY"):
+        return "🟢 LONG — ПОКУПКА"
+    if code in ("DOWN", "SHORT", "SELL"):
+        return "🔴 SHORT — ПРОДАЖА"
+    return ""
+
+
 def send_trade_telegram(text, sig, context="TRADING"):
     """Only corroborated trend+prospective odds reach Telegram.
 
     Unapproved candidates are stored as silent forward research. A rejected
     decision MUST NOT alter signal cooldown or signal-journal state.
     """
+    banner = trade_direction_banner(sig)
+    if banner:
+        text = f"{banner}\n\n{text}"
     if SMARTMONEY_TELEGRAM_POLICY == "LEGACY":
         return send_telegram(text)
     approved, reason = verify_trend_edge(sig)
