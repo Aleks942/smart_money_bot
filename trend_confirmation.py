@@ -453,8 +453,16 @@ def ready_candidate(sig, now=None):
 
 
 def ready_message(p):
+    direction = str(p.get("side") or "").upper()
+    if direction == "LONG":
+        banner = "🟢 LONG — ПОКУПКА"
+    elif direction == "SHORT":
+        banner = "🔴 SHORT — ПРОДАЖА"
+    else:
+        raise ValueError("Ready plan without validated direction")
     return "\n".join((
-        f"🎯 SMART MONEY | ГОТОВЫЙ ПЛАН {p['side']}",
+        banner,
+        f"🎯 SMART MONEY | ГОТОВЫЙ ПЛАН",
         f"🪙 {p['symbol']} | Bybit USDT perpetual",
         f"Вход: {p['entry']:.9g}",
         f"Стоп: {p['stop']:.9g}",

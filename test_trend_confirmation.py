@@ -233,6 +233,42 @@ class ReadyPlanTests(unittest.TestCase):
         self.assertIn("reason=risk_reward_or_level_order", output.getvalue())
         self.assertIn("symbol=ETHUSDT", output.getvalue())
 
+    def test_visible_long_short_banners_in_ready_plans(self):
+        long_plan = trend.ready_candidate(self.sample(), NOW)
+        self.assertIsNotNone(long_plan)
+        self.assertTrue(trend.ready_message(long_plan).startswith(
+            "🟢 LONG — ПОКУПКА\n"))
+        short = self.sample()
+        short.update(direction_code="DOWN", entry_type="EXPANSION_SHORT",
+                     flags=["PRESSURE_DOWN", "STRUCTURE_LH_LL"],
+                     stop=101, target=97)
+        short_plan = trend.ready_candidate(short, NOW)
+        self.assertIsNotNone(short_plan)
+        self.assertTrue(trend.ready_message(short_plan).startswith(
+            "🔴 SHORT — ПРОДАЖА\n"))
+        with self.assertRaises(ValueError):
+            trend.ready_message(dict(long_plan, side="UNKNOWN"))
+
+    def test_direction_banner_for_all_trade_notifications(self):
+        # Import only this pure function, not the network-heavy scanner module.
+        import ast
+        from pathlib import Path
+        source = Path(__file__).with_name("main.py").read_text(encoding="utf-8")
+        module = ast.parse(source)
+        fn = next(n for n in module.body if isinstance(n, ast.FunctionDef)
+                  and n.name == "trade_direction_banner")
+        code = compile(ast.Module(body=[fn], type_ignores=[]),
+                       "<direction-banner>", "exec")
+        namespace = {}
+        exec(code, namespace)
+        banner = namespace["trade_direction_banner"]
+        self.assertEqual(banner({"direction_code": "UP"}),
+                         "🟢 LONG — ПОКУПКА")
+        self.assertEqual(banner({"direction_code": "DOWN"}),
+                         "🔴 SHORT — ПРОДАЖА")
+        self.assertEqual(banner({"direction_code": "UNKNOWN"}), "")
+        self.assertEqual(banner(None), "")
+
     def test_daily_cap_and_telegram_ack(self):
         import json
         from pathlib import Path
