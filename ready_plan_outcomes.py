@@ -9,6 +9,7 @@ import os
 import sqlite3
 import threading
 import time
+from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -25,13 +26,21 @@ _started = False
 _last_summary_ts = 0.0
 
 
+@contextmanager
 def _connect():
     path = Path(DB)
     path.parent.mkdir(parents=True, exist_ok=True)
     db = sqlite3.connect(str(path), timeout=6)
-    db.execute("PRAGMA busy_timeout=6000")
-    db.execute("PRAGMA journal_mode=WAL")
-    return db
+    try:
+        db.execute("PRAGMA busy_timeout=6000")
+        db.execute("PRAGMA journal_mode=WAL")
+        yield db
+        db.commit()
+    except BaseException:
+        db.rollback()
+        raise
+    finally:
+        db.close()
 
 
 def _setup(db):
