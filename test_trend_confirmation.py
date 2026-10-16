@@ -237,7 +237,7 @@ class ReadyPlanTests(unittest.TestCase):
         long_plan = trend.ready_candidate(self.sample(), NOW)
         self.assertIsNotNone(long_plan)
         self.assertTrue(trend.ready_message(long_plan).startswith(
-            "🟢 LONG — ПОКУПКА\\n"))
+            "🟢 LONG — ПОКУПКА\n"))
         short = self.sample()
         short.update(direction_code="DOWN", entry_type="EXPANSION_SHORT",
                      flags=["PRESSURE_DOWN", "STRUCTURE_LH_LL"],
@@ -245,7 +245,7 @@ class ReadyPlanTests(unittest.TestCase):
         short_plan = trend.ready_candidate(short, NOW)
         self.assertIsNotNone(short_plan)
         self.assertTrue(trend.ready_message(short_plan).startswith(
-            "🔴 SHORT — ПРОДАЖА\\n"))
+            "🔴 SHORT — ПРОДАЖА\n"))
         with self.assertRaises(ValueError):
             trend.ready_message(dict(long_plan, side="UNKNOWN"))
 
