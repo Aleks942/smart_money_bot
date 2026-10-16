@@ -18,6 +18,7 @@ import requests
 from rejection_forward_study import _connect, API, _parse_candles
 
 POLICY = os.getenv("SMARTMONEY_TELEGRAM_POLICY", "CONFIRMED_ONLY").strip().upper()
+READY_DAILY_MAX = 5  # hard cap for informational technical trade plans
 if POLICY not in ("CONFIRMED_ONLY", "LEGACY"):
     POLICY = "CONFIRMED_ONLY"
 
