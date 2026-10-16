@@ -222,6 +222,17 @@ class ReadyPlanTests(unittest.TestCase):
             modified=dict(sig,**edits)
             self.assertIsNone(trend.ready_candidate(modified,NOW),edits)
 
+    def test_ready_rejection_has_reason_and_no_delivery(self):
+        import contextlib
+        import io
+        bad = self.sample()
+        bad["stop"] = 105
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            self.assertIsNone(trend.ready_candidate(bad, NOW))
+        self.assertIn("reason=risk_reward_or_level_order", output.getvalue())
+        self.assertIn("symbol=ETHUSDT", output.getvalue())
+
     def test_daily_cap_and_telegram_ack(self):
         import json
         from pathlib import Path

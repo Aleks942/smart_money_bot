@@ -389,47 +389,64 @@ def report(now=None):
               flush=True)
 
 
+def _ready_skip(sig, reason):
+    """Log why a technically valid research candidate is not yet a trade plan."""
+    data = sig if isinstance(sig, dict) else {}
+    print(
+        "[SM_READY_REJECT] symbol={} reason={} score={} acc={} ep={} "
+        "mode={} entry={} stop={} target={} oi={}".format(
+            data.get("instId") or data.get("symbol") or "?",
+            reason, data.get("score"), data.get("acc_score"),
+            data.get("early_pressure_score"), data.get("signal_mode"),
+            data.get("entry_type") or data.get("entry"),
+            data.get("stop"), data.get("tp1") or data.get("target"),
+            data.get("oi_change")),
+        flush=True,
+    )
+    return None
+
+
 def ready_candidate(sig, now=None):
     """Technical plan: valid levels and context, not proof of profit."""
     if not isinstance(sig, dict):
-        return None
+        return _ready_skip(sig, "bad_signal")
     symbol = str(sig.get("instId") or sig.get("symbol") or "")
     side = _side(sig)
     direction = "UP" if side == "LONG" else "DOWN" if side == "SHORT" else None
     if not symbol.endswith("USDT") or direction is None:
-        return None
+        return _ready_skip(sig, "no_symbol_or_side")
     if str(sig.get("direction_code") or "").upper() != direction:
-        return None
+        return _ready_skip(sig, "direction_conflict")
     kind = str(sig.get("entry_type") or sig.get("entry") or "").upper()
     if ("LONG" if side == "LONG" else "SHORT") not in kind:
-        return None
+        return _ready_skip(sig, "no_directional_entry")
     score = _finite(sig.get("score"))
     acc = _finite(sig.get("acc_score"))
     ep = _finite(sig.get("early_pressure_score"))
     if score is None or score < 14 or acc is None or ep is None:
-        return None
+        return _ready_skip(sig, "score_below_14_or_missing_features")
     if acc < 2 and ep < 10 or sig.get("late") is True:
-        return None
+        return _ready_skip(sig, "weak_pressure_or_late")
     flags = set(sig.get("flags") or [])
     pressure = {"PRESSURE_UP","BUYER_ABSORPTION"} if direction=="UP" else {"PRESSURE_DOWN","SELLER_ABSORPTION"}
     structure = {"STRUCTURE_HH_HL","MTF_LONG_ALIGN","BREAKOUT_CONFIRM_UP","CONTINUATION_UP"} if direction=="UP" else {"STRUCTURE_LH_LL","MTF_SHORT_ALIGN","BREAKOUT_CONFIRM_DOWN","CONTINUATION_DOWN"}
     conflict = {"PRESSURE_DOWN","BREAKOUT_CONFIRM_DOWN"} if direction=="UP" else {"PRESSURE_UP","BREAKOUT_CONFIRM_UP"}
     if not flags.intersection(pressure) or not flags.intersection(structure) or flags.intersection(conflict):
-        return None
+        return _ready_skip(sig, "pressure_structure_conflict")
     if sig.get("signal_mode") not in ("EXPANSION","PREMOVE","TRANSITION"):
-        return None
+        return _ready_skip(sig, "unsupported_stage")
     entry, last = _finite(sig.get("entry_price")), _finite(sig.get("price"))
     stop = _finite(sig.get("stop"))
     target = _finite(sig.get("tp1") or sig.get("target"))
     oi = _finite(sig.get("oi_change"))
     if any(v is None or v <= 0 for v in (entry,last,stop,target)):
-        return None
+        return _ready_skip(sig, "missing_levels")
     if oi is None or oi < -0.30 or abs(last/entry-1) > .008:
-        return None
+        return _ready_skip(sig, "oi_or_entry_distance")
     sign = 1 if direction == "UP" else -1
     risk, reward = sign*(entry-stop), sign*(target-entry)
     if risk <= 0 or reward <= 0 or not .3 <= risk/entry*100 <= 3 or reward/risk < 1.8:
-        return None
+        return _ready_skip(sig, "risk_reward_or_level_order")
     return dict(symbol=symbol,side=side,entry=entry,stop=stop,tp1=target,
                 tp2=entry+2.5*sign*risk,rr=reward/risk,score=score,
                 oi=oi,risk_pct=risk/entry*100)
@@ -460,7 +477,11 @@ def dispatch_ready(sig, sender, now=None):
     if plan is None:
         return False
     side = "UP" if plan["side"] == "LONG" else "DOWN"
-    if trend(plan["symbol"], now) not in (side, side+"_H4_FLAT"):
+    actual_trend = trend(plan["symbol"], now)
+    if actual_trend not in (side, side+"_H4_FLAT"):
+        print(f"[SM_READY_REJECT] symbol={plan['symbol']} "
+              f"reason=trend_mismatch trend={actual_trend} side={side}",
+              flush=True)
         return False
     if not callable(sender):
         return False
