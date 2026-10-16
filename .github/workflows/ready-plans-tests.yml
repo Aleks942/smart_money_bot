@@ -4,6 +4,8 @@ on:
     paths:
       - 'main.py'
       - 'trend_confirmation.py'
+      - 'ready_plan_outcomes.py'
+      - 'test_ready_plan_outcomes.py'
       - 'test_trend_confirmation.py'
       - '.github/workflows/ready-plans-tests.yml'
   workflow_dispatch:
@@ -17,5 +19,5 @@ jobs:
         with:
           python-version: '3.11'
       - run: pip install -r requirements.txt
-      - run: python -m py_compile trend_confirmation.py main.py test_trend_confirmation.py
-      - run: python -m unittest -v test_trend_confirmation
+      - run: python -m py_compile trend_confirmation.py ready_plan_outcomes.py main.py test_trend_confirmation.py test_ready_plan_outcomes.py
+      - run: python -m unittest -v test_trend_confirmation test_ready_plan_outcomes

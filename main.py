@@ -30,6 +30,7 @@ from trend_confirmation import (
     consider as verify_trend_edge,
     dispatch_ready as dispatch_ready_plan,
 )
+from ready_plan_outcomes import start_worker as start_ready_outcome_worker
 from signal_analyst import (
     init_db,
     save_signal,
@@ -22426,6 +22427,14 @@ if __name__ == "__main__":
     # never disables the market scanner or loosens trade alert policy.
     if os.getenv("SMARTMONEY_STARTUP_PING", "1").strip() == "1":
         verify_and_ping(BOT_TOKEN, send_telegram, SMARTMONEY_TELEGRAM_POLICY)
+
+    # Separate bounded worker: it audits only actually delivered ready plans,
+    # never affects scanning, Telegram trade gates or execution.
+    try:
+        start_ready_outcome_worker(send_telegram)
+    except Exception as ready_worker_error:
+        print("[SM_READY_OUTCOME_START_ERROR]",
+              type(ready_worker_error).__name__, flush=True)
 
     state = load_state()
     print("STATE LOADED")
