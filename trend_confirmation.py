@@ -448,3 +448,57 @@ def ready_message(p):
         "⚠️ Это технический торговый план, не доказанная прибыльная стратегия.",
         "Позиция не открывается автоматически. Проверяй ликвидность и размер риска."
     ))
+
+
+_ready_send_lock = __import__("threading").Lock()
+
+
+def dispatch_ready(sig, sender, now=None):
+    """Max five Warsaw-day plans, >=45m apart and one per symbol per 12h."""
+    now = time.time() if now is None else float(now)
+    plan = ready_candidate(sig, now)
+    if plan is None:
+        return False
+    side = "UP" if plan["side"] == "LONG" else "DOWN"
+    if trend(plan["symbol"], now) not in (side, side+"_H4_FLAT"):
+        return False
+    if not callable(sender):
+        return False
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    import json
+    from pathlib import Path
+    path = Path(os.getenv("READY_ALERTS_STATE_FILE", "/data/smart_money_ready.json"))
+    day = datetime.fromtimestamp(now, ZoneInfo("Europe/Warsaw")).strftime("%Y-%m-%d")
+    with _ready_send_lock:
+        try:
+            state = json.loads(path.read_text()) if path.exists() else {}
+        except (OSError, ValueError):
+            return False
+        if state.get("day") != day:
+            state = {"day":day,"count":0,"last":0,"symbols":{}}
+        previous = state.get("symbols") or {}
+        if int(state["count"]) >= READY_DAILY_MAX:
+            return False
+        if now-float(state["last"]) < 2700 or now-float(previous.get(plan["symbol"],0)) < 43200:
+            return False
+        try:
+            accepted = sender(ready_message(plan))
+        except Exception as exc:
+            print("[SM_READY_TG_ERROR]",type(exc).__name__,flush=True)
+            return False
+        if accepted is not True:
+            return False
+        state["count"] += 1
+        state["last"] = now
+        previous[plan["symbol"]] = now
+        state["symbols"] = previous
+        try:
+            path.parent.mkdir(parents=True,exist_ok=True)
+            temp = path.with_suffix(".tmp")
+            temp.write_text(json.dumps(state))
+            os.replace(temp,path)
+        except OSError as exc:
+            print("[SM_READY_STATE_ERROR]",type(exc).__name__,flush=True)
+        print(f"[SM_READY_SENT] {plan['symbol']} count={state['count']} edge_proven=false",flush=True)
+        return True
