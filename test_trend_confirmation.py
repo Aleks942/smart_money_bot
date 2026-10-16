@@ -202,5 +202,57 @@ class TrendConfirmationTests(unittest.TestCase):
                 "SELECT COUNT(*) FROM trend_gate_samples").fetchone()[0],0)
 
 
+class ReadyPlanTests(unittest.TestCase):
+    def sample(self):
+        return dict(instId="ETHUSDT",direction_code="UP",entry_type="EXPANSION_LONG",
+                    score=22,acc_score=3,early_pressure_score=12,
+                    signal_mode="EXPANSION",late=False,
+                    flags=["PRESSURE_UP","STRUCTURE_HH_HL"],
+                    entry_price=100,price=100,stop=99,
+                    target=103,oi_change=.2)
+
+    def test_levels_and_direction_required(self):
+        sig=self.sample()
+        plan=trend.ready_candidate(sig,NOW)
+        self.assertEqual(plan["side"],"LONG")
+        self.assertEqual(plan["tp1"],103)
+        self.assertGreaterEqual(plan["rr"],1.8)
+        for edits in ({"stop":101},{"target":99},{"direction_code":"DOWN"},
+                      {"flags":["PRESSURE_UP"]},{"price":105},{"oi_change":None}):
+            modified=dict(sig,**edits)
+            self.assertIsNone(trend.ready_candidate(modified,NOW),edits)
+
+    def test_daily_cap_and_telegram_ack(self):
+        import json
+        from pathlib import Path
+        sent=[]
+        def send(msg):
+            sent.append(msg)
+            return True
+        with tempfile.TemporaryDirectory() as tmp:
+            state=Path(tmp)/"ready.json"
+            with patch.dict(os.environ,{"READY_ALERTS_STATE_FILE":str(state)}):
+                with patch.object(trend,"trend",return_value="UP"):
+                    self.assertTrue(trend.dispatch_ready(self.sample(),send,NOW))
+                    self.assertFalse(trend.dispatch_ready(self.sample(),send,NOW+3600))
+                    self.assertEqual(len(sent),1)
+                    self.assertEqual(json.loads(state.read_text())["count"],1)
+                    sig=self.sample()
+                    sig["instId"]="BTCUSDT"
+                    self.assertTrue(trend.dispatch_ready(sig,lambda _:False,NOW+4000)==False)
+                    self.assertEqual(json.loads(state.read_text())["count"],1)
+                    self.assertTrue(trend.dispatch_ready(sig,send,NOW+4100))
+                    self.assertEqual(json.loads(state.read_text())["count"],2)
+                    for idx in range(3):
+                        sig=self.sample()
+                        sig["instId"]=f"COIN{idx}USDT"
+                        self.assertTrue(trend.dispatch_ready(sig,send,NOW+7000+idx*3500))
+                    sig=self.sample()
+                    sig["instId"]="EXTRAUSDT"
+                    self.assertFalse(trend.dispatch_ready(sig,send,NOW+19000))
+                    self.assertEqual(json.loads(state.read_text())["count"],5)
+
+
+
 if __name__=="__main__":
     unittest.main()

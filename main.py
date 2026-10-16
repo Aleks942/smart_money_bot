@@ -28,6 +28,7 @@ from rejection_forward_study import (
 from trend_confirmation import (
     POLICY as SMARTMONEY_TELEGRAM_POLICY,
     consider as verify_trend_edge,
+    dispatch_ready as dispatch_ready_plan,
 )
 from signal_analyst import (
     init_db,
@@ -7787,6 +7788,11 @@ def send_trade_telegram(text, sig, context="TRADING"):
         print(f"[SM_TG_SILENT] "
               f"{sig.get('instId') or sig.get('symbol')} "
               f"context={context} reason={reason}", flush=True)
+        # Separate bounded technical plan, not a confirmed statistical trade.
+        # Return False so the original research journal and cooldown are NOT
+        # incorrectly marked as a proven trading signal.
+        if reason == "EDGE_UNPROVEN":
+            dispatch_ready_plan(sig, send_telegram)
         return False
     return send_telegram(text)
 

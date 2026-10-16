@@ -18,6 +18,7 @@ import requests
 from rejection_forward_study import _connect, API, _parse_candles
 
 POLICY = os.getenv("SMARTMONEY_TELEGRAM_POLICY", "CONFIRMED_ONLY").strip().upper()
+READY_DAILY_MAX = 5  # hard cap for informational technical trade plans
 if POLICY not in ("CONFIRMED_ONLY", "LEGACY"):
     POLICY = "CONFIRMED_ONLY"
 
@@ -386,3 +387,118 @@ def report(now=None):
     except (sqlite3.Error,OSError) as exc:
         print(f"[TREND_GATE_ERROR] stage=report kind={type(exc).__name__}",
               flush=True)
+
+
+def ready_candidate(sig, now=None):
+    """Technical plan: valid levels and context, not proof of profit."""
+    if not isinstance(sig, dict):
+        return None
+    symbol = str(sig.get("instId") or sig.get("symbol") or "")
+    side = _side(sig)
+    direction = "UP" if side == "LONG" else "DOWN" if side == "SHORT" else None
+    if not symbol.endswith("USDT") or direction is None:
+        return None
+    if str(sig.get("direction_code") or "").upper() != direction:
+        return None
+    kind = str(sig.get("entry_type") or sig.get("entry") or "").upper()
+    if ("LONG" if side == "LONG" else "SHORT") not in kind:
+        return None
+    score = _finite(sig.get("score"))
+    acc = _finite(sig.get("acc_score"))
+    ep = _finite(sig.get("early_pressure_score"))
+    if score is None or score < 14 or acc is None or ep is None:
+        return None
+    if acc < 2 and ep < 10 or sig.get("late") is True:
+        return None
+    flags = set(sig.get("flags") or [])
+    pressure = {"PRESSURE_UP","BUYER_ABSORPTION"} if direction=="UP" else {"PRESSURE_DOWN","SELLER_ABSORPTION"}
+    structure = {"STRUCTURE_HH_HL","MTF_LONG_ALIGN","BREAKOUT_CONFIRM_UP","CONTINUATION_UP"} if direction=="UP" else {"STRUCTURE_LH_LL","MTF_SHORT_ALIGN","BREAKOUT_CONFIRM_DOWN","CONTINUATION_DOWN"}
+    conflict = {"PRESSURE_DOWN","BREAKOUT_CONFIRM_DOWN"} if direction=="UP" else {"PRESSURE_UP","BREAKOUT_CONFIRM_UP"}
+    if not flags.intersection(pressure) or not flags.intersection(structure) or flags.intersection(conflict):
+        return None
+    if sig.get("signal_mode") not in ("EXPANSION","PREMOVE","TRANSITION"):
+        return None
+    entry, last = _finite(sig.get("entry_price")), _finite(sig.get("price"))
+    stop = _finite(sig.get("stop"))
+    target = _finite(sig.get("tp1") or sig.get("target"))
+    oi = _finite(sig.get("oi_change"))
+    if any(v is None or v <= 0 for v in (entry,last,stop,target)):
+        return None
+    if oi is None or oi < -0.30 or abs(last/entry-1) > .008:
+        return None
+    sign = 1 if direction == "UP" else -1
+    risk, reward = sign*(entry-stop), sign*(target-entry)
+    if risk <= 0 or reward <= 0 or not .3 <= risk/entry*100 <= 3 or reward/risk < 1.8:
+        return None
+    return dict(symbol=symbol,side=side,entry=entry,stop=stop,tp1=target,
+                tp2=entry+2.5*sign*risk,rr=reward/risk,score=score,
+                oi=oi,risk_pct=risk/entry*100)
+
+
+def ready_message(p):
+    return "\n".join((
+        f"🎯 SMART MONEY | ГОТОВЫЙ ПЛАН {p['side']}",
+        f"🪙 {p['symbol']} | Bybit USDT perpetual",
+        f"Вход: {p['entry']:.9g}",
+        f"Стоп: {p['stop']:.9g}",
+        f"TP1: {p['tp1']:.9g}",
+        f"TP2 (расчётные 2.5R): {p['tp2']:.9g}",
+        f"R/R: {p['rr']:.2f} | Риск до стопа: {p['risk_pct']:.2f}%",
+        f"Score: {p['score']:g} | OI: {p['oi']:+.2f}%",
+        "⚠️ Это технический торговый план, не доказанная прибыльная стратегия.",
+        "Позиция не открывается автоматически. Проверяй ликвидность и размер риска."
+    ))
+
+
+_ready_send_lock = __import__("threading").Lock()
+
+
+def dispatch_ready(sig, sender, now=None):
+    """Max five Warsaw-day plans, >=45m apart and one per symbol per 12h."""
+    now = time.time() if now is None else float(now)
+    plan = ready_candidate(sig, now)
+    if plan is None:
+        return False
+    side = "UP" if plan["side"] == "LONG" else "DOWN"
+    if trend(plan["symbol"], now) not in (side, side+"_H4_FLAT"):
+        return False
+    if not callable(sender):
+        return False
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    import json
+    from pathlib import Path
+    path = Path(os.getenv("READY_ALERTS_STATE_FILE", "/data/smart_money_ready.json"))
+    day = datetime.fromtimestamp(now, ZoneInfo("Europe/Warsaw")).strftime("%Y-%m-%d")
+    with _ready_send_lock:
+        try:
+            state = json.loads(path.read_text()) if path.exists() else {}
+        except (OSError, ValueError):
+            return False
+        if state.get("day") != day:
+            state = {"day":day,"count":0,"last":0,"symbols":{}}
+        previous = state.get("symbols") or {}
+        if int(state["count"]) >= READY_DAILY_MAX:
+            return False
+        if now-float(state["last"]) < 2700 or now-float(previous.get(plan["symbol"],0)) < 43200:
+            return False
+        try:
+            accepted = sender(ready_message(plan))
+        except Exception as exc:
+            print("[SM_READY_TG_ERROR]",type(exc).__name__,flush=True)
+            return False
+        if accepted is not True:
+            return False
+        state["count"] += 1
+        state["last"] = now
+        previous[plan["symbol"]] = now
+        state["symbols"] = previous
+        try:
+            path.parent.mkdir(parents=True,exist_ok=True)
+            temp = path.with_suffix(".tmp")
+            temp.write_text(json.dumps(state))
+            os.replace(temp,path)
+        except OSError as exc:
+            print("[SM_READY_STATE_ERROR]",type(exc).__name__,flush=True)
+        print(f"[SM_READY_SENT] {plan['symbol']} count={state['count']} edge_proven=false",flush=True)
+        return True
