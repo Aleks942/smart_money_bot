@@ -1,0 +1,21 @@
+name: SmartMoney ready plans tests
+on:
+  pull_request:
+    paths:
+      - 'main.py'
+      - 'trend_confirmation.py'
+      - 'test_trend_confirmation.py'
+      - '.github/workflows/ready-plans-tests.yml'
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - run: python -m py_compile trend_confirmation.py main.py test_trend_confirmation.py
+      - run: python -m unittest -v test_trend_confirmation
